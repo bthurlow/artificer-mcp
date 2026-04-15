@@ -174,7 +174,19 @@ describe('registry', () => {
     expect(getProvider('http://example.com/foo').scheme).toBe('http');
   });
 
-  it('throws for unregistered schemes', () => {
-    expect(() => getProvider('gs://bucket/key')).toThrow(/No storage provider registered/);
+  it('routes gs:// to GCS provider', () => {
+    expect(getProvider('gs://bucket/key').scheme).toBe('gs');
+  });
+
+  it('routes s3:// to S3 stub', () => {
+    expect(getProvider('s3://bucket/key').scheme).toBe('s3');
+  });
+
+  it('routes onedrive:// to OneDrive stub', () => {
+    expect(getProvider('onedrive://path').scheme).toBe('onedrive');
+  });
+
+  it('throws for truly unregistered schemes', () => {
+    expect(() => getProvider('ftp://example.com/key')).toThrow(/No storage provider registered/);
   });
 });

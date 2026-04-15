@@ -1,6 +1,9 @@
 import type { StorageProvider } from '../types.js';
 import { LocalProvider } from './local.js';
 import { HttpsProvider } from './https.js';
+import { GCSProvider } from './gcs.js';
+import { S3Provider } from './s3.js';
+import { OneDriveProvider } from './onedrive.js';
 
 /**
  * Registry of storage providers, keyed by URI scheme.
@@ -59,6 +62,9 @@ export const registry = new ProviderRegistry();
 registry.register(new LocalProvider());
 registry.register(new HttpsProvider('https'));
 registry.register(new HttpsProvider('http'));
+registry.register(new GCSProvider());
+registry.register(new S3Provider());
+registry.register(new OneDriveProvider());
 
 /**
  * Get the storage provider that handles the given URI's scheme.
