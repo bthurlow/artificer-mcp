@@ -6,6 +6,7 @@ import { registerTextTools } from '../../src/text/index.js';
 import { registerCompositingTools } from '../../src/compositing/index.js';
 import { registerColorTools } from '../../src/color/index.js';
 import { registerContentTools } from '../../src/content/index.js';
+import { registerSocialTools } from '../../src/social/index.js';
 import { registerAdTools } from '../../src/ads/index.js';
 import { registerAssetTools } from '../../src/assets/index.js';
 
@@ -28,6 +29,7 @@ export async function createTestServerClient(): Promise<{
   registerCompositingTools(server);
   registerColorTools(server);
   registerContentTools(server);
+  registerSocialTools(server);
   registerAdTools(server);
   registerAssetTools(server);
 

@@ -7,14 +7,14 @@ import { registerTextTools } from './text/index.js';
 import { registerCompositingTools } from './compositing/index.js';
 import { registerColorTools } from './color/index.js';
 import { registerContentTools } from './content/index.js';
+import { registerSocialTools } from './social/index.js';
 import { registerAdTools } from './ads/index.js';
 import { registerAssetTools } from './assets/index.js';
 
 /**
- * ImageMagick MCP Server
+ * artificer-mcp Server
  *
- * A comprehensive MCP server for image processing, content creation,
- * ad creative generation, and web/mobile asset management.
+ * A comprehensive MCP server for AI-powered creative media generation and processing.
  *
  * Requires ImageMagick 7+ installed and available as `magick` in PATH.
  *
@@ -23,8 +23,9 @@ import { registerAssetTools } from './assets/index.js';
  * - Text: text-overlay, text-fit, text-path, annotate, caption-bar
  * - Compositing: composite, watermark, gradient-overlay, background-remove, drop-shadow, border, rounded-corners, mask-apply
  * - Color: adjust, tint, blur, sharpen, pixelate-region, color-extract, normalize, vignette
- * - Content: social-card, thumbnail, collage, carousel-set, before-after, gif-from-frames, sticker-cutout, quote-card
- * - Ads: banner-set, cta-button, price-badge, a-b-variants, template-fill, qr-code-overlay, product-mockup, email-header
+ * - Content: thumbnail, collage, before-after, gif-from-frames, sticker-cutout
+ * - Social: social-card, carousel-set, quote-card, email-header
+ * - Ads: banner-set, cta-button, price-badge, a-b-variants, template-fill, qr-code-overlay, product-mockup
  * - Assets: responsive-set, favicon-set, app-icon-set, splash-screen, sprite-sheet, nine-patch, aspect-crop-set, pdf-to-image, image-diff, optimize-batch
  */
 async function main(): Promise<void> {
@@ -39,6 +40,7 @@ async function main(): Promise<void> {
   registerCompositingTools(server);
   registerColorTools(server);
   registerContentTools(server);
+  registerSocialTools(server);
   registerAdTools(server);
   registerAssetTools(server);
 

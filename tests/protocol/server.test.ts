@@ -11,7 +11,7 @@ import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { createTestServerClient } from '../helpers/server.js';
 
 /**
- * All 57 tool names registered by the ImageMagick MCP server, grouped by category.
+ * All 57 tool names registered by the artificer-mcp server, grouped by category.
  */
 const EXPECTED_TOOLS = {
   core: [
@@ -48,15 +48,13 @@ const EXPECTED_TOOLS = {
     'vignette',
   ],
   content: [
-    'social-card',
     'thumbnail',
     'collage',
-    'carousel-set',
     'before-after',
     'gif-from-frames',
     'sticker-cutout',
-    'quote-card',
   ],
+  social: ['social-card', 'carousel-set', 'quote-card', 'email-header'],
   ads: [
     'banner-set',
     'cta-button',
@@ -65,7 +63,6 @@ const EXPECTED_TOOLS = {
     'template-fill',
     'qr-code-overlay',
     'product-mockup',
-    'email-header',
   ],
   assets: [
     'responsive-set',
@@ -83,7 +80,7 @@ const EXPECTED_TOOLS = {
 
 const ALL_TOOL_NAMES = Object.values(EXPECTED_TOOLS).flat();
 
-describe('MCP Protocol — ImageMagick Server', () => {
+describe('MCP Protocol — artificer-mcp Server', () => {
   let server: McpServer;
   let client: Client;
   let cleanup: () => Promise<void>;
@@ -178,8 +175,8 @@ describe('MCP Protocol — ImageMagick Server', () => {
       },
     );
 
-    it('should cover exactly 7 categories', () => {
-      expect(Object.keys(EXPECTED_TOOLS)).toHaveLength(7);
+    it('should cover exactly 8 categories', () => {
+      expect(Object.keys(EXPECTED_TOOLS)).toHaveLength(8);
     });
   });
 

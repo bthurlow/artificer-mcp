@@ -248,30 +248,3 @@ export const productMockupSchema = z.object({
   screen_height: z.number().int().positive().describe('Height of screen area on frame'),
   background: z.string().default('white').describe('Background color behind the device'),
 });
-
-/** Parameters for the email-header tool */
-export interface EmailHeaderParams {
-  input?: string;
-  output: string;
-  width: number;
-  height: number;
-  title?: string;
-  subtitle?: string;
-  background_color: string;
-  text_color: string;
-  font: string;
-  format: string;
-}
-
-export const emailHeaderSchema = z.object({
-  input: z.string().optional().describe('Path to a source image (or omit for solid color)'),
-  output: z.string().describe('Path for the output email header'),
-  width: z.number().int().positive().default(600).describe('Email width (standard: 600)'),
-  height: z.number().int().positive().default(200).describe('Header height'),
-  title: z.string().optional().describe('Header title text'),
-  subtitle: z.string().optional().describe('Subtitle text'),
-  background_color: z.string().default('#3B82F6').describe('Background color (if no input image)'),
-  text_color: z.string().default('white').describe('Text color'),
-  font: z.string().default('Arial-Bold').describe('Font family'),
-  format: z.string().default('png').describe('Output format (png or jpg — email safe)'),
-});
