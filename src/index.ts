@@ -10,6 +10,7 @@ import { registerContentTools } from './content/index.js';
 import { registerSocialTools } from './social/index.js';
 import { registerAdTools } from './ads/index.js';
 import { registerAssetTools } from './assets/index.js';
+import { registerStorageTools } from './storage/index.js';
 
 /**
  * artificer-mcp Server
@@ -27,6 +28,7 @@ import { registerAssetTools } from './assets/index.js';
  * - Social: social-card, carousel-set, quote-card, email-header
  * - Ads: banner-set, cta-button, price-badge, a-b-variants, template-fill, qr-code-overlay, product-mockup
  * - Assets: responsive-set, favicon-set, app-icon-set, splash-screen, sprite-sheet, nine-patch, aspect-crop-set, pdf-to-image, image-diff, optimize-batch
+ * - Storage: storage_upload, storage_download, storage_list, storage_delete, storage_exists, storage_get_public_url, storage_get_signed_url
  */
 async function main(): Promise<void> {
   const server = new McpServer({
@@ -43,6 +45,7 @@ async function main(): Promise<void> {
   registerSocialTools(server);
   registerAdTools(server);
   registerAssetTools(server);
+  registerStorageTools(server);
 
   // Connect via stdio transport
   const transport = new StdioServerTransport();

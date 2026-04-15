@@ -9,6 +9,7 @@ import { registerContentTools } from '../../src/content/index.js';
 import { registerSocialTools } from '../../src/social/index.js';
 import { registerAdTools } from '../../src/ads/index.js';
 import { registerAssetTools } from '../../src/assets/index.js';
+import { registerStorageTools } from '../../src/storage/index.js';
 
 /**
  * Create a test MCP server + client pair connected via in-memory transport.
@@ -32,6 +33,7 @@ export async function createTestServerClient(): Promise<{
   registerSocialTools(server);
   registerAdTools(server);
   registerAssetTools(server);
+  registerStorageTools(server);
 
   const client = new Client({ name: 'test-client', version: '1.0.0' });
 
