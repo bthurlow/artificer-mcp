@@ -4,7 +4,7 @@
 [![Release](https://github.com/bthurlow/artificer-mcp/actions/workflows/release.yml/badge.svg)](https://github.com/bthurlow/artificer-mcp/actions/workflows/release.yml)
 [![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fbthurlow.github.io%2Fartificer-mcp%2Fbadges%2Fcoverage.json&cacheSeconds=300)](https://github.com/bthurlow/artificer-mcp/actions/workflows/ci.yml)
 [![GitHub release](https://img.shields.io/github/v/release/bthurlow/artificer-mcp)](https://github.com/bthurlow/artificer-mcp/releases/latest)
-[![License: Apache 2.0](https://img.shields.io/github/license/bthurlow/artificer-mcp)](https://github.com/bthurlow/artificer-mcp/blob/main/LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org/)
 [![MCP](https://img.shields.io/badge/MCP-compatible-purple)](https://modelcontextprotocol.io/)
@@ -17,7 +17,7 @@
 - **Video generation** via Veo (all 3.1 tiers: Standard, Fast, Lite)
 - **Image processing** via ImageMagick (57 tools — resize, composite, text, social cards, ad creatives, app icons, and more)
 - **Video/audio post-processing** via FFmpeg (concat, transitions, trim, overlays, subtitles, audio mix/normalize)
-- **Pluggable storage** — local filesystem + Google Cloud Storage out of the box; S3 / OneDrive stubbed for contribution
+- **Pluggable storage** — local filesystem + Google Cloud Storage out of the box; S3 / OneDrive stubbed for contribution; 7 storage tools (upload, download, list, delete, exists, public URL, signed URL)
 - **Opinionated workflows** — one-call chains for common patterns (talking-head video, social carousel, brand asset pack)
 - **Prompt guides** — structured prompt guidance per AI provider with official-doc references + field-tested good/bad examples
 
