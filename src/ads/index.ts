@@ -16,7 +16,6 @@ import {
   type TemplateFillParams,
   type QrCodeOverlayParams,
   type ProductMockupParams,
-  type EmailHeaderParams,
   bannerSetSchema,
   ctaButtonSchema,
   priceBadgeSchema,
@@ -24,7 +23,6 @@ import {
   templateFillSchema,
   qrCodeOverlaySchema,
   productMockupSchema,
-  emailHeaderSchema,
 } from './types.js';
 import { join } from 'node:path';
 
@@ -509,79 +507,6 @@ export function registerAdTools(server: McpServer): void {
 
       await magick(args);
       return { content: [{ type: 'text', text: `Product mockup created: ${output}` }] };
-    },
-  );
-
-  // ── email-header ────────────────────────────────────────────────────────
-  registerTool<EmailHeaderParams>(
-    server,
-    'email-header',
-    'Generate email-safe header images at standard email width (600px) with fallback-friendly formats',
-    emailHeaderSchema.shape,
-    async (params: EmailHeaderParams) => {
-      const {
-        input,
-        output,
-        width,
-        height,
-        title,
-        subtitle,
-        background_color,
-        text_color,
-        font,
-        format: _format,
-      } = params;
-      void _format; // Format is encoded in the output path
-      await ensureOutputDir(output);
-
-      const args: string[] = [];
-
-      if (input) {
-        await validateInputFile(input);
-        args.push(
-          input,
-          '-resize',
-          `${width}x${height}^`,
-          '-gravity',
-          'center',
-          '-extent',
-          `${width}x${height}`,
-        );
-      } else {
-        args.push('-size', `${width}x${height}`, `xc:${background_color}`);
-      }
-
-      if (title) {
-        const titleSize = Math.floor(height * 0.2);
-        args.push(
-          '-fill',
-          text_color,
-          '-font',
-          font,
-          '-pointsize',
-          String(titleSize),
-          '-gravity',
-          'Center',
-          '-annotate',
-          '+0-10',
-          title,
-        );
-      }
-
-      if (subtitle) {
-        const subSize = Math.floor(height * 0.1);
-        args.push(
-          '-pointsize',
-          String(subSize),
-          '-annotate',
-          `+0+${Math.floor(height * 0.15)}`,
-          subtitle,
-        );
-      }
-
-      args.push(output);
-      await magick(args);
-      return { content: [{ type: 'text', text: `Email header (${width}x${height}): ${output}` }] };
     },
   );
 }
