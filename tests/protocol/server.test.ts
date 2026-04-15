@@ -11,7 +11,7 @@ import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { createTestServerClient } from '../helpers/server.js';
 
 /**
- * All 64 tool names registered by the artificer-mcp server, grouped by category.
+ * All 70 tool names registered by the artificer-mcp server, grouped by category.
  */
 const EXPECTED_TOOLS = {
   core: [
@@ -85,6 +85,14 @@ const EXPECTED_TOOLS = {
     'storage_get_public_url',
     'storage_get_signed_url',
   ],
+  video: [
+    'video_concatenate',
+    'video_trim',
+    'video_change_aspect_ratio',
+    'video_convert_format',
+    'video_change_speed',
+    'video_set_resolution',
+  ],
 } as const;
 
 const ALL_TOOL_NAMES = Object.values(EXPECTED_TOOLS).flat();
@@ -121,15 +129,15 @@ describe('MCP Protocol — artificer-mcp Server', () => {
   // ── 2. Tool discovery ─────────────────────────────────────────────────────
 
   describe('tool discovery', () => {
-    it('should return exactly 64 tools', () => {
-      expect(tools).toHaveLength(64);
+    it('should return exactly 70 tools', () => {
+      expect(tools).toHaveLength(70);
     });
   });
 
   // ── 3. Tool names ─────────────────────────────────────────────────────────
 
   describe('tool names', () => {
-    it('should contain all 64 expected tool names', () => {
+    it('should contain all 70 expected tool names', () => {
       const registeredNames = tools.map((t) => t.name).sort();
       const expectedNames = [...ALL_TOOL_NAMES].sort();
 
@@ -184,8 +192,8 @@ describe('MCP Protocol — artificer-mcp Server', () => {
       },
     );
 
-    it('should cover exactly 9 categories', () => {
-      expect(Object.keys(EXPECTED_TOOLS)).toHaveLength(9);
+    it('should cover exactly 10 categories', () => {
+      expect(Object.keys(EXPECTED_TOOLS)).toHaveLength(10);
     });
   });
 

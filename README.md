@@ -16,7 +16,7 @@
 - **Image generation** via Gemini / Nano Banana
 - **Video generation** via Veo (all 3.1 tiers: Standard, Fast, Lite)
 - **Image processing** via ImageMagick (57 tools — resize, composite, text, social cards, ad creatives, app icons, and more)
-- **Video/audio post-processing** via FFmpeg (concat, transitions, trim, overlays, subtitles, audio mix/normalize)
+- **Video post-processing** via FFmpeg — 6 tools live today: concatenate, trim, change aspect ratio, convert format, change speed, set resolution. More coming in subsequent releases (transitions, overlays, subtitles, b-roll).
 - **Pluggable storage** — local filesystem + Google Cloud Storage out of the box; S3 / OneDrive stubbed for contribution; 7 storage tools (upload, download, list, delete, exists, public URL, signed URL)
 - **Opinionated workflows** — one-call chains for common patterns (talking-head video, social carousel, brand asset pack)
 - **Prompt guides** — structured prompt guidance per AI provider with official-doc references + field-tested good/bad examples

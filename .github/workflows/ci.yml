@@ -145,9 +145,22 @@ jobs:
         with:
           node-version: 22
           cache: yarn
-      - name: Install ImageMagick
-        run: sudo apt-get update && sudo apt-get install -y imagemagick
-      - name: Verify ImageMagick
-        run: magick --version || convert --version
+      - name: Install ImageMagick v7 (static binary)
+        # Ubuntu apt ships ImageMagick v6 but artificer-mcp requires the v7 `magick` CLI.
+        run: |
+          wget -q https://download.imagemagick.org/archive/binaries/magick -O magick
+          chmod +x magick
+          sudo mv magick /usr/local/bin/magick
+          magick --version | head -1
+      - name: Install FFmpeg (static binary)
+        # Pin via johnvansickle static build so tests run against a known recent version.
+        run: |
+          wget -q -O /tmp/ffmpeg.tar.xz https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
+          mkdir -p /tmp/ffmpeg-extract
+          tar -xf /tmp/ffmpeg.tar.xz -C /tmp/ffmpeg-extract --strip-components=1
+          sudo mv /tmp/ffmpeg-extract/ffmpeg /usr/local/bin/ffmpeg
+          sudo mv /tmp/ffmpeg-extract/ffprobe /usr/local/bin/ffprobe
+          ffmpeg -version | head -1
+          ffprobe -version | head -1
       - run: yarn install --frozen-lockfile
       - run: yarn test:integration
