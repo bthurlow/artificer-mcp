@@ -2,6 +2,10 @@
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const { version } = require('../package.json') as { version: string };
 import { registerCoreTools } from './core/index.js';
 import { registerTextTools } from './text/index.js';
 import { registerCompositingTools } from './compositing/index.js';
@@ -37,7 +41,7 @@ import { registerAudioTools } from './audio/index.js';
 async function main(): Promise<void> {
   const server = new McpServer({
     name: 'artificer-mcp',
-    version: '0.1.0',
+    version,
   });
 
   // Register all tool categories

@@ -6,45 +6,32 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
   packages: write
 
 jobs:
-  # Only run if the commit message starts with a release prefix
-  check-release:
-    name: Check if release needed
+  release-please:
+    name: Release Please
     runs-on: ubuntu-latest
     outputs:
-      should_release: ${{ steps.check.outputs.should_release }}
-      release_type: ${{ steps.check.outputs.release_type }}
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: googleapis/release-please-action@v4
+        id: release
         with:
-          fetch-depth: 0
-      - name: Check commit for release trigger
-        id: check
-        run: |
-          MSG=$(git log -1 --pretty=%B)
-          echo "Commit message: $MSG"
+          release-type: node
+          # Conventional commits: feat → minor, fix → patch, feat! → major
+          # The action creates/updates a Release PR that accumulates changes.
+          # Merging the Release PR cuts the actual release + tag.
 
-          # Check for conventional commit prefixes that trigger releases
-          if echo "$MSG" | grep -qE '^feat(\(.+\))?!:'; then
-            echo "should_release=true" >> $GITHUB_OUTPUT
-            echo "release_type=major" >> $GITHUB_OUTPUT
-          elif echo "$MSG" | grep -qE '^feat(\(.+\))?:'; then
-            echo "should_release=true" >> $GITHUB_OUTPUT
-            echo "release_type=minor" >> $GITHUB_OUTPUT
-          elif echo "$MSG" | grep -qE '^fix(\(.+\))?:'; then
-            echo "should_release=true" >> $GITHUB_OUTPUT
-            echo "release_type=patch" >> $GITHUB_OUTPUT
-          else
-            echo "should_release=false" >> $GITHUB_OUTPUT
-            echo "release_type=none" >> $GITHUB_OUTPUT
-          fi
-
-  ci:
-    name: CI Checks
-    needs: check-release
-    if: needs.check-release.outputs.should_release == 'true'
+  # npm publish only runs after a release is actually created
+  # (i.e., after the Release PR is merged — not on every push)
+  publish:
+    name: Publish to npm
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -52,101 +39,12 @@ jobs:
         with:
           node-version: 22
           cache: yarn
+          registry-url: https://registry.npmjs.org
       - run: yarn install --frozen-lockfile
-      - run: yarn lint
-      - run: yarn format:check
-      - run: yarn typecheck
       - run: yarn build
-      - run: yarn test:unit
-      - uses: actions/upload-artifact@v7
-        with:
-          name: dist
-          path: dist/
-          retention-days: 1
-
-  release:
-    name: Create Release
-    needs: [check-release, ci]
-    if: needs.check-release.outputs.should_release == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: yarn
-
-      - run: yarn install --frozen-lockfile
-
-      - name: Determine version from latest tag
-        id: version
-        run: |
-          RELEASE_TYPE=${{ needs.check-release.outputs.release_type }}
-
-          # Get current version from latest git tag, fallback to 0.0.0
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          CURRENT="${LAST_TAG#v}"
-          echo "Current version (from tag): $CURRENT"
-
-          # Parse semver
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
-
-          case $RELEASE_TYPE in
-            major)
-              MAJOR=$((MAJOR + 1))
-              MINOR=0
-              PATCH=0
-              ;;
-            minor)
-              MINOR=$((MINOR + 1))
-              PATCH=0
-              ;;
-            patch)
-              PATCH=$((PATCH + 1))
-              ;;
-          esac
-
-          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
-          echo "New version: $NEW_VERSION"
-          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-          echo "tag=v$NEW_VERSION" >> $GITHUB_OUTPUT
-
-      - name: Build release
-        run: yarn build
-
-      - name: Generate changelog
-        run: |
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          if [ -n "$LAST_TAG" ]; then
-            COMMITS=$(git log "$LAST_TAG"..HEAD --pretty=format:"- %s (%h)" --no-merges)
-          else
-            COMMITS=$(git log --pretty=format:"- %s (%h)" --no-merges)
-          fi
-
-          cat > /tmp/changelog.md << CHANGELOGEOF
-          ## What's Changed
-
-          $COMMITS
-          CHANGELOGEOF
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v3
-        with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: ${{ steps.version.outputs.tag }}
-          body_path: /tmp/changelog.md
-          generate_release_notes: true
-          target_commitish: ${{ github.sha }}
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       # Uncomment when ready to publish to npm
-      # - name: Publish to npm
-      #   run: yarn publish --access public
+      # - run: yarn publish --access public
       #   env:
       #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish placeholder
+        run: echo "npm publish ready — uncomment the publish step and add NPM_TOKEN secret when ready"
