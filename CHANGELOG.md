@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.1](https://github.com/bthurlow/artificer-mcp/compare/v0.7.0...v0.7.1) (2026-04-16)
+
+
+### Bug Fixes
+
+* **ci:** clear NODE_AUTH_TOKEN for OIDC trusted publishing ([71edc10](https://github.com/bthurlow/artificer-mcp/commit/71edc10b7ed92bc505a405a854b140ee37aedbdf))
+* **publish:** add files field to package.json to ship only dist + docs ([b4433aa](https://github.com/bthurlow/artificer-mcp/commit/b4433aad78173eb47d42fbdaa323b5031cefe944))
+
 ## [0.7.0](https://github.com/bthurlow/artificer-mcp/compare/v0.6.0...v0.7.0) (2026-04-16)
 
 
