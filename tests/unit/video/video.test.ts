@@ -482,7 +482,7 @@ describe('Video Tools', () => {
       const args = ffmpegState.calls[0].args;
       const vf = args[args.indexOf('-vf') + 1];
       expect(vf).toContain('drawtext=');
-      expect(vf).toContain("text='Hello'");
+      expect(vf).toContain('textfile=');
       expect(vf).toContain('fontsize=64');
       expect(vf).toContain('fontcolor=yellow');
       expect(vf).toContain('x=100');
@@ -512,7 +512,7 @@ describe('Video Tools', () => {
       expect(vf).toContain('boxborderw=12');
     });
 
-    it('escapes colons and single quotes in the text', async () => {
+    it('uses textfile= approach for text with special chars', async () => {
       await client.callTool({
         name: 'video_add_text_overlay',
         arguments: {
@@ -530,9 +530,9 @@ describe('Video Tools', () => {
       });
 
       const vf = ffmpegState.calls[0].args[ffmpegState.calls[0].args.indexOf('-vf') + 1];
-      // "It's" → "It\'s" and "3:45" → "3\:45"
-      expect(vf).toContain("It\\'s");
-      expect(vf).toContain('3\\:45');
+      // Text is written to a temp file, not inlined in the filter string.
+      expect(vf).toContain('textfile=');
+      expect(vf).not.toContain("It's");
     });
   });
 
