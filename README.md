@@ -9,7 +9,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org/)
 [![MCP](https://img.shields.io/badge/MCP-compatible-purple)](https://modelcontextprotocol.io/)
 
-> **Status:** Pre-release (v0.1.0 in development). API may change before v1.0.
+> **Status:** Pre-release (v0.x). API may change before v1.0.
 
 **artificer-mcp** is a public MCP server for AI-powered creative media generation and processing. One server covering the full creative pipeline:
 
