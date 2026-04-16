@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.2](https://github.com/bthurlow/artificer-mcp/compare/v0.7.1...v0.7.2) (2026-04-16)
+
+
+### Bug Fixes
+
+* **ci:** remove registry-url from setup-node for OIDC publishing ([e743bbd](https://github.com/bthurlow/artificer-mcp/commit/e743bbd1af3b6fc5ba55076307fa09bfc5d2ebc3))
+* **publish:** apply npm pkg fix to bin path (remove leading ./) ([161b93e](https://github.com/bthurlow/artificer-mcp/commit/161b93e73e357696d1ace94768caf6b8e1eced58))
+
 ## [0.7.1](https://github.com/bthurlow/artificer-mcp/compare/v0.7.0...v0.7.1) (2026-04-16)
 
 
