@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.3](https://github.com/bthurlow/artificer-mcp/compare/v0.7.2...v0.7.3) (2026-04-16)
+
+
+### Bug Fixes
+
+* **ci:** upgrade npm to ^11 for OIDC trusted publishing + enable npx install ([7cd7752](https://github.com/bthurlow/artificer-mcp/commit/7cd7752c21e4565e62e4e397b4e83a717ea13634))
+
 ## [0.7.2](https://github.com/bthurlow/artificer-mcp/compare/v0.7.1...v0.7.2) (2026-04-16)
 
 
