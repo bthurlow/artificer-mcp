@@ -1,0 +1,211 @@
+import { z } from 'zod';
+
+/** Parameters for the audio_extract_from_video tool */
+export interface AudioExtractFromVideoParams {
+  input: string;
+  output: string;
+  codec?: string;
+  bitrate?: string;
+}
+
+export const audioExtractFromVideoSchema = z.object({
+  input: z.string().describe('Path to the source video file'),
+  output: z.string().describe('Path for the extracted audio (format inferred from extension)'),
+  codec: z
+    .string()
+    .optional()
+    .describe(
+      'Audio codec override (e.g., "libmp3lame", "aac", "libopus", "copy"). If omitted, picks a sensible default per output extension.',
+    ),
+  bitrate: z
+    .string()
+    .optional()
+    .describe('Target audio bitrate — e.g., "192k", "320k". If omitted, uses encoder default.'),
+});
+
+/** Parameters for the audio_normalize tool */
+export interface AudioNormalizeParams {
+  input: string;
+  output: string;
+  mode: 'loudnorm' | 'peak';
+  target_lufs: number;
+  target_peak_db: number;
+}
+
+export const audioNormalizeSchema = z.object({
+  input: z.string().describe('Path to the source audio (or video with audio)'),
+  output: z.string().describe('Path for the normalized output'),
+  mode: z
+    .enum(['loudnorm', 'peak'])
+    .default('loudnorm')
+    .describe(
+      '"loudnorm" = EBU R128 loudness normalization (broadcast/streaming standard). "peak" = simple peak normalization via volume filter (legacy; less accurate).',
+    ),
+  target_lufs: z
+    .number()
+    .default(-14)
+    .describe(
+      'Target integrated loudness in LUFS for loudnorm mode. Common targets: -14 (Spotify/YouTube), -16 (Apple Music), -23 (EBU broadcast).',
+    ),
+  target_peak_db: z
+    .number()
+    .default(-1)
+    .describe(
+      'Target true peak in dBTP for loudnorm mode or peak target for peak mode. Typical: -1.0 or -2.0.',
+    ),
+});
+
+/** Parameters for the audio_convert_format tool */
+export interface AudioConvertFormatParams {
+  input: string;
+  output: string;
+  format?: string;
+  codec?: string;
+}
+
+export const audioConvertFormatSchema = z.object({
+  input: z.string().describe('Path to the source audio'),
+  output: z.string().describe('Path for the converted output (format inferred from extension)'),
+  format: z
+    .string()
+    .optional()
+    .describe(
+      'Container format override (mp3, aac, wav, flac, ogg, m4a, opus). If omitted, inferred from output extension.',
+    ),
+  codec: z
+    .string()
+    .optional()
+    .describe(
+      'Codec override. If omitted, picks a sensible default for the target format (e.g., libmp3lame for mp3, libopus for opus).',
+    ),
+});
+
+/** Parameters for the audio_convert_properties tool */
+export interface AudioConvertPropertiesParams {
+  input: string;
+  output: string;
+  sample_rate?: number;
+  channels?: number;
+  bitrate?: string;
+  codec?: string;
+}
+
+export const audioConvertPropertiesSchema = z.object({
+  input: z.string().describe('Path to the source audio'),
+  output: z.string().describe('Path for the output audio'),
+  sample_rate: z
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe('Target sample rate in Hz — typical values: 22050, 44100, 48000, 96000.'),
+  channels: z
+    .number()
+    .int()
+    .min(1)
+    .max(8)
+    .optional()
+    .describe('Target channel count — 1 (mono), 2 (stereo), 6 (5.1), 8 (7.1).'),
+  bitrate: z.string().optional().describe('Target bitrate — e.g., "128k", "192k", "320k".'),
+  codec: z
+    .string()
+    .optional()
+    .describe('Codec override. If omitted, picks a default for the output extension.'),
+});
+
+/** Parameters for the audio_set_bitrate tool */
+export interface AudioSetBitrateParams {
+  input: string;
+  output: string;
+  bitrate: string;
+  codec?: string;
+}
+
+export const audioSetBitrateSchema = z.object({
+  input: z.string().describe('Path to the source audio'),
+  output: z.string().describe('Path for the output'),
+  bitrate: z.string().describe('Target bitrate — e.g., "128k", "192k", "320k", "64k" for speech.'),
+  codec: z
+    .string()
+    .optional()
+    .describe('Codec override. If omitted, picks a default for the output extension.'),
+});
+
+/** Parameters for the audio_set_channels tool */
+export interface AudioSetChannelsParams {
+  input: string;
+  output: string;
+  channels: number;
+  codec?: string;
+}
+
+export const audioSetChannelsSchema = z.object({
+  input: z.string().describe('Path to the source audio'),
+  output: z.string().describe('Path for the output'),
+  channels: z
+    .number()
+    .int()
+    .min(1)
+    .max(8)
+    .describe('Target channel count — 1 (mono), 2 (stereo), 6 (5.1), 8 (7.1).'),
+  codec: z
+    .string()
+    .optional()
+    .describe('Codec override. If omitted, picks a default for the output extension.'),
+});
+
+/** Parameters for the audio_set_sample_rate tool */
+export interface AudioSetSampleRateParams {
+  input: string;
+  output: string;
+  sample_rate: number;
+  codec?: string;
+}
+
+export const audioSetSampleRateSchema = z.object({
+  input: z.string().describe('Path to the source audio'),
+  output: z.string().describe('Path for the output'),
+  sample_rate: z
+    .number()
+    .int()
+    .positive()
+    .describe('Target sample rate in Hz — typical values: 22050, 44100, 48000, 96000.'),
+  codec: z
+    .string()
+    .optional()
+    .describe('Codec override. If omitted, picks a default for the output extension.'),
+});
+
+/** Parameters for the audio_remove_silence tool */
+export interface AudioRemoveSilenceParams {
+  input: string;
+  output: string;
+  threshold_db: number;
+  min_silence_duration: number;
+  remove: 'start' | 'end' | 'both' | 'all';
+}
+
+export const audioRemoveSilenceSchema = z.object({
+  input: z.string().describe('Path to the source audio'),
+  output: z.string().describe('Path for the trimmed output'),
+  threshold_db: z
+    .number()
+    .max(0)
+    .default(-50)
+    .describe(
+      'Silence threshold in dB (negative; closer to 0 = more aggressive). Typical: -40 (loose), -50 (balanced), -60 (strict).',
+    ),
+  min_silence_duration: z
+    .number()
+    .positive()
+    .default(0.5)
+    .describe(
+      'Minimum silence duration in seconds to trim (avoids cutting natural speech pauses).',
+    ),
+  remove: z
+    .enum(['start', 'end', 'both', 'all'])
+    .default('both')
+    .describe(
+      '"start" = leading silence only. "end" = trailing only. "both" = start + end. "all" = also removes silence within the audio (may sound unnatural).',
+    ),
+});

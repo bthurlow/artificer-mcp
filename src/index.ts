@@ -12,6 +12,7 @@ import { registerAdTools } from './ads/index.js';
 import { registerAssetTools } from './assets/index.js';
 import { registerStorageTools } from './storage/index.js';
 import { registerVideoTools } from './video/index.js';
+import { registerAudioTools } from './audio/index.js';
 
 /**
  * artificer-mcp Server
@@ -30,7 +31,8 @@ import { registerVideoTools } from './video/index.js';
  * - Ads: banner-set, cta-button, price-badge, a-b-variants, template-fill, qr-code-overlay, product-mockup
  * - Assets: responsive-set, favicon-set, app-icon-set, splash-screen, sprite-sheet, nine-patch, aspect-crop-set, pdf-to-image, image-diff, optimize-batch
  * - Storage: storage_upload, storage_download, storage_list, storage_delete, storage_exists, storage_get_public_url, storage_get_signed_url
- * - Video: video_concatenate, video_trim, video_change_aspect_ratio, video_convert_format, video_change_speed, video_set_resolution
+ * - Video: video_concatenate, video_trim, video_change_aspect_ratio, video_convert_format, video_change_speed, video_set_resolution, video_add_transitions, video_add_image_overlay, video_add_text_overlay, video_add_subtitles, video_add_b_roll, video_set_bitrate, video_set_codec, video_set_frame_rate
+ * - Audio: audio_extract_from_video, audio_normalize, audio_convert_format, audio_convert_properties, audio_set_bitrate, audio_set_channels, audio_set_sample_rate, audio_remove_silence
  */
 async function main(): Promise<void> {
   const server = new McpServer({
@@ -49,6 +51,7 @@ async function main(): Promise<void> {
   registerAssetTools(server);
   registerStorageTools(server);
   registerVideoTools(server);
+  registerAudioTools(server);
 
   // Connect via stdio transport
   const transport = new StdioServerTransport();
