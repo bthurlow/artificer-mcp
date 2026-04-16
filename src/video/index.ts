@@ -2,7 +2,12 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { registerTool } from '../utils/register.js';
-import { ffmpegBatch, VIDEO_ASPECT_RATIOS, VIDEO_RESOLUTIONS } from '../utils/exec-ffmpeg.js';
+import {
+  ffmpegBatch,
+  getVideoInfo,
+  VIDEO_ASPECT_RATIOS,
+  VIDEO_RESOLUTIONS,
+} from '../utils/exec-ffmpeg.js';
 import { tempPath } from '../utils/exec.js';
 import {
   type VideoConcatenateParams,
@@ -11,13 +16,40 @@ import {
   type VideoConvertFormatParams,
   type VideoChangeSpeedParams,
   type VideoSetResolutionParams,
+  type VideoAddTransitionsParams,
+  type VideoAddImageOverlayParams,
+  type VideoAddTextOverlayParams,
+  type VideoAddSubtitlesParams,
+  type VideoAddBRollParams,
+  type VideoSetBitrateParams,
+  type VideoSetCodecParams,
+  type VideoSetFrameRateParams,
   videoConcatenateSchema,
   videoTrimSchema,
   videoChangeAspectRatioSchema,
   videoConvertFormatSchema,
   videoChangeSpeedSchema,
   videoSetResolutionSchema,
+  videoAddTransitionsSchema,
+  videoAddImageOverlaySchema,
+  videoAddTextOverlaySchema,
+  videoAddSubtitlesSchema,
+  videoAddBRollSchema,
+  videoSetBitrateSchema,
+  videoSetCodecSchema,
+  videoSetFrameRateSchema,
 } from './types.js';
+
+/** Escape a value for FFmpeg's drawtext filter — commas, colons, backslashes, and quotes need escaping. */
+function escapeDrawText(text: string): string {
+  return text.replace(/\\/g, '\\\\').replace(/:/g, '\\:').replace(/'/g, "\\'").replace(/,/g, '\\,');
+}
+
+/** Escape a file path for the subtitles filter (colons on Windows break it). */
+function escapeSubtitlePath(path: string): string {
+  // Replace backslashes with forward, escape any colon (Windows drive letters).
+  return path.replace(/\\/g, '/').replace(/:/g, '\\:');
+}
 
 /** Shell-escape a path for FFmpeg concat-demuxer manifest files. */
 function escapeConcatPath(path: string): string {
@@ -321,6 +353,472 @@ export function registerVideoTools(server: McpServer): void {
           {
             type: 'text',
             text: `Resized to ${preset ?? `${targetW}x${targetH}`} → ${output}`,
+          },
+        ],
+      };
+    },
+  );
+
+  // ── video_add_transitions ───────────────────────────────────────────────
+  registerTool<VideoAddTransitionsParams>(
+    server,
+    'video_add_transitions',
+    'Join videos with xfade transitions between each pair. Inputs must share resolution/frame rate; use video_set_resolution first if not. See FFmpeg xfade docs for transition names.',
+    videoAddTransitionsSchema.shape,
+    async ({ inputs, output, transition, duration }) => {
+      await mkdir(dirname(output), { recursive: true });
+
+      // Probe durations of all but the last input so we can place each xfade at the right offset.
+      const infos = await Promise.all(inputs.slice(0, -1).map((p) => getVideoInfo(p)));
+
+      // Build chained xfade filter:
+      //   [0:v][1:v]xfade=transition=fade:duration=1:offset=<d0 - D>[v01];
+      //   [v01][2:v]xfade=...offset=<d0 + d1 - 2D>[v012];
+      //   Audio handled separately via acrossfade chain.
+      const videoChain: string[] = [];
+      const audioChain: string[] = [];
+      let vPrev = '[0:v]';
+      let aPrev = '[0:a]';
+      let runningOffset = 0;
+      for (let i = 0; i < infos.length; i++) {
+        runningOffset += infos[i].durationSeconds - duration;
+        const vLabel = i === infos.length - 1 ? '[vout]' : `[v${i + 1}]`;
+        const aLabel = i === infos.length - 1 ? '[aout]' : `[a${i + 1}]`;
+        videoChain.push(
+          `${vPrev}[${i + 1}:v]xfade=transition=${transition}:duration=${duration}:offset=${runningOffset.toFixed(3)}${vLabel}`,
+        );
+        audioChain.push(`${aPrev}[${i + 1}:a]acrossfade=d=${duration}${aLabel}`);
+        vPrev = vLabel;
+        aPrev = aLabel;
+      }
+      const filter = [...videoChain, ...audioChain].join(';');
+
+      const args: string[] = ['-y'];
+      for (const p of inputs) args.push('-i', p);
+      args.push(
+        '-filter_complex',
+        filter,
+        '-map',
+        '[vout]',
+        '-map',
+        '[aout]',
+        '-c:v',
+        'libx264',
+        '-c:a',
+        'aac',
+        output,
+      );
+
+      await ffmpegBatch(args);
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Joined ${inputs.length} videos with ${transition} transitions → ${output}`,
+          },
+        ],
+      };
+    },
+  );
+
+  // ── video_add_image_overlay ─────────────────────────────────────────────
+  registerTool<VideoAddImageOverlayParams>(
+    server,
+    'video_add_image_overlay',
+    'Overlay an image (logo, watermark, badge) on a video. Supports opacity and optional time range.',
+    videoAddImageOverlaySchema.shape,
+    async ({ input, overlay, output, x, y, opacity, start_seconds, end_seconds }) => {
+      await mkdir(dirname(output), { recursive: true });
+
+      // If opacity < 1, pre-apply alpha to the overlay stream.
+      // Time-bound with enable='between(t,start,end)' when either is set.
+      const enableClause =
+        start_seconds !== undefined || end_seconds !== undefined
+          ? `:enable='between(t,${start_seconds ?? 0},${end_seconds ?? 999999})'`
+          : '';
+
+      let filter: string;
+      if (opacity < 1) {
+        filter = `[1:v]format=rgba,colorchannelmixer=aa=${opacity}[ov];[0:v][ov]overlay=${x}:${y}${enableClause}[vout]`;
+      } else {
+        filter = `[0:v][1:v]overlay=${x}:${y}${enableClause}[vout]`;
+      }
+
+      await ffmpegBatch([
+        '-y',
+        '-i',
+        input,
+        '-i',
+        overlay,
+        '-filter_complex',
+        filter,
+        '-map',
+        '[vout]',
+        '-map',
+        '0:a?',
+        '-c:v',
+        'libx264',
+        '-c:a',
+        'copy',
+        output,
+      ]);
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Added image overlay at (${x}, ${y}) → ${output}`,
+          },
+        ],
+      };
+    },
+  );
+
+  // ── video_add_text_overlay ──────────────────────────────────────────────
+  registerTool<VideoAddTextOverlayParams>(
+    server,
+    'video_add_text_overlay',
+    'Burn text onto a video via the drawtext filter. Supports time-bounded display, background box, and custom font file.',
+    videoAddTextOverlaySchema.shape,
+    async ({
+      input,
+      output,
+      text,
+      font_file,
+      font_size,
+      color,
+      x,
+      y,
+      box,
+      box_color,
+      box_border_width,
+      start_seconds,
+      end_seconds,
+    }) => {
+      await mkdir(dirname(output), { recursive: true });
+
+      const parts: string[] = [
+        `text='${escapeDrawText(text)}'`,
+        `fontsize=${font_size}`,
+        `fontcolor=${color}`,
+      ];
+      if (font_file) parts.push(`fontfile='${font_file.replace(/\\/g, '/').replace(/'/g, "\\'")}'`);
+      parts.push(`x=${typeof x === 'number' ? x : x}`, `y=${typeof y === 'number' ? y : y}`);
+      if (box) {
+        parts.push('box=1', `boxcolor=${box_color}`, `boxborderw=${box_border_width}`);
+      }
+      if (start_seconds !== undefined || end_seconds !== undefined) {
+        parts.push(`enable='between(t,${start_seconds ?? 0},${end_seconds ?? 999999})'`);
+      }
+
+      const filter = `drawtext=${parts.join(':')}`;
+
+      await ffmpegBatch([
+        '-y',
+        '-i',
+        input,
+        '-vf',
+        filter,
+        '-c:v',
+        'libx264',
+        '-c:a',
+        'copy',
+        output,
+      ]);
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Added text overlay "${text}" → ${output}`,
+          },
+        ],
+      };
+    },
+  );
+
+  // ── video_add_subtitles ─────────────────────────────────────────────────
+  registerTool<VideoAddSubtitlesParams>(
+    server,
+    'video_add_subtitles',
+    'Add subtitles from an SRT/VTT/ASS file. burn_in=true renders them into the pixels (always visible); burn_in=false muxes as a soft track (toggleable in player).',
+    videoAddSubtitlesSchema.shape,
+    async ({ input, output, subtitle_file, burn_in, force_style }) => {
+      await mkdir(dirname(output), { recursive: true });
+
+      if (burn_in) {
+        // Use the `subtitles` filter — requires libass support compiled in.
+        const escaped = escapeSubtitlePath(subtitle_file);
+        const styleClause = force_style ? `:force_style='${force_style}'` : '';
+        const filter = `subtitles='${escaped}'${styleClause}`;
+        await ffmpegBatch([
+          '-y',
+          '-i',
+          input,
+          '-vf',
+          filter,
+          '-c:v',
+          'libx264',
+          '-c:a',
+          'copy',
+          output,
+        ]);
+      } else {
+        // Mux subtitles as a soft track. Codec depends on container; mov_text for mp4/mov.
+        const ext = output.split('.').pop()?.toLowerCase() ?? '';
+        const subCodec = ext === 'mp4' || ext === 'mov' ? 'mov_text' : 'srt';
+        await ffmpegBatch([
+          '-y',
+          '-i',
+          input,
+          '-i',
+          subtitle_file,
+          '-c:v',
+          'copy',
+          '-c:a',
+          'copy',
+          '-c:s',
+          subCodec,
+          output,
+        ]);
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Added subtitles (${burn_in ? 'burned in' : 'soft track'}) → ${output}`,
+          },
+        ],
+      };
+    },
+  );
+
+  // ── video_add_b_roll ────────────────────────────────────────────────────
+  registerTool<VideoAddBRollParams>(
+    server,
+    'video_add_b_roll',
+    'Insert a b-roll clip into the main video at a specific time. replace_main_duration=true cuts that segment out of the main (preserving main audio — cutaway style); false inserts additionally (extends length).',
+    videoAddBRollSchema.shape,
+    async ({
+      main,
+      b_roll,
+      output,
+      insert_at_seconds,
+      b_roll_duration_seconds,
+      replace_main_duration,
+    }) => {
+      await mkdir(dirname(output), { recursive: true });
+
+      const t0 = insert_at_seconds;
+      const d = b_roll_duration_seconds;
+      const postStart = replace_main_duration ? t0 + d : t0;
+
+      // Split main into pre (0..t0) and post (postStart..end).
+      // Keep main's audio over both pre and b-roll span (cutaway); then post audio.
+      //
+      // Graph:
+      //  [0:v]trim=0:t0,setpts=PTS-STARTPTS[preV]
+      //  [0:v]trim=postStart,setpts=PTS-STARTPTS[postV]
+      //  [1:v]trim=0:d,setpts=PTS-STARTPTS,scale=...[brV]
+      //  [0:a]atrim=0:t0+d,asetpts=PTS-STARTPTS[firstA]   (keep main audio over cutaway)
+      //  [0:a]atrim=postStart,asetpts=PTS-STARTPTS[postA]
+      //  [preV][firstA][brV][postV][postA]... but that mixes streams oddly.
+      //
+      // Simpler correct graph for replace_main_duration=true:
+      //  video: [preV][brV][postV] concat(v=1,a=0)
+      //  audio: [main_audio_0_to_t0][main_audio_t0_to_t0+d][main_audio_postStart_to_end] concat
+      //          = full main audio from 0..end spliced around the cutaway region,
+      //            BUT since audio covers the whole span naturally, we just use main audio as-is.
+      //
+      // For replace_main_duration=false: insert b-roll with b-roll audio (or silence) in between.
+
+      const parts: string[] = [];
+      if (replace_main_duration) {
+        parts.push(`[0:v]trim=0:${t0},setpts=PTS-STARTPTS[preV]`);
+        parts.push(`[1:v]trim=0:${d},setpts=PTS-STARTPTS[brV]`);
+        parts.push(`[0:v]trim=${postStart},setpts=PTS-STARTPTS[postV]`);
+        parts.push(`[preV][brV][postV]concat=n=3:v=1:a=0[vout]`);
+        // For audio: keep main's audio continuous — just reuse [0:a] as is.
+        const filter = parts.join(';');
+        await ffmpegBatch([
+          '-y',
+          '-i',
+          main,
+          '-i',
+          b_roll,
+          '-filter_complex',
+          filter,
+          '-map',
+          '[vout]',
+          '-map',
+          '0:a?',
+          '-c:v',
+          'libx264',
+          '-c:a',
+          'aac',
+          output,
+        ]);
+      } else {
+        // Insert b-roll (with its audio) at t0, extending total length by d.
+        parts.push(`[0:v]trim=0:${t0},setpts=PTS-STARTPTS[preV]`);
+        parts.push(`[0:a]atrim=0:${t0},asetpts=PTS-STARTPTS[preA]`);
+        parts.push(`[1:v]trim=0:${d},setpts=PTS-STARTPTS[brV]`);
+        parts.push(`[1:a]atrim=0:${d},asetpts=PTS-STARTPTS[brA]`);
+        parts.push(`[0:v]trim=${t0},setpts=PTS-STARTPTS[postV]`);
+        parts.push(`[0:a]atrim=${t0},asetpts=PTS-STARTPTS[postA]`);
+        parts.push(`[preV][preA][brV][brA][postV][postA]concat=n=3:v=1:a=1[vout][aout]`);
+        const filter = parts.join(';');
+        await ffmpegBatch([
+          '-y',
+          '-i',
+          main,
+          '-i',
+          b_roll,
+          '-filter_complex',
+          filter,
+          '-map',
+          '[vout]',
+          '-map',
+          '[aout]',
+          '-c:v',
+          'libx264',
+          '-c:a',
+          'aac',
+          output,
+        ]);
+      }
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Inserted ${d}s of b-roll at ${t0}s (${replace_main_duration ? 'cutaway' : 'additive'}) → ${output}`,
+          },
+        ],
+      };
+    },
+  );
+
+  // ── video_set_bitrate ───────────────────────────────────────────────────
+  registerTool<VideoSetBitrateParams>(
+    server,
+    'video_set_bitrate',
+    'Re-encode with a target video and/or audio bitrate. Use two_pass=true for more accurate bitrate targeting on longer clips.',
+    videoSetBitrateSchema.shape,
+    async ({ input, output, video_bitrate, audio_bitrate, two_pass }) => {
+      if (!video_bitrate && !audio_bitrate) {
+        throw new Error('Specify at least one of video_bitrate or audio_bitrate');
+      }
+      await mkdir(dirname(output), { recursive: true });
+
+      const baseArgs: string[] = ['-y', '-i', input, '-c:v', 'libx264'];
+      if (video_bitrate) baseArgs.push('-b:v', video_bitrate);
+      if (audio_bitrate) baseArgs.push('-c:a', 'aac', '-b:a', audio_bitrate);
+      else baseArgs.push('-c:a', 'copy');
+
+      if (two_pass && video_bitrate) {
+        const passLog = tempPath('.log');
+        try {
+          // Pass 1: write null output, just collect stats.
+          await ffmpegBatch([
+            ...baseArgs,
+            '-pass',
+            '1',
+            '-passlogfile',
+            passLog,
+            '-f',
+            'mp4',
+            '/dev/null',
+          ]);
+          // Pass 2: encode with stats.
+          await ffmpegBatch([...baseArgs, '-pass', '2', '-passlogfile', passLog, output]);
+        } finally {
+          await rm(`${passLog}-0.log`, { force: true }).catch(() => {});
+          await rm(`${passLog}-0.log.mbtree`, { force: true }).catch(() => {});
+        }
+      } else {
+        await ffmpegBatch([...baseArgs, output]);
+      }
+
+      const parts: string[] = [];
+      if (video_bitrate) parts.push(`video=${video_bitrate}`);
+      if (audio_bitrate) parts.push(`audio=${audio_bitrate}`);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Set bitrate (${parts.join(', ')}${two_pass ? ', 2-pass' : ''}) → ${output}`,
+          },
+        ],
+      };
+    },
+  );
+
+  // ── video_set_codec ─────────────────────────────────────────────────────
+  registerTool<VideoSetCodecParams>(
+    server,
+    'video_set_codec',
+    'Re-encode with specific video and/or audio codecs. Supports quality (CRF) and speed (preset) tuning for x264/x265/AV1.',
+    videoSetCodecSchema.shape,
+    async ({ input, output, video_codec, audio_codec, crf, preset }) => {
+      if (!video_codec && !audio_codec) {
+        throw new Error('Specify at least one of video_codec or audio_codec');
+      }
+      await mkdir(dirname(output), { recursive: true });
+
+      const args: string[] = ['-y', '-i', input];
+      if (video_codec) args.push('-c:v', video_codec);
+      else args.push('-c:v', 'copy');
+      if (audio_codec) args.push('-c:a', audio_codec);
+      else args.push('-c:a', 'copy');
+      if (crf !== undefined) args.push('-crf', String(crf));
+      if (preset) args.push('-preset', preset);
+      args.push(output);
+
+      await ffmpegBatch(args);
+
+      const parts: string[] = [];
+      if (video_codec) parts.push(`v=${video_codec}`);
+      if (audio_codec) parts.push(`a=${audio_codec}`);
+      if (crf !== undefined) parts.push(`crf=${crf}`);
+      if (preset) parts.push(`preset=${preset}`);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Set codec (${parts.join(', ')}) → ${output}`,
+          },
+        ],
+      };
+    },
+  );
+
+  // ── video_set_frame_rate ────────────────────────────────────────────────
+  registerTool<VideoSetFrameRateParams>(
+    server,
+    'video_set_frame_rate',
+    'Change video frame rate. drop_duplicate_frames=true uses the fps filter (preserves duration by dropping/duplicating frames); false uses -r (simpler but may stretch timing).',
+    videoSetFrameRateSchema.shape,
+    async ({ input, output, frame_rate, drop_duplicate_frames }) => {
+      await mkdir(dirname(output), { recursive: true });
+
+      const args: string[] = ['-y', '-i', input];
+      if (drop_duplicate_frames) {
+        args.push('-vf', `fps=${frame_rate}`);
+      } else {
+        args.push('-r', String(frame_rate));
+      }
+      args.push('-c:v', 'libx264', '-c:a', 'copy', output);
+
+      await ffmpegBatch(args);
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Set frame rate to ${frame_rate} fps → ${output}`,
           },
         ],
       };

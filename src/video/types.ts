@@ -148,3 +148,327 @@ export const videoSetResolutionSchema = z.object({
       'If true, scales to fit within the target box (aspect preserved). If false, stretches exactly to target (may distort).',
     ),
 });
+
+// ── Phase 3b — video effects ───────────────────────────────────────────────
+
+/** Xfade transition type — a subset of FFmpeg's xfade presets. */
+export const XFADE_TRANSITIONS = [
+  'fade',
+  'wipeleft',
+  'wiperight',
+  'wipeup',
+  'wipedown',
+  'slideleft',
+  'slideright',
+  'slideup',
+  'slidedown',
+  'circlecrop',
+  'rectcrop',
+  'distance',
+  'fadeblack',
+  'fadewhite',
+  'radial',
+  'smoothleft',
+  'smoothright',
+  'smoothup',
+  'smoothdown',
+  'circleopen',
+  'circleclose',
+  'dissolve',
+  'pixelize',
+  'diagtl',
+  'diagtr',
+  'diagbl',
+  'diagbr',
+  'hlslice',
+  'hrslice',
+  'vuslice',
+  'vdslice',
+  'hblur',
+  'fadegrays',
+  'wipetl',
+  'wipetr',
+  'wipebl',
+  'wipebr',
+  'squeezeh',
+  'squeezev',
+  'zoomin',
+] as const;
+
+/** Parameters for the video_add_transitions tool */
+export interface VideoAddTransitionsParams {
+  inputs: string[];
+  output: string;
+  transition: string;
+  duration: number;
+}
+
+export const videoAddTransitionsSchema = z.object({
+  inputs: z
+    .array(z.string())
+    .min(2)
+    .describe(
+      'Paths to video files to join with transitions, in order (min 2). Inputs must have identical resolution/frame rate.',
+    ),
+  output: z.string().describe('Path for the output video'),
+  transition: z
+    .string()
+    .default('fade')
+    .describe(
+      `FFmpeg xfade transition name — e.g., "fade", "wipeleft", "slideup", "circleopen", "dissolve". See https://ffmpeg.org/ffmpeg-filters.html#xfade for the full list.`,
+    ),
+  duration: z
+    .number()
+    .positive()
+    .default(1)
+    .describe('Duration of each transition in seconds (typically 0.5–2).'),
+});
+
+/** Parameters for the video_add_image_overlay tool */
+export interface VideoAddImageOverlayParams {
+  input: string;
+  overlay: string;
+  output: string;
+  x: number | string;
+  y: number | string;
+  opacity: number;
+  start_seconds?: number;
+  end_seconds?: number;
+}
+
+export const videoAddImageOverlaySchema = z.object({
+  input: z.string().describe('Path to the source video'),
+  overlay: z.string().describe('Path to the overlay image (e.g., logo, watermark)'),
+  output: z.string().describe('Path for the output video'),
+  x: z
+    .union([z.number(), z.string()])
+    .default(10)
+    .describe(
+      'Overlay X position. Accepts pixels (10) or FFmpeg expressions ("main_w-overlay_w-10" for right-10).',
+    ),
+  y: z
+    .union([z.number(), z.string()])
+    .default(10)
+    .describe('Overlay Y position (pixels or FFmpeg expression).'),
+  opacity: z
+    .number()
+    .min(0)
+    .max(1)
+    .default(1)
+    .describe('Overlay opacity from 0 (transparent) to 1 (fully opaque).'),
+  start_seconds: z
+    .number()
+    .min(0)
+    .optional()
+    .describe('Show overlay starting at this time. If omitted, shows from start.'),
+  end_seconds: z
+    .number()
+    .positive()
+    .optional()
+    .describe('Hide overlay after this time. If omitted, shows to end.'),
+});
+
+/** Parameters for the video_add_text_overlay tool */
+export interface VideoAddTextOverlayParams {
+  input: string;
+  output: string;
+  text: string;
+  font_file?: string;
+  font_size: number;
+  color: string;
+  x: number | string;
+  y: number | string;
+  box: boolean;
+  box_color: string;
+  box_border_width: number;
+  start_seconds?: number;
+  end_seconds?: number;
+}
+
+export const videoAddTextOverlaySchema = z.object({
+  input: z.string().describe('Path to the source video'),
+  output: z.string().describe('Path for the output video'),
+  text: z.string().describe('Text to draw on the video'),
+  font_file: z
+    .string()
+    .optional()
+    .describe(
+      'Absolute path to a .ttf/.otf font file. If omitted, uses FFmpeg drawtext default (fontconfig-based; system-default font). For portable/hermetic results, pass an explicit font file path.',
+    ),
+  font_size: z.number().int().positive().default(48).describe('Font size in pixels.'),
+  color: z.string().default('white').describe('Text color (name or #RRGGBB[AA]).'),
+  x: z
+    .union([z.number(), z.string()])
+    .default('(w-text_w)/2')
+    .describe(
+      'Text X position. Accepts pixels or FFmpeg expressions. Default centers horizontally.',
+    ),
+  y: z
+    .union([z.number(), z.string()])
+    .default('h-th-40')
+    .describe(
+      'Text Y position. Accepts pixels or FFmpeg expressions. Default is 40px from bottom.',
+    ),
+  box: z.boolean().default(false).describe('Draw a background box behind the text.'),
+  box_color: z
+    .string()
+    .default('black@0.5')
+    .describe('Box color with optional alpha (e.g., "black@0.5").'),
+  box_border_width: z
+    .number()
+    .int()
+    .min(0)
+    .default(10)
+    .describe('Padding between text and box edge.'),
+  start_seconds: z
+    .number()
+    .min(0)
+    .optional()
+    .describe('Show text starting at this time. If omitted, shows from start.'),
+  end_seconds: z
+    .number()
+    .positive()
+    .optional()
+    .describe('Hide text after this time. If omitted, shows to end.'),
+});
+
+/** Parameters for the video_add_subtitles tool */
+export interface VideoAddSubtitlesParams {
+  input: string;
+  output: string;
+  subtitle_file: string;
+  burn_in: boolean;
+  force_style?: string;
+}
+
+export const videoAddSubtitlesSchema = z.object({
+  input: z.string().describe('Path to the source video'),
+  output: z.string().describe('Path for the output video'),
+  subtitle_file: z.string().describe('Path to an SRT, VTT, or ASS subtitle file.'),
+  burn_in: z
+    .boolean()
+    .default(true)
+    .describe(
+      'If true, renders subtitles into the pixels (always visible). If false, muxes as a soft subtitle track (toggleable in player; only for containers that support it).',
+    ),
+  force_style: z
+    .string()
+    .optional()
+    .describe(
+      `ASS style override for burn-in, e.g., "FontName=Arial,FontSize=24,PrimaryColour=&HFFFFFF&,OutlineColour=&H000000&". Only used when burn_in=true.`,
+    ),
+});
+
+/** Parameters for the video_add_b_roll tool */
+export interface VideoAddBRollParams {
+  main: string;
+  b_roll: string;
+  output: string;
+  insert_at_seconds: number;
+  b_roll_duration_seconds: number;
+  replace_main_duration: boolean;
+}
+
+export const videoAddBRollSchema = z.object({
+  main: z.string().describe('Path to the main video (e.g., talking head)'),
+  b_roll: z.string().describe('Path to the b-roll clip to insert'),
+  output: z.string().describe('Path for the output video'),
+  insert_at_seconds: z
+    .number()
+    .min(0)
+    .describe('Time in the main video where the b-roll is inserted.'),
+  b_roll_duration_seconds: z
+    .number()
+    .positive()
+    .describe('How many seconds of the b-roll clip to use (trimmed from b_roll start).'),
+  replace_main_duration: z
+    .boolean()
+    .default(true)
+    .describe(
+      `If true, the b-roll replaces the same duration in the main (keeps main's audio; b-roll becomes a "cutaway"). If false, the b-roll is inserted — extending total length by b_roll_duration.`,
+    ),
+});
+
+/** Parameters for the video_set_bitrate tool */
+export interface VideoSetBitrateParams {
+  input: string;
+  output: string;
+  video_bitrate?: string;
+  audio_bitrate?: string;
+  two_pass: boolean;
+}
+
+export const videoSetBitrateSchema = z.object({
+  input: z.string().describe('Path to the source video'),
+  output: z.string().describe('Path for the output video'),
+  video_bitrate: z
+    .string()
+    .optional()
+    .describe('Target video bitrate — e.g., "2M", "500k", "8000k".'),
+  audio_bitrate: z.string().optional().describe('Target audio bitrate — e.g., "128k", "192k".'),
+  two_pass: z
+    .boolean()
+    .default(false)
+    .describe(
+      'If true, uses two-pass encoding for more accurate bitrate targeting (slower; requires a temp log file).',
+    ),
+});
+
+/** Parameters for the video_set_codec tool */
+export interface VideoSetCodecParams {
+  input: string;
+  output: string;
+  video_codec?: string;
+  audio_codec?: string;
+  crf?: number;
+  preset?: string;
+}
+
+export const videoSetCodecSchema = z.object({
+  input: z.string().describe('Path to the source video'),
+  output: z.string().describe('Path for the output video'),
+  video_codec: z
+    .string()
+    .optional()
+    .describe(
+      'Video codec — e.g., "libx264", "libx265", "libvpx-vp9", "libaom-av1", "copy" to stream-copy.',
+    ),
+  audio_codec: z
+    .string()
+    .optional()
+    .describe('Audio codec — e.g., "aac", "libopus", "libmp3lame", "copy".'),
+  crf: z
+    .number()
+    .min(0)
+    .max(63)
+    .optional()
+    .describe(
+      'Constant Rate Factor (quality). For libx264/libx265: 0 (lossless)–51, typical 18–28. For libvpx-vp9/libaom-av1: 0–63.',
+    ),
+  preset: z
+    .string()
+    .optional()
+    .describe(
+      'x264/x265 speed preset — "ultrafast","superfast","veryfast","faster","fast","medium","slow","slower","veryslow".',
+    ),
+});
+
+/** Parameters for the video_set_frame_rate tool */
+export interface VideoSetFrameRateParams {
+  input: string;
+  output: string;
+  frame_rate: number;
+  drop_duplicate_frames: boolean;
+}
+
+export const videoSetFrameRateSchema = z.object({
+  input: z.string().describe('Path to the source video'),
+  output: z.string().describe('Path for the output video'),
+  frame_rate: z.number().positive().describe('Target frame rate in fps — e.g., 24, 29.97, 30, 60.'),
+  drop_duplicate_frames: z
+    .boolean()
+    .default(true)
+    .describe(
+      'If true, uses the fps filter (frame-accurate; drops/duplicates frames to hit target). If false, uses -r (simpler but may stretch/shrink duration).',
+    ),
+});
