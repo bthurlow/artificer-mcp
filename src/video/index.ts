@@ -40,11 +40,6 @@ import {
   videoSetFrameRateSchema,
 } from './types.js';
 
-/** Escape a value for FFmpeg's drawtext filter — commas, colons, backslashes, and quotes need escaping. */
-function escapeDrawText(text: string): string {
-  return text.replace(/\\/g, '\\\\').replace(/:/g, '\\:').replace(/'/g, "\\'").replace(/,/g, '\\,');
-}
-
 /** Escape a file path for the subtitles filter (colons on Windows break it). */
 function escapeSubtitlePath(path: string): string {
   // Replace backslashes with forward, escape any colon (Windows drive letters).
@@ -498,12 +493,31 @@ export function registerVideoTools(server: McpServer): void {
     }) => {
       await mkdir(dirname(output), { recursive: true });
 
+      // Some FFmpeg builds on Windows don't respect `\:` escaping inside
+      // drawtext option values — the filter parser splits on `:` regardless.
+      // Single quotes protect `:` but can't contain `'`. Using a textfile=
+      // approach bypasses all escaping: we write the raw text to a CWD-
+      // relative temp file (just a filename, no directory — so no colons on
+      // Windows), pass its name via textfile=, and clean up after.
+      const textFileName = `.drawtext-${Date.now()}.txt`;
+      await writeFile(textFileName, text);
+
       const parts: string[] = [
-        `text='${escapeDrawText(text)}'`,
+        `textfile=${textFileName}`,
         `fontsize=${font_size}`,
         `fontcolor=${color}`,
       ];
-      if (font_file) parts.push(`fontfile='${font_file.replace(/\\/g, '/').replace(/'/g, "\\'")}'`);
+      if (font_file) {
+        // Also strip Windows drive-letter colons from the font file path.
+        let fontPath = font_file.replace(/\\/g, '/');
+        if (/^[A-Za-z]:/.test(fontPath)) {
+          const cwd = process.cwd().replace(/\\/g, '/');
+          if (fontPath.toLowerCase().startsWith(cwd.toLowerCase() + '/')) {
+            fontPath = fontPath.slice(cwd.length + 1);
+          }
+        }
+        parts.push(`fontfile=${fontPath}`);
+      }
       parts.push(`x=${typeof x === 'number' ? x : x}`, `y=${typeof y === 'number' ? y : y}`);
       if (box) {
         parts.push('box=1', `boxcolor=${box_color}`, `boxborderw=${box_border_width}`);
@@ -514,18 +528,22 @@ export function registerVideoTools(server: McpServer): void {
 
       const filter = `drawtext=${parts.join(':')}`;
 
-      await ffmpegBatch([
-        '-y',
-        '-i',
-        input,
-        '-vf',
-        filter,
-        '-c:v',
-        'libx264',
-        '-c:a',
-        'copy',
-        output,
-      ]);
+      try {
+        await ffmpegBatch([
+          '-y',
+          '-i',
+          input,
+          '-vf',
+          filter,
+          '-c:v',
+          'libx264',
+          '-c:a',
+          'copy',
+          output,
+        ]);
+      } finally {
+        await rm(textFileName, { force: true });
+      }
 
       return {
         content: [
