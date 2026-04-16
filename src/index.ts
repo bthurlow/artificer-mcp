@@ -17,6 +17,8 @@ import { registerAssetTools } from './assets/index.js';
 import { registerStorageTools } from './storage/index.js';
 import { registerVideoTools } from './video/index.js';
 import { registerAudioTools } from './audio/index.js';
+import { registerGenerationTools } from './generation/index.js';
+import { registerGuideTools } from './guides/index.js';
 
 /**
  * artificer-mcp Server
@@ -56,6 +58,8 @@ async function main(): Promise<void> {
   registerStorageTools(server);
   registerVideoTools(server);
   registerAudioTools(server);
+  registerGenerationTools(server);
+  registerGuideTools(server);
 
   // Connect via stdio transport
   const transport = new StdioServerTransport();

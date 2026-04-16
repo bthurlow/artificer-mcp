@@ -12,6 +12,8 @@ import { registerAssetTools } from '../../src/assets/index.js';
 import { registerStorageTools } from '../../src/storage/index.js';
 import { registerVideoTools } from '../../src/video/index.js';
 import { registerAudioTools } from '../../src/audio/index.js';
+import { registerGenerationTools } from '../../src/generation/index.js';
+import { registerGuideTools } from '../../src/guides/index.js';
 
 /**
  * Create a test MCP server + client pair connected via in-memory transport.
@@ -38,6 +40,8 @@ export async function createTestServerClient(): Promise<{
   registerStorageTools(server);
   registerVideoTools(server);
   registerAudioTools(server);
+  registerGenerationTools(server);
+  registerGuideTools(server);
 
   const client = new Client({ name: 'test-client', version: '1.0.0' });
 
