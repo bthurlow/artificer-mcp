@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.4](https://github.com/bthurlow/artificer-mcp/compare/v0.7.3...v0.7.4) (2026-04-16)
+
+
+### Bug Fixes
+
+* **ci:** use Node 24 for publish (ships npm 11.x with OIDC support) ([ff143a5](https://github.com/bthurlow/artificer-mcp/commit/ff143a5cd0621e2b8b92bc393bd5082ff45f21e9))
+
 ## [0.7.3](https://github.com/bthurlow/artificer-mcp/compare/v0.7.2...v0.7.3) (2026-04-16)
 
 
