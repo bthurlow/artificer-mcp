@@ -14,6 +14,7 @@ import { registerVideoTools } from '../../src/video/index.js';
 import { registerAudioTools } from '../../src/audio/index.js';
 import { registerGenerationTools } from '../../src/generation/index.js';
 import { registerGuideTools } from '../../src/guides/index.js';
+import { registerWorkflowTools } from '../../src/workflows/index.js';
 
 /**
  * Create a test MCP server + client pair connected via in-memory transport.
@@ -42,6 +43,7 @@ export async function createTestServerClient(): Promise<{
   registerAudioTools(server);
   registerGenerationTools(server);
   registerGuideTools(server);
+  registerWorkflowTools(server);
 
   const client = new Client({ name: 'test-client', version: '1.0.0' });
 
