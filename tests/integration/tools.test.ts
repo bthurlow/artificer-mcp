@@ -12,11 +12,17 @@ import { execFile, execFileSync } from 'node:child_process';
 import { promisify } from 'node:util';
 import { mkdir, rm, stat, access } from 'node:fs/promises';
 import { readdirSync, accessSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 
 const execFileAsync = promisify(execFile);
+
+// Bundled test font — avoids any OS/CI font-resolution fragility.
+// See tests/fixtures/fonts/README.md for rationale.
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const TEST_FONT = join(__dirname, '..', 'fixtures', 'fonts', 'Roboto-Regular.ttf');
 
 /**
  * Synchronously find ImageMagick. Checks PATH first, then common install locations.
@@ -142,6 +148,7 @@ describe('Integration: Text', () => {
         input: fixtureImage,
         output,
         text: 'Hello',
+        font: TEST_FONT,
         size: 16,
         color: 'white',
         x: 10,
@@ -205,6 +212,7 @@ describe('Integration: Content', () => {
         output,
         width: 200,
         height: 100,
+        font: TEST_FONT,
       },
     });
 
@@ -221,7 +229,7 @@ describe('Integration: Ads', () => {
     const output = join(testDir, 'cta_button.png');
     const result = await client.callTool({
       name: 'cta-button',
-      arguments: { output, text: 'Click Me', width: 200, height: 50 },
+      arguments: { output, text: 'Click Me', font: TEST_FONT, width: 200, height: 50 },
     });
 
     expect(await fileExists(output)).toBe(true);
