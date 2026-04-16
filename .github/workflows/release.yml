@@ -7,7 +7,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  packages: write
 
 jobs:
   release-please:
@@ -22,17 +21,16 @@ jobs:
         id: release
         with:
           release-type: node
-          # Conventional commits: feat → minor, fix → patch, feat! → major
-          # The action creates/updates a Release PR that accumulates changes.
-          # Merging the Release PR cuts the actual release + tag.
 
-  # npm publish only runs after a release is actually created
-  # (i.e., after the Release PR is merged — not on every push)
   publish:
     name: Publish to npm
     needs: release-please
     if: needs.release-please.outputs.release_created == 'true'
     runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
@@ -42,9 +40,4 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: yarn install --frozen-lockfile
       - run: yarn build
-      # Uncomment when ready to publish to npm
-      # - run: yarn publish --access public
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Publish placeholder
-        run: echo "npm publish ready — uncomment the publish step and add NPM_TOKEN secret when ready"
+      - run: npm publish --provenance --access public
