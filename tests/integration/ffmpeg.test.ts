@@ -36,11 +36,28 @@ function findFfmpegSync(): boolean {
 
 const hasFfmpeg = findFfmpegSync();
 
+/** Check whether the drawtext filter is compiled into ffmpeg. */
+function hasDrawtextFilter(): boolean {
+  if (!hasFfmpeg) return false;
+  try {
+    const out = execFileSync('ffmpeg', ['-filters'], { encoding: 'utf8', timeout: 5000 });
+    return out.includes('drawtext');
+  } catch {
+    return false;
+  }
+}
+
+const hasDrawtext = hasDrawtextFilter();
+
 if (!hasFfmpeg) {
-  // Surface the skip — avoid the silent-skip failure mode we had with ImageMagick.
   // eslint-disable-next-line no-console
   console.warn(
     '[integration/ffmpeg] ffmpeg/ffprobe not found on PATH — all ffmpeg integration tests will be skipped.',
+  );
+} else if (!hasDrawtext) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    '[integration/ffmpeg] ffmpeg drawtext filter not available (needs --enable-libfreetype) — drawtext tests will be skipped.',
   );
 }
 
@@ -442,7 +459,7 @@ describe('Integration: video_add_image_overlay', () => {
 });
 
 describe('Integration: video_add_text_overlay', () => {
-  it.skipIf(!hasFfmpeg)('burns text onto a video via drawtext (uses bundled font)', async () => {
+  it.skipIf(!hasFfmpeg || !hasDrawtext)('burns text onto a video via drawtext (uses bundled font)', async () => {
     const output = join(testDir, 'text_overlay.mp4');
     const result = await client.callTool({
       name: 'video_add_text_overlay',
@@ -467,7 +484,7 @@ describe('Integration: video_add_text_overlay', () => {
     expect(await fileSize(output)).toBeGreaterThan(0);
   }, 30_000);
 
-  it.skipIf(!hasFfmpeg)('handles text with special chars (colons, quotes)', async () => {
+  it.skipIf(!hasFfmpeg || !hasDrawtext)('handles text with special chars (colons, quotes)', async () => {
     const output = join(testDir, 'text_overlay_special.mp4');
     const result = await client.callTool({
       name: 'video_add_text_overlay',
