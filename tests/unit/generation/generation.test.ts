@@ -217,6 +217,78 @@ describe('Generation Tools', () => {
       expect(content[0].text).toContain('saved to /tmp/video.mp4');
     });
 
+    it('downloads video from URI when videoBytes not present', async () => {
+      // Mock global fetch for URI download
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+
+      mockGenerateVideos.mockResolvedValue({
+        done: true,
+        response: {
+          generatedVideos: [
+            { video: { uri: 'https://storage.googleapis.com/video.mp4', mimeType: 'video/mp4' } },
+          ],
+        },
+      });
+
+      const result = await client.callTool({
+        name: 'gemini_generate_video',
+        arguments: {
+          prompt: 'test',
+          output: '/tmp/video.mp4',
+        },
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith('https://storage.googleapis.com/video.mp4');
+      const content = result.content as Array<{ type: string; text: string }>;
+      expect(content[0].text).toContain('downloaded from');
+
+      vi.unstubAllGlobals();
+    });
+
+    it('handles video with no data (no bytes, no uri)', async () => {
+      mockGenerateVideos.mockResolvedValue({
+        done: true,
+        response: {
+          generatedVideos: [{ video: {} }],
+        },
+      });
+
+      const result = await client.callTool({
+        name: 'gemini_generate_video',
+        arguments: {
+          prompt: 'test',
+          output: '/tmp/video.mp4',
+        },
+      });
+
+      const content = result.content as Array<{ type: string; text: string }>;
+      expect(content[0].text).toContain('no video data');
+    });
+
+    it('throws on operation error', async () => {
+      mockGenerateVideos.mockResolvedValue({
+        done: true,
+        error: { code: 400, message: 'bad request' },
+      });
+
+      const result = await client.callTool({
+        name: 'gemini_generate_video',
+        arguments: {
+          prompt: 'test',
+          output: '/tmp/video.mp4',
+        },
+      });
+
+      const content = result.content as Array<{ type: string; text: string }>;
+      const text = content.map((c) => c.text).join(' ');
+      const isError = result.isError === true || /failed/i.test(text);
+      expect(isError).toBe(true);
+    });
+
     it('reports filtered videos without error', async () => {
       mockGenerateVideos.mockResolvedValue({
         done: true,
