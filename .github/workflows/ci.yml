@@ -145,17 +145,21 @@ jobs:
         with:
           node-version: 22
           cache: yarn
-      - name: Install ImageMagick and fonts
-        # Ubuntu noble's `imagemagick` package ships 6.9.12, which provides the
-        # `magick` CLI as a v6-compat alias. Our tools only use v7-compatible
-        # subcommands, so v6 works for CI. Production README still states v7+.
+      - name: Install ImageMagick v7
+        # Ubuntu noble's apt `imagemagick` package is v6.9.x and does NOT
+        # provide a `magick` CLI entry point. Our tools require v7+'s `magick`
+        # command, so install the official static AppImage instead.
         #
-        # Fonts-liberation provides Arial-compatible metrics; ghostscript is
-        # needed for several font paths ImageMagick uses.
+        # Fontconfig + ghostscript are still needed as ImageMagick runtime
+        # dependencies for certain operations (PDFs, type resolution).
+        # Tests don't rely on host fonts — they use a bundled TTF in
+        # tests/fixtures/fonts/.
         run: |
           sudo apt-get update
-          sudo apt-get install -y imagemagick fonts-liberation fontconfig ghostscript
-          fc-cache -f
+          sudo apt-get install -y fontconfig ghostscript
+          wget -q -O /tmp/magick "https://imagemagick.org/archive/binaries/magick"
+          chmod +x /tmp/magick
+          sudo mv /tmp/magick /usr/local/bin/magick
           magick --version | head -1
       - name: Install FFmpeg (static binary)
         # Pin via johnvansickle static build so tests run against a known recent version.
