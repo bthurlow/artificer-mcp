@@ -75,13 +75,11 @@ Add to your MCP config:
 }
 ```
 
-### npx (once published to npm)
+### npx
 
-<!-- TODO: Uncomment once published to npm
 ```bash
 claude mcp add artificer -- npx artificer-mcp
 ```
--->
 
 ## Architecture
 

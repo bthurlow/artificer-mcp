@@ -37,10 +37,22 @@ jobs:
         with:
           node-version: 22
           cache: yarn
+          registry-url: https://registry.npmjs.org
       - run: yarn install --frozen-lockfile
       - run: yarn build
-      # No registry-url on setup-node, no .npmrc _authToken interference.
-      # npm publish --provenance uses OIDC for both attestation and auth
+      # Node 22 ships npm 10.x which does NOT support OIDC trusted
+      # publishing. OIDC was added in npm 11.5.1 (July 2025). Upgrade
+      # before publishing.
+      - run: npm install -g npm@^11
+      # Diagnostic: verify npm version and that NODE_AUTH_TOKEN is not
+      # leaking into the publish step.
+      - name: Verify publish environment
+        run: |
+          echo "npm version: $(npm --version)"
+          echo "node version: $(node --version)"
+          echo "NODE_AUTH_TOKEN set: ${NODE_AUTH_TOKEN:+yes}${NODE_AUTH_TOKEN:-no}"
+      # Do NOT set NODE_AUTH_TOKEN — OIDC handles auth automatically
       # when trusted publishing is configured on npmjs.com.
-      - run: npm config set registry https://registry.npmjs.org/
-      - run: npm publish --provenance --access public
+      # setup-node sets NODE_AUTH_TOKEN to GITHUB_TOKEN by default;
+      # we must explicitly unset it so npm falls through to OIDC.
+      - run: unset NODE_AUTH_TOKEN && npm publish --provenance --access public
