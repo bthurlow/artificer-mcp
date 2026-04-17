@@ -119,7 +119,13 @@ export function registerVideoGenTools(server: McpServer): void {
         };
       } else if (video?.uri) {
         // Video returned as a URI (GCS or HTTP) — download it.
-        const resp = await fetch(video.uri);
+        // Gemini Files API URIs require the API key as x-goog-api-key header.
+        const isGeminiFilesApi = video.uri.includes('generativelanguage.googleapis.com');
+        const headers: Record<string, string> = {};
+        if (isGeminiFilesApi && process.env.GOOGLE_API_KEY) {
+          headers['x-goog-api-key'] = process.env.GOOGLE_API_KEY;
+        }
+        const resp = await fetch(video.uri, { headers });
         if (!resp.ok) throw new Error(`Failed to download video from ${video.uri}: ${resp.status}`);
         const buf = Buffer.from(await resp.arrayBuffer());
         await writeFile(output, buf);

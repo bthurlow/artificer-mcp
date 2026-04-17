@@ -242,10 +242,49 @@ describe('Generation Tools', () => {
         },
       });
 
-      expect(mockFetch).toHaveBeenCalledWith('https://storage.googleapis.com/video.mp4');
+      expect(mockFetch).toHaveBeenCalledWith('https://storage.googleapis.com/video.mp4', {
+        headers: {},
+      });
       const content = result.content as Array<{ type: string; text: string }>;
       expect(content[0].text).toContain('downloaded from');
 
+      vi.unstubAllGlobals();
+    });
+
+    it('sends x-goog-api-key header when downloading from Gemini Files API', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+      });
+      vi.stubGlobal('fetch', mockFetch);
+      const prevKey = process.env.GOOGLE_API_KEY;
+      process.env.GOOGLE_API_KEY = 'test-api-key-xyz';
+
+      mockGenerateVideos.mockResolvedValue({
+        done: true,
+        response: {
+          generatedVideos: [
+            {
+              video: {
+                uri: 'https://generativelanguage.googleapis.com/v1beta/files/abc:download?alt=media',
+                mimeType: 'video/mp4',
+              },
+            },
+          ],
+        },
+      });
+
+      await client.callTool({
+        name: 'gemini_generate_video',
+        arguments: { prompt: 'test', output: '/tmp/video.mp4' },
+      });
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://generativelanguage.googleapis.com/v1beta/files/abc:download?alt=media',
+        { headers: { 'x-goog-api-key': 'test-api-key-xyz' } },
+      );
+
+      process.env.GOOGLE_API_KEY = prevKey;
       vi.unstubAllGlobals();
     });
 
