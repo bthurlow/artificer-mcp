@@ -1,5 +1,12 @@
 import { z } from 'zod';
 
+/**
+ * Resolve a model default, preferring an environment override when set.
+ * Lets operators pin models in `.mcp.json` env without editing callers.
+ */
+const envDefault = (envVar: string, fallback: string): string =>
+  process.env[envVar]?.trim() || fallback;
+
 // ── gemini_generate_image ──────────────────────────────────────────────────
 
 export interface GenerateImageParams {
@@ -18,9 +25,9 @@ export interface GenerateImageParams {
 export const generateImageSchema = z.object({
   model: z
     .string()
-    .default('imagen-4.0-generate-001')
+    .default(envDefault('ARTIFICER_IMAGEN_MODEL', 'imagen-4.0-generate-001'))
     .describe(
-      'Imagen model ID. Pass any valid model string — no hardcoded enum. Default: imagen-4.0-generate-001.',
+      'Imagen model ID. Pass any valid model string — no hardcoded enum. Default: imagen-4.0-generate-001 (override via ARTIFICER_IMAGEN_MODEL env var).',
     ),
   prompt: z.string().describe('Text description of the image to generate.'),
   output: z
@@ -76,8 +83,10 @@ export interface EditImageParams {
 export const editImageSchema = z.object({
   model: z
     .string()
-    .default('imagen-3.0-capability-001')
-    .describe('Imagen editing model ID. Default: imagen-3.0-capability-001.'),
+    .default(envDefault('ARTIFICER_IMAGEN_EDIT_MODEL', 'imagen-3.0-capability-001'))
+    .describe(
+      'Imagen editing model ID. Default: imagen-3.0-capability-001 (override via ARTIFICER_IMAGEN_EDIT_MODEL env var).',
+    ),
   prompt: z.string().describe('Description of the edit to apply.'),
   image: z.string().describe('Path to the source image to edit.'),
   output: z
@@ -118,11 +127,49 @@ export interface UpscaleImageParams {
 export const upscaleImageSchema = z.object({
   model: z
     .string()
-    .default('imagen-4.0-upscale-preview')
-    .describe('Upscale model ID. Default: imagen-4.0-upscale-preview.'),
+    .default(envDefault('ARTIFICER_IMAGEN_UPSCALE_MODEL', 'imagen-4.0-upscale-preview'))
+    .describe(
+      'Upscale model ID. Default: imagen-4.0-upscale-preview (override via ARTIFICER_IMAGEN_UPSCALE_MODEL env var).',
+    ),
   image: z.string().describe('Path to the image to upscale.'),
   output: z.string().describe('Output path for the upscaled image.'),
   upscale_factor: z.string().default('x2').describe('Upscale factor — "x2" or "x4".'),
+});
+
+// ── gemini_nanobanana_generate_image ───────────────────────────────────────
+
+export interface NanobananaGenerateImageParams {
+  model: string;
+  prompt: string;
+  output: string;
+  reference_images?: string[];
+  aspect_ratio?: string;
+  include_text: boolean;
+}
+
+export const nanobananaGenerateImageSchema = z.object({
+  model: z
+    .string()
+    .default(envDefault('ARTIFICER_NANOBANANA_MODEL', 'gemini-2.5-flash-image'))
+    .describe(
+      'Gemini image model ID (nano-banana family). Default: gemini-2.5-flash-image (override via ARTIFICER_NANOBANANA_MODEL env var).',
+    ),
+  prompt: z.string().describe('Text prompt. If reference_images are provided, describe the edit or composition.'),
+  output: z.string().describe('Output path for the generated image (e.g., "./output.png").'),
+  reference_images: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Optional local paths to reference images. When provided, nano-banana uses them as visual context — enabling edits, composites, style transfer, and reference-guided generation.',
+    ),
+  aspect_ratio: z
+    .string()
+    .optional()
+    .describe('Optional aspect ratio hint — "1:1", "3:4", "4:3", "9:16", "16:9".'),
+  include_text: z
+    .boolean()
+    .default(false)
+    .describe('If true, request text modality alongside image — any narration returned is included in the response.'),
 });
 
 // ── gemini_generate_video ──────────────────────────────────────────────────
@@ -148,8 +195,10 @@ export interface GenerateVideoParams {
 export const generateVideoSchema = z.object({
   model: z
     .string()
-    .default('veo-2.0-generate-001')
-    .describe('Veo model ID. Pass any valid model string. Default: veo-2.0-generate-001.'),
+    .default(envDefault('ARTIFICER_VEO_MODEL', 'veo-2.0-generate-001'))
+    .describe(
+      'Veo model ID. Pass any valid model string. Default: veo-2.0-generate-001 (override via ARTIFICER_VEO_MODEL env var).',
+    ),
   prompt: z.string().describe('Text description of the video to generate.'),
   output: z.string().describe('Output path for the generated video (e.g., "./output.mp4").'),
   image: z

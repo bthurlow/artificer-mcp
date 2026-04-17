@@ -75,6 +75,20 @@ Add to your MCP config:
 }
 ```
 
+### Environment variables
+
+| Variable | Purpose |
+|---|---|
+| `GOOGLE_API_KEY` | Required for all Gemini/Imagen/Veo tools. |
+| `GOOGLE_APPLICATION_CREDENTIALS` | Required for `gs://` storage URIs. Path to a GCP service-account JSON. |
+| `ARTIFICER_IMAGEN_MODEL` | Override default model for `gemini_generate_image` (fallback: `imagen-4.0-generate-001`). |
+| `ARTIFICER_IMAGEN_EDIT_MODEL` | Override default model for `gemini_edit_image` (fallback: `imagen-3.0-capability-001`). |
+| `ARTIFICER_IMAGEN_UPSCALE_MODEL` | Override default model for `gemini_upscale_image` (fallback: `imagen-4.0-upscale-preview`). |
+| `ARTIFICER_VEO_MODEL` | Override default model for `gemini_generate_video` (fallback: `veo-2.0-generate-001`). |
+| `ARTIFICER_NANOBANANA_MODEL` | Override default model for `gemini_nanobanana_generate_image` (fallback: `gemini-2.5-flash-image`). |
+
+Per-call `model` args always win over env overrides.
+
 ### npx
 
 ```bash
