@@ -109,6 +109,62 @@ describe('Audio Tools', () => {
       const af = ffmpegState.calls[0].args[ffmpegState.calls[0].args.indexOf('-af') + 1];
       expect(af).toBe('volume=-2dB');
     });
+
+    it('picks AAC (not mp3) and copies video stream when output is .mp4', async () => {
+      await client.callTool({
+        name: 'audio_normalize',
+        arguments: {
+          input: '/tmp/in.mp4',
+          output: '/tmp/out.mp4',
+          mode: 'loudnorm',
+          target_lufs: -14,
+          target_peak_db: -1,
+        },
+      });
+
+      const args = ffmpegState.calls[0].args;
+      expect(args).toContain('aac');
+      expect(args).not.toContain('libmp3lame');
+      // -c:v copy must be present so the video track is preserved
+      const cvIdx = args.indexOf('-c:v');
+      expect(cvIdx).toBeGreaterThan(-1);
+      expect(args[cvIdx + 1]).toBe('copy');
+    });
+
+    it('picks libopus and copies video stream when output is .webm', async () => {
+      await client.callTool({
+        name: 'audio_normalize',
+        arguments: {
+          input: '/tmp/in.webm',
+          output: '/tmp/out.webm',
+          mode: 'loudnorm',
+          target_lufs: -14,
+          target_peak_db: -1,
+        },
+      });
+
+      const args = ffmpegState.calls[0].args;
+      expect(args).toContain('libopus');
+      const cvIdx = args.indexOf('-c:v');
+      expect(cvIdx).toBeGreaterThan(-1);
+      expect(args[cvIdx + 1]).toBe('copy');
+    });
+
+    it('does NOT add -c:v copy when output is a pure audio container (.mp3)', async () => {
+      await client.callTool({
+        name: 'audio_normalize',
+        arguments: {
+          input: '/tmp/in.mp3',
+          output: '/tmp/out.mp3',
+          mode: 'loudnorm',
+          target_lufs: -14,
+          target_peak_db: -1,
+        },
+      });
+
+      const args = ffmpegState.calls[0].args;
+      expect(args).not.toContain('-c:v');
+    });
   });
 
   // ── audio_convert_format ──────────────────────────────────────────────

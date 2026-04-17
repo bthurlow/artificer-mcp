@@ -22,9 +22,16 @@ import {
   audioRemoveSilenceSchema,
 } from './types.js';
 
+/** Video container extensions — when the output is one of these, the audio tools
+ * should preserve the video track (`-c:v copy`) and pick an audio codec the
+ * container supports. */
+const VIDEO_CONTAINERS = new Set(['mp4', 'mov', 'm4v', 'mkv', 'webm', 'avi']);
+
 /**
  * Pick a sensible audio codec for a given output file extension.
- * Falls back to libmp3lame for unknown extensions.
+ * Handles both audio containers (mp3/aac/wav/etc.) and video containers
+ * (mp4/mov/mkv/webm/avi) — for a video container, picks the audio codec
+ * the container conventionally uses. Falls back to libmp3lame for unknown.
  */
 function defaultCodecForExt(ext: string): string {
   switch (ext.toLowerCase()) {
@@ -32,6 +39,11 @@ function defaultCodecForExt(ext: string): string {
       return 'libmp3lame';
     case 'aac':
     case 'm4a':
+    case 'mp4':
+    case 'mov':
+    case 'm4v':
+    case 'mkv':
+    case 'avi':
       return 'aac';
     case 'wav':
       return 'pcm_s16le';
@@ -40,6 +52,7 @@ function defaultCodecForExt(ext: string): string {
     case 'ogg':
       return 'libvorbis';
     case 'opus':
+    case 'webm':
       return 'libopus';
     default:
       return 'libmp3lame';
@@ -50,6 +63,11 @@ function defaultCodecForExt(ext: string): string {
 function extOf(path: string): string {
   const dot = path.lastIndexOf('.');
   return dot >= 0 ? path.slice(dot + 1) : '';
+}
+
+/** True if the given file extension names a video container (not a pure-audio one). */
+function isVideoContainer(ext: string): boolean {
+  return VIDEO_CONTAINERS.has(ext.toLowerCase());
 }
 
 /**
@@ -104,8 +122,16 @@ export function registerAudioTools(server: McpServer): void {
         filter = `volume=${target_peak_db}dB`;
       }
 
-      const chosenCodec = defaultCodecForExt(extOf(output));
-      await ffmpegBatch(['-y', '-i', input, '-af', filter, '-c:a', chosenCodec, output]);
+      const ext = extOf(output);
+      const chosenCodec = defaultCodecForExt(ext);
+      const args = ['-y', '-i', input, '-af', filter, '-c:a', chosenCodec];
+      // When writing into a video container, keep the video stream as-is so
+      // loudnorm only touches audio. Otherwise ffmpeg re-encodes the video.
+      if (isVideoContainer(ext)) {
+        args.push('-c:v', 'copy');
+      }
+      args.push(output);
+      await ffmpegBatch(args);
 
       return {
         content: [
