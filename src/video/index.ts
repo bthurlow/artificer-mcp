@@ -79,10 +79,60 @@ export function registerVideoTools(server: McpServer): void {
   registerTool<VideoConcatenateParams>(
     server,
     'video_concatenate',
-    'Concatenate videos end-to-end. Use reencode=false for identical codecs/resolutions (fast stream copy) or reencode=true for mixed formats (slower but robust).',
+    'Concatenate videos end-to-end. By default uses hard cuts (fast stream copy). Pass `transition` (e.g., "fade", "wipeleft") to blend clips with xfade crossfades — this implicitly re-encodes and requires identical resolution/frame rate.',
     videoConcatenateSchema.shape,
-    async ({ inputs, output, reencode }) => {
+    async ({ inputs, output, reencode, transition, transition_duration }) => {
       await mkdir(dirname(output), { recursive: true });
+
+      if (transition) {
+        // Transition mode — chain xfade filters between each pair.
+        // Requires identical resolution/frame rate across inputs.
+        const infos = await Promise.all(inputs.slice(0, -1).map((p) => getVideoInfo(p)));
+
+        const videoChain: string[] = [];
+        const audioChain: string[] = [];
+        let vPrev = '[0:v]';
+        let aPrev = '[0:a]';
+        let runningOffset = 0;
+        for (let i = 0; i < infos.length; i++) {
+          runningOffset += infos[i].durationSeconds - transition_duration;
+          const vLabel = i === infos.length - 1 ? '[vout]' : `[v${i + 1}]`;
+          const aLabel = i === infos.length - 1 ? '[aout]' : `[a${i + 1}]`;
+          videoChain.push(
+            `${vPrev}[${i + 1}:v]xfade=transition=${transition}:duration=${transition_duration}:offset=${runningOffset.toFixed(3)}${vLabel}`,
+          );
+          audioChain.push(`${aPrev}[${i + 1}:a]acrossfade=d=${transition_duration}${aLabel}`);
+          vPrev = vLabel;
+          aPrev = aLabel;
+        }
+        const filter = [...videoChain, ...audioChain].join(';');
+
+        const args: string[] = ['-y'];
+        for (const p of inputs) args.push('-i', p);
+        args.push(
+          '-filter_complex',
+          filter,
+          '-map',
+          '[vout]',
+          '-map',
+          '[aout]',
+          '-c:v',
+          'libx264',
+          '-c:a',
+          'aac',
+          output,
+        );
+        await ffmpegBatch(args);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Concatenated ${inputs.length} videos with ${transition} transitions (${transition_duration}s) → ${output}`,
+            },
+          ],
+        };
+      }
 
       if (!reencode) {
         // Concat demuxer — fast, requires identical streams.

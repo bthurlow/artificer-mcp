@@ -79,6 +79,71 @@ describe('Video Tools', () => {
       const filter = args[args.indexOf('-filter_complex') + 1];
       expect(filter).toContain('concat=n=3:v=1:a=1');
     });
+
+    it('delegates to xfade chain when transition is set', async () => {
+      const result = await client.callTool({
+        name: 'video_concatenate',
+        arguments: {
+          inputs: ['/tmp/a.mp4', '/tmp/b.mp4', '/tmp/c.mp4'],
+          output: '/tmp/out.mp4',
+          transition: 'fade',
+          transition_duration: 0.5,
+        },
+      });
+
+      const args = ffmpegState.calls[0].args;
+      const filter = args[args.indexOf('-filter_complex') + 1];
+      // Two xfade pairs for three inputs
+      expect(filter).toContain('xfade=transition=fade');
+      expect(filter).toContain('duration=0.5');
+      // acrossfade audio chain must also be present
+      expect(filter).toContain('acrossfade=d=0.5');
+      // re-encoding codecs
+      expect(args).toContain('libx264');
+      expect(args).toContain('aac');
+
+      const content = result.content as Array<{ type: string; text: string }>;
+      expect(content[0].text).toContain('with fade transitions');
+    });
+
+    it('computes xfade offsets from cumulative durations minus transition overlap', async () => {
+      // Mocked getVideoInfo returns 10s for every clip; with 3 inputs and 1s xfade:
+      //   offset[0] = 10 - 1 = 9
+      //   offset[1] = (10 - 1) + (10 - 1) = 18
+      await client.callTool({
+        name: 'video_concatenate',
+        arguments: {
+          inputs: ['/tmp/a.mp4', '/tmp/b.mp4', '/tmp/c.mp4'],
+          output: '/tmp/out.mp4',
+          transition: 'wipeleft',
+          transition_duration: 1,
+        },
+      });
+
+      const args = ffmpegState.calls[0].args;
+      const filter = args[args.indexOf('-filter_complex') + 1];
+      expect(filter).toContain('offset=9.000');
+      expect(filter).toContain('offset=18.000');
+    });
+
+    it('ignores reencode=false when transition is set (transitions always re-encode)', async () => {
+      await client.callTool({
+        name: 'video_concatenate',
+        arguments: {
+          inputs: ['/tmp/a.mp4', '/tmp/b.mp4'],
+          output: '/tmp/out.mp4',
+          reencode: false,
+          transition: 'fade',
+        },
+      });
+
+      const args = ffmpegState.calls[0].args;
+      // Should NOT be using the concat demuxer path
+      expect(args).not.toContain('concat');
+      // Should be using filter_complex + libx264
+      expect(args).toContain('-filter_complex');
+      expect(args).toContain('libx264');
+    });
   });
 
   // ── video_trim ─────────────────────────────────────────────────────────

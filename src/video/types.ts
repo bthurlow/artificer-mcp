@@ -5,6 +5,8 @@ export interface VideoConcatenateParams {
   inputs: string[];
   output: string;
   reencode: boolean;
+  transition?: string;
+  transition_duration: number;
 }
 
 export const videoConcatenateSchema = z.object({
@@ -14,7 +16,20 @@ export const videoConcatenateSchema = z.object({
     .boolean()
     .default(false)
     .describe(
-      'If true, re-encode via concat filter (safe for mixed codecs/formats; slower). If false, use concat demuxer (fast; requires identical codecs/resolutions).',
+      'If true, re-encode via concat filter (safe for mixed codecs/formats; slower). If false, use concat demuxer (fast; requires identical codecs/resolutions). Ignored when `transition` is set — transitions always re-encode.',
+    ),
+  transition: z
+    .string()
+    .optional()
+    .describe(
+      `Optional FFmpeg xfade transition name to blend each pair of clips — e.g., "fade", "wipeleft", "slideup", "circleopen", "dissolve". When set, clips are joined with smooth crossfades instead of hard cuts (implicitly re-encodes). Omit for hard cuts. Inputs must share resolution/frame rate when using transitions; use video_set_resolution first if they don't. See https://ffmpeg.org/ffmpeg-filters.html#xfade for the full list.`,
+    ),
+  transition_duration: z
+    .number()
+    .positive()
+    .default(0.5)
+    .describe(
+      'Duration of each transition in seconds when `transition` is set (typically 0.3–1.5).',
     ),
 });
 
