@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.8.0](https://github.com/bthurlow/artificer-mcp/compare/v0.7.4...v0.8.0) (2026-04-17)
+
+
+### Features
+
+* **generation:** env-var model overrides and nano-banana tool ([3cda5fa](https://github.com/bthurlow/artificer-mcp/commit/3cda5fa4ef2c54812b6df06527f61c29dd8ba60f))
+* **guides:** add gemini_nanobanana_prompt_guide ([c3d25b0](https://github.com/bthurlow/artificer-mcp/commit/c3d25b0bc09be38f0ace2d10b9f102cb7febefd4))
+
+
+### Bug Fixes
+
+* **generation:** authenticate Gemini Files API downloads with x-goog-api-key ([2fc9b24](https://github.com/bthurlow/artificer-mcp/commit/2fc9b24749212b4d9dee29f5b62355691f073f67))
+* **generation:** omit config fields Gemini Dev API rejects by default ([46cfb49](https://github.com/bthurlow/artificer-mcp/commit/46cfb491af31f34f8b7bbfc04d99130b04a7530b))
+* **generation:** omit enhance_prompt when false to satisfy Gemini API ([bba9887](https://github.com/bthurlow/artificer-mcp/commit/bba988757ce62ca21d0d4076824e3dc47b30505e))
+
 ## [0.7.4](https://github.com/bthurlow/artificer-mcp/compare/v0.7.3...v0.7.4) (2026-04-16)
 
 
