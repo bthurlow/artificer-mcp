@@ -1,8 +1,9 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, extname } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { extname } from 'node:path';
 import { registerTool } from '../utils/register.js';
 import { getGenAIClient } from './client.js';
+import { getProvider } from '../storage/providers/registry.js';
 import {
   type NanobananaGenerateImageParams,
   nanobananaGenerateImageSchema,
@@ -97,8 +98,8 @@ export function registerNanobananaTools(server: McpServer): void {
         if (inline?.data) {
           imageIndex++;
           const path = imageIndex === 1 ? output : `${base}_${imageIndex}${ext}`;
-          await mkdir(dirname(path), { recursive: true });
-          await writeFile(path, Buffer.from(inline.data, 'base64'));
+          const bytes = Buffer.from(inline.data, 'base64');
+          await getProvider(path).write(path, bytes, inline.mimeType ?? 'image/png');
           written++;
           lines.push(`Image ${imageIndex}: saved to ${path}`);
         } else if (text) {

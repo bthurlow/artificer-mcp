@@ -1,8 +1,9 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, extname } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { extname } from 'node:path';
 import { registerTool } from '../utils/register.js';
 import { getGenAIClient } from './client.js';
+import { getProvider } from '../storage/providers/registry.js';
 import {
   type GenerateImageParams,
   type EditImageParams,
@@ -44,8 +45,8 @@ async function writeGeneratedImages(
       continue;
     }
     const path = images.length === 1 ? output : `${base}_${i + 1}${ext}`;
-    await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, Buffer.from(img.image.imageBytes, 'base64'));
+    const bytes = Buffer.from(img.image.imageBytes, 'base64');
+    await getProvider(path).write(path, bytes, img.image.mimeType ?? 'image/png');
     written++;
     lines.push(`Image ${i + 1}: saved to ${path}`);
     if (img.enhancedPrompt) {

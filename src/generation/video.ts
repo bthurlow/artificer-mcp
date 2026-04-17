@@ -1,8 +1,9 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, extname } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { extname } from 'node:path';
 import { registerTool } from '../utils/register.js';
 import { getGenAIClient } from './client.js';
+import { getProvider } from '../storage/providers/registry.js';
 import { type GenerateVideoParams, generateVideoSchema } from './types.js';
 import type { Image } from '@google/genai';
 
@@ -40,7 +41,6 @@ export function registerVideoGenTools(server: McpServer): void {
       poll_timeout_seconds,
     }) => {
       const client = getGenAIClient();
-      await mkdir(dirname(output), { recursive: true });
 
       // Build the image input for image-to-video, if provided.
       let inputImage: Image | undefined;
@@ -112,8 +112,10 @@ export function registerVideoGenTools(server: McpServer): void {
       }
 
       const video = videos[0].video;
+      const mime = video?.mimeType ?? 'video/mp4';
       if (video?.videoBytes) {
-        await writeFile(output, Buffer.from(video.videoBytes, 'base64'));
+        const bytes = Buffer.from(video.videoBytes, 'base64');
+        await getProvider(output).write(output, bytes, mime);
         return {
           content: [{ type: 'text', text: `Video generated and saved to ${output}` }],
         };
@@ -128,7 +130,7 @@ export function registerVideoGenTools(server: McpServer): void {
         const resp = await fetch(video.uri, { headers });
         if (!resp.ok) throw new Error(`Failed to download video from ${video.uri}: ${resp.status}`);
         const buf = Buffer.from(await resp.arrayBuffer());
-        await writeFile(output, buf);
+        await getProvider(output).write(output, buf, mime);
         return {
           content: [
             {
