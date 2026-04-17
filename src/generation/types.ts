@@ -17,8 +17,8 @@ export interface GenerateImageParams {
   number_of_images: number;
   aspect_ratio: string;
   seed?: number;
-  safety_filter_level: string;
-  person_generation: string;
+  safety_filter_level?: string;
+  person_generation?: string;
   enhance_prompt: boolean;
 }
 
@@ -50,14 +50,14 @@ export const generateImageSchema = z.object({
   seed: z.number().int().optional().describe('Random seed for reproducibility.'),
   safety_filter_level: z
     .string()
-    .default('BLOCK_MEDIUM_AND_ABOVE')
+    .optional()
     .describe(
-      'Safety filter — "BLOCK_LOW_AND_ABOVE", "BLOCK_MEDIUM_AND_ABOVE", "BLOCK_ONLY_HIGH", "BLOCK_NONE".',
+      'Safety filter — "BLOCK_LOW_AND_ABOVE", "BLOCK_MEDIUM_AND_ABOVE", "BLOCK_ONLY_HIGH", "BLOCK_NONE". Omit to use API default; note the Gemini Developer API (aistudio keys) currently only accepts BLOCK_LOW_AND_ABOVE.',
     ),
   person_generation: z
     .string()
-    .default('ALLOW_ADULT')
-    .describe('"DONT_ALLOW", "ALLOW_ADULT", "ALLOW_ALL".'),
+    .optional()
+    .describe('"DONT_ALLOW", "ALLOW_ADULT", "ALLOW_ALL". Omit to use API default.'),
   enhance_prompt: z
     .boolean()
     .default(false)
@@ -184,7 +184,7 @@ export interface GenerateVideoParams {
   resolution: string;
   fps?: number;
   negative_prompt?: string;
-  person_generation: string;
+  person_generation?: string;
   generate_audio: boolean;
   enhance_prompt: boolean;
   seed?: number;
@@ -219,7 +219,10 @@ export const generateVideoSchema = z.object({
   resolution: z.string().default('720p').describe('Resolution — "720p" or "1080p".'),
   fps: z.number().int().positive().optional().describe('Frames per second (model-dependent).'),
   negative_prompt: z.string().optional().describe('What to discourage.'),
-  person_generation: z.string().default('ALLOW_ADULT').describe('"dont_allow" or "allow_adult".'),
+  person_generation: z
+    .string()
+    .optional()
+    .describe('"dont_allow" or "allow_adult". Omit to use API default.'),
   generate_audio: z
     .boolean()
     .default(false)

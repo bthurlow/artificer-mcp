@@ -91,8 +91,12 @@ export function registerImageGenTools(server: McpServer): void {
           aspectRatio: aspect_ratio,
           negativePrompt: negative_prompt,
           seed,
-          safetyFilterLevel: safety_filter_level as SafetyFilterLevel,
-          personGeneration: person_generation as PersonGeneration,
+          ...(safety_filter_level
+            ? { safetyFilterLevel: safety_filter_level as SafetyFilterLevel }
+            : {}),
+          ...(person_generation
+            ? { personGeneration: person_generation as PersonGeneration }
+            : {}),
           ...(enhance_prompt ? { enhancePrompt: true } : {}),
           outputMimeType: `image/${(extname(output).slice(1) || 'png').toLowerCase()}`,
         },
