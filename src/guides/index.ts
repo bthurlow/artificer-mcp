@@ -115,9 +115,29 @@ Nano-banana is a multimodal image model accessed via \`generateContent\` with IM
 - When referencing multiple images, name them in the prompt ("image 1", "image 2") so the model disambiguates.
 - Higher-resolution references preserve more detail.
 
+## Aspect ratio — generate for the platform you'll use
+
+The \`aspect_ratio\` you pass must match the aspect ratio of the downstream destination. Nano-banana composes the scene natively at the requested aspect — it does not re-crop a square generation into a portrait intelligently, so generating at the wrong aspect and hoping to crop later produces bad framing (subjects centered for 1:1 end up cut off at 9:16).
+
+**Critical interop rule — image-to-video:** If the generated image will be fed into Veo as an image-to-video source (\`gemini_generate_video\` with \`image=\` set), the image aspect **must match** the target video aspect. Veo honors the container size you request but composes based on the source image's aspect, so a 1:1 source going into a 9:16 video renders like a "zoomed wide shot cropped vertically" — it does not generate a true portrait composition. Always pre-generate the reference at the target aspect before calling Veo.
+
+**Standard social aspects — pick by destination:**
+
+| Aspect | Dimensions (1080 long edge) | Primary use |
+|---|---|---|
+| 9:16 | 1080 × 1920 | TikTok, Instagram Reels, Stories, YouTube Shorts, Facebook Reels |
+| 1:1 | 1080 × 1080 | Instagram carousel, Facebook feed, LinkedIn feed |
+| 4:5 | 1080 × 1350 | Instagram feed preferred — Meta's recommended aspect; more screen real estate on mobile |
+| 16:9 | 1920 × 1080 | YouTube thumbnails, blog hero images, LinkedIn native video, web embeds |
+| 2:3 | 1080 × 1620 | Pinterest standard pin — taller pins get more organic distribution |
+| 1.91:1 | 1200 × 628 | Facebook/Instagram link cards, Open Graph images for blog shares |
+| 3:4 | 1080 × 1440 | Older Instagram portrait, some Pinterest content |
+
+**Pre-generation workflow for campaign assets:** if one reference asset will be used across multiple destinations (e.g., a character, a product shot), generate it once per target aspect up front. Don't generate at 1:1 and try to reuse for 9:16 video or 2:3 Pinterest — quality degrades from cropping, and image-to-video breaks.
+
 ## Model-Specific Notes
 - **gemini-2.5-flash-image** — Production model. Fast (seconds, not minutes). Override via \`ARTIFICER_NANOBANANA_MODEL\` env var.
-- **aspect_ratio**: Optional hint. Same set as Imagen (1:1, 3:4, 4:3, 9:16, 16:9).
+- **aspect_ratio**: Optional hint but strongly recommended when composition matters. Common values: 1:1, 3:4, 4:3, 9:16, 16:9, 4:5, 2:3, 1.91:1. See "Aspect ratio" section above for the interop rule with Veo image-to-video.
 - **include_text**: If true, the model can emit a text commentary alongside the image — useful when you want the model to _explain_ what it changed.
 - **No negative prompts / seed / enhance_prompt / safety knobs** — these are Imagen-only. Use explicit preservation language in the prompt instead ("keep the lighting", "do not change the pose").
 
@@ -160,6 +180,21 @@ Providing an input image dramatically improves consistency:
 2. Pass it as the \`image\` parameter
 3. Keep the prompt focused on MOTION and CAMERA, not scene description (the image provides that)
 4. Works best with: zoom, pan, parallax, gentle camera movements
+
+**Critical: source image aspect ratio MUST match target video aspect ratio.**
+
+Veo honors the \`aspect_ratio\` you request for the output container, but it composes the scene based on the source image's aspect. If you pass a 1:1 source with \`aspect_ratio: "9:16"\`, the result looks like a landscape-composed shot awkwardly cropped vertically — subjects centered, framing wrong. This is the #1 pitfall in image-to-video workflows.
+
+**Rule:** pre-generate the source image at the exact target aspect with nano-banana before calling Veo.
+
+| Target video aspect | Pre-generate source image at |
+|---|---|
+| 9:16 (TikTok/Reels/Stories) | 9:16 |
+| 16:9 (YouTube/LinkedIn) | 16:9 |
+| 1:1 (IG feed legacy) | 1:1 |
+| 4:5 (IG feed preferred) | 4:5 |
+
+If you need the same character/scene in multiple aspects, generate the reference multiple times — once per aspect — rather than cropping.
 
 ## Native Audio + Dialogue (Veo 3.x)
 
