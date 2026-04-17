@@ -118,6 +118,11 @@ export function registerVideoTools(server: McpServer): void {
           '[aout]',
           '-c:v',
           'libx264',
+          // Force yuv420p so consumer players (QuickTime, mobile, browsers) can decode.
+          // Without this, libx264 picks yuv444p from some filter-chain inputs and the
+          // output is a 4:4:4 High Predictive profile that most clients can't play.
+          '-pix_fmt',
+          'yuv420p',
           '-c:a',
           'aac',
           output,
@@ -449,6 +454,9 @@ export function registerVideoTools(server: McpServer): void {
         '[aout]',
         '-c:v',
         'libx264',
+        // yuv420p for consumer-player compatibility — see comment in video_concatenate.
+        '-pix_fmt',
+        'yuv420p',
         '-c:a',
         'aac',
         output,

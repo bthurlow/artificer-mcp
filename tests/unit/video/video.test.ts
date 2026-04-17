@@ -144,6 +144,22 @@ describe('Video Tools', () => {
       expect(args).toContain('-filter_complex');
       expect(args).toContain('libx264');
     });
+
+    it('forces yuv420p pixel format on transition output for consumer-player compatibility', async () => {
+      await client.callTool({
+        name: 'video_concatenate',
+        arguments: {
+          inputs: ['/tmp/a.mp4', '/tmp/b.mp4'],
+          output: '/tmp/out.mp4',
+          transition: 'fade',
+        },
+      });
+
+      const args = ffmpegState.calls[0].args;
+      const pixIdx = args.indexOf('-pix_fmt');
+      expect(pixIdx).toBeGreaterThan(-1);
+      expect(args[pixIdx + 1]).toBe('yuv420p');
+    });
   });
 
   // ── video_trim ─────────────────────────────────────────────────────────
