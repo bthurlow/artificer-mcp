@@ -129,7 +129,7 @@ Nano-banana is a multimodal image model accessed via \`generateContent\` with IM
 const VIDEO_GUIDE = `# Veo Video Generation — Prompt Guide
 
 ## Overview
-Google Veo generates short videos (5-8 seconds) from text prompts or text + image. Best for establishing shots, product demos, ambient scenes, and social content. Currently limited in precise character animation and dialogue sync.
+Google Veo generates short videos (4-8 seconds) from text prompts or text + image. Veo 3.x generates **native audio** including ambient sound, Foley, and **lip-synced dialogue** — so talking-head content is fully achievable without external TTS. Best for: establishing shots, product demos, ambient scenes, short-form social content, and talking heads when combined with image-to-video for character consistency.
 
 ## Prompt Template
 \`[Camera movement] of [subject] [doing action] in [setting], [visual style], [lighting], [mood]\`
@@ -147,11 +147,11 @@ Google Veo generates short videos (5-8 seconds) from text prompts or text + imag
 
 ## Bad Examples
 
-> "A person talking to the camera" — Veo struggles with lip sync and natural human motion. Use real footage for talking heads.
+> "A person says a lot of stuff about pricing and then laughs and then says more stuff" — Too long and unquoted. Quote the exact line and keep it to one sentence per clip. See "Native Audio + Dialogue" below.
 
 > "Fast action sequence with explosions" — Complex physics and rapid motion tend to produce artifacts.
 
-> "A 30-second commercial" — Veo generates 5-8 second clips. Plan your story in short segments and use video_concatenate or video_add_transitions to join them.
+> "A 30-second commercial" — Veo generates 4 or 8-second clips. Plan your story in short segments and use video_concatenate or video_add_transitions to join them.
 
 ## Image-to-Video Tips
 
@@ -161,27 +161,67 @@ Providing an input image dramatically improves consistency:
 3. Keep the prompt focused on MOTION and CAMERA, not scene description (the image provides that)
 4. Works best with: zoom, pan, parallax, gentle camera movements
 
-## Model-Specific Notes
+## Native Audio + Dialogue (Veo 3.x)
 
-- **veo-2.0-generate-001** — Current production model. 5-8 second clips at 720p or 1080p.
+Veo 3 generates audio automatically — ambient sound, Foley, music, AND lip-synced dialogue. You do NOT need a separate TTS pipeline for talking-head content.
+
+**Dialogue pattern** — quote the exact line the character should speak in the prompt:
+\`\`\`
+A woman says, "If one more person tells you to just double your ingredient cost..."
+\`\`\`
+
+Other working patterns:
+- \`The baker looks at the camera and says, "That's not a pricing method."\`
+- \`She says in a frustrated tone, "This is why you're broke."\`
+- \`He whispers, "They don't tell you this part."\`
+
+**Rules for reliable lip-sync:**
+1. Put the speaker + speech verb (\`says\`, \`exclaims\`, \`whispers\`) **before** the quoted dialogue.
+2. Keep each line short — ~1 sentence per 8-sec clip. Rushed delivery breaks lip-sync.
+3. Describe tone/emotion in the same clause ("says in a frustrated tone", "says warmly").
+4. No multi-character conversations in a single clip.
+5. Combine with image-to-video for character identity consistency.
+
+**Do NOT pass \`generate_audio: true\`** — Gemini Developer API rejects this field. Audio generates automatically on Veo 3.x; the flag is Vertex-only.
+
+## Workflow: Talking-Head Video (100% AI with synced dialogue)
+
+Veo 3 + nano-banana closes the loop — no real footage required:
+
+1. Generate the speaker as a still with nano-banana using locked character references (consistent face/outfit).
+2. Feed the still into \`gemini_generate_video\` as the \`image\` param (image-to-video) with a prompt using the dialogue pattern above. The still anchors the first frame so the face stays consistent.
+3. Repeat per dialogue beat — 4s or 8s clips.
+4. Stitch with \`video_concatenate\` or \`video_add_transitions\`.
+5. Optionally layer \`video_add_subtitles\` for sound-off accessibility.
+6. \`audio_normalize\` at the end for consistent loudness across clips.
+
+## Gemini Developer API quirks (empirically validated)
+
+- **\`generate_audio\`**: rejected. Omit — audio generates by default on Veo 3.x.
+- **\`negative_prompt\`**: not supported on Veo 3.x Lite. Drop it if using Lite.
+- **\`duration_seconds\`**: only \`4\` and \`8\` are accepted with image-to-video on most 3.x models. Other values may 400.
+- **\`reference_images\` config** (multi-reference): Veo 3.1 **Standard only**. Lite and Fast return 400 — use single \`image\` param (image-to-video) instead.
+- **Files API download URIs** (\`generativelanguage.googleapis.com/v1beta/files/...\`): require \`x-goog-api-key\` header. \`gemini_generate_video\` handles this automatically.
+
+## Model tier guidance
+
+| Tier | Model ID | Cost | When to use |
+|---|---|---|---|
+| Lite | \`veo-3.1-lite-generate-preview\` | ~$0.05/sec | Default. Indistinguishable from Standard for most social content. |
+| Fast | \`veo-3.1-fast-generate-preview\` | ~$0.10/sec | Faster iteration during drafting. |
+| Standard | \`veo-3.1-generate-preview\` | ~$0.40/sec | Multi-reference composition; critical hero shots. |
+
+Override the default via \`ARTIFICER_VEO_MODEL\` env var.
+
+## Misc
+
 - **Aspect ratios**: 16:9 (landscape) or 9:16 (portrait). Choose based on platform.
-- **generate_audio**: Set to true for ambient audio generation (model-dependent).
-- **Polling**: Video generation takes 30-120 seconds typically. Default poll timeout is 5 minutes.
-- **Cost**: Varies by model tier. Veo Lite is ~$0.05/sec of generated video.
-
-## Workflow: Talking-Head Video
-
-Veo alone can't do talking heads. Recommended pipeline:
-1. Record real talking-head footage
-2. Use \`video_trim\` to cut segments
-3. Generate b-roll with Veo (\`gemini_generate_video\`)
-4. Use \`video_add_b_roll\` to insert b-roll as cutaways
-5. Use \`video_add_subtitles\` for captions
-6. Use \`audio_normalize\` for consistent loudness
+- **Polling**: Video generation typically takes 60-180 seconds. Default poll timeout is 5 minutes.
 
 ## Official References
 - Veo API: https://ai.google.dev/gemini-api/docs/veo
 - Model cards: https://ai.google.dev/gemini-api/docs/models/veo
+- Audio + dialogue: https://ai.google.dev/gemini-api/docs/video#audio-generation
 `;
 
 /**
