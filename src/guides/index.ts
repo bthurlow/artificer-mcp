@@ -37,12 +37,96 @@ Google Imagen generates high-quality images from text prompts. It excels at phot
 - **Safety filters**: Default is BLOCK_MEDIUM_AND_ABOVE. Lower to BLOCK_ONLY_HIGH for creative freedom; raise for child-safe content.
 - **Seed**: Set for reproducibility. Same seed + same prompt = same image.
 
+## When to use nano-banana instead
+For **edits, composites, style transfer, text rendering, or reference-guided generation**, prefer \`gemini_nanobanana_generate_image\` and its dedicated \`gemini_nanobanana_prompt_guide\`. Imagen is stronger for clean one-shot photorealism and multi-variation batches; nano-banana is stronger when you need to work _with_ existing imagery.
+
 ## Official References
 - Imagen API: https://ai.google.dev/gemini-api/docs/imagen
 - Model cards: https://ai.google.dev/gemini-api/docs/models/imagen
 `;
 
-const VIDEO_GUIDE = `# Veo Video Generation — Prompt Guide
+const NANOBANANA_GUIDE = `# Gemini Nano-Banana (gemini-2.5-flash-image) — Prompt Guide
+
+## Overview
+Nano-banana is a multimodal image model accessed via \`generateContent\` with IMAGE response modality. Unlike Imagen (text-only input), nano-banana accepts **text + reference images** as multimodal parts — enabling edits, composites, style transfer, and reference-guided generation from a single tool.
+
+**Strengths:**
+- Edits (add/remove/replace elements in an existing image)
+- Composites across multiple references (subject from A, scene from B)
+- Style transfer from a reference
+- **Text rendering** inside images (usually more reliable than Imagen)
+- Character consistency across iterations
+
+**Weaknesses:**
+- Lower max fidelity than Imagen 4 for pristine photorealism
+- No native batch variations (one image per call; loop for multiples)
+- No explicit safety-level knob (server-side defaults only)
+
+## When to use nano-banana vs Imagen
+| Task | Pick |
+|---|---|
+| Generate a brand-new image from text only, photoreal quality matters | Imagen |
+| Edit an existing image (remove/add/change something) | Nano-banana |
+| Composite multiple images | Nano-banana |
+| Apply the style of reference A to image B | Nano-banana |
+| Render specific text inside the image | Nano-banana |
+| 4 variations of the same prompt | Imagen (\`number_of_images\`) |
+| Maintain a character across edits | Nano-banana |
+
+## Prompt Templates
+
+**Generation (no references):**
+\`[Subject] [action] in [setting], [style], [lighting], [composition]\`
+
+**Edit (1 reference):**
+\`In this image, [change description]. Keep [things to preserve].\`
+
+**Composite (2+ references):**
+\`Place the [subject from image 1] into the [scene from image 2]. Match the [lighting/style/perspective] of image 2.\`
+
+**Style transfer:**
+\`Redraw the subject of image 1 in the style of image 2.\`
+
+## Good Examples
+
+**Edit:**
+> "In this image, remove the coffee cup from the table and replace it with a small vase of wildflowers. Keep the lighting and table texture identical." (+ reference image of a table)
+
+**Composite:**
+> "Place the sourdough loaf from image 1 onto the marble countertop in image 2. Match the warm morning lighting of image 2 and cast a soft shadow from the loaf." (+ 2 reference images)
+
+**Style transfer:**
+> "Redraw this photograph in the style of a loose watercolor illustration with visible brush strokes and bleeding edges, preserving the composition." (+ 1 reference image)
+
+**Text-in-image:**
+> "A minimalist product poster that reads 'Sourdough Sunday' in elegant serif lettering, centered, cream background, subtle paper texture, no other elements."
+
+## Bad Examples
+
+> "Make it better" — Too vague. Specify what to change and what to preserve.
+
+> "Remove the background" (no reference image passed) — Nano-banana needs the source image as a reference to edit. Pass it in \`reference_images\`.
+
+> "Generate 4 variations of this prompt" — One image per call. Loop on the client side instead.
+
+## Reference-Image Tips
+- The text prompt is the first \`part\`; reference images follow as \`inlineData\` parts.
+- 1–3 references is the sweet spot. More than 3 and the model starts blending them unpredictably.
+- When referencing multiple images, name them in the prompt ("image 1", "image 2") so the model disambiguates.
+- Higher-resolution references preserve more detail.
+
+## Model-Specific Notes
+- **gemini-2.5-flash-image** — Production model. Fast (seconds, not minutes). Override via \`ARTIFICER_NANOBANANA_MODEL\` env var.
+- **aspect_ratio**: Optional hint. Same set as Imagen (1:1, 3:4, 4:3, 9:16, 16:9).
+- **include_text**: If true, the model can emit a text commentary alongside the image — useful when you want the model to _explain_ what it changed.
+- **No negative prompts / seed / enhance_prompt / safety knobs** — these are Imagen-only. Use explicit preservation language in the prompt instead ("keep the lighting", "do not change the pose").
+
+## Official References
+- Gemini image-generation docs: https://ai.google.dev/gemini-api/docs/image-generation
+- Model card (gemini-2.5-flash-image): https://ai.google.dev/gemini-api/docs/models
+`;
+
+const VIDEO_GUIDE =`# Veo Video Generation — Prompt Guide
 
 ## Overview
 Google Veo generates short videos (5-8 seconds) from text prompts or text + image. Best for establishing shots, product demos, ambient scenes, and social content. Currently limited in precise character animation and dialogue sync.
@@ -116,6 +200,16 @@ export function registerGuideTools(server: McpServer): void {
     z.object({}).shape,
     async () => ({
       content: [{ type: 'text', text: IMAGE_GUIDE }],
+    }),
+  );
+
+  registerTool<Record<string, never>>(
+    server,
+    'gemini_nanobanana_prompt_guide',
+    'Get structured prompt guidance for Gemini nano-banana (gemini-2.5-flash-image). Covers when to use it over Imagen, templates for generation/edit/composite/style transfer, reference-image tips, and model-specific notes. No API call — pure reference.',
+    z.object({}).shape,
+    async () => ({
+      content: [{ type: 'text', text: NANOBANANA_GUIDE }],
     }),
   );
 
