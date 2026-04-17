@@ -4,10 +4,7 @@ import { extname } from 'node:path';
 import { registerTool } from '../utils/register.js';
 import { getGenAIClient } from './client.js';
 import { getProvider } from '../storage/providers/registry.js';
-import {
-  type NanobananaGenerateImageParams,
-  nanobananaGenerateImageSchema,
-} from './types.js';
+import { type NanobananaGenerateImageParams, nanobananaGenerateImageSchema } from './types.js';
 
 /**
  * Infer an image MIME type from a file path extension.

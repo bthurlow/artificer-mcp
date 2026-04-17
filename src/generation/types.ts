@@ -154,7 +154,9 @@ export const nanobananaGenerateImageSchema = z.object({
     .describe(
       'Gemini image model ID (nano-banana family). Default: gemini-2.5-flash-image (override via ARTIFICER_NANOBANANA_MODEL env var).',
     ),
-  prompt: z.string().describe('Text prompt. If reference_images are provided, describe the edit or composition.'),
+  prompt: z
+    .string()
+    .describe('Text prompt. If reference_images are provided, describe the edit or composition.'),
   output: z.string().describe('Output path for the generated image (e.g., "./output.png").'),
   reference_images: z
     .array(z.string())
@@ -169,7 +171,9 @@ export const nanobananaGenerateImageSchema = z.object({
   include_text: z
     .boolean()
     .default(false)
-    .describe('If true, request text modality alongside image — any narration returned is included in the response.'),
+    .describe(
+      'If true, request text modality alongside image — any narration returned is included in the response.',
+    ),
 });
 
 // ── gemini_generate_video ──────────────────────────────────────────────────

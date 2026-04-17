@@ -126,7 +126,7 @@ Nano-banana is a multimodal image model accessed via \`generateContent\` with IM
 - Model card (gemini-2.5-flash-image): https://ai.google.dev/gemini-api/docs/models
 `;
 
-const VIDEO_GUIDE =`# Veo Video Generation — Prompt Guide
+const VIDEO_GUIDE = `# Veo Video Generation — Prompt Guide
 
 ## Overview
 Google Veo generates short videos (5-8 seconds) from text prompts or text + image. Best for establishing shots, product demos, ambient scenes, and social content. Currently limited in precise character animation and dialogue sync.
