@@ -65,7 +65,7 @@ export function registerVideoGenTools(server: McpServer): void {
           negativePrompt: negative_prompt,
           personGeneration: person_generation,
           generateAudio: generate_audio,
-          enhancePrompt: enhance_prompt,
+          ...(enhance_prompt ? { enhancePrompt: true } : {}),
           seed,
           numberOfVideos: 1,
         },

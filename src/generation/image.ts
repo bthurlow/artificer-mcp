@@ -93,7 +93,7 @@ export function registerImageGenTools(server: McpServer): void {
           seed,
           safetyFilterLevel: safety_filter_level as SafetyFilterLevel,
           personGeneration: person_generation as PersonGeneration,
-          enhancePrompt: enhance_prompt,
+          ...(enhance_prompt ? { enhancePrompt: true } : {}),
           outputMimeType: `image/${(extname(output).slice(1) || 'png').toLowerCase()}`,
         },
       });
