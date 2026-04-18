@@ -873,4 +873,115 @@ describe('Video Tools', () => {
       expect(args).not.toContain('-vf');
     });
   });
+
+  // ── video_from_image ──────────────────────────────────────────────────
+
+  describe('video_from_image', () => {
+    it('loops a still image into a silent clip with yuv420p', async () => {
+      await client.callTool({
+        name: 'video_from_image',
+        arguments: {
+          input: '/tmp/title.png',
+          output: '/tmp/title.mp4',
+          duration_seconds: 3,
+          frame_rate: 30,
+        },
+      });
+
+      const args = ffmpegState.calls[0].args;
+      expect(args).toContain('-loop');
+      expect(args).toContain('1');
+      expect(args).toContain('/tmp/title.png');
+      expect(args).toContain('-t');
+      expect(args).toContain('3');
+      expect(args).toContain('-r');
+      expect(args).toContain('30');
+      expect(args).toContain('-pix_fmt');
+      expect(args).toContain('yuv420p');
+      expect(args).toContain('-an');
+    });
+
+    it('resizes to width and height with scale filter', async () => {
+      await client.callTool({
+        name: 'video_from_image',
+        arguments: {
+          input: '/tmp/card.png',
+          output: '/tmp/card.mp4',
+          duration_seconds: 2,
+          frame_rate: 30,
+          width: 1080,
+          height: 1920,
+        },
+      });
+
+      const vf = ffmpegState.calls[0].args[ffmpegState.calls[0].args.indexOf('-vf') + 1];
+      expect(vf).toContain('scale=1080:1920');
+      expect(vf).toContain('format=yuv420p');
+    });
+
+    it('muxes in audio when provided and uses -shortest', async () => {
+      await client.callTool({
+        name: 'video_from_image',
+        arguments: {
+          input: '/tmp/card.png',
+          output: '/tmp/card.mp4',
+          duration_seconds: 3,
+          frame_rate: 30,
+          audio: '/tmp/intro-sting.mp3',
+        },
+      });
+
+      const args = ffmpegState.calls[0].args;
+      expect(args).toContain('/tmp/intro-sting.mp3');
+      expect(args).toContain('-c:a');
+      expect(args).toContain('aac');
+      expect(args).toContain('-shortest');
+      expect(args).not.toContain('-an');
+    });
+  });
+
+  // ── video_set_audio ──────────────────────────────────────────────────
+
+  describe('video_set_audio', () => {
+    it('muxes a new audio track with video-stream copy', async () => {
+      await client.callTool({
+        name: 'video_set_audio',
+        arguments: {
+          input: '/tmp/video.mp4',
+          output: '/tmp/final.mp4',
+          audio: '/tmp/mixed.mp3',
+          audio_codec: 'aac',
+          shortest: false,
+        },
+      });
+
+      const args = ffmpegState.calls[0].args;
+      expect(args).toContain('/tmp/video.mp4');
+      expect(args).toContain('/tmp/mixed.mp3');
+      expect(args).toContain('0:v:0');
+      expect(args).toContain('1:a:0');
+      const cvIdx = args.indexOf('-c:v');
+      expect(cvIdx).toBeGreaterThan(-1);
+      expect(args[cvIdx + 1]).toBe('copy');
+      const caIdx = args.indexOf('-c:a');
+      expect(caIdx).toBeGreaterThan(-1);
+      expect(args[caIdx + 1]).toBe('aac');
+      expect(args).not.toContain('-shortest');
+    });
+
+    it('applies -shortest when requested', async () => {
+      await client.callTool({
+        name: 'video_set_audio',
+        arguments: {
+          input: '/tmp/v.mp4',
+          output: '/tmp/o.mp4',
+          audio: '/tmp/a.mp3',
+          audio_codec: 'aac',
+          shortest: true,
+        },
+      });
+
+      expect(ffmpegState.calls[0].args).toContain('-shortest');
+    });
+  });
 });

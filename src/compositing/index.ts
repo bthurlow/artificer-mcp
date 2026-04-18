@@ -1,5 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { magick, validateInputFile, ensureOutputDir, resolveOutputPath } from '../utils/exec.js';
+import { magick, ensureOutputDir } from '../utils/exec.js';
+import { resolveInput, resolveIO } from '../utils/resource.js';
 import { registerTool } from '../utils/register.js';
 import {
   type CompositeParams,
@@ -31,46 +32,56 @@ export function registerCompositingTools(server: McpServer): void {
     compositeSchema.shape,
     async (params: CompositeParams) => {
       const { base, overlay, output, gravity, x, y, blend, opacity, format } = params;
-      await validateInputFile(base);
-      await validateInputFile(overlay);
-      const outPath = resolveOutputPath(base, { outputPath: output, suffix: '_composite', format });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input: base, output, suffix: '_composite', format });
+      const overlayR = await resolveInput(overlay);
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      const args = [base];
-      if (opacity < 100) {
+        const args = [io.inputLocal];
+        if (opacity < 100) {
+          args.push(
+            '(',
+            overlayR.localPath,
+            '-alpha',
+            'set',
+            '-channel',
+            'A',
+            '-evaluate',
+            'multiply',
+            String(opacity / 100),
+            '+channel',
+            ')',
+          );
+        } else {
+          args.push(overlayR.localPath);
+        }
         args.push(
-          '(',
-          overlay,
-          '-alpha',
-          'set',
-          '-channel',
-          'A',
-          '-evaluate',
-          'multiply',
-          String(opacity / 100),
-          '+channel',
-          ')',
+          '-gravity',
+          gravity,
+          '-geometry',
+          `+${x}+${y}`,
+          '-compose',
+          blend,
+          '-composite',
+          io.outputLocal,
         );
-      } else {
-        args.push(overlay);
-      }
-      args.push(
-        '-gravity',
-        gravity,
-        '-geometry',
-        `+${x}+${y}`,
-        '-compose',
-        blend,
-        '-composite',
-        outPath,
-      );
 
-      await magick(args);
-      return {
-        content: [
-          { type: 'text' as const, text: `Composited (${blend}, ${opacity}% opacity): ${outPath}` },
-        ],
-      };
+        await magick(args);
+        await io.finalize();
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Composited (${blend}, ${opacity}% opacity): ${io.outputUri}`,
+            },
+          ],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
+      } finally {
+        await overlayR.cleanup?.();
+      }
     },
   );
 
@@ -81,67 +92,73 @@ export function registerCompositingTools(server: McpServer): void {
     watermarkSchema.shape,
     async (params: WatermarkParams) => {
       const { input, watermark, output, mode, gravity, opacity, format } = params;
-      await validateInputFile(input);
-      await validateInputFile(watermark);
-      const outPath = resolveOutputPath(input, {
-        outputPath: output,
-        suffix: '_watermarked',
-        format,
-      });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_watermarked', format });
+      const wmR = await resolveInput(watermark);
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      if (mode === 'tile') {
-        await magick([
-          input,
-          '(',
-          watermark,
-          '-alpha',
-          'set',
-          '-channel',
-          'A',
-          '-evaluate',
-          'multiply',
-          String(opacity / 100),
-          '+channel',
-          '-write',
-          'mpr:wm',
-          '+delete',
-          ')',
-          '-fill',
-          'mpr:wm',
-          '-draw',
-          'color 0,0 reset',
-          '-compose',
-          'Over',
-          '-composite',
-          outPath,
-        ]);
-      } else {
-        await magick([
-          input,
-          '(',
-          watermark,
-          '-alpha',
-          'set',
-          '-channel',
-          'A',
-          '-evaluate',
-          'multiply',
-          String(opacity / 100),
-          '+channel',
-          ')',
-          '-gravity',
-          gravity,
-          '-composite',
-          outPath,
-        ]);
+        if (mode === 'tile') {
+          await magick([
+            io.inputLocal,
+            '(',
+            wmR.localPath,
+            '-alpha',
+            'set',
+            '-channel',
+            'A',
+            '-evaluate',
+            'multiply',
+            String(opacity / 100),
+            '+channel',
+            '-write',
+            'mpr:wm',
+            '+delete',
+            ')',
+            '-fill',
+            'mpr:wm',
+            '-draw',
+            'color 0,0 reset',
+            '-compose',
+            'Over',
+            '-composite',
+            io.outputLocal,
+          ]);
+        } else {
+          await magick([
+            io.inputLocal,
+            '(',
+            wmR.localPath,
+            '-alpha',
+            'set',
+            '-channel',
+            'A',
+            '-evaluate',
+            'multiply',
+            String(opacity / 100),
+            '+channel',
+            ')',
+            '-gravity',
+            gravity,
+            '-composite',
+            io.outputLocal,
+          ]);
+        }
+
+        await io.finalize();
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Watermark added (${mode}, ${opacity}%): ${io.outputUri}`,
+            },
+          ],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
+      } finally {
+        await wmR.cleanup?.();
       }
-
-      return {
-        content: [
-          { type: 'text' as const, text: `Watermark added (${mode}, ${opacity}%): ${outPath}` },
-        ],
-      };
     },
   );
 
@@ -152,53 +169,61 @@ export function registerCompositingTools(server: McpServer): void {
     gradientOverlaySchema.shape,
     async (params: GradientOverlayParams) => {
       const { input, output, type, direction, color_start, color_end, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, { outputPath: output, suffix: '_gradient', format });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_gradient', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      const info = await magick(['identify', '-format', '%wx%h', input]);
-      const dimensions = info.trim();
+        const info = await magick(['identify', '-format', '%wx%h', io.inputLocal]);
+        const dimensions = info.trim();
 
-      const gradientSpec =
-        type === 'radial'
-          ? `radial-gradient:${color_start}-${color_end}`
-          : `gradient:${color_start}-${color_end}`;
+        const gradientSpec =
+          type === 'radial'
+            ? `radial-gradient:${color_start}-${color_end}`
+            : `gradient:${color_start}-${color_end}`;
 
-      let rotateArgs: string[] = [];
-      if (type === 'linear') {
-        switch (direction) {
-          case 'top-bottom':
-            break;
-          case 'bottom-top':
-            rotateArgs = ['-rotate', '180'];
-            break;
-          case 'left-right':
-            rotateArgs = ['-rotate', '90'];
-            break;
-          case 'right-left':
-            rotateArgs = ['-rotate', '270'];
-            break;
+        let rotateArgs: string[] = [];
+        if (type === 'linear') {
+          switch (direction) {
+            case 'top-bottom':
+              break;
+            case 'bottom-top':
+              rotateArgs = ['-rotate', '180'];
+              break;
+            case 'left-right':
+              rotateArgs = ['-rotate', '90'];
+              break;
+            case 'right-left':
+              rotateArgs = ['-rotate', '270'];
+              break;
+          }
         }
-      }
 
-      await magick([
-        input,
-        '(',
-        '-size',
-        dimensions,
-        gradientSpec,
-        ...rotateArgs,
-        ')',
-        '-compose',
-        'Over',
-        '-composite',
-        outPath,
-      ]);
-      return {
-        content: [
-          { type: 'text' as const, text: `Gradient overlay (${type} ${direction}): ${outPath}` },
-        ],
-      };
+        await magick([
+          io.inputLocal,
+          '(',
+          '-size',
+          dimensions,
+          gradientSpec,
+          ...rotateArgs,
+          ')',
+          '-compose',
+          'Over',
+          '-composite',
+          io.outputLocal,
+        ]);
+        await io.finalize();
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Gradient overlay (${type} ${direction}): ${io.outputUri}`,
+            },
+          ],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
+      }
     },
   );
 
@@ -209,26 +234,30 @@ export function registerCompositingTools(server: McpServer): void {
     backgroundRemoveSchema.shape,
     async (params: BackgroundRemoveParams) => {
       const { input, output, target_color, fuzz, replace_color, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, {
-        outputPath: output,
-        suffix: '_nobg',
-        format: format ?? 'png',
-      });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_nobg', format: format ?? 'png' });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      const args = [input, '-fuzz', `${fuzz}%`, '-transparent', target_color];
-      if (replace_color !== 'none') {
-        args.push('-background', replace_color, '-flatten');
+        const args = [io.inputLocal, '-fuzz', `${fuzz}%`, '-transparent', target_color];
+        if (replace_color !== 'none') {
+          args.push('-background', replace_color, '-flatten');
+        }
+        args.push(io.outputLocal);
+
+        await magick(args);
+        await io.finalize();
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Background removed (fuzz ${fuzz}%): ${io.outputUri}`,
+            },
+          ],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
       }
-      args.push(outPath);
-
-      await magick(args);
-      return {
-        content: [
-          { type: 'text' as const, text: `Background removed (fuzz ${fuzz}%): ${outPath}` },
-        ],
-      };
     },
   );
 
@@ -239,28 +268,35 @@ export function registerCompositingTools(server: McpServer): void {
     dropShadowSchema.shape,
     async (params: DropShadowParams) => {
       const { input, output, color, offset_x, offset_y, blur, background, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, { outputPath: output, suffix: '_shadow', format });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_shadow', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      await magick([
-        input,
-        '(',
-        '+clone',
-        '-background',
-        color,
-        '-shadow',
-        `100x${blur}+${offset_x}+${offset_y}`,
-        ')',
-        '+swap',
-        '-background',
-        background,
-        '-layers',
-        'merge',
-        '+repage',
-        outPath,
-      ]);
-      return { content: [{ type: 'text' as const, text: `Drop shadow added: ${outPath}` }] };
+        await magick([
+          io.inputLocal,
+          '(',
+          '+clone',
+          '-background',
+          color,
+          '-shadow',
+          `100x${blur}+${offset_x}+${offset_y}`,
+          ')',
+          '+swap',
+          '-background',
+          background,
+          '-layers',
+          'merge',
+          '+repage',
+          io.outputLocal,
+        ]);
+        await io.finalize();
+        return {
+          content: [{ type: 'text' as const, text: `Drop shadow added: ${io.outputUri}` }],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
+      }
     },
   );
 
@@ -271,47 +307,55 @@ export function registerCompositingTools(server: McpServer): void {
     borderSchema.shape,
     async (params: BorderParams) => {
       const { input, output, width, color, style, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, { outputPath: output, suffix: '_bordered', format });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_bordered', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      let args: string[];
-      switch (style) {
-        case 'raised':
-          args = [
-            input,
-            '-bordercolor',
-            color,
-            '-border',
-            String(width),
-            '-raise',
-            `${width}x${width}`,
-            outPath,
-          ];
-          break;
-        case 'sunken':
-          args = [
-            input,
-            '-bordercolor',
-            color,
-            '-border',
-            String(width),
-            '+raise',
-            `${width}x${width}`,
-            outPath,
-          ];
-          break;
-        default:
-          args = [input, '-bordercolor', color, '-border', String(width), outPath];
-          break;
+        let args: string[];
+        switch (style) {
+          case 'raised':
+            args = [
+              io.inputLocal,
+              '-bordercolor',
+              color,
+              '-border',
+              String(width),
+              '-raise',
+              `${width}x${width}`,
+              io.outputLocal,
+            ];
+            break;
+          case 'sunken':
+            args = [
+              io.inputLocal,
+              '-bordercolor',
+              color,
+              '-border',
+              String(width),
+              '+raise',
+              `${width}x${width}`,
+              io.outputLocal,
+            ];
+            break;
+          default:
+            args = [io.inputLocal, '-bordercolor', color, '-border', String(width), io.outputLocal];
+            break;
+        }
+
+        await magick(args);
+        await io.finalize();
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Border added (${style}, ${width}px): ${io.outputUri}`,
+            },
+          ],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
       }
-
-      await magick(args);
-      return {
-        content: [
-          { type: 'text' as const, text: `Border added (${style}, ${width}px): ${outPath}` },
-        ],
-      };
     },
   );
 
@@ -322,38 +366,41 @@ export function registerCompositingTools(server: McpServer): void {
     roundedCornersSchema.shape,
     async (params: RoundedCornersParams) => {
       const { input, output, radius, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, {
-        outputPath: output,
-        suffix: '_rounded',
-        format: format ?? 'png',
-      });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_rounded', format: format ?? 'png' });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      const info = await magick(['identify', '-format', '%wx%h', input]);
-      const dimensions = info.trim();
+        const info = await magick(['identify', '-format', '%wx%h', io.inputLocal]);
+        const dimensions = info.trim();
 
-      await magick([
-        '(',
-        input,
-        '-alpha',
-        'set',
-        ')',
-        '(',
-        '-size',
-        dimensions,
-        'xc:none',
-        '-draw',
-        `roundrectangle 0,0,%[fx:w-1],%[fx:h-1],${radius},${radius}`,
-        ')',
-        '-compose',
-        'DstIn',
-        '-composite',
-        outPath,
-      ]);
-      return {
-        content: [{ type: 'text' as const, text: `Rounded corners (${radius}px): ${outPath}` }],
-      };
+        await magick([
+          '(',
+          io.inputLocal,
+          '-alpha',
+          'set',
+          ')',
+          '(',
+          '-size',
+          dimensions,
+          'xc:none',
+          '-draw',
+          `roundrectangle 0,0,%[fx:w-1],%[fx:h-1],${radius},${radius}`,
+          ')',
+          '-compose',
+          'DstIn',
+          '-composite',
+          io.outputLocal,
+        ]);
+        await io.finalize();
+        return {
+          content: [
+            { type: 'text' as const, text: `Rounded corners (${radius}px): ${io.outputUri}` },
+          ],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
+      }
     },
   );
 
@@ -364,71 +411,86 @@ export function registerCompositingTools(server: McpServer): void {
     maskApplySchema.shape,
     async (params: MaskApplyParams) => {
       const { input, output, mask, shape, radius, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, {
-        outputPath: output,
-        suffix: '_masked',
-        format: format ?? 'png',
-      });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_masked', format: format ?? 'png' });
+      const maskR = mask ? await resolveInput(mask) : null;
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      const info = await magick(['identify', '-format', '%wx%h', input]);
-      const [w, h] = info.trim().split('x').map(Number);
+        const info = await magick(['identify', '-format', '%wx%h', io.inputLocal]);
+        const [w, h] = info.trim().split('x').map(Number);
 
-      if (mask) {
-        await validateInputFile(mask);
-        await magick([input, '-alpha', 'set', mask, '-compose', 'DstIn', '-composite', outPath]);
-      } else if (shape === 'circle') {
-        const cx = Math.floor(w / 2);
-        const cy = Math.floor(h / 2);
-        const r = Math.min(cx, cy);
-        await magick([
-          '(',
-          input,
-          '-alpha',
-          'set',
-          ')',
-          '(',
-          '-size',
-          `${w}x${h}`,
-          'xc:none',
-          '-fill',
-          'white',
-          '-draw',
-          `circle ${cx},${cy} ${cx},${cy - r}`,
-          ')',
-          '-compose',
-          'DstIn',
-          '-composite',
-          outPath,
-        ]);
-      } else {
-        const r = radius ?? 20;
-        await magick([
-          '(',
-          input,
-          '-alpha',
-          'set',
-          ')',
-          '(',
-          '-size',
-          `${w}x${h}`,
-          'xc:none',
-          '-draw',
-          `roundrectangle 0,0,${w - 1},${h - 1},${r},${r}`,
-          ')',
-          '-compose',
-          'DstIn',
-          '-composite',
-          outPath,
-        ]);
+        if (maskR) {
+          await magick([
+            io.inputLocal,
+            '-alpha',
+            'set',
+            maskR.localPath,
+            '-compose',
+            'DstIn',
+            '-composite',
+            io.outputLocal,
+          ]);
+        } else if (shape === 'circle') {
+          const cx = Math.floor(w / 2);
+          const cy = Math.floor(h / 2);
+          const r = Math.min(cx, cy);
+          await magick([
+            '(',
+            io.inputLocal,
+            '-alpha',
+            'set',
+            ')',
+            '(',
+            '-size',
+            `${w}x${h}`,
+            'xc:none',
+            '-fill',
+            'white',
+            '-draw',
+            `circle ${cx},${cy} ${cx},${cy - r}`,
+            ')',
+            '-compose',
+            'DstIn',
+            '-composite',
+            io.outputLocal,
+          ]);
+        } else {
+          const r = radius ?? 20;
+          await magick([
+            '(',
+            io.inputLocal,
+            '-alpha',
+            'set',
+            ')',
+            '(',
+            '-size',
+            `${w}x${h}`,
+            'xc:none',
+            '-draw',
+            `roundrectangle 0,0,${w - 1},${h - 1},${r},${r}`,
+            ')',
+            '-compose',
+            'DstIn',
+            '-composite',
+            io.outputLocal,
+          ]);
+        }
+
+        await io.finalize();
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Mask applied (${mask ? 'custom' : shape}): ${io.outputUri}`,
+            },
+          ],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
+      } finally {
+        await maskR?.cleanup?.();
       }
-
-      return {
-        content: [
-          { type: 'text' as const, text: `Mask applied (${mask ? 'custom' : shape}): ${outPath}` },
-        ],
-      };
     },
   );
 }

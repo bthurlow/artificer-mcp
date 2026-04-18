@@ -468,6 +468,70 @@ export const videoSetCodecSchema = z.object({
     ),
 });
 
+/** Parameters for the video_from_image tool */
+export interface VideoFromImageParams {
+  input: string;
+  output: string;
+  duration_seconds: number;
+  frame_rate: number;
+  width?: number;
+  height?: number;
+  audio?: string;
+}
+
+export const videoFromImageSchema = z.object({
+  input: z.string().describe('Path to the source still image (PNG/JPG).'),
+  output: z.string().describe('Path for the output video clip.'),
+  duration_seconds: z
+    .number()
+    .positive()
+    .describe('Clip duration in seconds — e.g., 2 for a title card, 3 for an end card.'),
+  frame_rate: z.number().positive().default(30).describe('Output frame rate (fps).'),
+  width: z
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe('Resize output to this width. If omitted, uses source width.'),
+  height: z
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe('Resize output to this height. If omitted, uses source height.'),
+  audio: z
+    .string()
+    .optional()
+    .describe(
+      'Optional audio track to pair with the image. If omitted, output has no audio (silent clip).',
+    ),
+});
+
+/** Parameters for the video_set_audio tool */
+export interface VideoSetAudioParams {
+  input: string;
+  output: string;
+  audio: string;
+  audio_codec: string;
+  shortest: boolean;
+}
+
+export const videoSetAudioSchema = z.object({
+  input: z.string().describe('Path to the source video.'),
+  output: z.string().describe('Path for the output video.'),
+  audio: z.string().describe('Path to the audio track to mux in. Replaces any existing audio.'),
+  audio_codec: z
+    .string()
+    .default('aac')
+    .describe('Audio codec for the output — "aac" (mp4/mov), "libopus" (webm), or "copy".'),
+  shortest: z
+    .boolean()
+    .default(false)
+    .describe(
+      'If true, output ends when the shorter of video/audio ends. Otherwise, output matches the video length (audio may be padded or truncated).',
+    ),
+});
+
 /** Parameters for the video_set_frame_rate tool */
 export interface VideoSetFrameRateParams {
   input: string;

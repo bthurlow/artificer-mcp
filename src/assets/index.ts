@@ -8,6 +8,7 @@ import {
   ANDROID_ICON_SIZES,
   ASPECT_RATIOS,
 } from '../utils/exec.js';
+import { resolveInput, resolveOutput, joinUri, uriStem } from '../utils/resource.js';
 import { registerTool } from '../utils/register.js';
 import {
   type ResponsiveSetParams,
@@ -46,43 +47,57 @@ export function registerAssetTools(server: McpServer): void {
     responsiveSetSchema.shape,
     async (params: ResponsiveSetParams) => {
       const { input, output_dir, widths, format, quality, generate_2x } = params;
-      await validateInputFile(input);
-      await ensureOutputDir(join(output_dir, 'placeholder'));
-
-      const parsed = parse(input);
+      const inR = await resolveInput(input);
+      const stem = uriStem(input);
       const generated: string[] = [];
-
-      for (const w of widths) {
-        const outPath = join(output_dir, `${parsed.name}_${w}w.${format}`);
-        await magick([input, '-resize', `${w}x`, '-quality', String(quality), '-strip', outPath]);
-        generated.push(`${w}w: ${outPath}`);
-
-        if (generate_2x) {
-          const outPath2x = join(output_dir, `${parsed.name}_${w}w@2x.${format}`);
+      try {
+        for (const w of widths) {
+          const outUri = joinUri(output_dir, `${stem}_${w}w.${format}`);
+          const out = await resolveOutput(outUri);
+          await ensureOutputDir(out.localPath);
           await magick([
-            input,
+            inR.localPath,
             '-resize',
-            `${w * 2}x`,
+            `${w}x`,
             '-quality',
             String(quality),
             '-strip',
-            outPath2x,
+            out.localPath,
           ]);
-          generated.push(`${w}w@2x: ${outPath2x}`);
+          await out.commit();
+          generated.push(`${w}w: ${outUri}`);
+
+          if (generate_2x) {
+            const outUri2x = joinUri(output_dir, `${stem}_${w}w@2x.${format}`);
+            const out2x = await resolveOutput(outUri2x);
+            await ensureOutputDir(out2x.localPath);
+            await magick([
+              inR.localPath,
+              '-resize',
+              `${w * 2}x`,
+              '-quality',
+              String(quality),
+              '-strip',
+              out2x.localPath,
+            ]);
+            await out2x.commit();
+            generated.push(`${w}w@2x: ${outUri2x}`);
+          }
         }
+
+        const srcset = widths.map((w) => `${stem}_${w}w.${format} ${w}w`).join(', ');
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Generated ${generated.length} responsive variants:\n${generated.join('\n')}\n\nsrcset="${srcset}"`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
       }
-
-      // Generate srcset attribute
-      const srcset = widths.map((w) => `${parsed.name}_${w}w.${format} ${w}w`).join(', ');
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Generated ${generated.length} responsive variants:\n${generated.join('\n')}\n\nsrcset="${srcset}"`,
-          },
-        ],
-      };
     },
   );
 
@@ -94,38 +109,43 @@ export function registerAssetTools(server: McpServer): void {
     faviconSetSchema.shape,
     async (params: FaviconSetParams) => {
       const { input, output_dir, sizes, generate_ico } = params;
-      await validateInputFile(input);
-      await ensureOutputDir(join(output_dir, 'placeholder'));
-
+      const inR = await resolveInput(input);
       const generated: string[] = [];
+      const icoLocalPaths: string[] = [];
+      try {
+        for (const size of sizes) {
+          const name = size === 180 ? 'apple-touch-icon.png' : `favicon-${size}x${size}.png`;
+          const outUri = joinUri(output_dir, name);
+          const out = await resolveOutput(outUri);
+          await ensureOutputDir(out.localPath);
+          await magick([inR.localPath, '-resize', `${size}x${size}!`, '-strip', out.localPath]);
+          await out.commit();
+          generated.push(`${size}x${size}: ${outUri}`);
+          if (size <= 48) icoLocalPaths.push(out.localPath);
+        }
 
-      for (const size of sizes) {
-        const name = size === 180 ? 'apple-touch-icon.png' : `favicon-${size}x${size}.png`;
-        const outPath = join(output_dir, name);
-        await magick([input, '-resize', `${size}x${size}!`, '-strip', outPath]);
-        generated.push(`${size}x${size}: ${outPath}`);
+        if (generate_ico) {
+          const icoUri = joinUri(output_dir, 'favicon.ico');
+          const icoOut = await resolveOutput(icoUri);
+          await ensureOutputDir(icoOut.localPath);
+          // For remote URIs, we'd have committed PNGs already; for local paths
+          // they still exist. Either way, pass local paths to magick.
+          await magick([...icoLocalPaths, icoOut.localPath]);
+          await icoOut.commit();
+          generated.push(`ICO bundle: ${icoUri}`);
+        }
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Generated ${generated.length} favicon files:\n${generated.join('\n')}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
       }
-
-      if (generate_ico) {
-        const icoPath = join(output_dir, 'favicon.ico');
-        const icoSizes = sizes.filter((s) => s <= 48);
-        const icoInputs = icoSizes.map((s) =>
-          s === 180
-            ? join(output_dir, 'apple-touch-icon.png')
-            : join(output_dir, `favicon-${s}x${s}.png`),
-        );
-        await magick([...icoInputs, icoPath]);
-        generated.push(`ICO bundle: ${icoPath}`);
-      }
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Generated ${generated.length} favicon files:\n${generated.join('\n')}`,
-          },
-        ],
-      };
     },
   );
 
@@ -137,74 +157,88 @@ export function registerAssetTools(server: McpServer): void {
     appIconSetSchema.shape,
     async (params: AppIconSetParams) => {
       const { input, output_dir, platforms } = params;
-      await validateInputFile(input);
-
+      const inR = await resolveInput(input);
       const generated: string[] = [];
+      try {
+        if (platforms.includes('ios')) {
+          const iosDirUri = joinUri(output_dir, 'ios');
 
-      if (platforms.includes('ios')) {
-        const iosDir = join(output_dir, 'ios');
-        await ensureOutputDir(join(iosDir, 'placeholder'));
-
-        for (const icon of IOS_ICON_SIZES) {
-          for (const scale of icon.scales) {
-            const px = Math.round(icon.size * scale);
-            const name = `icon_${icon.size}pt@${scale}x.png`;
-            const outPath = join(iosDir, name);
-            await magick([input, '-resize', `${px}x${px}!`, '-strip', outPath]);
-            generated.push(`iOS ${icon.size}pt@${scale}x (${px}px): ${outPath}`);
+          for (const icon of IOS_ICON_SIZES) {
+            for (const scale of icon.scales) {
+              const px = Math.round(icon.size * scale);
+              const name = `icon_${icon.size}pt@${scale}x.png`;
+              const outUri = joinUri(iosDirUri, name);
+              const out = await resolveOutput(outUri);
+              await ensureOutputDir(out.localPath);
+              await magick([inR.localPath, '-resize', `${px}x${px}!`, '-strip', out.localPath]);
+              await out.commit();
+              generated.push(`iOS ${icon.size}pt@${scale}x (${px}px): ${outUri}`);
+            }
           }
         }
-      }
 
-      if (platforms.includes('android')) {
-        const androidDir = join(output_dir, 'android');
+        if (platforms.includes('android')) {
+          const androidDirUri = joinUri(output_dir, 'android');
 
-        for (const [density, px] of Object.entries(ANDROID_ICON_SIZES)) {
-          const densityDir = join(androidDir, `mipmap-${density}`);
-          await ensureOutputDir(join(densityDir, 'placeholder'));
+          for (const [density, px] of Object.entries(ANDROID_ICON_SIZES)) {
+            const densityDirUri = joinUri(androidDirUri, `mipmap-${density}`);
 
-          const outPath = join(densityDir, 'ic_launcher.png');
-          await magick([input, '-resize', `${px}x${px}!`, '-strip', outPath]);
-          generated.push(`Android ${density} (${px}px): ${outPath}`);
+            const launcherUri = joinUri(densityDirUri, 'ic_launcher.png');
+            const launcherOut = await resolveOutput(launcherUri);
+            await ensureOutputDir(launcherOut.localPath);
+            await magick([
+              inR.localPath,
+              '-resize',
+              `${px}x${px}!`,
+              '-strip',
+              launcherOut.localPath,
+            ]);
+            await launcherOut.commit();
+            generated.push(`Android ${density} (${px}px): ${launcherUri}`);
 
-          // Round icon variant
-          const roundPath = join(densityDir, 'ic_launcher_round.png');
-          const cx = Math.floor(px / 2);
-          await magick([
-            '(',
-            input,
-            '-resize',
-            `${px}x${px}!`,
-            '-alpha',
-            'set',
-            ')',
-            '(',
-            '-size',
-            `${px}x${px}`,
-            'xc:none',
-            '-fill',
-            'white',
-            '-draw',
-            `circle ${cx},${cx} ${cx},0`,
-            ')',
-            '-compose',
-            'DstIn',
-            '-composite',
-            '-strip',
-            roundPath,
-          ]);
-          generated.push(`Android ${density} round (${px}px): ${roundPath}`);
+            const roundUri = joinUri(densityDirUri, 'ic_launcher_round.png');
+            const roundOut = await resolveOutput(roundUri);
+            await ensureOutputDir(roundOut.localPath);
+            const cx = Math.floor(px / 2);
+            await magick([
+              '(',
+              inR.localPath,
+              '-resize',
+              `${px}x${px}!`,
+              '-alpha',
+              'set',
+              ')',
+              '(',
+              '-size',
+              `${px}x${px}`,
+              'xc:none',
+              '-fill',
+              'white',
+              '-draw',
+              `circle ${cx},${cx} ${cx},0`,
+              ')',
+              '-compose',
+              'DstIn',
+              '-composite',
+              '-strip',
+              roundOut.localPath,
+            ]);
+            await roundOut.commit();
+            generated.push(`Android ${density} round (${px}px): ${roundUri}`);
+          }
         }
-      }
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Generated ${generated.length} app icons:\n${generated.join('\n')}`,
-          },
-        ],
-      };
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Generated ${generated.length} app icons:\n${generated.join('\n')}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+      }
     },
   );
 
@@ -216,58 +250,61 @@ export function registerAssetTools(server: McpServer): void {
     splashScreenSchema.shape,
     async (params: SplashScreenParams) => {
       const { input, output_dir, background_color, mode, sizes } = params;
-      await validateInputFile(input);
-
+      const inR = await resolveInput(input);
       const generated: string[] = [];
+      try {
+        for (const screen of sizes) {
+          const outUri = joinUri(
+            output_dir,
+            `splash_${screen.name}_${screen.width}x${screen.height}.png`,
+          );
+          const out = await resolveOutput(outUri);
+          await ensureOutputDir(out.localPath);
 
-      for (const screen of sizes) {
-        const outPath = join(
-          output_dir,
-          `splash_${screen.name}_${screen.width}x${screen.height}.png`,
-        );
-        await ensureOutputDir(outPath);
+          if (mode === 'cover') {
+            await magick([
+              inR.localPath,
+              '-resize',
+              `${screen.width}x${screen.height}^`,
+              '-gravity',
+              'center',
+              '-extent',
+              `${screen.width}x${screen.height}`,
+              out.localPath,
+            ]);
+          } else {
+            const logoSize = Math.floor(Math.min(screen.width, screen.height) * 0.3);
+            await magick([
+              '-size',
+              `${screen.width}x${screen.height}`,
+              `xc:${background_color}`,
+              '(',
+              inR.localPath,
+              '-resize',
+              `${logoSize}x${logoSize}`,
+              ')',
+              '-gravity',
+              'Center',
+              '-composite',
+              out.localPath,
+            ]);
+          }
+          await out.commit();
 
-        if (mode === 'cover') {
-          await magick([
-            input,
-            '-resize',
-            `${screen.width}x${screen.height}^`,
-            '-gravity',
-            'center',
-            '-extent',
-            `${screen.width}x${screen.height}`,
-            outPath,
-          ]);
-        } else {
-          // Contain: center logo on background
-          const logoSize = Math.floor(Math.min(screen.width, screen.height) * 0.3);
-          await magick([
-            '-size',
-            `${screen.width}x${screen.height}`,
-            `xc:${background_color}`,
-            '(',
-            input,
-            '-resize',
-            `${logoSize}x${logoSize}`,
-            ')',
-            '-gravity',
-            'Center',
-            '-composite',
-            outPath,
-          ]);
+          generated.push(`${screen.name} (${screen.width}x${screen.height}): ${outUri}`);
         }
 
-        generated.push(`${screen.name} (${screen.width}x${screen.height}): ${outPath}`);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Generated ${generated.length} splash screens:\n${generated.join('\n')}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
       }
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Generated ${generated.length} splash screens:\n${generated.join('\n')}`,
-          },
-        ],
-      };
     },
   );
 
@@ -279,46 +316,49 @@ export function registerAssetTools(server: McpServer): void {
     spriteSheetSchema.shape,
     async (params: SpriteSheetParams) => {
       const { inputs, output, tile_size, columns, padding, background } = params;
-      for (const img of inputs) {
-        await validateInputFile(img);
-      }
-      await ensureOutputDir(output);
+      const resolvedInputs = await Promise.all(inputs.map((i) => resolveInput(i)));
+      const out = await resolveOutput(output);
+      try {
+        await ensureOutputDir(out.localPath);
 
-      const args = ['montage'];
-      args.push(...inputs);
-      args.push(
-        '-geometry',
-        `${tile_size}x${tile_size}+${padding}+${padding}`,
-        '-tile',
-        `${columns}x`,
-        '-background',
-        background,
-        output,
-      );
-
-      await magickBatch(args);
-
-      // Generate CSS offset data
-      const cssOffsets: string[] = [];
-      for (let i = 0; i < inputs.length; i++) {
-        const col = i % columns;
-        const row = Math.floor(i / columns);
-        const x = col * (tile_size + padding * 2);
-        const y = row * (tile_size + padding * 2);
-        const name = parse(inputs[i]).name;
-        cssOffsets.push(
-          `.sprite-${name} { background-position: -${x}px -${y}px; width: ${tile_size}px; height: ${tile_size}px; }`,
+        const args = ['montage'];
+        args.push(...resolvedInputs.map((r) => r.localPath));
+        args.push(
+          '-geometry',
+          `${tile_size}x${tile_size}+${padding}+${padding}`,
+          '-tile',
+          `${columns}x`,
+          '-background',
+          background,
+          out.localPath,
         );
-      }
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Sprite sheet (${inputs.length} sprites): ${output}\n\nCSS offsets:\n${cssOffsets.join('\n')}`,
-          },
-        ],
-      };
+        await magickBatch(args);
+        await out.commit();
+
+        const cssOffsets: string[] = [];
+        for (let i = 0; i < inputs.length; i++) {
+          const col = i % columns;
+          const row = Math.floor(i / columns);
+          const x = col * (tile_size + padding * 2);
+          const y = row * (tile_size + padding * 2);
+          const name = uriStem(inputs[i]);
+          cssOffsets.push(
+            `.sprite-${name} { background-position: -${x}px -${y}px; width: ${tile_size}px; height: ${tile_size}px; }`,
+          );
+        }
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Sprite sheet (${inputs.length} sprites): ${output}\n\nCSS offsets:\n${cssOffsets.join('\n')}`,
+            },
+          ],
+        };
+      } finally {
+        await Promise.all(resolvedInputs.map((r) => r.cleanup?.()));
+      }
     },
   );
 
@@ -341,55 +381,58 @@ export function registerAssetTools(server: McpServer): void {
         padding_right,
         padding_bottom,
       } = params;
-      await validateInputFile(input);
-      const outPath = output ?? input.replace(/\.[^.]+$/, '.9.png');
-      await ensureOutputDir(outPath);
+      const inR = await resolveInput(input);
+      const outUri = output ?? input.replace(/\.[^.]+$/, '.9.png');
+      const out = await resolveOutput(outUri);
+      try {
+        await ensureOutputDir(out.localPath);
 
-      const info = await magick(['identify', '-format', '%wx%h', input]);
-      const [w, h] = info.trim().split('x').map(Number);
+        const info = await magick(['identify', '-format', '%wx%h', inR.localPath]);
+        const [w, h] = info.trim().split('x').map(Number);
 
-      // 9-patch has 1px black lines on edges to define stretch/padding regions
-      const newW = w + 2;
-      const newH = h + 2;
+        const newW = w + 2;
+        const newH = h + 2;
 
-      const args = [
-        // Create transparent canvas 2px larger
-        '-size',
-        `${newW}x${newH}`,
-        'xc:none',
-        // Place original image at (1,1)
-        input,
-        '-gravity',
-        'NorthWest',
-        '-geometry',
-        '+1+1',
-        '-composite',
-        // Draw stretch markers (top and left edges)
-        '-fill',
-        'black',
-        '-draw',
-        `line ${stretch_x_start + 1},0 ${stretch_x_end + 1},0`, // top edge
-        '-draw',
-        `line 0,${stretch_y_start + 1} 0,${stretch_y_end + 1}`, // left edge
-      ];
-
-      // Draw content padding markers (bottom and right edges)
-      if (padding_left > 0 || padding_right > 0 || padding_top > 0 || padding_bottom > 0) {
-        const contentLeft = padding_left + 1;
-        const contentRight = newW - 1 - padding_right;
-        const contentTop = padding_top + 1;
-        const contentBottom = newH - 1 - padding_bottom;
-        args.push(
+        const args = [
+          '-size',
+          `${newW}x${newH}`,
+          'xc:none',
+          inR.localPath,
+          '-gravity',
+          'NorthWest',
+          '-geometry',
+          '+1+1',
+          '-composite',
+          '-fill',
+          'black',
           '-draw',
-          `line ${contentLeft},${newH - 1} ${contentRight},${newH - 1}`, // bottom edge
+          `line ${stretch_x_start + 1},0 ${stretch_x_end + 1},0`,
           '-draw',
-          `line ${newW - 1},${contentTop} ${newW - 1},${contentBottom}`, // right edge
-        );
+          `line 0,${stretch_y_start + 1} 0,${stretch_y_end + 1}`,
+        ];
+
+        if (padding_left > 0 || padding_right > 0 || padding_top > 0 || padding_bottom > 0) {
+          const contentLeft = padding_left + 1;
+          const contentRight = newW - 1 - padding_right;
+          const contentTop = padding_top + 1;
+          const contentBottom = newH - 1 - padding_bottom;
+          args.push(
+            '-draw',
+            `line ${contentLeft},${newH - 1} ${contentRight},${newH - 1}`,
+            '-draw',
+            `line ${newW - 1},${contentTop} ${newW - 1},${contentBottom}`,
+          );
+        }
+
+        args.push(out.localPath);
+        await magick(args);
+        await out.commit();
+        return {
+          content: [{ type: 'text', text: `9-patch created (${newW}x${newH}): ${outUri}` }],
+        };
+      } finally {
+        await inR.cleanup?.();
       }
-
-      args.push(outPath);
-      await magick(args);
-      return { content: [{ type: 'text', text: `9-patch created (${newW}x${newH}): ${outPath}` }] };
     },
   );
 
@@ -401,56 +444,63 @@ export function registerAssetTools(server: McpServer): void {
     aspectCropSetSchema.shape,
     async (params: AspectCropSetParams) => {
       const { input, output_dir, ratios, max_dimension, format } = params;
-      await validateInputFile(input);
-      await ensureOutputDir(join(output_dir, 'placeholder'));
-
-      const parsed = parse(input);
-      const ext = format ?? parsed.ext.slice(1);
+      const inR = await resolveInput(input);
+      const stem = uriStem(input);
+      const inputExt = input.match(/\.([^.]+)$/)?.[1] ?? 'png';
+      const ext = format ?? inputExt;
       const generated: string[] = [];
+      try {
+        for (const ratio of ratios) {
+          const ar = ASPECT_RATIOS[ratio];
+          if (!ar) continue;
 
-      for (const ratio of ratios) {
-        const ar = ASPECT_RATIOS[ratio];
-        if (!ar) continue;
+          let w: number, h: number;
+          if (ar.w >= ar.h) {
+            w = max_dimension;
+            h = Math.round((max_dimension * ar.h) / ar.w);
+          } else {
+            h = max_dimension;
+            w = Math.round((max_dimension * ar.w) / ar.h);
+          }
 
-        // Calculate dimensions respecting max_dimension
-        let w: number, h: number;
-        if (ar.w >= ar.h) {
-          w = max_dimension;
-          h = Math.round((max_dimension * ar.h) / ar.w);
-        } else {
-          h = max_dimension;
-          w = Math.round((max_dimension * ar.w) / ar.h);
+          const ratioName = ratio.replace(':', 'x');
+          const outUri = joinUri(output_dir, `${stem}_${ratioName}.${ext}`);
+          const out = await resolveOutput(outUri);
+          await ensureOutputDir(out.localPath);
+
+          await magick([
+            inR.localPath,
+            '-resize',
+            `${w}x${h}^`,
+            '-gravity',
+            'center',
+            '-extent',
+            `${w}x${h}`,
+            out.localPath,
+          ]);
+          await out.commit();
+
+          generated.push(`${ratio} (${w}x${h}): ${outUri}`);
         }
 
-        const ratioName = ratio.replace(':', 'x');
-        const outPath = join(output_dir, `${parsed.name}_${ratioName}.${ext}`);
-
-        await magick([
-          input,
-          '-resize',
-          `${w}x${h}^`,
-          '-gravity',
-          'center',
-          '-extent',
-          `${w}x${h}`,
-          outPath,
-        ]);
-
-        generated.push(`${ratio} (${w}x${h}): ${outPath}`);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Generated ${generated.length} aspect ratio crops:\n${generated.join('\n')}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
       }
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Generated ${generated.length} aspect ratio crops:\n${generated.join('\n')}`,
-          },
-        ],
-      };
     },
   );
 
   // ── pdf-to-image ────────────────────────────────────────────────────────
+  // Note: PDF multi-page output pattern (%03d) is ImageMagick-native and writes
+  // locally. For remote output_dir, we'd need to enumerate locally-produced
+  // files and upload each. Kept local-first for now.
   registerTool<PdfToImageParams>(
     server,
     'pdf-to-image',
@@ -463,7 +513,6 @@ export function registerAssetTools(server: McpServer): void {
 
       const parsed = parse(input);
 
-      // ImageMagick uses [page] syntax for PDFs
       let pageSpec: string;
       if (pages === 'all') {
         pageSpec = '';
@@ -497,87 +546,92 @@ export function registerAssetTools(server: McpServer): void {
     imageDiffSchema.shape,
     async (params: ImageDiffParams) => {
       const { image_a, image_b, output, highlight_color, fuzz, mode } = params;
-      await validateInputFile(image_a);
-      await validateInputFile(image_b);
-      await ensureOutputDir(output);
-
-      if (mode === 'side-by-side') {
-        // Side by side: A | diff | B
-        await magick([
-          '(',
-          image_a,
-          ')',
-          '(',
-          image_a,
-          image_b,
-          '-fuzz',
-          `${fuzz}%`,
-          '-compose',
-          'Src',
-          '-highlight-color',
-          highlight_color,
-          '-lowlight-color',
-          'white',
-          '-compare',
-          ')',
-          '(',
-          image_b,
-          ')',
-          '+append',
-          output,
-        ]);
-      } else if (mode === 'overlay') {
-        // Blend both images
-        await magick([
-          image_a,
-          image_b,
-          '-compose',
-          'Difference',
-          '-composite',
-          '-auto-level',
-          output,
-        ]);
-      } else {
-        // Highlight differences
-        await magick([
-          image_a,
-          image_b,
-          '-fuzz',
-          `${fuzz}%`,
-          '-compose',
-          'Src',
-          '-highlight-color',
-          highlight_color,
-          '-lowlight-color',
-          'white',
-          '-compare',
-          output,
-        ]);
-      }
-
-      // Get metrics
-      let metrics = '';
+      const aR = await resolveInput(image_a);
+      const bR = await resolveInput(image_b);
+      const out = await resolveOutput(output);
       try {
-        const result = await magick([
-          image_a,
-          image_b,
-          '-fuzz',
-          `${fuzz}%`,
-          '-metric',
-          'AE',
-          '-compare',
-          'null:',
-        ]);
-        metrics = `\nDifferent pixels: ${result.trim()}`;
-      } catch {
-        // Metrics command returns non-zero when images differ — that's expected
-      }
+        await ensureOutputDir(out.localPath);
 
-      return { content: [{ type: 'text', text: `Image diff (${mode}): ${output}${metrics}` }] };
+        if (mode === 'side-by-side') {
+          await magick([
+            '(',
+            aR.localPath,
+            ')',
+            '(',
+            aR.localPath,
+            bR.localPath,
+            '-fuzz',
+            `${fuzz}%`,
+            '-compose',
+            'Src',
+            '-highlight-color',
+            highlight_color,
+            '-lowlight-color',
+            'white',
+            '-compare',
+            ')',
+            '(',
+            bR.localPath,
+            ')',
+            '+append',
+            out.localPath,
+          ]);
+        } else if (mode === 'overlay') {
+          await magick([
+            aR.localPath,
+            bR.localPath,
+            '-compose',
+            'Difference',
+            '-composite',
+            '-auto-level',
+            out.localPath,
+          ]);
+        } else {
+          await magick([
+            aR.localPath,
+            bR.localPath,
+            '-fuzz',
+            `${fuzz}%`,
+            '-compose',
+            'Src',
+            '-highlight-color',
+            highlight_color,
+            '-lowlight-color',
+            'white',
+            '-compare',
+            out.localPath,
+          ]);
+        }
+        await out.commit();
+
+        let metrics = '';
+        try {
+          const result = await magick([
+            aR.localPath,
+            bR.localPath,
+            '-fuzz',
+            `${fuzz}%`,
+            '-metric',
+            'AE',
+            '-compare',
+            'null:',
+          ]);
+          metrics = `\nDifferent pixels: ${result.trim()}`;
+        } catch {
+          /* expected non-zero when images differ */
+        }
+
+        return { content: [{ type: 'text', text: `Image diff (${mode}): ${output}${metrics}` }] };
+      } finally {
+        await aR.cleanup?.();
+        await bR.cleanup?.();
+      }
     },
   );
 
   // ── optimize-batch ──────────────────────────────────────────────────────
+  // Local-only: uses readdir + stat which are filesystem-specific. If URI
+  // support is needed later, swap to provider.list() and commit per-file.
   registerTool<OptimizeBatchParams>(
     server,
     'optimize-batch',
@@ -608,7 +662,6 @@ export function registerAssetTools(server: McpServer): void {
         'heic',
       ]);
 
-      // Read directory
       const entries = await readdir(input_dir, { withFileTypes: true, recursive });
       const files = entries
         .filter(
@@ -629,7 +682,7 @@ export function registerAssetTools(server: McpServer): void {
 
         const args = [file];
         if (max_width) {
-          args.push('-resize', `${max_width}x>`); // Only downscale, never upscale
+          args.push('-resize', `${max_width}x>`);
         }
         args.push('-quality', String(quality));
         if (strip_metadata) {

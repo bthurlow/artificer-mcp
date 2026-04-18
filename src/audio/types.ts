@@ -209,3 +209,75 @@ export const audioRemoveSilenceSchema = z.object({
       '"start" = leading silence only. "end" = trailing only. "both" = start + end. "all" = also removes silence within the audio (may sound unnatural).',
     ),
 });
+
+/** Parameters for the audio_mix tool */
+export interface AudioMixTrack {
+  input: string;
+  volume?: number;
+  delay_seconds?: number;
+}
+
+export interface AudioMixParams {
+  tracks: AudioMixTrack[];
+  output: string;
+  duration: 'longest' | 'shortest' | 'first';
+  duck_to?: number;
+  duck_against_track?: number;
+  duck_attack_ms: number;
+  duck_release_ms: number;
+}
+
+export const audioMixSchema = z.object({
+  tracks: z
+    .array(
+      z.object({
+        input: z.string().describe('Path to an audio track (or any file with audio).'),
+        volume: z
+          .number()
+          .nonnegative()
+          .optional()
+          .describe(
+            'Linear volume multiplier applied before mixing — 1.0 = unchanged, 0.3 = 30%, 0 = silent. Default 1.0.',
+          ),
+        delay_seconds: z
+          .number()
+          .nonnegative()
+          .optional()
+          .describe('Delay this track by N seconds before it enters the mix (default 0).'),
+      }),
+    )
+    .min(2)
+    .describe('Ordered list of tracks to mix (2+). Track 0 is the reference for ducking.'),
+  output: z.string().describe('Path for the mixed output audio.'),
+  duration: z
+    .enum(['longest', 'shortest', 'first'])
+    .default('longest')
+    .describe(
+      '"longest" = output length = longest input (pads shorter with silence). "shortest" = stops at shortest. "first" = matches track 0.',
+    ),
+  duck_to: z
+    .number()
+    .max(0)
+    .optional()
+    .describe(
+      'If set, activates sidechain ducking: lowers `duck_against_track` by this many dB whenever track 0 (voice) is audible. Typical: -10 to -18. Omit for no ducking.',
+    ),
+  duck_against_track: z
+    .number()
+    .int()
+    .min(1)
+    .optional()
+    .describe(
+      'Index of the track to duck (1-based, referring to tracks[1] and later). Required when duck_to is set. Usually the music-bed track.',
+    ),
+  duck_attack_ms: z
+    .number()
+    .positive()
+    .default(20)
+    .describe('Sidechain attack time in ms — how fast the duck engages when voice starts.'),
+  duck_release_ms: z
+    .number()
+    .positive()
+    .default(250)
+    .describe('Sidechain release time in ms — how fast volume recovers after voice ends.'),
+});

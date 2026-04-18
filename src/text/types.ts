@@ -28,9 +28,9 @@ export interface TextOverlayParams {
   input: string;
   output?: string;
   text: string;
-  font: string;
+  font?: string;
   size: number;
-  color: string;
+  color?: string;
   x: number;
   y: number;
   gravity: Gravity;
@@ -45,9 +45,19 @@ export const textOverlaySchema = z.object({
   input: z.string().describe('Path to the input image'),
   output: z.string().optional().describe('Path for the output image'),
   text: z.string().describe('Text to overlay'),
-  font: z.string().default('Arial').describe('Font family name'),
+  font: z
+    .string()
+    .optional()
+    .describe(
+      'Font family name or path. When omitted, falls back to ARTIFICER_BRAND_SPEC.fonts.regular, else "Arial".',
+    ),
   size: z.number().int().positive().default(32).describe('Font size in points'),
-  color: z.string().default('white').describe('Text color (name, hex, or rgba)'),
+  color: z
+    .string()
+    .optional()
+    .describe(
+      'Text color (name, hex, or rgba). When omitted, falls back to ARTIFICER_BRAND_SPEC.colors.primary, else "white".',
+    ),
   x: z.number().int().default(0).describe('X position from top-left'),
   y: z.number().int().default(0).describe('Y position from top-left'),
   gravity: gravityEnum.default('NorthWest').describe('Gravity anchor for positioning'),

@@ -1,12 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import {
-  magick,
-  magickBatch,
-  validateInputFile,
-  ensureOutputDir,
-  resolveOutputPath,
-  getExtension,
-} from '../utils/exec.js';
+import { magick, magickBatch, ensureOutputDir, getExtension } from '../utils/exec.js';
+import { resolveIO, resolveInput } from '../utils/resource.js';
 import { registerTool } from '../utils/register.js';
 import {
   type ResizeParams,
@@ -42,41 +36,49 @@ export function registerCoreTools(server: McpServer): void {
     resizeSchema.shape,
     async (params: ResizeParams) => {
       const { input, output, width, height, mode, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, { outputPath: output, suffix: '_resized', format });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_resized', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      const geometry = `${width}x${height}`;
-      let args: string[];
+        const geometry = `${width}x${height}`;
+        let args: string[];
 
-      switch (mode) {
-        case 'fill':
-          args = [
-            input,
-            '-resize',
-            `${geometry}^`,
-            '-gravity',
-            'center',
-            '-extent',
-            geometry,
-            outPath,
-          ];
-          break;
-        case 'stretch':
-          args = [input, '-resize', `${geometry}!`, outPath];
-          break;
-        case 'fit':
-        default:
-          args = [input, '-resize', geometry, outPath];
-          break;
+        switch (mode) {
+          case 'fill':
+            args = [
+              io.inputLocal,
+              '-resize',
+              `${geometry}^`,
+              '-gravity',
+              'center',
+              '-extent',
+              geometry,
+              io.outputLocal,
+            ];
+            break;
+          case 'stretch':
+            args = [io.inputLocal, '-resize', `${geometry}!`, io.outputLocal];
+            break;
+          case 'fit':
+          default:
+            args = [io.inputLocal, '-resize', geometry, io.outputLocal];
+            break;
+        }
+
+        await magick(args);
+        await io.finalize();
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Resized to ${width}x${height} (${mode}): ${io.outputUri}`,
+            },
+          ],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
       }
-
-      await magick(args);
-      return {
-        content: [
-          { type: 'text' as const, text: `Resized to ${width}x${height} (${mode}): ${outPath}` },
-        ],
-      };
     },
   );
 
@@ -87,16 +89,29 @@ export function registerCoreTools(server: McpServer): void {
     cropSchema.shape,
     async (params: CropParams) => {
       const { input, output, width, height, x, y, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, { outputPath: output, suffix: '_cropped', format });
-      await ensureOutputDir(outPath);
-
-      await magick([input, '-crop', `${width}x${height}+${x}+${y}`, '+repage', outPath]);
-      return {
-        content: [
-          { type: 'text' as const, text: `Cropped ${width}x${height} at (${x},${y}): ${outPath}` },
-        ],
-      };
+      const io = await resolveIO({ input, output, suffix: '_cropped', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
+        await magick([
+          io.inputLocal,
+          '-crop',
+          `${width}x${height}+${x}+${y}`,
+          '+repage',
+          io.outputLocal,
+        ]);
+        await io.finalize();
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Cropped ${width}x${height} at (${x},${y}): ${io.outputUri}`,
+            },
+          ],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
+      }
     },
   );
 
@@ -107,30 +122,34 @@ export function registerCoreTools(server: McpServer): void {
     smartCropSchema.shape,
     async (params: SmartCropParams) => {
       const { input, output, width, height, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, {
-        outputPath: output,
-        suffix: '_smartcrop',
-        format,
-      });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_smartcrop', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      const geometry = `${width}x${height}`;
-      await magick([
-        input,
-        '-resize',
-        `${geometry}^`,
-        '-gravity',
-        'center',
-        '-extent',
-        geometry,
-        outPath,
-      ]);
-      return {
-        content: [
-          { type: 'text' as const, text: `Smart-cropped to ${width}x${height}: ${outPath}` },
-        ],
-      };
+        const geometry = `${width}x${height}`;
+        await magick([
+          io.inputLocal,
+          '-resize',
+          `${geometry}^`,
+          '-gravity',
+          'center',
+          '-extent',
+          geometry,
+          io.outputLocal,
+        ]);
+        await io.finalize();
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Smart-cropped to ${width}x${height}: ${io.outputUri}`,
+            },
+          ],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
+      }
     },
   );
 
@@ -141,12 +160,25 @@ export function registerCoreTools(server: McpServer): void {
     rotateSchema.shape,
     async (params: RotateParams) => {
       const { input, output, degrees, background, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, { outputPath: output, suffix: '_rotated', format });
-      await ensureOutputDir(outPath);
-
-      await magick([input, '-background', background, '-rotate', String(degrees), outPath]);
-      return { content: [{ type: 'text' as const, text: `Rotated ${degrees}°: ${outPath}` }] };
+      const io = await resolveIO({ input, output, suffix: '_rotated', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
+        await magick([
+          io.inputLocal,
+          '-background',
+          background,
+          '-rotate',
+          String(degrees),
+          io.outputLocal,
+        ]);
+        await io.finalize();
+        return {
+          content: [{ type: 'text' as const, text: `Rotated ${degrees}°: ${io.outputUri}` }],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
+      }
     },
   );
 
@@ -157,13 +189,19 @@ export function registerCoreTools(server: McpServer): void {
     flipSchema.shape,
     async (params: FlipParams) => {
       const { input, output, direction, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, { outputPath: output, suffix: '_flipped', format });
-      await ensureOutputDir(outPath);
-
-      const flag = direction === 'horizontal' ? '-flop' : '-flip';
-      await magick([input, flag, outPath]);
-      return { content: [{ type: 'text' as const, text: `Flipped ${direction}: ${outPath}` }] };
+      const io = await resolveIO({ input, output, suffix: '_flipped', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
+        const flag = direction === 'horizontal' ? '-flop' : '-flip';
+        await magick([io.inputLocal, flag, io.outputLocal]);
+        await io.finalize();
+        return {
+          content: [{ type: 'text' as const, text: `Flipped ${direction}: ${io.outputUri}` }],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
+      }
     },
   );
 
@@ -174,18 +212,25 @@ export function registerCoreTools(server: McpServer): void {
     formatConvertSchema.shape,
     async (params: FormatConvertParams) => {
       const { input, output, format, quality } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, { outputPath: output, suffix: '', format });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      const args = [input];
-      if (quality !== undefined) {
-        args.push('-quality', String(quality));
+        const args = [io.inputLocal];
+        if (quality !== undefined) {
+          args.push('-quality', String(quality));
+        }
+        args.push(io.outputLocal);
+
+        await magick(args);
+        await io.finalize();
+        return {
+          content: [{ type: 'text' as const, text: `Converted to ${format}: ${io.outputUri}` }],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
       }
-      args.push(outPath);
-
-      await magick(args);
-      return { content: [{ type: 'text' as const, text: `Converted to ${format}: ${outPath}` }] };
     },
   );
 
@@ -196,30 +241,33 @@ export function registerCoreTools(server: McpServer): void {
     compressSchema.shape,
     async (params: CompressParams) => {
       const { input, output, quality, strip, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, {
-        outputPath: output,
-        suffix: '_compressed',
-        format,
-      });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_compressed', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      const args = [input, '-quality', String(quality)];
-      if (strip) {
-        args.push('-strip');
-      }
-      const ext = getExtension(outPath);
-      if (ext === 'jpg' || ext === 'jpeg') {
-        args.push('-sampling-factor', '4:2:0', '-interlace', 'JPEG');
-      } else if (ext === 'png') {
-        args.push('-define', 'png:compression-level=9');
-      }
-      args.push(outPath);
+        const args = [io.inputLocal, '-quality', String(quality)];
+        if (strip) {
+          args.push('-strip');
+        }
+        const ext = getExtension(io.outputLocal);
+        if (ext === 'jpg' || ext === 'jpeg') {
+          args.push('-sampling-factor', '4:2:0', '-interlace', 'JPEG');
+        } else if (ext === 'png') {
+          args.push('-define', 'png:compression-level=9');
+        }
+        args.push(io.outputLocal);
 
-      await magick(args);
-      return {
-        content: [{ type: 'text' as const, text: `Compressed (quality ${quality}): ${outPath}` }],
-      };
+        await magick(args);
+        await io.finalize();
+        return {
+          content: [
+            { type: 'text' as const, text: `Compressed (quality ${quality}): ${io.outputUri}` },
+          ],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
+      }
     },
   );
 
@@ -230,16 +278,19 @@ export function registerCoreTools(server: McpServer): void {
     infoSchema.shape,
     async (params: InfoParams) => {
       const { input } = params;
-      await validateInputFile(input);
+      const inR = await resolveInput(input);
+      try {
+        const result = await magick([
+          'identify',
+          '-format',
+          'Format: %m\\nDimensions: %wx%h\\nColor Space: %[colorspace]\\nDepth: %z-bit\\nSize: %b\\nDPI: %x x %y\\nAlpha: %A\\nType: %[type]',
+          inR.localPath,
+        ]);
 
-      const result = await magick([
-        'identify',
-        '-format',
-        'Format: %m\\nDimensions: %wx%h\\nColor Space: %[colorspace]\\nDepth: %z-bit\\nSize: %b\\nDPI: %x x %y\\nAlpha: %A\\nType: %[type]',
-        input,
-      ]);
-
-      return { content: [{ type: 'text' as const, text: result.trim() }] };
+        return { content: [{ type: 'text' as const, text: result.trim() }] };
+      } finally {
+        await inR.cleanup?.();
+      }
     },
   );
 
@@ -250,12 +301,18 @@ export function registerCoreTools(server: McpServer): void {
     stripMetadataSchema.shape,
     async (params: StripMetadataParams) => {
       const { input, output, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, { outputPath: output, suffix: '_stripped', format });
-      await ensureOutputDir(outPath);
-
-      await magick([input, '-strip', outPath]);
-      return { content: [{ type: 'text' as const, text: `Metadata stripped: ${outPath}` }] };
+      const io = await resolveIO({ input, output, suffix: '_stripped', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
+        await magick([io.inputLocal, '-strip', io.outputLocal]);
+        await io.finalize();
+        return {
+          content: [{ type: 'text' as const, text: `Metadata stripped: ${io.outputUri}` }],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
+      }
     },
   );
 
@@ -266,21 +323,30 @@ export function registerCoreTools(server: McpServer): void {
     batchSchema.shape,
     async (params: BatchParams) => {
       const { input, output, operations } = params;
-      await validateInputFile(input);
-      await ensureOutputDir(output);
+      const io = await resolveIO({ input, output });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      const args = [input];
-      for (const op of operations) {
-        args.push(...op.split(/\s+/));
+        const args = [io.inputLocal];
+        for (const op of operations) {
+          args.push(...op.split(/\s+/));
+        }
+        args.push(io.outputLocal);
+
+        await magickBatch(args);
+        await io.finalize();
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Batch (${operations.length} ops) complete: ${io.outputUri}`,
+            },
+          ],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
       }
-      args.push(output);
-
-      await magickBatch(args);
-      return {
-        content: [
-          { type: 'text' as const, text: `Batch (${operations.length} ops) complete: ${output}` },
-        ],
-      };
     },
   );
 }

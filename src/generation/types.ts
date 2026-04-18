@@ -176,6 +176,138 @@ export const nanobananaGenerateImageSchema = z.object({
     ),
 });
 
+// ── gemini_generate_speech (TTS) ───────────────────────────────────────────
+
+export interface GenerateSpeechParams {
+  model: string;
+  text: string;
+  output: string;
+  voice?: string;
+  language_code?: string;
+  style?: string;
+}
+
+export const generateSpeechSchema = z.object({
+  model: z
+    .string()
+    .default(envDefault('ARTIFICER_TTS_MODEL', 'gemini-2.5-flash-preview-tts'))
+    .describe(
+      'Gemini TTS model ID. Default: gemini-2.5-flash-preview-tts (override via ARTIFICER_TTS_MODEL env var). Also valid: gemini-2.5-pro-preview-tts.',
+    ),
+  text: z
+    .string()
+    .describe(
+      'Text to speak. Keep under ~1000 chars per call for best results. May include natural-language style prompts inline (e.g., "Say warmly: Hello baker").',
+    ),
+  output: z
+    .string()
+    .describe(
+      'Output audio path. .wav is emitted natively; any other extension is transcoded via ffmpeg (requires ffmpeg on PATH).',
+    ),
+  voice: z
+    .string()
+    .optional()
+    .describe(
+      'Prebuilt voice name — "Kore" (warm, calm), "Puck" (upbeat), "Zephyr" (bright), "Charon" (informative), "Fenrir" (excitable), "Leda" (youthful), "Aoede" (breezy), "Orus" (firm), "Sage" (clear). See Gemini TTS docs for full list. When omitted, falls back to ARTIFICER_BRAND_SPEC.tts.voice if set, otherwise "Kore".',
+    ),
+  language_code: z
+    .string()
+    .optional()
+    .describe('Optional ISO-639-1 language code (e.g., "en-US"). Usually auto-detected.'),
+  style: z
+    .string()
+    .optional()
+    .describe(
+      'Optional style prefix prepended to the text as a natural-language instruction (e.g., "In a warm, encouraging tone"). Concatenated with a colon to the text.',
+    ),
+});
+
+// ── gemini_generate_music (Lyria 3 batch) ───────────────────────────────────
+
+export interface GenerateMusicParams {
+  model: string;
+  prompt: string;
+  output: string;
+  negative_prompt?: string;
+}
+
+export const generateMusicSchema = z.object({
+  model: z
+    .string()
+    .default(envDefault('ARTIFICER_LYRIA_MODEL', 'lyria-3-clip-preview'))
+    .describe(
+      'Lyria 3 model ID. Default: lyria-3-clip-preview (fixed 30-second clip). Also valid: lyria-3-pro-preview (up to ~2 minutes, duration controllable via prompt; emits WAV instead of MP3). Override via ARTIFICER_LYRIA_MODEL env var.',
+    ),
+  prompt: z
+    .string()
+    .describe(
+      'Music description — genre, mood, instruments, tempo. E.g., "upbeat indie folk with acoustic guitar and claps, 110 bpm, warm". Pro model supports timestamps like "[0:00-0:15] calm intro, [0:15-0:30] build to drop" for structured tracks.',
+    ),
+  output: z
+    .string()
+    .describe(
+      'Output audio path. Native format: MP3 for clip, WAV for Pro. Other extensions transcoded via ffmpeg.',
+    ),
+  negative_prompt: z
+    .string()
+    .optional()
+    .describe(
+      'Elements to avoid — appended to the prompt as "Avoid: ...". Note: Lyria 3 does not expose a dedicated negative_prompt field like Lyria 2, so this is prompt-engineered guidance rather than a guarantee.',
+    ),
+});
+
+// ── gemini_generate_music_live (Lyria RealTime) ─────────────────────────────
+
+export interface GenerateMusicLiveParams {
+  model: string;
+  prompt: string;
+  output: string;
+  duration_seconds: number;
+  temperature?: number;
+  seed?: number;
+  guidance?: number;
+}
+
+export const generateMusicLiveSchema = z.object({
+  model: z
+    .string()
+    .default(envDefault('ARTIFICER_LYRIA_LIVE_MODEL', 'models/lyria-realtime-exp'))
+    .describe(
+      'Lyria RealTime model ID. Default: models/lyria-realtime-exp. Override via ARTIFICER_LYRIA_LIVE_MODEL env var. This tool opens a WebSocket session, collects audio for duration_seconds, then force-closes.',
+    ),
+  prompt: z
+    .string()
+    .describe(
+      'Music description — genre, mood, instruments, tempo. Sent as weightedPrompts[0] with weight 1.0.',
+    ),
+  output: z
+    .string()
+    .describe(
+      'Output audio path. .wav is emitted natively; other extensions transcoded via ffmpeg.',
+    ),
+  duration_seconds: z
+    .number()
+    .positive()
+    .max(120)
+    .default(30)
+    .describe(
+      'How long to capture audio before closing the session (seconds). Capped at 120s to avoid runaway sessions.',
+    ),
+  temperature: z
+    .number()
+    .min(0)
+    .max(3)
+    .optional()
+    .describe('Audio variance. Higher = more variance. Range 0.0–3.0.'),
+  seed: z.number().int().optional().describe('Seeds audio generation for reproducibility.'),
+  guidance: z
+    .number()
+    .min(0)
+    .max(6)
+    .optional()
+    .describe('How closely the model follows prompts. Range 0.0–6.0.'),
+});
+
 // ── gemini_generate_video ──────────────────────────────────────────────────
 
 export interface GenerateVideoParams {

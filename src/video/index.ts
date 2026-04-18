@@ -24,6 +24,8 @@ import {
   type VideoSetBitrateParams,
   type VideoSetCodecParams,
   type VideoSetFrameRateParams,
+  type VideoFromImageParams,
+  type VideoSetAudioParams,
   videoConcatenateSchema,
   videoTrimSchema,
   videoChangeAspectRatioSchema,
@@ -38,6 +40,8 @@ import {
   videoSetBitrateSchema,
   videoSetCodecSchema,
   videoSetFrameRateSchema,
+  videoFromImageSchema,
+  videoSetAudioSchema,
 } from './types.js';
 
 /** Escape a file path for the subtitles filter (colons on Windows break it). */
@@ -895,6 +899,96 @@ export function registerVideoTools(server: McpServer): void {
           {
             type: 'text',
             text: `Set frame rate to ${frame_rate} fps → ${output}`,
+          },
+        ],
+      };
+    },
+  );
+
+  // ── video_from_image ────────────────────────────────────────────────────
+  registerTool<VideoFromImageParams>(
+    server,
+    'video_from_image',
+    'Create a short video clip from a still image — ideal for title cards, end cards, or static intros. Loops the image for duration_seconds and encodes with yuv420p for consumer-player compatibility. Optional audio track can be muxed in; otherwise the clip is silent.',
+    videoFromImageSchema.shape,
+    async ({ input, output, duration_seconds, frame_rate, width, height, audio }) => {
+      await mkdir(dirname(output), { recursive: true });
+
+      const args = ['-y', '-loop', '1', '-i', input];
+      if (audio) {
+        args.push('-i', audio);
+      }
+
+      const vf: string[] = [];
+      if (width || height) {
+        const wExpr = width ?? -2;
+        const hExpr = height ?? -2;
+        vf.push(`scale=${wExpr}:${hExpr}:flags=lanczos`);
+      }
+      // Consumer-player safe pixel format — see video_concatenate note.
+      vf.push('format=yuv420p');
+
+      args.push('-vf', vf.join(','));
+      args.push('-r', String(frame_rate));
+      args.push('-t', String(duration_seconds));
+      args.push('-c:v', 'libx264', '-pix_fmt', 'yuv420p');
+
+      if (audio) {
+        args.push('-c:a', 'aac', '-shortest');
+      } else {
+        args.push('-an');
+      }
+
+      args.push(output);
+      await ffmpegBatch(args);
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Image-to-video clip (${duration_seconds}s @ ${frame_rate}fps) → ${output}`,
+          },
+        ],
+      };
+    },
+  );
+
+  // ── video_set_audio ─────────────────────────────────────────────────────
+  registerTool<VideoSetAudioParams>(
+    server,
+    'video_set_audio',
+    'Replace (or add) an audio track on a video by muxing in a new audio file. Video stream is stream-copied (no re-encode). Use this after mixing dialogue + music with audio_mix to attach the final soundtrack to a finished video.',
+    videoSetAudioSchema.shape,
+    async ({ input, output, audio, audio_codec, shortest }) => {
+      await mkdir(dirname(output), { recursive: true });
+
+      const args = [
+        '-y',
+        '-i',
+        input,
+        '-i',
+        audio,
+        '-map',
+        '0:v:0',
+        '-map',
+        '1:a:0',
+        '-c:v',
+        'copy',
+        '-c:a',
+        audio_codec,
+      ];
+      if (shortest) {
+        args.push('-shortest');
+      }
+      args.push(output);
+
+      await ffmpegBatch(args);
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Set audio track (codec=${audio_codec}${shortest ? ', shortest' : ''}) → ${output}`,
           },
         ],
       };

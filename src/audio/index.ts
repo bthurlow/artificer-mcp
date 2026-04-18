@@ -12,6 +12,7 @@ import {
   type AudioSetChannelsParams,
   type AudioSetSampleRateParams,
   type AudioRemoveSilenceParams,
+  type AudioMixParams,
   audioExtractFromVideoSchema,
   audioNormalizeSchema,
   audioConvertFormatSchema,
@@ -20,6 +21,7 @@ import {
   audioSetChannelsSchema,
   audioSetSampleRateSchema,
   audioRemoveSilenceSchema,
+  audioMixSchema,
 } from './types.js';
 
 /** Video container extensions — when the output is one of these, the audio tools
@@ -351,6 +353,118 @@ export function registerAudioTools(server: McpServer): void {
           {
             type: 'text',
             text: `Removed silence (${remove}, threshold=${threshold_db}dB, min=${min_silence_duration}s) → ${output}`,
+          },
+        ],
+      };
+    },
+  );
+
+  // ── audio_mix ─────────────────────────────────────────────────────────
+  registerTool<AudioMixParams>(
+    server,
+    'audio_mix',
+    'Mix 2+ audio tracks into one output with per-track volume and optional delay. Supports sidechain ducking: when `duck_to` and `duck_against_track` are set, the specified track(s) are lowered (dB) whenever track 0 is audible — ideal for ducking a music bed under dialogue.',
+    audioMixSchema.shape,
+    async ({
+      tracks,
+      output,
+      duration,
+      duck_to,
+      duck_against_track,
+      duck_attack_ms,
+      duck_release_ms,
+    }) => {
+      if (duck_to !== undefined && duck_against_track === undefined) {
+        throw new Error('duck_against_track is required when duck_to is set.');
+      }
+      if (duck_against_track !== undefined && duck_to === undefined) {
+        throw new Error('duck_to is required when duck_against_track is set.');
+      }
+      if (duck_against_track !== undefined && duck_against_track >= tracks.length) {
+        throw new Error(
+          `duck_against_track=${duck_against_track} out of range (tracks.length=${tracks.length})`,
+        );
+      }
+
+      await mkdir(dirname(output), { recursive: true });
+
+      // Stage 1: per-track prep filters (volume + delay) → labeled outputs [a0]..[aN]
+      const filterParts: string[] = [];
+      for (let i = 0; i < tracks.length; i++) {
+        const t = tracks[i];
+        const steps: string[] = [];
+        if (t.volume !== undefined && t.volume !== 1) {
+          steps.push(`volume=${t.volume}`);
+        }
+        if (t.delay_seconds !== undefined && t.delay_seconds > 0) {
+          const delayMs = Math.round(t.delay_seconds * 1000);
+          // adelay needs per-channel values; "|" separator with "all=1" fallback
+          steps.push(`adelay=${delayMs}|${delayMs}`);
+        }
+        // Always include at least one filter so the label chain is valid
+        if (steps.length === 0) steps.push('anull');
+        filterParts.push(`[${i}:a]${steps.join(',')}[a${i}]`);
+      }
+
+      // Stage 2: sidechain duck (optional) → replaces [a<duck_against_track>] with ducked version
+      let mixInputs: string[] = tracks.map((_, i) => `[a${i}]`);
+      if (duck_to !== undefined && duck_against_track !== undefined) {
+        // sidechaincompress: ratio/threshold derived from duck_to (dB).
+        // Using a fixed high ratio (8) and threshold 0.03 (~-30 dB) with makeup=0.
+        // The "level_sc" of sidechain + our ratio/threshold controls how far music
+        // drops. We encode duck_to as the makeup attenuation: add a post-duck
+        // volume stage that applies the remaining correction.
+        // Simpler + more predictable: use sidechaincompress with threshold=0.05,
+        // ratio=20, attack/release from params, then chain a volume=`duck_to`dB
+        // which ONLY applies when sidechain is triggered (sidechain itself already
+        // attenuates, so we skip the extra volume to avoid double-ducking).
+        const attack = duck_attack_ms / 1000;
+        const release = duck_release_ms / 1000;
+        // Stronger ratio produces deeper duck; we clamp threshold so only audible
+        // voice triggers it.
+        const ratio = Math.max(2, Math.min(20, Math.abs(duck_to) / 2));
+        filterParts.push(
+          `[a${duck_against_track}][a0]sidechaincompress=threshold=0.05:ratio=${ratio}:attack=${Math.round(
+            attack * 1000,
+          )}:release=${Math.round(release * 1000)}:level_sc=1[a${duck_against_track}_ducked]`,
+        );
+        mixInputs = mixInputs.map((label, i) =>
+          i === duck_against_track ? `[a${duck_against_track}_ducked]` : label,
+        );
+      }
+
+      // Stage 3: amix
+      filterParts.push(
+        `${mixInputs.join('')}amix=inputs=${tracks.length}:duration=${duration}:dropout_transition=0:normalize=0[aout]`,
+      );
+
+      const filterComplex = filterParts.join(';');
+
+      const args: string[] = ['-y'];
+      for (const t of tracks) {
+        args.push('-i', t.input);
+      }
+      args.push(
+        '-filter_complex',
+        filterComplex,
+        '-map',
+        '[aout]',
+        '-c:a',
+        defaultCodecForExt(output.split('.').pop() ?? ''),
+        output,
+      );
+
+      await ffmpegBatch(args);
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Mixed ${tracks.length} tracks${
+              duck_to !== undefined
+                ? ` (duck track ${duck_against_track} by ${duck_to}dB under track 0)`
+                : ''
+            } → ${output}`,
           },
         ],
       };

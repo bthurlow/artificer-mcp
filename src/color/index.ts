@@ -1,5 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { magick, validateInputFile, ensureOutputDir, resolveOutputPath } from '../utils/exec.js';
+import { magick, ensureOutputDir } from '../utils/exec.js';
+import { resolveIO, resolveInput } from '../utils/resource.js';
 import { registerTool } from '../utils/register.js';
 import {
   type AdjustParams,
@@ -31,31 +32,36 @@ export function registerColorTools(server: McpServer): void {
     adjustSchema.shape,
     async (params: AdjustParams) => {
       const { input, output, brightness, contrast, saturation, hue, gamma, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, { outputPath: output, suffix: '_adjusted', format });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_adjusted', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      const args = [input];
-      if (brightness !== 0 || contrast !== 0) {
-        args.push('-brightness-contrast', `${brightness}x${contrast}`);
-      }
-      if (saturation !== 100 || hue !== 100) {
-        args.push('-modulate', `100,${saturation},${hue}`);
-      }
-      if (gamma !== 1.0) {
-        args.push('-gamma', String(gamma));
-      }
+        const args = [io.inputLocal];
+        if (brightness !== 0 || contrast !== 0) {
+          args.push('-brightness-contrast', `${brightness}x${contrast}`);
+        }
+        if (saturation !== 100 || hue !== 100) {
+          args.push('-modulate', `100,${saturation},${hue}`);
+        }
+        if (gamma !== 1.0) {
+          args.push('-gamma', String(gamma));
+        }
 
-      args.push(outPath);
-      await magick(args);
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: `Adjusted (b:${brightness} c:${contrast} s:${saturation} h:${hue} g:${gamma}): ${outPath}`,
-          },
-        ],
-      };
+        args.push(io.outputLocal);
+        await magick(args);
+        await io.finalize();
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Adjusted (b:${brightness} c:${contrast} s:${saturation} h:${hue} g:${gamma}): ${io.outputUri}`,
+            },
+          ],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
+      }
     },
   );
 
@@ -66,38 +72,43 @@ export function registerColorTools(server: McpServer): void {
     tintSchema.shape,
     async (params: TintParams) => {
       const { input, output, mode, color, shadow_color, intensity, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, { outputPath: output, suffix: '_tinted', format });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_tinted', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      if (mode === 'duotone') {
-        await magick([
-          input,
-          '-colorspace',
-          'Gray',
-          '-fill',
-          shadow_color,
-          '-tint',
-          '100',
-          '(',
-          '+clone',
-          '-fill',
-          color,
-          '-tint',
-          '100',
-          ')',
-          '-compose',
-          'Screen',
-          '-composite',
-          outPath,
-        ]);
-      } else {
-        await magick([input, '-fill', color, '-tint', String(intensity), outPath]);
+        if (mode === 'duotone') {
+          await magick([
+            io.inputLocal,
+            '-colorspace',
+            'Gray',
+            '-fill',
+            shadow_color,
+            '-tint',
+            '100',
+            '(',
+            '+clone',
+            '-fill',
+            color,
+            '-tint',
+            '100',
+            ')',
+            '-compose',
+            'Screen',
+            '-composite',
+            io.outputLocal,
+          ]);
+        } else {
+          await magick([io.inputLocal, '-fill', color, '-tint', String(intensity), io.outputLocal]);
+        }
+
+        await io.finalize();
+        return {
+          content: [{ type: 'text' as const, text: `${mode} applied (${color}): ${io.outputUri}` }],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
       }
-
-      return {
-        content: [{ type: 'text' as const, text: `${mode} applied (${color}): ${outPath}` }],
-      };
     },
   );
 
@@ -108,32 +119,37 @@ export function registerColorTools(server: McpServer): void {
     blurSchema.shape,
     async (params: BlurParams) => {
       const { input, output, type, radius, sigma, angle, region, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, { outputPath: output, suffix: '_blurred', format });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_blurred', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      const args = [input];
-      if (region) {
-        args.push('-region', `${region.width}x${region.height}+${region.x}+${region.y}`);
+        const args = [io.inputLocal];
+        if (region) {
+          args.push('-region', `${region.width}x${region.height}+${region.x}+${region.y}`);
+        }
+
+        switch (type) {
+          case 'motion':
+            args.push('-motion-blur', `${radius}x${sigma}+${angle}`);
+            break;
+          case 'radial':
+            args.push('-radial-blur', String(sigma));
+            break;
+          default:
+            args.push('-blur', `${radius}x${sigma}`);
+            break;
+        }
+
+        args.push(io.outputLocal);
+        await magick(args);
+        await io.finalize();
+        return {
+          content: [{ type: 'text' as const, text: `Blur (${type}, σ=${sigma}): ${io.outputUri}` }],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
       }
-
-      switch (type) {
-        case 'motion':
-          args.push('-motion-blur', `${radius}x${sigma}+${angle}`);
-          break;
-        case 'radial':
-          args.push('-radial-blur', String(sigma));
-          break;
-        default:
-          args.push('-blur', `${radius}x${sigma}`);
-          break;
-      }
-
-      args.push(outPath);
-      await magick(args);
-      return {
-        content: [{ type: 'text' as const, text: `Blur (${type}, σ=${sigma}): ${outPath}` }],
-      };
     },
   );
 
@@ -144,24 +160,27 @@ export function registerColorTools(server: McpServer): void {
     sharpenSchema.shape,
     async (params: SharpenParams) => {
       const { input, output, type, radius, sigma, amount, threshold, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, {
-        outputPath: output,
-        suffix: '_sharpened',
-        format,
-      });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_sharpened', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      const args = [input];
-      if (type === 'adaptive') {
-        args.push('-adaptive-sharpen', `${radius}x${sigma}`);
-      } else {
-        args.push('-unsharp', `${radius}x${sigma}+${amount}+${threshold}`);
+        const args = [io.inputLocal];
+        if (type === 'adaptive') {
+          args.push('-adaptive-sharpen', `${radius}x${sigma}`);
+        } else {
+          args.push('-unsharp', `${radius}x${sigma}+${amount}+${threshold}`);
+        }
+        args.push(io.outputLocal);
+
+        await magick(args);
+        await io.finalize();
+        return {
+          content: [{ type: 'text' as const, text: `Sharpened (${type}): ${io.outputUri}` }],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
       }
-      args.push(outPath);
-
-      await magick(args);
-      return { content: [{ type: 'text' as const, text: `Sharpened (${type}): ${outPath}` }] };
     },
   );
 
@@ -172,47 +191,52 @@ export function registerColorTools(server: McpServer): void {
     pixelateRegionSchema.shape,
     async (params: PixelateRegionParams) => {
       const { input, output, x, y, width, height, method, block_size, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, { outputPath: output, suffix: '_redacted', format });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_redacted', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      if (method === 'pixelate') {
-        await magick([
-          input,
-          '(',
-          '+clone',
-          '-crop',
-          `${width}x${height}+${x}+${y}`,
-          '+repage',
-          '-scale',
-          `${Math.ceil(width / block_size)}x${Math.ceil(height / block_size)}`,
-          '-scale',
-          `${width}x${height}!`,
-          ')',
-          '-geometry',
-          `+${x}+${y}`,
-          '-composite',
-          outPath,
-        ]);
-      } else {
-        await magick([
-          input,
-          '-region',
-          `${width}x${height}+${x}+${y}`,
-          '-blur',
-          `0x${block_size}`,
-          outPath,
-        ]);
+        if (method === 'pixelate') {
+          await magick([
+            io.inputLocal,
+            '(',
+            '+clone',
+            '-crop',
+            `${width}x${height}+${x}+${y}`,
+            '+repage',
+            '-scale',
+            `${Math.ceil(width / block_size)}x${Math.ceil(height / block_size)}`,
+            '-scale',
+            `${width}x${height}!`,
+            ')',
+            '-geometry',
+            `+${x}+${y}`,
+            '-composite',
+            io.outputLocal,
+          ]);
+        } else {
+          await magick([
+            io.inputLocal,
+            '-region',
+            `${width}x${height}+${x}+${y}`,
+            '-blur',
+            `0x${block_size}`,
+            io.outputLocal,
+          ]);
+        }
+
+        await io.finalize();
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `${method === 'pixelate' ? 'Pixelated' : 'Blurred'} region at (${x},${y}): ${io.outputUri}`,
+            },
+          ],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
       }
-
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: `${method === 'pixelate' ? 'Pixelated' : 'Blurred'} region at (${x},${y}): ${outPath}`,
-          },
-        ],
-      };
     },
   );
 
@@ -223,35 +247,38 @@ export function registerColorTools(server: McpServer): void {
     colorExtractSchema.shape,
     async (params: ColorExtractParams) => {
       const { input, count } = params;
-      await validateInputFile(input);
+      const inR = await resolveInput(input);
+      try {
+        const result = await magick([
+          inR.localPath,
+          '-colors',
+          String(count),
+          '-unique-colors',
+          '-format',
+          '%c',
+          'histogram:info:',
+        ]);
 
-      const result = await magick([
-        input,
-        '-colors',
-        String(count),
-        '-unique-colors',
-        '-format',
-        '%c',
-        'histogram:info:',
-      ]);
-
-      const lines = result.trim().split('\n').filter(Boolean);
-      const colors: string[] = [];
-      for (const line of lines) {
-        const hexMatch = line.match(/#[0-9A-Fa-f]{6}/);
-        if (hexMatch) {
-          colors.push(hexMatch[0]);
+        const lines = result.trim().split('\n').filter(Boolean);
+        const colors: string[] = [];
+        for (const line of lines) {
+          const hexMatch = line.match(/#[0-9A-Fa-f]{6}/);
+          if (hexMatch) {
+            colors.push(hexMatch[0]);
+          }
         }
-      }
 
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: `Dominant colors (${colors.length}):\n${colors.map((c, i) => `${i + 1}. ${c}`).join('\n')}`,
-          },
-        ],
-      };
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Dominant colors (${colors.length}):\n${colors.map((c, i) => `${i + 1}. ${c}`).join('\n')}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+      }
     },
   );
 
@@ -262,23 +289,26 @@ export function registerColorTools(server: McpServer): void {
     normalizeSchema.shape,
     async (params: NormalizeParams) => {
       const { input, output, method, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, {
-        outputPath: output,
-        suffix: '_normalized',
-        format,
-      });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_normalized', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      const flagMap: Record<string, string> = {
-        normalize: '-normalize',
-        equalize: '-equalize',
-        'auto-level': '-auto-level',
-        'auto-gamma': '-auto-gamma',
-      };
+        const flagMap: Record<string, string> = {
+          normalize: '-normalize',
+          equalize: '-equalize',
+          'auto-level': '-auto-level',
+          'auto-gamma': '-auto-gamma',
+        };
 
-      await magick([input, flagMap[method], outPath]);
-      return { content: [{ type: 'text' as const, text: `${method} applied: ${outPath}` }] };
+        await magick([io.inputLocal, flagMap[method], io.outputLocal]);
+        await io.finalize();
+        return {
+          content: [{ type: 'text' as const, text: `${method} applied: ${io.outputUri}` }],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
+      }
     },
   );
 
@@ -289,19 +319,26 @@ export function registerColorTools(server: McpServer): void {
     vignetteSchema.shape,
     async (params: VignetteParams) => {
       const { input, output, radius, sigma, x, y, color, format } = params;
-      await validateInputFile(input);
-      const outPath = resolveOutputPath(input, { outputPath: output, suffix: '_vignette', format });
-      await ensureOutputDir(outPath);
+      const io = await resolveIO({ input, output, suffix: '_vignette', format });
+      try {
+        await ensureOutputDir(io.outputLocal);
 
-      await magick([
-        input,
-        '-background',
-        color,
-        '-vignette',
-        `${radius}x${sigma}+${x}+${y}`,
-        outPath,
-      ]);
-      return { content: [{ type: 'text' as const, text: `Vignette applied: ${outPath}` }] };
+        await magick([
+          io.inputLocal,
+          '-background',
+          color,
+          '-vignette',
+          `${radius}x${sigma}+${x}+${y}`,
+          io.outputLocal,
+        ]);
+        await io.finalize();
+        return {
+          content: [{ type: 'text' as const, text: `Vignette applied: ${io.outputUri}` }],
+        };
+      } catch (err) {
+        await io.cleanup();
+        throw err;
+      }
     },
   );
 }

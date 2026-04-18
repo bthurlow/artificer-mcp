@@ -316,6 +316,370 @@ describe('Workflow Tools', () => {
     });
   });
 
+  // ── workflow_carousel_compose ─────────────────────────────────────────
+
+  describe('workflow_carousel_compose', () => {
+    it('composes multi-element slide: color bg + text + rect', async () => {
+      const result = await client.callTool({
+        name: 'workflow_carousel_compose',
+        arguments: {
+          slides: [
+            {
+              background: { type: 'color', color: '#ffffff' },
+              elements: [
+                {
+                  type: 'text',
+                  content: 'MYTH:',
+                  font_size: 60,
+                  color: '#b0445b',
+                  gravity: 'NorthWest',
+                  x: 80,
+                  y: 100,
+                },
+                {
+                  type: 'rect',
+                  x: 0,
+                  y: 900,
+                  width: 1080,
+                  height: 20,
+                  color: '#b0445b',
+                },
+              ],
+            },
+          ],
+          output_dir: '/tmp/carousel',
+          width: 1080,
+          height: 1080,
+        },
+      });
+
+      expect(mockState.calls).toHaveLength(1);
+      const args = mockState.calls[0].args;
+      // Color background
+      expect(args).toContain('1080x1080');
+      expect(args).toContain('xc:#ffffff');
+      // Text element
+      expect(args).toContain('MYTH:');
+      expect(args).toContain('60');
+      expect(args).toContain('#b0445b');
+      // Rect element
+      expect(args.some((a: string) => a.startsWith('rectangle 0,900,1079,919'))).toBe(true);
+
+      const content = result.content as Array<{ type: string; text: string }>;
+      expect(content[0].text).toContain('1 slides');
+      expect(content[0].text).toContain('2 elements');
+    });
+
+    it('supports image background with overlay', async () => {
+      await client.callTool({
+        name: 'workflow_carousel_compose',
+        arguments: {
+          slides: [
+            {
+              background: {
+                type: 'image',
+                source: '/tmp/bg.jpg',
+                overlay_color: '#00000080',
+              },
+              elements: [
+                {
+                  type: 'text',
+                  content: 'Hello',
+                  font_size: 48,
+                  color: 'white',
+                  gravity: 'Center',
+                  x: 0,
+                  y: 0,
+                },
+              ],
+            },
+          ],
+          output_dir: '/tmp/carousel',
+        },
+      });
+
+      const args = mockState.calls[0].args;
+      expect(args[0]).toBe('/tmp/bg.jpg');
+      expect(args).toContain('xc:#00000080');
+      expect(args).toContain('Hello');
+    });
+
+    it('uses brand.font as default for text elements', async () => {
+      await client.callTool({
+        name: 'workflow_carousel_compose',
+        arguments: {
+          slides: [
+            {
+              background: { type: 'color', color: '#fff' },
+              elements: [
+                {
+                  type: 'text',
+                  content: 'Branded',
+                  font_size: 32,
+                  color: 'black',
+                  gravity: 'NorthWest',
+                  x: 10,
+                  y: 10,
+                },
+              ],
+            },
+          ],
+          output_dir: '/tmp/carousel',
+          brand: { font: '/tmp/DMSans.ttf' },
+        },
+      });
+
+      const args = mockState.calls[0].args;
+      expect(args).toContain('-font');
+      expect(args).toContain('/tmp/DMSans.ttf');
+    });
+
+    it('applies filename_pattern with zero-padded index', async () => {
+      const result = await client.callTool({
+        name: 'workflow_carousel_compose',
+        arguments: {
+          slides: [
+            {
+              background: { type: 'color', color: '#fff' },
+              elements: [],
+            },
+            {
+              background: { type: 'color', color: '#fff' },
+              elements: [],
+            },
+          ],
+          output_dir: '/tmp/carousel',
+          filename_pattern: 'slide_{n:03d}.png',
+        },
+      });
+
+      const content = result.content as Array<{ type: string; text: string }>;
+      const text = content[0].text;
+      expect(text).toContain('slide_001.png');
+      expect(text).toContain('slide_002.png');
+    });
+
+    it('composites image element with resize', async () => {
+      await client.callTool({
+        name: 'workflow_carousel_compose',
+        arguments: {
+          slides: [
+            {
+              background: { type: 'color', color: '#fff' },
+              elements: [
+                {
+                  type: 'image',
+                  source: '/tmp/icon.png',
+                  x: 100,
+                  y: 200,
+                  width: 150,
+                  height: 150,
+                },
+              ],
+            },
+          ],
+          output_dir: '/tmp/carousel',
+        },
+      });
+
+      const args = mockState.calls[0].args;
+      expect(args).toContain('/tmp/icon.png');
+      expect(args).toContain('150x150!');
+      expect(args).toContain('+100+200');
+      expect(args).toContain('-composite');
+    });
+
+    it('draws a line element with stroke width', async () => {
+      await client.callTool({
+        name: 'workflow_carousel_compose',
+        arguments: {
+          slides: [
+            {
+              background: { type: 'color', color: '#fff' },
+              elements: [
+                {
+                  type: 'line',
+                  x1: 100,
+                  y1: 200,
+                  x2: 900,
+                  y2: 200,
+                  color: '#b0445b',
+                  width: 4,
+                },
+              ],
+            },
+          ],
+          output_dir: '/tmp/carousel',
+        },
+      });
+
+      const args = mockState.calls[0].args;
+      expect(args).toContain('-strokewidth');
+      expect(args).toContain('4');
+      expect(args.some((a: string) => a.startsWith('line 100,200 900,200'))).toBe(true);
+    });
+  });
+
+  // ── workflow_ig_reel ───────────────────────────────────────────────────
+
+  describe('workflow_ig_reel', () => {
+    it('runs minimal pipeline: normalize clips + concat + normalize audio + final copy', async () => {
+      const result = await client.callTool({
+        name: 'workflow_ig_reel',
+        arguments: {
+          clips: ['/tmp/a.mp4', '/tmp/b.mp4'],
+          output: '/tmp/reel.mp4',
+        },
+      });
+
+      // Stages for minimal:
+      // 1. normalize each clip (2 calls)
+      // 2. concat (demuxer, 1 call)
+      // 3. normalize audio (1 call)
+      // 4. final copy (1 call)
+      expect(ffmpegState.calls.length).toBe(5);
+
+      // First two calls are clip normalization — should include 1080:1920 scale
+      for (let i = 0; i < 2; i++) {
+        const vf = ffmpegState.calls[i].args[ffmpegState.calls[i].args.indexOf('-vf') + 1];
+        expect(vf).toContain('1080:1920');
+        expect(vf).toContain('format=yuv420p');
+      }
+
+      // The loudnorm filter must be applied
+      const normCall = ffmpegState.calls.find((c) =>
+        c.args.some((a) => typeof a === 'string' && a.includes('loudnorm=I=-14')),
+      );
+      expect(normCall).toBeDefined();
+
+      const content = result.content as Array<{ type: string; text: string }>;
+      expect(content[0].text).toContain('IG Reel composed');
+      expect(content[0].text).toContain('1080×1920');
+    });
+
+    it('adds title + end cards and re-concatenates', async () => {
+      await client.callTool({
+        name: 'workflow_ig_reel',
+        arguments: {
+          clips: ['/tmp/body.mp4'],
+          output: '/tmp/reel.mp4',
+          title_card: { image: '/tmp/title.png', duration_seconds: 2 },
+          end_card: { image: '/tmp/end.png', duration_seconds: 3 },
+        },
+      });
+
+      // Clip normalization (1) + title encode (1) + end encode (1) +
+      // card concat (1) + audio normalize (1) + final copy (1) = 6
+      expect(ffmpegState.calls.length).toBe(6);
+
+      // One call creates the title card from image: -loop 1 with -t 2
+      const titleCall = ffmpegState.calls.find(
+        (c) => c.args.includes('-loop') && c.args.includes('/tmp/title.png'),
+      );
+      expect(titleCall).toBeDefined();
+      const tIdx = titleCall!.args.indexOf('-t');
+      expect(titleCall!.args[tIdx + 1]).toBe('2');
+
+      const endCall = ffmpegState.calls.find(
+        (c) => c.args.includes('-loop') && c.args.includes('/tmp/end.png'),
+      );
+      expect(endCall).toBeDefined();
+    });
+
+    it('mixes music bed with sidechain duck when duck_to is set', async () => {
+      await client.callTool({
+        name: 'workflow_ig_reel',
+        arguments: {
+          clips: ['/tmp/body.mp4'],
+          output: '/tmp/reel.mp4',
+          music: {
+            input: '/tmp/music.mp3',
+            volume: 0.25,
+            duck_to: -12,
+          },
+        },
+      });
+
+      // Find the mix ffmpeg call — it has two inputs (voice + music) and a
+      // filter_complex that includes sidechaincompress.
+      const mixCall = ffmpegState.calls.find((c) => {
+        const fc = c.args.includes('-filter_complex')
+          ? c.args[c.args.indexOf('-filter_complex') + 1]
+          : '';
+        return (
+          typeof fc === 'string' && fc.includes('sidechaincompress') && fc.includes('amix=inputs=2')
+        );
+      });
+      expect(mixCall).toBeDefined();
+    });
+
+    it('burns captions when captions_srt is set', async () => {
+      await client.callTool({
+        name: 'workflow_ig_reel',
+        arguments: {
+          clips: ['/tmp/body.mp4'],
+          output: '/tmp/reel.mp4',
+          captions_srt: '/tmp/captions.srt',
+        },
+      });
+
+      const subCall = ffmpegState.calls.find((c) => {
+        const vf = c.args.includes('-vf') ? c.args[c.args.indexOf('-vf') + 1] : '';
+        return typeof vf === 'string' && vf.includes('subtitles=');
+      });
+      expect(subCall).toBeDefined();
+    });
+
+    it('overlays watermark with gravity-based position', async () => {
+      await client.callTool({
+        name: 'workflow_ig_reel',
+        arguments: {
+          clips: ['/tmp/body.mp4'],
+          output: '/tmp/reel.mp4',
+          watermark: {
+            image: '/tmp/logo.png',
+            gravity: 'SouthEast',
+            x: 40,
+            y: 120,
+            opacity: 0.8,
+          },
+        },
+      });
+
+      const wmCall = ffmpegState.calls.find((c) => {
+        const fc = c.args.includes('-filter_complex')
+          ? c.args[c.args.indexOf('-filter_complex') + 1]
+          : '';
+        return typeof fc === 'string' && fc.includes('overlay=') && fc.includes('colorchannelmixer');
+      });
+      expect(wmCall).toBeDefined();
+      const fc = wmCall!.args[wmCall!.args.indexOf('-filter_complex') + 1];
+      // SouthEast: W-w-40:H-h-120
+      expect(fc).toContain('W-w-40:H-h-120');
+      expect(fc).toContain('aa=0.8');
+    });
+
+    it('applies xfade transition when transition is set', async () => {
+      await client.callTool({
+        name: 'workflow_ig_reel',
+        arguments: {
+          clips: ['/tmp/a.mp4', '/tmp/b.mp4', '/tmp/c.mp4'],
+          output: '/tmp/reel.mp4',
+          transition: 'fade',
+          transition_duration: 0.5,
+        },
+      });
+
+      const xfadeCall = ffmpegState.calls.find((c) => {
+        const fc = c.args.includes('-filter_complex')
+          ? c.args[c.args.indexOf('-filter_complex') + 1]
+          : '';
+        return typeof fc === 'string' && fc.includes('xfade=transition=fade');
+      });
+      expect(xfadeCall).toBeDefined();
+    });
+  });
+
   // ── workflow_ad_creative_set ──────────────────────────────────────────
 
   describe('workflow_ad_creative_set', () => {

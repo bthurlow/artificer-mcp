@@ -403,4 +403,105 @@ describe('Audio Tools', () => {
       expect(af).toContain('stop_threshold=-50dB');
     });
   });
+
+  // ── audio_mix ─────────────────────────────────────────────────────────
+
+  describe('audio_mix', () => {
+    it('mixes two tracks with volume and amix filter', async () => {
+      await client.callTool({
+        name: 'audio_mix',
+        arguments: {
+          tracks: [
+            { input: '/tmp/voice.mp3', volume: 1.0 },
+            { input: '/tmp/music.mp3', volume: 0.3 },
+          ],
+          output: '/tmp/mixed.mp3',
+          duration: 'longest',
+        },
+      });
+
+      const args = ffmpegState.calls[0].args;
+      expect(args).toContain('/tmp/voice.mp3');
+      expect(args).toContain('/tmp/music.mp3');
+      const fc = args[args.indexOf('-filter_complex') + 1];
+      expect(fc).toContain('volume=0.3');
+      expect(fc).toContain('amix=inputs=2');
+      expect(fc).toContain('duration=longest');
+      expect(args[args.indexOf('-map') + 1]).toBe('[aout]');
+    });
+
+    it('applies delay via adelay filter when delay_seconds > 0', async () => {
+      await client.callTool({
+        name: 'audio_mix',
+        arguments: {
+          tracks: [
+            { input: '/tmp/a.mp3' },
+            { input: '/tmp/b.mp3', delay_seconds: 1.5 },
+          ],
+          output: '/tmp/mixed.mp3',
+          duration: 'longest',
+        },
+      });
+
+      const fc = ffmpegState.calls[0].args[
+        ffmpegState.calls[0].args.indexOf('-filter_complex') + 1
+      ];
+      expect(fc).toContain('adelay=1500|1500');
+    });
+
+    it('adds sidechaincompress when ducking params are set', async () => {
+      await client.callTool({
+        name: 'audio_mix',
+        arguments: {
+          tracks: [
+            { input: '/tmp/voice.mp3' },
+            { input: '/tmp/music.mp3' },
+          ],
+          output: '/tmp/mixed.mp3',
+          duration: 'longest',
+          duck_to: -12,
+          duck_against_track: 1,
+        },
+      });
+
+      const fc = ffmpegState.calls[0].args[
+        ffmpegState.calls[0].args.indexOf('-filter_complex') + 1
+      ];
+      expect(fc).toContain('sidechaincompress');
+      expect(fc).toContain('[a1_ducked]');
+    });
+
+    it('errors when duck_to is set without duck_against_track', async () => {
+      const result = await client.callTool({
+        name: 'audio_mix',
+        arguments: {
+          tracks: [{ input: '/tmp/a.mp3' }, { input: '/tmp/b.mp3' }],
+          output: '/tmp/out.mp3',
+          duration: 'longest',
+          duck_to: -10,
+        },
+      });
+
+      const content = result.content as Array<{ type: string; text: string }>;
+      const text = content.map((c) => c.text).join(' ');
+      expect(result.isError === true || /duck_against_track/.test(text)).toBe(true);
+    });
+
+    it('errors when duck_against_track is out of range', async () => {
+      const result = await client.callTool({
+        name: 'audio_mix',
+        arguments: {
+          tracks: [{ input: '/tmp/a.mp3' }, { input: '/tmp/b.mp3' }],
+          output: '/tmp/out.mp3',
+          duration: 'longest',
+          duck_to: -10,
+          duck_against_track: 5,
+        },
+      });
+
+      const content = result.content as Array<{ type: string; text: string }>;
+      const text = content.map((c) => c.text).join(' ');
+      expect(result.isError === true || /out of range/.test(text)).toBe(true);
+    });
+  });
 });

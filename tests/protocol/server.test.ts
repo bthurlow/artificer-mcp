@@ -11,7 +11,7 @@ import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { createTestServerClient } from '../helpers/server.js';
 
 /**
- * All 98 tool names registered by the artificer-mcp server, grouped by category.
+ * All 113 tool names registered by the artificer-mcp server, grouped by category.
  */
 const EXPECTED_TOOLS = {
   core: [
@@ -100,6 +100,8 @@ const EXPECTED_TOOLS = {
     'video_set_bitrate',
     'video_set_codec',
     'video_set_frame_rate',
+    'video_from_image',
+    'video_set_audio',
   ],
   audio: [
     'audio_extract_from_video',
@@ -110,6 +112,7 @@ const EXPECTED_TOOLS = {
     'audio_set_channels',
     'audio_set_sample_rate',
     'audio_remove_silence',
+    'audio_mix',
   ],
   generation: [
     'gemini_generate_image',
@@ -117,17 +120,29 @@ const EXPECTED_TOOLS = {
     'gemini_upscale_image',
     'gemini_generate_video',
     'gemini_nanobanana_generate_image',
+    'gemini_generate_speech',
+    'gemini_generate_music',
+    'gemini_generate_music_live',
   ],
   guides: [
     'gemini_image_prompt_guide',
     'gemini_nanobanana_prompt_guide',
     'veo_video_prompt_guide',
+    'gemini_tts_prompt_guide',
+    'gemini_lyria_prompt_guide',
+    'brand_spec_get',
   ],
   workflows: [
     'workflow_brand_asset_pack',
     'workflow_social_carousel',
+    'workflow_carousel_compose',
     'workflow_talking_head',
     'workflow_ad_creative_set',
+    'workflow_ig_reel',
+    'workflow_tiktok_reel',
+    'workflow_yt_short',
+    'workflow_fb_reel',
+    'workflow_narrated_explainer',
   ],
 } as const;
 
@@ -165,15 +180,15 @@ describe('MCP Protocol — artificer-mcp Server', () => {
   // ── 2. Tool discovery ─────────────────────────────────────────────────────
 
   describe('tool discovery', () => {
-    it('should return exactly 98 tools', () => {
-      expect(tools).toHaveLength(98);
+    it('should return exactly 113 tools', () => {
+      expect(tools).toHaveLength(113);
     });
   });
 
   // ── 3. Tool names ─────────────────────────────────────────────────────────
 
   describe('tool names', () => {
-    it('should contain all 98 expected tool names', () => {
+    it('should contain all 113 expected tool names', () => {
       const registeredNames = tools.map((t) => t.name).sort();
       const expectedNames = [...ALL_TOOL_NAMES].sort();
 
