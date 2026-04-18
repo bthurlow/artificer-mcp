@@ -13,13 +13,16 @@
 
 **artificer-mcp** is a public MCP server for AI-powered creative media generation and processing. One server covering the full creative pipeline:
 
-- **Image generation** via Gemini / Nano Banana
-- **Video generation** via Veo (all 3.1 tiers: Standard, Fast, Lite)
+- **Image generation** via Gemini (Imagen family) + Nano Banana
+- **Video generation** via Veo
+- **Speech generation** via Gemini TTS (prebuilt voices, natural-language style/accent control)
+- **Music generation** via Lyria 3 (batch) + Lyria RealTime (streaming)
 - **Image processing** via ImageMagick (57 tools — resize, composite, text, social cards, ad creatives, app icons, and more)
-- **Video post-processing** via FFmpeg — 6 tools live today: concatenate, trim, change aspect ratio, convert format, change speed, set resolution. More coming in subsequent releases (transitions, overlays, subtitles, b-roll).
+- **Video + audio post-processing** via FFmpeg (16 video + 9 audio tools — concatenate, trim, aspect, transitions, overlays, subtitles, b-roll, encoding controls, image-to-video, audio mixing with sidechain ducking, loudness normalization, and more)
 - **Pluggable storage** — local filesystem + Google Cloud Storage out of the box; S3 / OneDrive stubbed for contribution; 7 storage tools (upload, download, list, delete, exists, public URL, signed URL)
-- **Opinionated workflows** — one-call chains for common patterns (talking-head video, social carousel, brand asset pack)
-- **Prompt guides** — structured prompt guidance per AI provider with official-doc references + field-tested good/bad examples
+- **Opinionated workflows** — one-call chains for common patterns (brand asset pack, social carousel, multi-element carousel compose, talking-head video, ad creative set, 9:16 short-form video for IG/TikTok/YT/FB, narrated explainer)
+- **Brand spec** — one JSON env var (`ARTIFICER_BRAND_SPEC`) defines colors, fonts, TTS voice, music prompt, and logo variants so every tool can soft-default to project-consistent choices
+- **Prompt guides** — structured prompt guidance per AI provider (Imagen, Nano Banana, Veo, Gemini TTS, Lyria) with official-doc references + field-tested good/bad examples
 
 Built for the [Model Context Protocol](https://modelcontextprotocol.io/). Works with Claude Code, Claude Desktop, Cursor, and any MCP-compatible client.
 
@@ -86,6 +89,10 @@ Add to your MCP config:
 | `ARTIFICER_IMAGEN_UPSCALE_MODEL` | Override default model for `gemini_upscale_image` (fallback: `imagen-4.0-upscale-preview`). |
 | `ARTIFICER_VEO_MODEL` | Override default model for `gemini_generate_video` (fallback: `veo-2.0-generate-001`). |
 | `ARTIFICER_NANOBANANA_MODEL` | Override default model for `gemini_nanobanana_generate_image` (fallback: `gemini-2.5-flash-image`). |
+| `ARTIFICER_TTS_MODEL` | Override default model for `gemini_generate_speech` (fallback: `gemini-2.5-flash-preview-tts`). |
+| `ARTIFICER_LYRIA_MODEL` | Override default model for `gemini_generate_music` (fallback: `lyria-3-clip-preview`). Also valid: `lyria-3-pro-preview`. |
+| `ARTIFICER_LYRIA_LIVE_MODEL` | Override default model for `gemini_generate_music_live` (fallback: `models/lyria-realtime-exp`). |
+| `ARTIFICER_BRAND_SPEC` | Optional JSON with project-wide brand defaults (colors, fonts, TTS voice, music prompt, logo variants). All fields optional. See [docs/brand-spec.md](docs/brand-spec.md). |
 
 Per-call `model` args always win over env overrides.
 
@@ -111,10 +118,12 @@ See [docs/](docs/) for detailed documentation per area.
 | Doc | Covers |
 |-----|--------|
 | [docs/storage.md](docs/storage.md) | Storage providers, URI routing, extending with new providers |
-| [docs/image-gen.md](docs/image-gen.md) | Gemini image generation tools, prompt patterns |
-| [docs/video-gen.md](docs/video-gen.md) | Veo video generation tools, tier selection, prompt patterns |
+| [docs/image-gen.md](docs/image-gen.md) | Gemini image generation tools (Imagen + Nano Banana), prompt patterns |
+| [docs/video-gen.md](docs/video-gen.md) | Veo video generation tools, model selection, prompt patterns |
+| [docs/audio-gen.md](docs/audio-gen.md) | Gemini TTS speech generation + Lyria music generation (batch + realtime) |
 | [docs/video-audio-post.md](docs/video-audio-post.md) | FFmpeg-backed video/audio post-processing tools |
 | [docs/workflows.md](docs/workflows.md) | Opinionated compound workflows |
+| [docs/brand-spec.md](docs/brand-spec.md) | Project-wide brand defaults via `ARTIFICER_BRAND_SPEC` |
 | [docs/prompt-guides.md](docs/prompt-guides.md) | How prompt guides are structured and extended |
 | [docs/adr/](docs/adr/) | Architectural decision records |
 
