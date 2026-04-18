@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.9.0](https://github.com/bthurlow/artificer-mcp/compare/v0.8.0...v0.9.0) (2026-04-18)
+
+
+### Features
+
+* brand spec, speech/music generation, carousel+reel+explainer workflows ([914b4eb](https://github.com/bthurlow/artificer-mcp/commit/914b4ebbce354db81b1fed2c52565835db51b629))
+* **video:** add transition option to video_concatenate ([4d09c23](https://github.com/bthurlow/artificer-mcp/commit/4d09c23f9c19cdc01ba76779c871ec896325056b))
+
+
+### Bug Fixes
+
+* **audio:** preserve video stream and pick correct codec when output is a video container ([bf8600d](https://github.com/bthurlow/artificer-mcp/commit/bf8600de6e1b5e6fa8bf12ca4f61ae813a0517fe))
+* **generation:** route image + video writes through storage providers ([b74888c](https://github.com/bthurlow/artificer-mcp/commit/b74888c913fc20af5f37a0fee1c3ea4d3a12d785))
+* **video:** force yuv420p pixel format on xfade-encoded output ([650c74e](https://github.com/bthurlow/artificer-mcp/commit/650c74e65cdfdf932b1dc2e998d6986645dc9065))
+
 ## [0.8.0](https://github.com/bthurlow/artificer-mcp/compare/v0.7.4...v0.8.0) (2026-04-17)
 
 
