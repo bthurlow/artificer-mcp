@@ -1,8 +1,9 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { registerGuideTools } from '../../../src/guides/index.js';
+import { resetBrandSpecCache } from '../../../src/brand.js';
 
 describe('Guide Tools', () => {
   let client: Client;
@@ -65,6 +66,74 @@ describe('Guide Tools', () => {
       expect(text).toContain('## Bad Examples');
       expect(text).toContain('## Image-to-Video Tips');
       expect(text).toContain('## Official References');
+    });
+  });
+
+  describe('gemini_nanobanana_prompt_guide', () => {
+    it('returns structured markdown', async () => {
+      const result = await client.callTool({
+        name: 'gemini_nanobanana_prompt_guide',
+        arguments: {},
+      });
+      const text = (result.content as Array<{ text: string }>)[0].text;
+      expect(text.length).toBeGreaterThan(200);
+      expect(text).toMatch(/nano-?banana|gemini-2\.5-flash-image/i);
+    });
+  });
+
+  describe('gemini_tts_prompt_guide', () => {
+    it('returns structured markdown', async () => {
+      const result = await client.callTool({
+        name: 'gemini_tts_prompt_guide',
+        arguments: {},
+      });
+      const text = (result.content as Array<{ text: string }>)[0].text;
+      expect(text.length).toBeGreaterThan(200);
+      expect(text.toLowerCase()).toContain('voice');
+    });
+  });
+
+  describe('gemini_lyria_prompt_guide', () => {
+    it('returns structured markdown', async () => {
+      const result = await client.callTool({
+        name: 'gemini_lyria_prompt_guide',
+        arguments: {},
+      });
+      const text = (result.content as Array<{ text: string }>)[0].text;
+      expect(text.length).toBeGreaterThan(200);
+      expect(text.toLowerCase()).toContain('lyria');
+    });
+  });
+
+  describe('brand_spec_get', () => {
+    beforeEach(() => {
+      resetBrandSpecCache();
+      delete process.env.ARTIFICER_BRAND_SPEC;
+    });
+
+    it('returns configured:false when env var is unset', async () => {
+      const result = await client.callTool({ name: 'brand_spec_get', arguments: {} });
+      const text = (result.content as Array<{ text: string }>)[0].text;
+      const parsed = JSON.parse(text) as { configured: boolean; hint?: string };
+      expect(parsed.configured).toBe(false);
+      expect(parsed.hint).toMatch(/ARTIFICER_BRAND_SPEC/);
+    });
+
+    it('returns configured:true with parsed spec when env var is set', async () => {
+      process.env.ARTIFICER_BRAND_SPEC = JSON.stringify({
+        name: 'Acme',
+        colors: { primary: '#e11d48' },
+      });
+      resetBrandSpecCache();
+      const result = await client.callTool({ name: 'brand_spec_get', arguments: {} });
+      const text = (result.content as Array<{ text: string }>)[0].text;
+      const parsed = JSON.parse(text) as {
+        configured: boolean;
+        spec: { name: string; colors: { primary: string } };
+      };
+      expect(parsed.configured).toBe(true);
+      expect(parsed.spec.name).toBe('Acme');
+      expect(parsed.spec.colors.primary).toBe('#e11d48');
     });
   });
 });

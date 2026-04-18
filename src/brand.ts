@@ -270,6 +270,7 @@ export function resolveLogoSource(explicit: string | undefined): string | undefi
  *   const { localPath, cleanup } = await stageLogoForRaster(resolveWatermark(explicit));
  *   try { // hand localPath to ffmpeg } finally { await cleanup(); }
  */
+/* v8 ignore start — SVG rasterization path requires ImageMagick; covered by integration tests */
 export async function stageLogoForRaster(
   uri: string | undefined,
   opts: { rasterWidth?: number } = {},
@@ -300,3 +301,4 @@ export async function stageLogoForRaster(
     },
   };
 }
+/* v8 ignore stop */

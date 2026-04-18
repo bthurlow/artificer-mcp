@@ -42,6 +42,7 @@ export async function ffmpeg(
   try {
     const { stderr } = await execFileAsync('ffmpeg', args, { timeout, maxBuffer });
     return stderr;
+    /* v8 ignore start — defensive subprocess error paths, covered by integration tests */
   } catch (error: unknown) {
     const err = error as { stderr?: string; message?: string; killed?: boolean; signal?: string };
     if (err.killed && err.signal === 'SIGTERM') {
@@ -50,6 +51,7 @@ export async function ffmpeg(
     const message = err.stderr || err.message || 'Unknown FFmpeg error';
     throw new Error(`FFmpeg failed: ${message}`, { cause: error });
   }
+  /* v8 ignore stop */
 }
 
 /**
@@ -73,11 +75,13 @@ export async function ffprobe(
   try {
     const { stdout } = await execFileAsync('ffprobe', args, { timeout, maxBuffer });
     return stdout;
+    /* v8 ignore start — defensive subprocess error path, covered by integration tests */
   } catch (error: unknown) {
     const err = error as { stderr?: string; message?: string };
     const message = err.stderr || err.message || 'Unknown ffprobe error';
     throw new Error(`ffprobe failed: ${message}`, { cause: error });
   }
+  /* v8 ignore stop */
 }
 
 /**
