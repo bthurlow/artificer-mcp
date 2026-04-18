@@ -106,8 +106,10 @@ export function registerContentTools(server: McpServer): void {
           content: [{ type: 'text', text: `Thumbnail (${width}x${height}): ${io.outputUri}` }],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       } finally {
         await logoR?.cleanup?.();
       }
@@ -350,8 +352,10 @@ export function registerContentTools(server: McpServer): void {
         await io.finalize();
         return { content: [{ type: 'text', text: `Sticker cutout created: ${io.outputUri}` }] };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );

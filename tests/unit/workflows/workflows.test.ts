@@ -767,3 +767,25 @@ describe('Workflow Tools', () => {
     });
   });
 });
+
+describe('gravityToOverlayExpr', () => {
+  // Imported lazily to avoid pulling in the tool-registration side effects
+  // of src/workflows/index.ts until all the outer mocks are installed.
+  it('emits the correct overlay=W/H expression for each gravity', async () => {
+    const { gravityToOverlayExpr } = await import('../../../src/workflows/index.js');
+    expect(gravityToOverlayExpr('NorthWest', 10, 20)).toBe('10:20');
+    expect(gravityToOverlayExpr('North', 10, 20)).toBe('(W-w)/2+10:20');
+    expect(gravityToOverlayExpr('NorthEast', 10, 20)).toBe('W-w-10:20');
+    expect(gravityToOverlayExpr('West', 10, 20)).toBe('10:(H-h)/2+20');
+    expect(gravityToOverlayExpr('Center', 10, 20)).toBe('(W-w)/2+10:(H-h)/2+20');
+    expect(gravityToOverlayExpr('East', 10, 20)).toBe('W-w-10:(H-h)/2+20');
+    expect(gravityToOverlayExpr('SouthWest', 10, 20)).toBe('10:H-h-20');
+    expect(gravityToOverlayExpr('South', 10, 20)).toBe('(W-w)/2+10:H-h-20');
+    expect(gravityToOverlayExpr('SouthEast', 10, 20)).toBe('W-w-10:H-h-20');
+  });
+
+  it('falls back to NorthWest-equivalent for an unknown gravity', async () => {
+    const { gravityToOverlayExpr } = await import('../../../src/workflows/index.js');
+    expect(gravityToOverlayExpr('Weirdness', 5, 7)).toBe('5:7');
+  });
+});

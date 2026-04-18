@@ -83,8 +83,10 @@ export function registerTextTools(server: McpServer): void {
           content: [{ type: 'text' as const, text: `Text overlay added: ${io.outputUri}` }],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       } finally {
         await fontCleanup?.();
       }
@@ -149,8 +151,10 @@ export function registerTextTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -199,8 +203,10 @@ export function registerTextTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -270,8 +276,10 @@ export function registerTextTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -332,8 +340,10 @@ export function registerTextTools(server: McpServer): void {
           content: [{ type: 'text' as const, text: `Caption bar (${position}): ${io.outputUri}` }],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );

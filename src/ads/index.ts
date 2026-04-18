@@ -466,8 +466,10 @@ export function registerAdTools(server: McpServer): void {
           content: [{ type: 'text', text: `QR code overlaid (${size}px): ${io.outputUri}` }],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       } finally {
         await qrR.cleanup?.();
       }

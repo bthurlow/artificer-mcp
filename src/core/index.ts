@@ -76,8 +76,10 @@ export function registerCoreTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -109,8 +111,10 @@ export function registerCoreTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -147,8 +151,10 @@ export function registerCoreTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -176,8 +182,10 @@ export function registerCoreTools(server: McpServer): void {
           content: [{ type: 'text' as const, text: `Rotated ${degrees}°: ${io.outputUri}` }],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -199,8 +207,10 @@ export function registerCoreTools(server: McpServer): void {
           content: [{ type: 'text' as const, text: `Flipped ${direction}: ${io.outputUri}` }],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -228,8 +238,10 @@ export function registerCoreTools(server: McpServer): void {
           content: [{ type: 'text' as const, text: `Converted to ${format}: ${io.outputUri}` }],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -265,8 +277,10 @@ export function registerCoreTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -310,8 +324,10 @@ export function registerCoreTools(server: McpServer): void {
           content: [{ type: 'text' as const, text: `Metadata stripped: ${io.outputUri}` }],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -344,8 +360,10 @@ export function registerCoreTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );

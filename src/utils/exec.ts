@@ -28,13 +28,11 @@ export async function magick(args: string[], options?: { timeout?: number }): Pr
       // ImageMagick writes some info to stderr that isn't an error
     }
     return stdout;
-    /* v8 ignore start — defensive subprocess error path, covered by integration tests */
   } catch (error: unknown) {
     const err = error as { stderr?: string; message?: string };
     const message = err.stderr || err.message || 'Unknown ImageMagick error';
     throw new Error(`ImageMagick failed: ${message}`, { cause: error });
   }
-  /* v8 ignore stop */
 }
 
 /**
@@ -47,7 +45,6 @@ export async function magickBatch(args: string[]): Promise<string> {
 /**
  * Validate that a file exists and is readable.
  */
-/* v8 ignore start — thin fs.access/stat wrapper; error paths covered by integration tests */
 export async function validateInputFile(filePath: string): Promise<void> {
   try {
     await access(filePath);
@@ -59,7 +56,6 @@ export async function validateInputFile(filePath: string): Promise<void> {
     throw new Error(`Not a file: ${filePath}`);
   }
 }
-/* v8 ignore stop */
 
 /**
  * Ensure the output directory exists, creating it if needed.

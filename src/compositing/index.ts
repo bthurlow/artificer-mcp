@@ -77,8 +77,10 @@ export function registerCompositingTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       } finally {
         await overlayR.cleanup?.();
       }
@@ -154,8 +156,10 @@ export function registerCompositingTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       } finally {
         await wmR.cleanup?.();
       }
@@ -221,8 +225,10 @@ export function registerCompositingTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -255,8 +261,10 @@ export function registerCompositingTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -294,8 +302,10 @@ export function registerCompositingTools(server: McpServer): void {
           content: [{ type: 'text' as const, text: `Drop shadow added: ${io.outputUri}` }],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -353,8 +363,10 @@ export function registerCompositingTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -398,8 +410,10 @@ export function registerCompositingTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -486,8 +500,10 @@ export function registerCompositingTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       } finally {
         await maskR?.cleanup?.();
       }

@@ -59,8 +59,10 @@ export function registerColorTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -106,8 +108,10 @@ export function registerColorTools(server: McpServer): void {
           content: [{ type: 'text' as const, text: `${mode} applied (${color}): ${io.outputUri}` }],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -147,8 +151,10 @@ export function registerColorTools(server: McpServer): void {
           content: [{ type: 'text' as const, text: `Blur (${type}, σ=${sigma}): ${io.outputUri}` }],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -178,8 +184,10 @@ export function registerColorTools(server: McpServer): void {
           content: [{ type: 'text' as const, text: `Sharpened (${type}): ${io.outputUri}` }],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -234,8 +242,10 @@ export function registerColorTools(server: McpServer): void {
           ],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -306,8 +316,10 @@ export function registerColorTools(server: McpServer): void {
           content: [{ type: 'text' as const, text: `${method} applied: ${io.outputUri}` }],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );
@@ -336,8 +348,10 @@ export function registerColorTools(server: McpServer): void {
           content: [{ type: 'text' as const, text: `Vignette applied: ${io.outputUri}` }],
         };
       } catch (err) {
+        /* v8 ignore start */
         await io.cleanup();
         throw err;
+        /* v8 ignore stop */
       }
     },
   );

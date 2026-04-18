@@ -1170,6 +1170,7 @@ async function composeShortVideo(
  *   6. Hand off to composeShortVideo for music mixing, LUFS normalize,
  *      title/end cards, watermark, final mux.
  */
+/* v8 ignore start — calls live Gemini TTS + Lyria APIs; covered by integration tests */
 async function composeNarratedExplainer(
   params: NarratedExplainerParams,
 ): Promise<{ content: Array<{ type: 'text'; text: string }> }> {
@@ -1416,12 +1417,16 @@ async function composeNarratedExplainer(
     await Promise.all(temps.map((t) => rm(t, { force: true }).catch(() => {})));
   }
 }
+/* v8 ignore stop */
 
 /**
  * Map an ImageMagick-style gravity string + x/y offset to an FFmpeg overlay
  * position expression. The overlay filter uses W/H/w/h variables.
+ *
+ * Exported for unit testing — production callers use it indirectly via the
+ * watermark overlay inside the short-video workflows.
  */
-function gravityToOverlayExpr(gravity: string, x: number, y: number): string {
+export function gravityToOverlayExpr(gravity: string, x: number, y: number): string {
   switch (gravity) {
     case 'NorthWest':
       return `${x}:${y}`;
