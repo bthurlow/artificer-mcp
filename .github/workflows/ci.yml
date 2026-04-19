@@ -162,14 +162,17 @@ jobs:
           sudo mv /tmp/magick /usr/local/bin/magick
           magick --version | head -1
       - name: Install FFmpeg (static binary)
-        # Pin via johnvansickle static build so tests run against a known recent version.
+        # BtbN GPL build — unlike johnvansickle's, this includes --enable-libfreetype
+        # and --enable-libfontconfig, so the drawtext filter is available.
+        # Pinned to the n7.1 line (matches the prior 7.0.2 baseline, minor bump only).
         run: |
-          wget -q -O /tmp/ffmpeg.tar.xz https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
+          wget -q -O /tmp/ffmpeg.tar.xz https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n7.1-latest-linux64-gpl-7.1.tar.xz
           mkdir -p /tmp/ffmpeg-extract
-          tar -xf /tmp/ffmpeg.tar.xz -C /tmp/ffmpeg-extract --strip-components=1
+          tar -xf /tmp/ffmpeg.tar.xz -C /tmp/ffmpeg-extract --strip-components=2 --wildcards '*/bin/*'
           sudo mv /tmp/ffmpeg-extract/ffmpeg /usr/local/bin/ffmpeg
           sudo mv /tmp/ffmpeg-extract/ffprobe /usr/local/bin/ffprobe
           ffmpeg -version | head -1
           ffprobe -version | head -1
+          ffmpeg -hide_banner -filters 2>/dev/null | grep -q ' drawtext ' && echo "drawtext filter: OK" || { echo "drawtext filter MISSING"; exit 1; }
       - run: yarn install --frozen-lockfile
       - run: yarn test:integration
