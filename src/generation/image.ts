@@ -4,6 +4,7 @@ import { extname } from 'node:path';
 import { registerTool } from '../utils/register.js';
 import { getGenAIClient } from './client.js';
 import { getProvider } from '../storage/providers/registry.js';
+import { resolveInput } from '../utils/resource.js';
 import {
   type GenerateImageParams,
   type EditImageParams,
@@ -128,48 +129,55 @@ export function registerImageGenTools(server: McpServer): void {
       seed,
     }) => {
       const client = getGenAIClient();
-      const imageBytes = await readFile(image);
+      const imageR = await resolveInput(image);
+      const maskR = mask_image ? await resolveInput(mask_image) : undefined;
+      try {
+        const imageBytes = await readFile(imageR.localPath);
 
-      const referenceImages: Array<RawReferenceImage | MaskReferenceImage> = [
-        {
-          referenceImage: {
-            imageBytes: imageBytes.toString('base64'),
-            mimeType: `image/${(extname(image).slice(1) || 'png').toLowerCase()}`,
-          },
-          referenceType: 'REFERENCE_TYPE_RAW',
-        } as RawReferenceImage,
-      ];
+        const referenceImages: Array<RawReferenceImage | MaskReferenceImage> = [
+          {
+            referenceImage: {
+              imageBytes: imageBytes.toString('base64'),
+              mimeType: `image/${(extname(image).slice(1) || 'png').toLowerCase()}`,
+            },
+            referenceType: 'REFERENCE_TYPE_RAW',
+          } as RawReferenceImage,
+        ];
 
-      if (mask_image) {
-        const maskBytes = await readFile(mask_image);
-        referenceImages.push({
-          referenceImage: {
-            imageBytes: maskBytes.toString('base64'),
-            mimeType: `image/${(extname(mask_image).slice(1) || 'png').toLowerCase()}`,
+        if (maskR) {
+          const maskBytes = await readFile(maskR.localPath);
+          referenceImages.push({
+            referenceImage: {
+              imageBytes: maskBytes.toString('base64'),
+              mimeType: `image/${(extname(mask_image!).slice(1) || 'png').toLowerCase()}`,
+            },
+            referenceType: 'REFERENCE_TYPE_MASK',
+            config: { maskMode: 'MASK_MODE_FOREGROUND' },
+          } as unknown as MaskReferenceImage);
+        }
+
+        const response = await client.models.editImage({
+          model,
+          prompt,
+          referenceImages,
+          config: {
+            editMode: edit_mode as EditMode,
+            negativePrompt: negative_prompt,
+            numberOfImages: number_of_images,
+            seed,
           },
-          referenceType: 'REFERENCE_TYPE_MASK',
-          config: { maskMode: 'MASK_MODE_FOREGROUND' },
-        } as unknown as MaskReferenceImage);
+        });
+
+        const images = response.generatedImages ?? [];
+        const lines = await writeGeneratedImages(images, output);
+
+        return {
+          content: [{ type: 'text', text: lines.join('\n') }],
+        };
+      } finally {
+        await imageR.cleanup?.();
+        await maskR?.cleanup?.();
       }
-
-      const response = await client.models.editImage({
-        model,
-        prompt,
-        referenceImages,
-        config: {
-          editMode: edit_mode as EditMode,
-          negativePrompt: negative_prompt,
-          numberOfImages: number_of_images,
-          seed,
-        },
-      });
-
-      const images = response.generatedImages ?? [];
-      const lines = await writeGeneratedImages(images, output);
-
-      return {
-        content: [{ type: 'text', text: lines.join('\n') }],
-      };
     },
   );
 
@@ -181,26 +189,31 @@ export function registerImageGenTools(server: McpServer): void {
     upscaleImageSchema.shape,
     async ({ model, image, output, upscale_factor }) => {
       const client = getGenAIClient();
-      const imageBytes = await readFile(image);
+      const imageR = await resolveInput(image);
+      try {
+        const imageBytes = await readFile(imageR.localPath);
 
-      const response = await client.models.upscaleImage({
-        model,
-        image: {
-          imageBytes: imageBytes.toString('base64'),
-          mimeType: `image/${(extname(image).slice(1) || 'png').toLowerCase()}`,
-        },
-        upscaleFactor: upscale_factor,
-        config: {
-          outputMimeType: `image/${(extname(output).slice(1) || 'png').toLowerCase()}`,
-        },
-      });
+        const response = await client.models.upscaleImage({
+          model,
+          image: {
+            imageBytes: imageBytes.toString('base64'),
+            mimeType: `image/${(extname(image).slice(1) || 'png').toLowerCase()}`,
+          },
+          upscaleFactor: upscale_factor,
+          config: {
+            outputMimeType: `image/${(extname(output).slice(1) || 'png').toLowerCase()}`,
+          },
+        });
 
-      const images = response.generatedImages ?? [];
-      const lines = await writeGeneratedImages(images, output);
+        const images = response.generatedImages ?? [];
+        const lines = await writeGeneratedImages(images, output);
 
-      return {
-        content: [{ type: 'text', text: lines.join('\n') }],
-      };
+        return {
+          content: [{ type: 'text', text: lines.join('\n') }],
+        };
+      } finally {
+        await imageR.cleanup?.();
+      }
     },
   );
 }

@@ -3,6 +3,7 @@ import { mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { registerTool } from '../utils/register.js';
 import { ffmpegBatch } from '../utils/exec-ffmpeg.js';
+import { resolveInput, resolveOutput } from '../utils/resource.js';
 import {
   type AudioExtractFromVideoParams,
   type AudioNormalizeParams,
@@ -87,23 +88,31 @@ export function registerAudioTools(server: McpServer): void {
     'Extract the audio track from a video file. Use codec="copy" to avoid re-encoding when the source audio codec is compatible with the target container.',
     audioExtractFromVideoSchema.shape,
     async ({ input, output, codec, bitrate }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      const args: string[] = ['-y', '-i', input, '-vn'];
-      const chosenCodec = codec ?? defaultCodecForExt(extOf(output));
-      args.push('-c:a', chosenCodec);
-      if (bitrate) args.push('-b:a', bitrate);
-      args.push(output);
+        const args: string[] = ['-y', '-i', inR.localPath, '-vn'];
+        const chosenCodec = codec ?? defaultCodecForExt(extOf(output));
+        args.push('-c:a', chosenCodec);
+        if (bitrate) args.push('-b:a', bitrate);
+        args.push(outR.localPath);
 
-      await ffmpegBatch(args);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Extracted audio (${chosenCodec}${bitrate ? `, ${bitrate}` : ''}) → ${output}`,
-          },
-        ],
-      };
+        await ffmpegBatch(args);
+        await outR.commit();
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Extracted audio (${chosenCodec}${bitrate ? `, ${bitrate}` : ''}) → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
+      }
     },
   );
 
@@ -114,35 +123,43 @@ export function registerAudioTools(server: McpServer): void {
     'Normalize audio loudness. mode="loudnorm" uses EBU R128 (recommended for streaming/broadcast); mode="peak" uses a simple volume-based peak normalization.',
     audioNormalizeSchema.shape,
     async ({ input, output, mode, target_lufs, target_peak_db }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      let filter: string;
-      if (mode === 'loudnorm') {
-        filter = `loudnorm=I=${target_lufs}:TP=${target_peak_db}:LRA=11`;
-      } else {
-        // Peak normalization via volume filter — simple, not as accurate as loudnorm.
-        filter = `volume=${target_peak_db}dB`;
+        let filter: string;
+        if (mode === 'loudnorm') {
+          filter = `loudnorm=I=${target_lufs}:TP=${target_peak_db}:LRA=11`;
+        } else {
+          // Peak normalization via volume filter — simple, not as accurate as loudnorm.
+          filter = `volume=${target_peak_db}dB`;
+        }
+
+        const ext = extOf(output);
+        const chosenCodec = defaultCodecForExt(ext);
+        const args = ['-y', '-i', inR.localPath, '-af', filter, '-c:a', chosenCodec];
+        // When writing into a video container, keep the video stream as-is so
+        // loudnorm only touches audio. Otherwise ffmpeg re-encodes the video.
+        if (isVideoContainer(ext)) {
+          args.push('-c:v', 'copy');
+        }
+        args.push(outR.localPath);
+        await ffmpegBatch(args);
+        await outR.commit();
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Normalized via ${mode} (target=${target_lufs} LUFS, peak=${target_peak_db} dB) → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
       }
-
-      const ext = extOf(output);
-      const chosenCodec = defaultCodecForExt(ext);
-      const args = ['-y', '-i', input, '-af', filter, '-c:a', chosenCodec];
-      // When writing into a video container, keep the video stream as-is so
-      // loudnorm only touches audio. Otherwise ffmpeg re-encodes the video.
-      if (isVideoContainer(ext)) {
-        args.push('-c:v', 'copy');
-      }
-      args.push(output);
-      await ffmpegBatch(args);
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Normalized via ${mode} (target=${target_lufs} LUFS, peak=${target_peak_db} dB) → ${output}`,
-          },
-        ],
-      };
     },
   );
 
@@ -153,24 +170,32 @@ export function registerAudioTools(server: McpServer): void {
     'Convert audio between container formats (mp3/aac/wav/flac/ogg/m4a/opus). Re-encodes with a sensible codec default per target format.',
     audioConvertFormatSchema.shape,
     async ({ input, output, format, codec }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      const targetExt = format ?? extOf(output);
-      const chosenCodec = codec ?? defaultCodecForExt(targetExt);
+        const targetExt = format ?? extOf(output);
+        const chosenCodec = codec ?? defaultCodecForExt(targetExt);
 
-      const args: string[] = ['-y', '-i', input, '-vn', '-c:a', chosenCodec];
-      if (format) args.push('-f', format);
-      args.push(output);
+        const args: string[] = ['-y', '-i', inR.localPath, '-vn', '-c:a', chosenCodec];
+        if (format) args.push('-f', format);
+        args.push(outR.localPath);
 
-      await ffmpegBatch(args);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Converted → ${output} (codec=${chosenCodec})`,
-          },
-        ],
-      };
+        await ffmpegBatch(args);
+        await outR.commit();
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Converted → ${output} (codec=${chosenCodec})`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
+      }
     },
   );
 
@@ -189,30 +214,38 @@ export function registerAudioTools(server: McpServer): void {
       ) {
         throw new Error('Specify at least one of sample_rate, channels, bitrate, or codec');
       }
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      const chosenCodec = codec ?? defaultCodecForExt(extOf(output));
-      const args: string[] = ['-y', '-i', input, '-vn', '-c:a', chosenCodec];
-      if (sample_rate !== undefined) args.push('-ar', String(sample_rate));
-      if (channels !== undefined) args.push('-ac', String(channels));
-      if (bitrate) args.push('-b:a', bitrate);
-      args.push(output);
+        const chosenCodec = codec ?? defaultCodecForExt(extOf(output));
+        const args: string[] = ['-y', '-i', inR.localPath, '-vn', '-c:a', chosenCodec];
+        if (sample_rate !== undefined) args.push('-ar', String(sample_rate));
+        if (channels !== undefined) args.push('-ac', String(channels));
+        if (bitrate) args.push('-b:a', bitrate);
+        args.push(outR.localPath);
 
-      await ffmpegBatch(args);
+        await ffmpegBatch(args);
+        await outR.commit();
 
-      const parts: string[] = [];
-      if (sample_rate !== undefined) parts.push(`rate=${sample_rate}Hz`);
-      if (channels !== undefined) parts.push(`channels=${channels}`);
-      if (bitrate) parts.push(`bitrate=${bitrate}`);
-      if (codec) parts.push(`codec=${codec}`);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Set audio properties (${parts.join(', ')}) → ${output}`,
-          },
-        ],
-      };
+        const parts: string[] = [];
+        if (sample_rate !== undefined) parts.push(`rate=${sample_rate}Hz`);
+        if (channels !== undefined) parts.push(`channels=${channels}`);
+        if (bitrate) parts.push(`bitrate=${bitrate}`);
+        if (codec) parts.push(`codec=${codec}`);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Set audio properties (${parts.join(', ')}) → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
+      }
     },
   );
 
@@ -223,19 +256,37 @@ export function registerAudioTools(server: McpServer): void {
     'Re-encode audio at a target bitrate. Useful for reducing file size (e.g., 320k → 128k for web delivery).',
     audioSetBitrateSchema.shape,
     async ({ input, output, bitrate, codec }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      const chosenCodec = codec ?? defaultCodecForExt(extOf(output));
-      await ffmpegBatch(['-y', '-i', input, '-vn', '-c:a', chosenCodec, '-b:a', bitrate, output]);
+        const chosenCodec = codec ?? defaultCodecForExt(extOf(output));
+        await ffmpegBatch([
+          '-y',
+          '-i',
+          inR.localPath,
+          '-vn',
+          '-c:a',
+          chosenCodec,
+          '-b:a',
+          bitrate,
+          outR.localPath,
+        ]);
+        await outR.commit();
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Set audio bitrate to ${bitrate} (codec=${chosenCodec}) → ${output}`,
-          },
-        ],
-      };
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Set audio bitrate to ${bitrate} (codec=${chosenCodec}) → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
+      }
     },
   );
 
@@ -246,29 +297,37 @@ export function registerAudioTools(server: McpServer): void {
     'Downmix or upmix audio to a target channel count. 2→1 is a proper stereo-to-mono downmix; 1→2 duplicates the mono channel.',
     audioSetChannelsSchema.shape,
     async ({ input, output, channels, codec }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      const chosenCodec = codec ?? defaultCodecForExt(extOf(output));
-      await ffmpegBatch([
-        '-y',
-        '-i',
-        input,
-        '-vn',
-        '-ac',
-        String(channels),
-        '-c:a',
-        chosenCodec,
-        output,
-      ]);
+        const chosenCodec = codec ?? defaultCodecForExt(extOf(output));
+        await ffmpegBatch([
+          '-y',
+          '-i',
+          inR.localPath,
+          '-vn',
+          '-ac',
+          String(channels),
+          '-c:a',
+          chosenCodec,
+          outR.localPath,
+        ]);
+        await outR.commit();
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Set audio to ${channels} channel${channels === 1 ? '' : 's'} → ${output}`,
-          },
-        ],
-      };
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Set audio to ${channels} channel${channels === 1 ? '' : 's'} → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
+      }
     },
   );
 
@@ -279,29 +338,37 @@ export function registerAudioTools(server: McpServer): void {
     "Resample audio to a target sample rate. Uses FFmpeg's high-quality resampler by default.",
     audioSetSampleRateSchema.shape,
     async ({ input, output, sample_rate, codec }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      const chosenCodec = codec ?? defaultCodecForExt(extOf(output));
-      await ffmpegBatch([
-        '-y',
-        '-i',
-        input,
-        '-vn',
-        '-ar',
-        String(sample_rate),
-        '-c:a',
-        chosenCodec,
-        output,
-      ]);
+        const chosenCodec = codec ?? defaultCodecForExt(extOf(output));
+        await ffmpegBatch([
+          '-y',
+          '-i',
+          inR.localPath,
+          '-vn',
+          '-ar',
+          String(sample_rate),
+          '-c:a',
+          chosenCodec,
+          outR.localPath,
+        ]);
+        await outR.commit();
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Set sample rate to ${sample_rate} Hz → ${output}`,
-          },
-        ],
-      };
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Set sample rate to ${sample_rate} Hz → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
+      }
     },
   );
 
@@ -312,50 +379,67 @@ export function registerAudioTools(server: McpServer): void {
     'Trim silence from audio. remove="both" trims leading/trailing silence (most common); "all" also removes silent sections within the audio (may sound unnatural).',
     audioRemoveSilenceSchema.shape,
     async ({ input, output, threshold_db, min_silence_duration, remove }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      // silenceremove filter params:
-      //   start_periods=1: detect one start-silence period
-      //   stop_periods=-1: detect all later silence periods
-      //   start_duration/stop_duration: min silence to remove
-      //   start_threshold/stop_threshold: detection level in dB
-      //
-      // For "end" only we need to run in reverse since silenceremove only
-      // detects silence forward. Use areverse -> silenceremove -> areverse.
-      let filter: string;
-      const thr = `${threshold_db}dB`;
-      const dur = `${min_silence_duration}`;
+        // silenceremove filter params:
+        //   start_periods=1: detect one start-silence period
+        //   stop_periods=-1: detect all later silence periods
+        //   start_duration/stop_duration: min silence to remove
+        //   start_threshold/stop_threshold: detection level in dB
+        //
+        // For "end" only we need to run in reverse since silenceremove only
+        // detects silence forward. Use areverse -> silenceremove -> areverse.
+        let filter: string;
+        const thr = `${threshold_db}dB`;
+        const dur = `${min_silence_duration}`;
 
-      switch (remove) {
-        case 'start':
-          filter = `silenceremove=start_periods=1:start_duration=${dur}:start_threshold=${thr}`;
-          break;
-        case 'end':
-          filter = `areverse,silenceremove=start_periods=1:start_duration=${dur}:start_threshold=${thr},areverse`;
-          break;
-        case 'both':
-          filter =
-            `silenceremove=start_periods=1:start_duration=${dur}:start_threshold=${thr},` +
-            `areverse,silenceremove=start_periods=1:start_duration=${dur}:start_threshold=${thr},areverse`;
-          break;
-        case 'all':
-          filter =
-            `silenceremove=start_periods=1:start_duration=${dur}:start_threshold=${thr}:` +
-            `stop_periods=-1:stop_duration=${dur}:stop_threshold=${thr}`;
-          break;
+        switch (remove) {
+          case 'start':
+            filter = `silenceremove=start_periods=1:start_duration=${dur}:start_threshold=${thr}`;
+            break;
+          case 'end':
+            filter = `areverse,silenceremove=start_periods=1:start_duration=${dur}:start_threshold=${thr},areverse`;
+            break;
+          case 'both':
+            filter =
+              `silenceremove=start_periods=1:start_duration=${dur}:start_threshold=${thr},` +
+              `areverse,silenceremove=start_periods=1:start_duration=${dur}:start_threshold=${thr},areverse`;
+            break;
+          case 'all':
+            filter =
+              `silenceremove=start_periods=1:start_duration=${dur}:start_threshold=${thr}:` +
+              `stop_periods=-1:stop_duration=${dur}:stop_threshold=${thr}`;
+            break;
+        }
+
+        const chosenCodec = defaultCodecForExt(extOf(output));
+        await ffmpegBatch([
+          '-y',
+          '-i',
+          inR.localPath,
+          '-af',
+          filter,
+          '-c:a',
+          chosenCodec,
+          outR.localPath,
+        ]);
+        await outR.commit();
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Removed silence (${remove}, threshold=${threshold_db}dB, min=${min_silence_duration}s) → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
       }
-
-      const chosenCodec = defaultCodecForExt(extOf(output));
-      await ffmpegBatch(['-y', '-i', input, '-af', filter, '-c:a', chosenCodec, output]);
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Removed silence (${remove}, threshold=${threshold_db}dB, min=${min_silence_duration}s) → ${output}`,
-          },
-        ],
-      };
     },
   );
 
@@ -386,88 +470,97 @@ export function registerAudioTools(server: McpServer): void {
         );
       }
 
-      await mkdir(dirname(output), { recursive: true });
+      // Resolve all track inputs through the storage abstraction.
+      const trackInputRs = await Promise.all(tracks.map((t) => resolveInput(t.input)));
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      // Stage 1: per-track prep filters (volume + delay) → labeled outputs [a0]..[aN]
-      const filterParts: string[] = [];
-      for (let i = 0; i < tracks.length; i++) {
-        const t = tracks[i];
-        const steps: string[] = [];
-        if (t.volume !== undefined && t.volume !== 1) {
-          steps.push(`volume=${t.volume}`);
+        // Stage 1: per-track prep filters (volume + delay) → labeled outputs [a0]..[aN]
+        const filterParts: string[] = [];
+        for (let i = 0; i < tracks.length; i++) {
+          const t = tracks[i];
+          const steps: string[] = [];
+          if (t.volume !== undefined && t.volume !== 1) {
+            steps.push(`volume=${t.volume}`);
+          }
+          if (t.delay_seconds !== undefined && t.delay_seconds > 0) {
+            const delayMs = Math.round(t.delay_seconds * 1000);
+            // adelay needs per-channel values; "|" separator with "all=1" fallback
+            steps.push(`adelay=${delayMs}|${delayMs}`);
+          }
+          // Always include at least one filter so the label chain is valid
+          if (steps.length === 0) steps.push('anull');
+          filterParts.push(`[${i}:a]${steps.join(',')}[a${i}]`);
         }
-        if (t.delay_seconds !== undefined && t.delay_seconds > 0) {
-          const delayMs = Math.round(t.delay_seconds * 1000);
-          // adelay needs per-channel values; "|" separator with "all=1" fallback
-          steps.push(`adelay=${delayMs}|${delayMs}`);
-        }
-        // Always include at least one filter so the label chain is valid
-        if (steps.length === 0) steps.push('anull');
-        filterParts.push(`[${i}:a]${steps.join(',')}[a${i}]`);
-      }
 
-      // Stage 2: sidechain duck (optional) → replaces [a<duck_against_track>] with ducked version
-      let mixInputs: string[] = tracks.map((_, i) => `[a${i}]`);
-      if (duck_to !== undefined && duck_against_track !== undefined) {
-        // sidechaincompress: ratio/threshold derived from duck_to (dB).
-        // Using a fixed high ratio (8) and threshold 0.03 (~-30 dB) with makeup=0.
-        // The "level_sc" of sidechain + our ratio/threshold controls how far music
-        // drops. We encode duck_to as the makeup attenuation: add a post-duck
-        // volume stage that applies the remaining correction.
-        // Simpler + more predictable: use sidechaincompress with threshold=0.05,
-        // ratio=20, attack/release from params, then chain a volume=`duck_to`dB
-        // which ONLY applies when sidechain is triggered (sidechain itself already
-        // attenuates, so we skip the extra volume to avoid double-ducking).
-        const attack = duck_attack_ms / 1000;
-        const release = duck_release_ms / 1000;
-        // Stronger ratio produces deeper duck; we clamp threshold so only audible
-        // voice triggers it.
-        const ratio = Math.max(2, Math.min(20, Math.abs(duck_to) / 2));
+        // Stage 2: sidechain duck (optional) → replaces [a<duck_against_track>] with ducked version
+        let mixInputs: string[] = tracks.map((_, i) => `[a${i}]`);
+        if (duck_to !== undefined && duck_against_track !== undefined) {
+          // sidechaincompress: ratio/threshold derived from duck_to (dB).
+          // Using a fixed high ratio (8) and threshold 0.03 (~-30 dB) with makeup=0.
+          // The "level_sc" of sidechain + our ratio/threshold controls how far music
+          // drops. We encode duck_to as the makeup attenuation: add a post-duck
+          // volume stage that applies the remaining correction.
+          // Simpler + more predictable: use sidechaincompress with threshold=0.05,
+          // ratio=20, attack/release from params, then chain a volume=`duck_to`dB
+          // which ONLY applies when sidechain is triggered (sidechain itself already
+          // attenuates, so we skip the extra volume to avoid double-ducking).
+          const attack = duck_attack_ms / 1000;
+          const release = duck_release_ms / 1000;
+          // Stronger ratio produces deeper duck; we clamp threshold so only audible
+          // voice triggers it.
+          const ratio = Math.max(2, Math.min(20, Math.abs(duck_to) / 2));
+          filterParts.push(
+            `[a${duck_against_track}][a0]sidechaincompress=threshold=0.05:ratio=${ratio}:attack=${Math.round(
+              attack * 1000,
+            )}:release=${Math.round(release * 1000)}:level_sc=1[a${duck_against_track}_ducked]`,
+          );
+          mixInputs = mixInputs.map((label, i) =>
+            i === duck_against_track ? `[a${duck_against_track}_ducked]` : label,
+          );
+        }
+
+        // Stage 3: amix
         filterParts.push(
-          `[a${duck_against_track}][a0]sidechaincompress=threshold=0.05:ratio=${ratio}:attack=${Math.round(
-            attack * 1000,
-          )}:release=${Math.round(release * 1000)}:level_sc=1[a${duck_against_track}_ducked]`,
+          `${mixInputs.join('')}amix=inputs=${tracks.length}:duration=${duration}:dropout_transition=0:normalize=0[aout]`,
         );
-        mixInputs = mixInputs.map((label, i) =>
-          i === duck_against_track ? `[a${duck_against_track}_ducked]` : label,
+
+        const filterComplex = filterParts.join(';');
+
+        const args: string[] = ['-y'];
+        for (const r of trackInputRs) {
+          args.push('-i', r.localPath);
+        }
+        args.push(
+          '-filter_complex',
+          filterComplex,
+          '-map',
+          '[aout]',
+          '-c:a',
+          defaultCodecForExt(output.split('.').pop() ?? ''),
+          outR.localPath,
         );
+
+        await ffmpegBatch(args);
+        await outR.commit();
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Mixed ${tracks.length} tracks${
+                duck_to !== undefined
+                  ? ` (duck track ${duck_against_track} by ${duck_to}dB under track 0)`
+                  : ''
+              } → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await Promise.all(trackInputRs.map((r) => r.cleanup?.()));
+        await outR.cleanup?.();
       }
-
-      // Stage 3: amix
-      filterParts.push(
-        `${mixInputs.join('')}amix=inputs=${tracks.length}:duration=${duration}:dropout_transition=0:normalize=0[aout]`,
-      );
-
-      const filterComplex = filterParts.join(';');
-
-      const args: string[] = ['-y'];
-      for (const t of tracks) {
-        args.push('-i', t.input);
-      }
-      args.push(
-        '-filter_complex',
-        filterComplex,
-        '-map',
-        '[aout]',
-        '-c:a',
-        defaultCodecForExt(output.split('.').pop() ?? ''),
-        output,
-      );
-
-      await ffmpegBatch(args);
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Mixed ${tracks.length} tracks${
-              duck_to !== undefined
-                ? ` (duck track ${duck_against_track} by ${duck_to}dB under track 0)`
-                : ''
-            } → ${output}`,
-          },
-        ],
-      };
     },
   );
 }

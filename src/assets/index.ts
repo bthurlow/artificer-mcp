@@ -2,7 +2,6 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import {
   magick,
   magickBatch,
-  validateInputFile,
   ensureOutputDir,
   IOS_ICON_SIZES,
   ANDROID_ICON_SIZES,
@@ -508,33 +507,37 @@ export function registerAssetTools(server: McpServer): void {
     pdfToImageSchema.shape,
     async (params: PdfToImageParams) => {
       const { input, output_dir, pages, dpi, format, quality } = params;
-      await validateInputFile(input);
-      await ensureOutputDir(join(output_dir, 'placeholder'));
+      const inR = await resolveInput(input);
+      try {
+        await ensureOutputDir(join(output_dir, 'placeholder'));
 
-      const parsed = parse(input);
+        const parsed = parse(input);
 
-      let pageSpec: string;
-      if (pages === 'all') {
-        pageSpec = '';
-      } else if (pages.includes('-')) {
-        const [start, end] = pages.split('-').map(Number);
-        pageSpec = `[${start}-${end}]`;
-      } else {
-        pageSpec = `[${pages}]`;
+        let pageSpec: string;
+        if (pages === 'all') {
+          pageSpec = '';
+        } else if (pages.includes('-')) {
+          const [start, end] = pages.split('-').map(Number);
+          pageSpec = `[${start}-${end}]`;
+        } else {
+          pageSpec = `[${pages}]`;
+        }
+
+        const outPattern = join(output_dir, `${parsed.name}_page_%03d.${format}`);
+
+        await magickBatch([
+          '-density',
+          String(dpi),
+          `${inR.localPath}${pageSpec}`,
+          '-quality',
+          String(quality),
+          outPattern,
+        ]);
+
+        return { content: [{ type: 'text', text: `PDF pages exported to: ${output_dir}` }] };
+      } finally {
+        await inR.cleanup?.();
       }
-
-      const outPattern = join(output_dir, `${parsed.name}_page_%03d.${format}`);
-
-      await magickBatch([
-        '-density',
-        String(dpi),
-        `${input}${pageSpec}`,
-        '-quality',
-        String(quality),
-        outPattern,
-      ]);
-
-      return { content: [{ type: 'text', text: `PDF pages exported to: ${output_dir}` }] };
     },
   );
 

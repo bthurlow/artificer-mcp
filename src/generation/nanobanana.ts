@@ -4,6 +4,7 @@ import { extname } from 'node:path';
 import { registerTool } from '../utils/register.js';
 import { getGenAIClient } from './client.js';
 import { getProvider } from '../storage/providers/registry.js';
+import { resolveInput, type ResolvedInput } from '../utils/resource.js';
 import { type NanobananaGenerateImageParams, nanobananaGenerateImageSchema } from './types.js';
 
 /**
@@ -48,16 +49,24 @@ export function registerNanobananaTools(server: McpServer): void {
     async ({ model, prompt, output, reference_images, aspect_ratio, include_text }) => {
       const client = getGenAIClient();
 
+      // Resolve reference images through the storage abstraction so remote URIs work.
+      const resolvedRefs: ResolvedInput[] = [];
+      if (reference_images) {
+        for (const refPath of reference_images) {
+          resolvedRefs.push(await resolveInput(refPath));
+        }
+      }
+      try {
       // Build the multimodal parts array: prompt text + any reference images.
       const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [
         { text: prompt },
       ];
       if (reference_images) {
-        for (const refPath of reference_images) {
-          const bytes = await readFile(refPath);
+        for (let i = 0; i < reference_images.length; i++) {
+          const bytes = await readFile(resolvedRefs[i].localPath);
           parts.push({
             inlineData: {
-              mimeType: mimeFromPath(refPath),
+              mimeType: mimeFromPath(reference_images[i]),
               data: bytes.toString('base64'),
             },
           });
@@ -122,6 +131,9 @@ export function registerNanobananaTools(server: McpServer): void {
       return {
         content: [{ type: 'text', text: lines.join('\n') }],
       };
+      } finally {
+        await Promise.all(resolvedRefs.map((r) => r.cleanup?.()));
+      }
     },
   );
 }

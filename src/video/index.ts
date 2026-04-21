@@ -9,6 +9,7 @@ import {
   VIDEO_RESOLUTIONS,
 } from '../utils/exec-ffmpeg.js';
 import { tempPath } from '../utils/exec.js';
+import { resolveInput, resolveOutput } from '../utils/resource.js';
 import {
   type VideoConcatenateParams,
   type VideoTrimParams,
@@ -86,104 +87,124 @@ export function registerVideoTools(server: McpServer): void {
     'Concatenate videos end-to-end. By default uses hard cuts (fast stream copy). Pass `transition` (e.g., "fade", "wipeleft") to blend clips with xfade crossfades — this implicitly re-encodes and requires identical resolution/frame rate.',
     videoConcatenateSchema.shape,
     async ({ inputs, output, reencode, transition, transition_duration }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const resolvedInputs = await Promise.all(inputs.map((p) => resolveInput(p)));
+      const localInputs = resolvedInputs.map((r) => r.localPath);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      if (transition) {
-        // Transition mode — chain xfade filters between each pair.
-        // Requires identical resolution/frame rate across inputs.
-        const infos = await Promise.all(inputs.slice(0, -1).map((p) => getVideoInfo(p)));
-
-        const videoChain: string[] = [];
-        const audioChain: string[] = [];
-        let vPrev = '[0:v]';
-        let aPrev = '[0:a]';
-        let runningOffset = 0;
-        for (let i = 0; i < infos.length; i++) {
-          runningOffset += infos[i].durationSeconds - transition_duration;
-          const vLabel = i === infos.length - 1 ? '[vout]' : `[v${i + 1}]`;
-          const aLabel = i === infos.length - 1 ? '[aout]' : `[a${i + 1}]`;
-          videoChain.push(
-            `${vPrev}[${i + 1}:v]xfade=transition=${transition}:duration=${transition_duration}:offset=${runningOffset.toFixed(3)}${vLabel}`,
+        if (transition) {
+          // Transition mode — chain xfade filters between each pair.
+          // Requires identical resolution/frame rate across inputs.
+          const infos = await Promise.all(
+            localInputs.slice(0, -1).map((p) => getVideoInfo(p)),
           );
-          audioChain.push(`${aPrev}[${i + 1}:a]acrossfade=d=${transition_duration}${aLabel}`);
-          vPrev = vLabel;
-          aPrev = aLabel;
-        }
-        const filter = [...videoChain, ...audioChain].join(';');
 
-        const args: string[] = ['-y'];
-        for (const p of inputs) args.push('-i', p);
-        args.push(
-          '-filter_complex',
-          filter,
-          '-map',
-          '[vout]',
-          '-map',
-          '[aout]',
-          '-c:v',
-          'libx264',
-          // Force yuv420p so consumer players (QuickTime, mobile, browsers) can decode.
-          // Without this, libx264 picks yuv444p from some filter-chain inputs and the
-          // output is a 4:4:4 High Predictive profile that most clients can't play.
-          '-pix_fmt',
-          'yuv420p',
-          '-c:a',
-          'aac',
-          output,
-        );
-        await ffmpegBatch(args);
+          const videoChain: string[] = [];
+          const audioChain: string[] = [];
+          let vPrev = '[0:v]';
+          let aPrev = '[0:a]';
+          let runningOffset = 0;
+          for (let i = 0; i < infos.length; i++) {
+            runningOffset += infos[i].durationSeconds - transition_duration;
+            const vLabel = i === infos.length - 1 ? '[vout]' : `[v${i + 1}]`;
+            const aLabel = i === infos.length - 1 ? '[aout]' : `[a${i + 1}]`;
+            videoChain.push(
+              `${vPrev}[${i + 1}:v]xfade=transition=${transition}:duration=${transition_duration}:offset=${runningOffset.toFixed(3)}${vLabel}`,
+            );
+            audioChain.push(`${aPrev}[${i + 1}:a]acrossfade=d=${transition_duration}${aLabel}`);
+            vPrev = vLabel;
+            aPrev = aLabel;
+          }
+          const filter = [...videoChain, ...audioChain].join(';');
+
+          const args: string[] = ['-y'];
+          for (const p of localInputs) args.push('-i', p);
+          args.push(
+            '-filter_complex',
+            filter,
+            '-map',
+            '[vout]',
+            '-map',
+            '[aout]',
+            '-c:v',
+            'libx264',
+            // Force yuv420p so consumer players (QuickTime, mobile, browsers) can decode.
+            // Without this, libx264 picks yuv444p from some filter-chain inputs and the
+            // output is a 4:4:4 High Predictive profile that most clients can't play.
+            '-pix_fmt',
+            'yuv420p',
+            '-c:a',
+            'aac',
+            outR.localPath,
+          );
+          await ffmpegBatch(args);
+          await outR.commit();
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Concatenated ${inputs.length} videos with ${transition} transitions (${transition_duration}s) → ${output}`,
+              },
+            ],
+          };
+        }
+
+        if (!reencode) {
+          // Concat demuxer — fast, requires identical streams.
+          const manifest = localInputs.map((p) => `file ${escapeConcatPath(p)}`).join('\n');
+          const manifestPath = tempPath('.txt');
+          await writeFile(manifestPath, manifest);
+          try {
+            await ffmpegBatch([
+              '-y',
+              '-f',
+              'concat',
+              '-safe',
+              '0',
+              '-i',
+              manifestPath,
+              '-c',
+              'copy',
+              outR.localPath,
+            ]);
+          } finally {
+            await rm(manifestPath, { force: true });
+          }
+        } else {
+          // Concat filter — re-encodes, handles mixed inputs.
+          const args: string[] = ['-y'];
+          for (const p of localInputs) {
+            args.push('-i', p);
+          }
+          const streamSpec = localInputs.map((_, i) => `[${i}:v:0][${i}:a:0]`).join('');
+          const filter = `${streamSpec}concat=n=${inputs.length}:v=1:a=1[outv][outa]`;
+          args.push(
+            '-filter_complex',
+            filter,
+            '-map',
+            '[outv]',
+            '-map',
+            '[outa]',
+            outR.localPath,
+          );
+          await ffmpegBatch(args);
+        }
+        await outR.commit();
 
         return {
           content: [
             {
               type: 'text',
-              text: `Concatenated ${inputs.length} videos with ${transition} transitions (${transition_duration}s) → ${output}`,
+              text: `Concatenated ${inputs.length} videos → ${output} (${reencode ? 're-encoded' : 'stream copy'})`,
             },
           ],
         };
+      } finally {
+        await Promise.all(resolvedInputs.map((r) => r.cleanup?.()));
+        await outR.cleanup?.();
       }
-
-      if (!reencode) {
-        // Concat demuxer — fast, requires identical streams.
-        const manifest = inputs.map((p) => `file ${escapeConcatPath(p)}`).join('\n');
-        const manifestPath = tempPath('.txt');
-        await writeFile(manifestPath, manifest);
-        try {
-          await ffmpegBatch([
-            '-y',
-            '-f',
-            'concat',
-            '-safe',
-            '0',
-            '-i',
-            manifestPath,
-            '-c',
-            'copy',
-            output,
-          ]);
-        } finally {
-          await rm(manifestPath, { force: true });
-        }
-      } else {
-        // Concat filter — re-encodes, handles mixed inputs.
-        const args: string[] = ['-y'];
-        for (const p of inputs) {
-          args.push('-i', p);
-        }
-        const streamSpec = inputs.map((_, i) => `[${i}:v:0][${i}:a:0]`).join('');
-        const filter = `${streamSpec}concat=n=${inputs.length}:v=1:a=1[outv][outa]`;
-        args.push('-filter_complex', filter, '-map', '[outv]', '-map', '[outa]', output);
-        await ffmpegBatch(args);
-      }
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Concatenated ${inputs.length} videos → ${output} (${reencode ? 're-encoded' : 'stream copy'})`,
-          },
-        ],
-      };
     },
   );
 
@@ -197,30 +218,38 @@ export function registerVideoTools(server: McpServer): void {
       if (duration_seconds !== undefined && end_seconds !== undefined) {
         throw new Error('Specify duration_seconds OR end_seconds, not both');
       }
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      const args: string[] = ['-y', '-ss', String(start_seconds), '-i', input];
-      if (duration_seconds !== undefined) {
-        args.push('-t', String(duration_seconds));
-      } else if (end_seconds !== undefined) {
-        args.push('-to', String(end_seconds));
-      }
-      if (reencode) {
-        args.push('-c:v', 'libx264', '-c:a', 'aac');
-      } else {
-        args.push('-c', 'copy');
-      }
-      args.push(output);
+        const args: string[] = ['-y', '-ss', String(start_seconds), '-i', inR.localPath];
+        if (duration_seconds !== undefined) {
+          args.push('-t', String(duration_seconds));
+        } else if (end_seconds !== undefined) {
+          args.push('-to', String(end_seconds));
+        }
+        if (reencode) {
+          args.push('-c:v', 'libx264', '-c:a', 'aac');
+        } else {
+          args.push('-c', 'copy');
+        }
+        args.push(outR.localPath);
 
-      await ffmpegBatch(args);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Trimmed ${input} from ${start_seconds}s → ${output}`,
-          },
-        ],
-      };
+        await ffmpegBatch(args);
+        await outR.commit();
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Trimmed ${input} from ${start_seconds}s → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
+      }
     },
   );
 
@@ -232,36 +261,44 @@ export function registerVideoTools(server: McpServer): void {
     videoChangeAspectRatioSchema.shape,
     async ({ input, output, aspect_ratio, mode, pad_color }) => {
       const { w, h } = parseAspectRatio(aspect_ratio);
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      // Build a filter that either crops to target ratio or pads to it.
-      // Using input width/height via `iw`/`ih`, crop/pad preserves original pixels where possible.
-      const filter =
-        mode === 'crop'
-          ? `crop='if(gt(iw/ih,${w}/${h}),ih*${w}/${h},iw)':'if(gt(iw/ih,${w}/${h}),ih,iw*${h}/${w})'`
-          : `pad=width='if(gt(iw/ih,${w}/${h}),iw,ih*${w}/${h})':height='if(gt(iw/ih,${w}/${h}),iw*${h}/${w},ih)':x='(ow-iw)/2':y='(oh-ih)/2':color=${pad_color}`;
+        // Build a filter that either crops to target ratio or pads to it.
+        // Using input width/height via `iw`/`ih`, crop/pad preserves original pixels where possible.
+        const filter =
+          mode === 'crop'
+            ? `crop='if(gt(iw/ih,${w}/${h}),ih*${w}/${h},iw)':'if(gt(iw/ih,${w}/${h}),ih,iw*${h}/${w})'`
+            : `pad=width='if(gt(iw/ih,${w}/${h}),iw,ih*${w}/${h})':height='if(gt(iw/ih,${w}/${h}),iw*${h}/${w},ih)':x='(ow-iw)/2':y='(oh-ih)/2':color=${pad_color}`;
 
-      await ffmpegBatch([
-        '-y',
-        '-i',
-        input,
-        '-vf',
-        filter,
-        '-c:v',
-        'libx264',
-        '-c:a',
-        'copy',
-        output,
-      ]);
+        await ffmpegBatch([
+          '-y',
+          '-i',
+          inR.localPath,
+          '-vf',
+          filter,
+          '-c:v',
+          'libx264',
+          '-c:a',
+          'copy',
+          outR.localPath,
+        ]);
+        await outR.commit();
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Reframed to ${aspect_ratio} via ${mode} → ${output}`,
-          },
-        ],
-      };
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Reframed to ${aspect_ratio} via ${mode} → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
+      }
     },
   );
 
@@ -272,39 +309,47 @@ export function registerVideoTools(server: McpServer): void {
     'Convert a video to a different container format (mp4/webm/mov/mkv/avi/flv). Re-encodes video/audio to a sensible default for the target container.',
     videoConvertFormatSchema.shape,
     async ({ input, output, format }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      const args: string[] = ['-y', '-i', input];
+        const args: string[] = ['-y', '-i', inR.localPath];
 
-      // Pick sensible codec defaults per target format.
-      const targetExt = (format ?? output.split('.').pop() ?? '').toLowerCase();
-      switch (targetExt) {
-        case 'webm':
-          args.push('-c:v', 'libvpx-vp9', '-c:a', 'libopus');
-          break;
-        case 'mp4':
-        case 'mov':
-          args.push('-c:v', 'libx264', '-c:a', 'aac');
-          break;
-        default:
-          // For mkv/avi/flv, let FFmpeg pick defaults — or fall back to h264/aac.
-          args.push('-c:v', 'libx264', '-c:a', 'aac');
+        // Pick sensible codec defaults per target format.
+        const targetExt = (format ?? output.split('.').pop() ?? '').toLowerCase();
+        switch (targetExt) {
+          case 'webm':
+            args.push('-c:v', 'libvpx-vp9', '-c:a', 'libopus');
+            break;
+          case 'mp4':
+          case 'mov':
+            args.push('-c:v', 'libx264', '-c:a', 'aac');
+            break;
+          default:
+            // For mkv/avi/flv, let FFmpeg pick defaults — or fall back to h264/aac.
+            args.push('-c:v', 'libx264', '-c:a', 'aac');
+        }
+
+        if (format) {
+          args.push('-f', format);
+        }
+        args.push(outR.localPath);
+
+        await ffmpegBatch(args);
+        await outR.commit();
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Converted ${input} → ${output} (${targetExt || format || 'inferred'})`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
       }
-
-      if (format) {
-        args.push('-f', format);
-      }
-      args.push(output);
-
-      await ffmpegBatch(args);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Converted ${input} → ${output} (${targetExt || format || 'inferred'})`,
-          },
-        ],
-      };
     },
   );
 
@@ -316,43 +361,51 @@ export function registerVideoTools(server: McpServer): void {
     videoChangeSpeedSchema.shape,
     async ({ input, output, speed, preserve_audio }) => {
       if (speed <= 0) throw new Error('speed must be positive');
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      // Video: setpts is the inverse of the speed multiplier.
-      // Audio: atempo's valid range is [0.5, 2.0] per filter instance.
-      const vpts = (1 / speed).toFixed(6);
+        // Video: setpts is the inverse of the speed multiplier.
+        // Audio: atempo's valid range is [0.5, 2.0] per filter instance.
+        const vpts = (1 / speed).toFixed(6);
 
-      const args: string[] = ['-y', '-i', input];
-      if (preserve_audio) {
-        if (speed < 0.5 || speed > 2.0) {
-          throw new Error(
-            'preserve_audio=true requires speed in [0.5, 2.0]. Set preserve_audio=false for extreme speeds.',
+        const args: string[] = ['-y', '-i', inR.localPath];
+        if (preserve_audio) {
+          if (speed < 0.5 || speed > 2.0) {
+            throw new Error(
+              'preserve_audio=true requires speed in [0.5, 2.0]. Set preserve_audio=false for extreme speeds.',
+            );
+          }
+          args.push(
+            '-filter_complex',
+            `[0:v]setpts=${vpts}*PTS[v];[0:a]atempo=${speed}[a]`,
+            '-map',
+            '[v]',
+            '-map',
+            '[a]',
           );
+        } else {
+          args.push('-vf', `setpts=${vpts}*PTS`, '-an');
         }
-        args.push(
-          '-filter_complex',
-          `[0:v]setpts=${vpts}*PTS[v];[0:a]atempo=${speed}[a]`,
-          '-map',
-          '[v]',
-          '-map',
-          '[a]',
-        );
-      } else {
-        args.push('-vf', `setpts=${vpts}*PTS`, '-an');
-      }
-      args.push('-c:v', 'libx264');
-      if (preserve_audio) args.push('-c:a', 'aac');
-      args.push(output);
+        args.push('-c:v', 'libx264');
+        if (preserve_audio) args.push('-c:a', 'aac');
+        args.push(outR.localPath);
 
-      await ffmpegBatch(args);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Speed ${speed}× → ${output}${preserve_audio ? '' : ' (audio dropped)'}`,
-          },
-        ],
-      };
+        await ffmpegBatch(args);
+        await outR.commit();
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Speed ${speed}× → ${output}${preserve_audio ? '' : ' (audio dropped)'}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
+      }
     },
   );
 
@@ -363,53 +416,61 @@ export function registerVideoTools(server: McpServer): void {
     'Resize video to a target resolution. Use preset (480p/720p/1080p/1440p/4k) or explicit width/height. preserve_aspect_ratio=true fits within the target box.',
     videoSetResolutionSchema.shape,
     async ({ input, output, width, height, preset, preserve_aspect_ratio }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      let targetW: number;
-      let targetH: number;
-      if (preset) {
-        const p = VIDEO_RESOLUTIONS[preset];
-        if (!p) {
-          throw new Error(
-            `Unknown preset: ${preset}. Known: ${Object.keys(VIDEO_RESOLUTIONS).join(', ')}`,
-          );
+        let targetW: number;
+        let targetH: number;
+        if (preset) {
+          const p = VIDEO_RESOLUTIONS[preset];
+          if (!p) {
+            throw new Error(
+              `Unknown preset: ${preset}. Known: ${Object.keys(VIDEO_RESOLUTIONS).join(', ')}`,
+            );
+          }
+          targetW = p.width;
+          targetH = p.height;
+        } else {
+          if (!width && !height) {
+            throw new Error('Must specify preset, or at least one of width/height');
+          }
+          targetW = width ?? -2;
+          targetH = height ?? -2;
         }
-        targetW = p.width;
-        targetH = p.height;
-      } else {
-        if (!width && !height) {
-          throw new Error('Must specify preset, or at least one of width/height');
-        }
-        targetW = width ?? -2;
-        targetH = height ?? -2;
+
+        // FFmpeg scale filter: -2 means "auto to keep aspect ratio, divisible by 2"
+        const scaleArg = preserve_aspect_ratio
+          ? `scale=${targetW === -2 ? -2 : `'min(${targetW},iw)'`}:${targetH === -2 ? -2 : `'min(${targetH},ih)'`}:force_original_aspect_ratio=decrease`
+          : `scale=${targetW}:${targetH}`;
+
+        await ffmpegBatch([
+          '-y',
+          '-i',
+          inR.localPath,
+          '-vf',
+          scaleArg,
+          '-c:v',
+          'libx264',
+          '-c:a',
+          'copy',
+          outR.localPath,
+        ]);
+        await outR.commit();
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Resized to ${preset ?? `${targetW}x${targetH}`} → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
       }
-
-      // FFmpeg scale filter: -2 means "auto to keep aspect ratio, divisible by 2"
-      const scaleArg = preserve_aspect_ratio
-        ? `scale=${targetW === -2 ? -2 : `'min(${targetW},iw)'`}:${targetH === -2 ? -2 : `'min(${targetH},ih)'`}:force_original_aspect_ratio=decrease`
-        : `scale=${targetW}:${targetH}`;
-
-      await ffmpegBatch([
-        '-y',
-        '-i',
-        input,
-        '-vf',
-        scaleArg,
-        '-c:v',
-        'libx264',
-        '-c:a',
-        'copy',
-        output,
-      ]);
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Resized to ${preset ?? `${targetW}x${targetH}`} → ${output}`,
-          },
-        ],
-      };
     },
   );
 
@@ -420,62 +481,73 @@ export function registerVideoTools(server: McpServer): void {
     'Join videos with xfade transitions between each pair. Inputs must share resolution/frame rate; use video_set_resolution first if not. See FFmpeg xfade docs for transition names.',
     videoAddTransitionsSchema.shape,
     async ({ inputs, output, transition, duration }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const resolvedInputs = await Promise.all(inputs.map((p) => resolveInput(p)));
+      const localInputs = resolvedInputs.map((r) => r.localPath);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      // Probe durations of all but the last input so we can place each xfade at the right offset.
-      const infos = await Promise.all(inputs.slice(0, -1).map((p) => getVideoInfo(p)));
-
-      // Build chained xfade filter:
-      //   [0:v][1:v]xfade=transition=fade:duration=1:offset=<d0 - D>[v01];
-      //   [v01][2:v]xfade=...offset=<d0 + d1 - 2D>[v012];
-      //   Audio handled separately via acrossfade chain.
-      const videoChain: string[] = [];
-      const audioChain: string[] = [];
-      let vPrev = '[0:v]';
-      let aPrev = '[0:a]';
-      let runningOffset = 0;
-      for (let i = 0; i < infos.length; i++) {
-        runningOffset += infos[i].durationSeconds - duration;
-        const vLabel = i === infos.length - 1 ? '[vout]' : `[v${i + 1}]`;
-        const aLabel = i === infos.length - 1 ? '[aout]' : `[a${i + 1}]`;
-        videoChain.push(
-          `${vPrev}[${i + 1}:v]xfade=transition=${transition}:duration=${duration}:offset=${runningOffset.toFixed(3)}${vLabel}`,
+        // Probe durations of all but the last input so we can place each xfade at the right offset.
+        const infos = await Promise.all(
+          localInputs.slice(0, -1).map((p) => getVideoInfo(p)),
         );
-        audioChain.push(`${aPrev}[${i + 1}:a]acrossfade=d=${duration}${aLabel}`);
-        vPrev = vLabel;
-        aPrev = aLabel;
+
+        // Build chained xfade filter:
+        //   [0:v][1:v]xfade=transition=fade:duration=1:offset=<d0 - D>[v01];
+        //   [v01][2:v]xfade=...offset=<d0 + d1 - 2D>[v012];
+        //   Audio handled separately via acrossfade chain.
+        const videoChain: string[] = [];
+        const audioChain: string[] = [];
+        let vPrev = '[0:v]';
+        let aPrev = '[0:a]';
+        let runningOffset = 0;
+        for (let i = 0; i < infos.length; i++) {
+          runningOffset += infos[i].durationSeconds - duration;
+          const vLabel = i === infos.length - 1 ? '[vout]' : `[v${i + 1}]`;
+          const aLabel = i === infos.length - 1 ? '[aout]' : `[a${i + 1}]`;
+          videoChain.push(
+            `${vPrev}[${i + 1}:v]xfade=transition=${transition}:duration=${duration}:offset=${runningOffset.toFixed(3)}${vLabel}`,
+          );
+          audioChain.push(`${aPrev}[${i + 1}:a]acrossfade=d=${duration}${aLabel}`);
+          vPrev = vLabel;
+          aPrev = aLabel;
+        }
+        const filter = [...videoChain, ...audioChain].join(';');
+
+        const args: string[] = ['-y'];
+        for (const p of localInputs) args.push('-i', p);
+        args.push(
+          '-filter_complex',
+          filter,
+          '-map',
+          '[vout]',
+          '-map',
+          '[aout]',
+          '-c:v',
+          'libx264',
+          // yuv420p for consumer-player compatibility — see comment in video_concatenate.
+          '-pix_fmt',
+          'yuv420p',
+          '-c:a',
+          'aac',
+          outR.localPath,
+        );
+
+        await ffmpegBatch(args);
+        await outR.commit();
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Joined ${inputs.length} videos with ${transition} transitions → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await Promise.all(resolvedInputs.map((r) => r.cleanup?.()));
+        await outR.cleanup?.();
       }
-      const filter = [...videoChain, ...audioChain].join(';');
-
-      const args: string[] = ['-y'];
-      for (const p of inputs) args.push('-i', p);
-      args.push(
-        '-filter_complex',
-        filter,
-        '-map',
-        '[vout]',
-        '-map',
-        '[aout]',
-        '-c:v',
-        'libx264',
-        // yuv420p for consumer-player compatibility — see comment in video_concatenate.
-        '-pix_fmt',
-        'yuv420p',
-        '-c:a',
-        'aac',
-        output,
-      );
-
-      await ffmpegBatch(args);
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Joined ${inputs.length} videos with ${transition} transitions → ${output}`,
-          },
-        ],
-      };
     },
   );
 
@@ -486,49 +558,59 @@ export function registerVideoTools(server: McpServer): void {
     'Overlay an image (logo, watermark, badge) on a video. Supports opacity and optional time range.',
     videoAddImageOverlaySchema.shape,
     async ({ input, overlay, output, x, y, opacity, start_seconds, end_seconds }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const overlayR = await resolveInput(overlay);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      // If opacity < 1, pre-apply alpha to the overlay stream.
-      // Time-bound with enable='between(t,start,end)' when either is set.
-      const enableClause =
-        start_seconds !== undefined || end_seconds !== undefined
-          ? `:enable='between(t,${start_seconds ?? 0},${end_seconds ?? 999999})'`
-          : '';
+        // If opacity < 1, pre-apply alpha to the overlay stream.
+        // Time-bound with enable='between(t,start,end)' when either is set.
+        const enableClause =
+          start_seconds !== undefined || end_seconds !== undefined
+            ? `:enable='between(t,${start_seconds ?? 0},${end_seconds ?? 999999})'`
+            : '';
 
-      let filter: string;
-      if (opacity < 1) {
-        filter = `[1:v]format=rgba,colorchannelmixer=aa=${opacity}[ov];[0:v][ov]overlay=${x}:${y}${enableClause}[vout]`;
-      } else {
-        filter = `[0:v][1:v]overlay=${x}:${y}${enableClause}[vout]`;
+        let filter: string;
+        if (opacity < 1) {
+          filter = `[1:v]format=rgba,colorchannelmixer=aa=${opacity}[ov];[0:v][ov]overlay=${x}:${y}${enableClause}[vout]`;
+        } else {
+          filter = `[0:v][1:v]overlay=${x}:${y}${enableClause}[vout]`;
+        }
+
+        await ffmpegBatch([
+          '-y',
+          '-i',
+          inR.localPath,
+          '-i',
+          overlayR.localPath,
+          '-filter_complex',
+          filter,
+          '-map',
+          '[vout]',
+          '-map',
+          '0:a?',
+          '-c:v',
+          'libx264',
+          '-c:a',
+          'copy',
+          outR.localPath,
+        ]);
+        await outR.commit();
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Added image overlay at (${x}, ${y}) → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await overlayR.cleanup?.();
+        await outR.cleanup?.();
       }
-
-      await ffmpegBatch([
-        '-y',
-        '-i',
-        input,
-        '-i',
-        overlay,
-        '-filter_complex',
-        filter,
-        '-map',
-        '[vout]',
-        '-map',
-        '0:a?',
-        '-c:v',
-        'libx264',
-        '-c:a',
-        'copy',
-        output,
-      ]);
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Added image overlay at (${x}, ${y}) → ${output}`,
-          },
-        ],
-      };
     },
   );
 
@@ -553,68 +635,78 @@ export function registerVideoTools(server: McpServer): void {
       start_seconds,
       end_seconds,
     }) => {
-      await mkdir(dirname(output), { recursive: true });
-
-      // Some FFmpeg builds on Windows don't respect `\:` escaping inside
-      // drawtext option values — the filter parser splits on `:` regardless.
-      // Single quotes protect `:` but can't contain `'`. Using a textfile=
-      // approach bypasses all escaping: we write the raw text to a CWD-
-      // relative temp file (just a filename, no directory — so no colons on
-      // Windows), pass its name via textfile=, and clean up after.
-      const textFileName = `.drawtext-${Date.now()}.txt`;
-      await writeFile(textFileName, text);
-
-      const parts: string[] = [
-        `textfile=${textFileName}`,
-        `fontsize=${font_size}`,
-        `fontcolor=${color}`,
-      ];
-      if (font_file) {
-        // Also strip Windows drive-letter colons from the font file path.
-        let fontPath = font_file.replace(/\\/g, '/');
-        if (/^[A-Za-z]:/.test(fontPath)) {
-          const cwd = process.cwd().replace(/\\/g, '/');
-          if (fontPath.toLowerCase().startsWith(cwd.toLowerCase() + '/')) {
-            fontPath = fontPath.slice(cwd.length + 1);
-          }
-        }
-        parts.push(`fontfile=${fontPath}`);
-      }
-      parts.push(`x=${typeof x === 'number' ? x : x}`, `y=${typeof y === 'number' ? y : y}`);
-      if (box) {
-        parts.push('box=1', `boxcolor=${box_color}`, `boxborderw=${box_border_width}`);
-      }
-      if (start_seconds !== undefined || end_seconds !== undefined) {
-        parts.push(`enable='between(t,${start_seconds ?? 0},${end_seconds ?? 999999})'`);
-      }
-
-      const filter = `drawtext=${parts.join(':')}`;
-
+      const inR = await resolveInput(input);
+      const fontR = font_file ? await resolveInput(font_file) : undefined;
+      const outR = await resolveOutput(output);
       try {
-        await ffmpegBatch([
-          '-y',
-          '-i',
-          input,
-          '-vf',
-          filter,
-          '-c:v',
-          'libx264',
-          '-c:a',
-          'copy',
-          output,
-        ]);
-      } finally {
-        await rm(textFileName, { force: true });
-      }
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Added text overlay "${text}" → ${output}`,
-          },
-        ],
-      };
+        // Some FFmpeg builds on Windows don't respect `\:` escaping inside
+        // drawtext option values — the filter parser splits on `:` regardless.
+        // Single quotes protect `:` but can't contain `'`. Using a textfile=
+        // approach bypasses all escaping: we write the raw text to a CWD-
+        // relative temp file (just a filename, no directory — so no colons on
+        // Windows), pass its name via textfile=, and clean up after.
+        const textFileName = `.drawtext-${Date.now()}.txt`;
+        await writeFile(textFileName, text);
+
+        const parts: string[] = [
+          `textfile=${textFileName}`,
+          `fontsize=${font_size}`,
+          `fontcolor=${color}`,
+        ];
+        if (fontR) {
+          // Also strip Windows drive-letter colons from the font file path.
+          let fontPath = fontR.localPath.replace(/\\/g, '/');
+          if (/^[A-Za-z]:/.test(fontPath)) {
+            const cwd = process.cwd().replace(/\\/g, '/');
+            if (fontPath.toLowerCase().startsWith(cwd.toLowerCase() + '/')) {
+              fontPath = fontPath.slice(cwd.length + 1);
+            }
+          }
+          parts.push(`fontfile=${fontPath}`);
+        }
+        parts.push(`x=${typeof x === 'number' ? x : x}`, `y=${typeof y === 'number' ? y : y}`);
+        if (box) {
+          parts.push('box=1', `boxcolor=${box_color}`, `boxborderw=${box_border_width}`);
+        }
+        if (start_seconds !== undefined || end_seconds !== undefined) {
+          parts.push(`enable='between(t,${start_seconds ?? 0},${end_seconds ?? 999999})'`);
+        }
+
+        const filter = `drawtext=${parts.join(':')}`;
+
+        try {
+          await ffmpegBatch([
+            '-y',
+            '-i',
+            inR.localPath,
+            '-vf',
+            filter,
+            '-c:v',
+            'libx264',
+            '-c:a',
+            'copy',
+            outR.localPath,
+          ]);
+        } finally {
+          await rm(textFileName, { force: true });
+        }
+        await outR.commit();
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Added text overlay "${text}" → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await fontR?.cleanup?.();
+        await outR.cleanup?.();
+      }
     },
   );
 
@@ -625,53 +717,63 @@ export function registerVideoTools(server: McpServer): void {
     'Add subtitles from an SRT/VTT/ASS file. burn_in=true renders them into the pixels (always visible); burn_in=false muxes as a soft track (toggleable in player).',
     videoAddSubtitlesSchema.shape,
     async ({ input, output, subtitle_file, burn_in, force_style }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const subR = await resolveInput(subtitle_file);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      if (burn_in) {
-        // Use the `subtitles` filter — requires libass support compiled in.
-        const escaped = escapeSubtitlePath(subtitle_file);
-        const styleClause = force_style ? `:force_style='${force_style}'` : '';
-        const filter = `subtitles='${escaped}'${styleClause}`;
-        await ffmpegBatch([
-          '-y',
-          '-i',
-          input,
-          '-vf',
-          filter,
-          '-c:v',
-          'libx264',
-          '-c:a',
-          'copy',
-          output,
-        ]);
-      } else {
-        // Mux subtitles as a soft track. Codec depends on container; mov_text for mp4/mov.
-        const ext = output.split('.').pop()?.toLowerCase() ?? '';
-        const subCodec = ext === 'mp4' || ext === 'mov' ? 'mov_text' : 'srt';
-        await ffmpegBatch([
-          '-y',
-          '-i',
-          input,
-          '-i',
-          subtitle_file,
-          '-c:v',
-          'copy',
-          '-c:a',
-          'copy',
-          '-c:s',
-          subCodec,
-          output,
-        ]);
+        if (burn_in) {
+          // Use the `subtitles` filter — requires libass support compiled in.
+          const escaped = escapeSubtitlePath(subR.localPath);
+          const styleClause = force_style ? `:force_style='${force_style}'` : '';
+          const filter = `subtitles='${escaped}'${styleClause}`;
+          await ffmpegBatch([
+            '-y',
+            '-i',
+            inR.localPath,
+            '-vf',
+            filter,
+            '-c:v',
+            'libx264',
+            '-c:a',
+            'copy',
+            outR.localPath,
+          ]);
+        } else {
+          // Mux subtitles as a soft track. Codec depends on container; mov_text for mp4/mov.
+          const ext = output.split('.').pop()?.toLowerCase() ?? '';
+          const subCodec = ext === 'mp4' || ext === 'mov' ? 'mov_text' : 'srt';
+          await ffmpegBatch([
+            '-y',
+            '-i',
+            inR.localPath,
+            '-i',
+            subR.localPath,
+            '-c:v',
+            'copy',
+            '-c:a',
+            'copy',
+            '-c:s',
+            subCodec,
+            outR.localPath,
+          ]);
+        }
+        await outR.commit();
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Added subtitles (${burn_in ? 'burned in' : 'soft track'}) → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await subR.cleanup?.();
+        await outR.cleanup?.();
       }
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Added subtitles (${burn_in ? 'burned in' : 'soft track'}) → ${output}`,
-          },
-        ],
-      };
     },
   );
 
@@ -689,95 +791,105 @@ export function registerVideoTools(server: McpServer): void {
       b_roll_duration_seconds,
       replace_main_duration,
     }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const mainR = await resolveInput(main);
+      const bRollR = await resolveInput(b_roll);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      const t0 = insert_at_seconds;
-      const d = b_roll_duration_seconds;
-      const postStart = replace_main_duration ? t0 + d : t0;
+        const t0 = insert_at_seconds;
+        const d = b_roll_duration_seconds;
+        const postStart = replace_main_duration ? t0 + d : t0;
 
-      // Split main into pre (0..t0) and post (postStart..end).
-      // Keep main's audio over both pre and b-roll span (cutaway); then post audio.
-      //
-      // Graph:
-      //  [0:v]trim=0:t0,setpts=PTS-STARTPTS[preV]
-      //  [0:v]trim=postStart,setpts=PTS-STARTPTS[postV]
-      //  [1:v]trim=0:d,setpts=PTS-STARTPTS,scale=...[brV]
-      //  [0:a]atrim=0:t0+d,asetpts=PTS-STARTPTS[firstA]   (keep main audio over cutaway)
-      //  [0:a]atrim=postStart,asetpts=PTS-STARTPTS[postA]
-      //  [preV][firstA][brV][postV][postA]... but that mixes streams oddly.
-      //
-      // Simpler correct graph for replace_main_duration=true:
-      //  video: [preV][brV][postV] concat(v=1,a=0)
-      //  audio: [main_audio_0_to_t0][main_audio_t0_to_t0+d][main_audio_postStart_to_end] concat
-      //          = full main audio from 0..end spliced around the cutaway region,
-      //            BUT since audio covers the whole span naturally, we just use main audio as-is.
-      //
-      // For replace_main_duration=false: insert b-roll with b-roll audio (or silence) in between.
+        // Split main into pre (0..t0) and post (postStart..end).
+        // Keep main's audio over both pre and b-roll span (cutaway); then post audio.
+        //
+        // Graph:
+        //  [0:v]trim=0:t0,setpts=PTS-STARTPTS[preV]
+        //  [0:v]trim=postStart,setpts=PTS-STARTPTS[postV]
+        //  [1:v]trim=0:d,setpts=PTS-STARTPTS,scale=...[brV]
+        //  [0:a]atrim=0:t0+d,asetpts=PTS-STARTPTS[firstA]   (keep main audio over cutaway)
+        //  [0:a]atrim=postStart,asetpts=PTS-STARTPTS[postA]
+        //  [preV][firstA][brV][postV][postA]... but that mixes streams oddly.
+        //
+        // Simpler correct graph for replace_main_duration=true:
+        //  video: [preV][brV][postV] concat(v=1,a=0)
+        //  audio: [main_audio_0_to_t0][main_audio_t0_to_t0+d][main_audio_postStart_to_end] concat
+        //          = full main audio from 0..end spliced around the cutaway region,
+        //            BUT since audio covers the whole span naturally, we just use main audio as-is.
+        //
+        // For replace_main_duration=false: insert b-roll with b-roll audio (or silence) in between.
 
-      const parts: string[] = [];
-      if (replace_main_duration) {
-        parts.push(`[0:v]trim=0:${t0},setpts=PTS-STARTPTS[preV]`);
-        parts.push(`[1:v]trim=0:${d},setpts=PTS-STARTPTS[brV]`);
-        parts.push(`[0:v]trim=${postStart},setpts=PTS-STARTPTS[postV]`);
-        parts.push(`[preV][brV][postV]concat=n=3:v=1:a=0[vout]`);
-        // For audio: keep main's audio continuous — just reuse [0:a] as is.
-        const filter = parts.join(';');
-        await ffmpegBatch([
-          '-y',
-          '-i',
-          main,
-          '-i',
-          b_roll,
-          '-filter_complex',
-          filter,
-          '-map',
-          '[vout]',
-          '-map',
-          '0:a?',
-          '-c:v',
-          'libx264',
-          '-c:a',
-          'aac',
-          output,
-        ]);
-      } else {
-        // Insert b-roll (with its audio) at t0, extending total length by d.
-        parts.push(`[0:v]trim=0:${t0},setpts=PTS-STARTPTS[preV]`);
-        parts.push(`[0:a]atrim=0:${t0},asetpts=PTS-STARTPTS[preA]`);
-        parts.push(`[1:v]trim=0:${d},setpts=PTS-STARTPTS[brV]`);
-        parts.push(`[1:a]atrim=0:${d},asetpts=PTS-STARTPTS[brA]`);
-        parts.push(`[0:v]trim=${t0},setpts=PTS-STARTPTS[postV]`);
-        parts.push(`[0:a]atrim=${t0},asetpts=PTS-STARTPTS[postA]`);
-        parts.push(`[preV][preA][brV][brA][postV][postA]concat=n=3:v=1:a=1[vout][aout]`);
-        const filter = parts.join(';');
-        await ffmpegBatch([
-          '-y',
-          '-i',
-          main,
-          '-i',
-          b_roll,
-          '-filter_complex',
-          filter,
-          '-map',
-          '[vout]',
-          '-map',
-          '[aout]',
-          '-c:v',
-          'libx264',
-          '-c:a',
-          'aac',
-          output,
-        ]);
+        const parts: string[] = [];
+        if (replace_main_duration) {
+          parts.push(`[0:v]trim=0:${t0},setpts=PTS-STARTPTS[preV]`);
+          parts.push(`[1:v]trim=0:${d},setpts=PTS-STARTPTS[brV]`);
+          parts.push(`[0:v]trim=${postStart},setpts=PTS-STARTPTS[postV]`);
+          parts.push(`[preV][brV][postV]concat=n=3:v=1:a=0[vout]`);
+          // For audio: keep main's audio continuous — just reuse [0:a] as is.
+          const filter = parts.join(';');
+          await ffmpegBatch([
+            '-y',
+            '-i',
+            mainR.localPath,
+            '-i',
+            bRollR.localPath,
+            '-filter_complex',
+            filter,
+            '-map',
+            '[vout]',
+            '-map',
+            '0:a?',
+            '-c:v',
+            'libx264',
+            '-c:a',
+            'aac',
+            outR.localPath,
+          ]);
+        } else {
+          // Insert b-roll (with its audio) at t0, extending total length by d.
+          parts.push(`[0:v]trim=0:${t0},setpts=PTS-STARTPTS[preV]`);
+          parts.push(`[0:a]atrim=0:${t0},asetpts=PTS-STARTPTS[preA]`);
+          parts.push(`[1:v]trim=0:${d},setpts=PTS-STARTPTS[brV]`);
+          parts.push(`[1:a]atrim=0:${d},asetpts=PTS-STARTPTS[brA]`);
+          parts.push(`[0:v]trim=${t0},setpts=PTS-STARTPTS[postV]`);
+          parts.push(`[0:a]atrim=${t0},asetpts=PTS-STARTPTS[postA]`);
+          parts.push(`[preV][preA][brV][brA][postV][postA]concat=n=3:v=1:a=1[vout][aout]`);
+          const filter = parts.join(';');
+          await ffmpegBatch([
+            '-y',
+            '-i',
+            mainR.localPath,
+            '-i',
+            bRollR.localPath,
+            '-filter_complex',
+            filter,
+            '-map',
+            '[vout]',
+            '-map',
+            '[aout]',
+            '-c:v',
+            'libx264',
+            '-c:a',
+            'aac',
+            outR.localPath,
+          ]);
+        }
+        await outR.commit();
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Inserted ${d}s of b-roll at ${t0}s (${replace_main_duration ? 'cutaway' : 'additive'}) → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await mainR.cleanup?.();
+        await bRollR.cleanup?.();
+        await outR.cleanup?.();
       }
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Inserted ${d}s of b-roll at ${t0}s (${replace_main_duration ? 'cutaway' : 'additive'}) → ${output}`,
-          },
-        ],
-      };
     },
   );
 
@@ -791,48 +903,63 @@ export function registerVideoTools(server: McpServer): void {
       if (!video_bitrate && !audio_bitrate) {
         throw new Error('Specify at least one of video_bitrate or audio_bitrate');
       }
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      const baseArgs: string[] = ['-y', '-i', input, '-c:v', 'libx264'];
-      if (video_bitrate) baseArgs.push('-b:v', video_bitrate);
-      if (audio_bitrate) baseArgs.push('-c:a', 'aac', '-b:a', audio_bitrate);
-      else baseArgs.push('-c:a', 'copy');
+        const baseArgs: string[] = ['-y', '-i', inR.localPath, '-c:v', 'libx264'];
+        if (video_bitrate) baseArgs.push('-b:v', video_bitrate);
+        if (audio_bitrate) baseArgs.push('-c:a', 'aac', '-b:a', audio_bitrate);
+        else baseArgs.push('-c:a', 'copy');
 
-      if (two_pass && video_bitrate) {
-        const passLog = tempPath('.log');
-        try {
-          // Pass 1: write null output, just collect stats.
-          await ffmpegBatch([
-            ...baseArgs,
-            '-pass',
-            '1',
-            '-passlogfile',
-            passLog,
-            '-f',
-            'mp4',
-            '/dev/null',
-          ]);
-          // Pass 2: encode with stats.
-          await ffmpegBatch([...baseArgs, '-pass', '2', '-passlogfile', passLog, output]);
-        } finally {
-          await rm(`${passLog}-0.log`, { force: true }).catch(() => {});
-          await rm(`${passLog}-0.log.mbtree`, { force: true }).catch(() => {});
+        if (two_pass && video_bitrate) {
+          const passLog = tempPath('.log');
+          try {
+            // Pass 1: write null output, just collect stats.
+            await ffmpegBatch([
+              ...baseArgs,
+              '-pass',
+              '1',
+              '-passlogfile',
+              passLog,
+              '-f',
+              'mp4',
+              '/dev/null',
+            ]);
+            // Pass 2: encode with stats.
+            await ffmpegBatch([
+              ...baseArgs,
+              '-pass',
+              '2',
+              '-passlogfile',
+              passLog,
+              outR.localPath,
+            ]);
+          } finally {
+            await rm(`${passLog}-0.log`, { force: true }).catch(() => {});
+            await rm(`${passLog}-0.log.mbtree`, { force: true }).catch(() => {});
+          }
+        } else {
+          await ffmpegBatch([...baseArgs, outR.localPath]);
         }
-      } else {
-        await ffmpegBatch([...baseArgs, output]);
-      }
+        await outR.commit();
 
-      const parts: string[] = [];
-      if (video_bitrate) parts.push(`video=${video_bitrate}`);
-      if (audio_bitrate) parts.push(`audio=${audio_bitrate}`);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Set bitrate (${parts.join(', ')}${two_pass ? ', 2-pass' : ''}) → ${output}`,
-          },
-        ],
-      };
+        const parts: string[] = [];
+        if (video_bitrate) parts.push(`video=${video_bitrate}`);
+        if (audio_bitrate) parts.push(`audio=${audio_bitrate}`);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Set bitrate (${parts.join(', ')}${two_pass ? ', 2-pass' : ''}) → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
+      }
     },
   );
 
@@ -846,32 +973,40 @@ export function registerVideoTools(server: McpServer): void {
       if (!video_codec && !audio_codec) {
         throw new Error('Specify at least one of video_codec or audio_codec');
       }
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      const args: string[] = ['-y', '-i', input];
-      if (video_codec) args.push('-c:v', video_codec);
-      else args.push('-c:v', 'copy');
-      if (audio_codec) args.push('-c:a', audio_codec);
-      else args.push('-c:a', 'copy');
-      if (crf !== undefined) args.push('-crf', String(crf));
-      if (preset) args.push('-preset', preset);
-      args.push(output);
+        const args: string[] = ['-y', '-i', inR.localPath];
+        if (video_codec) args.push('-c:v', video_codec);
+        else args.push('-c:v', 'copy');
+        if (audio_codec) args.push('-c:a', audio_codec);
+        else args.push('-c:a', 'copy');
+        if (crf !== undefined) args.push('-crf', String(crf));
+        if (preset) args.push('-preset', preset);
+        args.push(outR.localPath);
 
-      await ffmpegBatch(args);
+        await ffmpegBatch(args);
+        await outR.commit();
 
-      const parts: string[] = [];
-      if (video_codec) parts.push(`v=${video_codec}`);
-      if (audio_codec) parts.push(`a=${audio_codec}`);
-      if (crf !== undefined) parts.push(`crf=${crf}`);
-      if (preset) parts.push(`preset=${preset}`);
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Set codec (${parts.join(', ')}) → ${output}`,
-          },
-        ],
-      };
+        const parts: string[] = [];
+        if (video_codec) parts.push(`v=${video_codec}`);
+        if (audio_codec) parts.push(`a=${audio_codec}`);
+        if (crf !== undefined) parts.push(`crf=${crf}`);
+        if (preset) parts.push(`preset=${preset}`);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Set codec (${parts.join(', ')}) → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
+      }
     },
   );
 
@@ -882,26 +1017,34 @@ export function registerVideoTools(server: McpServer): void {
     'Change video frame rate. drop_duplicate_frames=true uses the fps filter (preserves duration by dropping/duplicating frames); false uses -r (simpler but may stretch timing).',
     videoSetFrameRateSchema.shape,
     async ({ input, output, frame_rate, drop_duplicate_frames }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      const args: string[] = ['-y', '-i', input];
-      if (drop_duplicate_frames) {
-        args.push('-vf', `fps=${frame_rate}`);
-      } else {
-        args.push('-r', String(frame_rate));
+        const args: string[] = ['-y', '-i', inR.localPath];
+        if (drop_duplicate_frames) {
+          args.push('-vf', `fps=${frame_rate}`);
+        } else {
+          args.push('-r', String(frame_rate));
+        }
+        args.push('-c:v', 'libx264', '-c:a', 'copy', outR.localPath);
+
+        await ffmpegBatch(args);
+        await outR.commit();
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Set frame rate to ${frame_rate} fps → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
       }
-      args.push('-c:v', 'libx264', '-c:a', 'copy', output);
-
-      await ffmpegBatch(args);
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Set frame rate to ${frame_rate} fps → ${output}`,
-          },
-        ],
-      };
     },
   );
 
@@ -912,44 +1055,54 @@ export function registerVideoTools(server: McpServer): void {
     'Create a short video clip from a still image — ideal for title cards, end cards, or static intros. Loops the image for duration_seconds and encodes with yuv420p for consumer-player compatibility. Optional audio track can be muxed in; otherwise the clip is silent.',
     videoFromImageSchema.shape,
     async ({ input, output, duration_seconds, frame_rate, width, height, audio }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const audioR = audio ? await resolveInput(audio) : undefined;
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      const args = ['-y', '-loop', '1', '-i', input];
-      if (audio) {
-        args.push('-i', audio);
+        const args = ['-y', '-loop', '1', '-i', inR.localPath];
+        if (audioR) {
+          args.push('-i', audioR.localPath);
+        }
+
+        const vf: string[] = [];
+        if (width || height) {
+          const wExpr = width ?? -2;
+          const hExpr = height ?? -2;
+          vf.push(`scale=${wExpr}:${hExpr}:flags=lanczos`);
+        }
+        // Consumer-player safe pixel format — see video_concatenate note.
+        vf.push('format=yuv420p');
+
+        args.push('-vf', vf.join(','));
+        args.push('-r', String(frame_rate));
+        args.push('-t', String(duration_seconds));
+        args.push('-c:v', 'libx264', '-pix_fmt', 'yuv420p');
+
+        if (audioR) {
+          args.push('-c:a', 'aac', '-shortest');
+        } else {
+          args.push('-an');
+        }
+
+        args.push(outR.localPath);
+        await ffmpegBatch(args);
+        await outR.commit();
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Image-to-video clip (${duration_seconds}s @ ${frame_rate}fps) → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await audioR?.cleanup?.();
+        await outR.cleanup?.();
       }
-
-      const vf: string[] = [];
-      if (width || height) {
-        const wExpr = width ?? -2;
-        const hExpr = height ?? -2;
-        vf.push(`scale=${wExpr}:${hExpr}:flags=lanczos`);
-      }
-      // Consumer-player safe pixel format — see video_concatenate note.
-      vf.push('format=yuv420p');
-
-      args.push('-vf', vf.join(','));
-      args.push('-r', String(frame_rate));
-      args.push('-t', String(duration_seconds));
-      args.push('-c:v', 'libx264', '-pix_fmt', 'yuv420p');
-
-      if (audio) {
-        args.push('-c:a', 'aac', '-shortest');
-      } else {
-        args.push('-an');
-      }
-
-      args.push(output);
-      await ffmpegBatch(args);
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Image-to-video clip (${duration_seconds}s @ ${frame_rate}fps) → ${output}`,
-          },
-        ],
-      };
     },
   );
 
@@ -960,38 +1113,48 @@ export function registerVideoTools(server: McpServer): void {
     'Replace (or add) an audio track on a video by muxing in a new audio file. Video stream is stream-copied (no re-encode). Use this after mixing dialogue + music with audio_mix to attach the final soundtrack to a finished video.',
     videoSetAudioSchema.shape,
     async ({ input, output, audio, audio_codec, shortest }) => {
-      await mkdir(dirname(output), { recursive: true });
+      const inR = await resolveInput(input);
+      const audioR = await resolveInput(audio);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
 
-      const args = [
-        '-y',
-        '-i',
-        input,
-        '-i',
-        audio,
-        '-map',
-        '0:v:0',
-        '-map',
-        '1:a:0',
-        '-c:v',
-        'copy',
-        '-c:a',
-        audio_codec,
-      ];
-      if (shortest) {
-        args.push('-shortest');
+        const args = [
+          '-y',
+          '-i',
+          inR.localPath,
+          '-i',
+          audioR.localPath,
+          '-map',
+          '0:v:0',
+          '-map',
+          '1:a:0',
+          '-c:v',
+          'copy',
+          '-c:a',
+          audio_codec,
+        ];
+        if (shortest) {
+          args.push('-shortest');
+        }
+        args.push(outR.localPath);
+
+        await ffmpegBatch(args);
+        await outR.commit();
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Set audio track (codec=${audio_codec}${shortest ? ', shortest' : ''}) → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await audioR.cleanup?.();
+        await outR.cleanup?.();
       }
-      args.push(output);
-
-      await ffmpegBatch(args);
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Set audio track (codec=${audio_codec}${shortest ? ', shortest' : ''}) → ${output}`,
-          },
-        ],
-      };
     },
   );
 }

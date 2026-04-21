@@ -25,13 +25,16 @@ export interface ResolvedInput {
  * the local file and writes it via the matching storage provider, then
  * removes the temp file.
  *
- * Tools MUST call `commit()` after writing the local file.
+ * Tools MUST call `commit()` after writing the local file, and
+ * `cleanup?.()` in a finally block to remove temps on error paths.
  */
 export interface ResolvedOutput {
   /** Local filesystem path to write output to. */
   localPath: string;
   /** Upload the local file to its destination URI (no-op for local paths). */
   commit: () => Promise<void>;
+  /** Remove the temp file on error paths. Undefined for local outputs. Idempotent with commit(). */
+  cleanup?: () => Promise<void>;
 }
 
 /**
@@ -108,6 +111,9 @@ export async function resolveOutput(location: string): Promise<ResolvedOutput> {
     commit: async () => {
       const bytes = await readFile(localPath);
       await provider.write(location, bytes, guessMime(location));
+      await rm(localPath, { force: true });
+    },
+    cleanup: async () => {
       await rm(localPath, { force: true });
     },
   };
