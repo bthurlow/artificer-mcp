@@ -52,7 +52,7 @@ export function registerVideoGenTools(server: McpServer): void {
           const imageBytes = await readFile(imageR.localPath);
           inputImage = {
             imageBytes: imageBytes.toString('base64'),
-            mimeType: `image/${(extname(image!).slice(1) || 'png').toLowerCase()}`,
+            mimeType: `image/${(extname(image ?? '').slice(1) || 'png').toLowerCase()}`,
           };
         }
 

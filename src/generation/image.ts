@@ -149,7 +149,7 @@ export function registerImageGenTools(server: McpServer): void {
           referenceImages.push({
             referenceImage: {
               imageBytes: maskBytes.toString('base64'),
-              mimeType: `image/${(extname(mask_image!).slice(1) || 'png').toLowerCase()}`,
+              mimeType: `image/${(extname(mask_image ?? '').slice(1) || 'png').toLowerCase()}`,
             },
             referenceType: 'REFERENCE_TYPE_MASK',
             config: { maskMode: 'MASK_MODE_FOREGROUND' },
