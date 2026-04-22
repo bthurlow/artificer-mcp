@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.9.1](https://github.com/bthurlow/artificer-mcp/compare/v0.9.0...v0.9.1) (2026-04-22)
+
+
+### Bug Fixes
+
+* failing  format  check  on ci ([5b0b761](https://github.com/bthurlow/artificer-mcp/commit/5b0b761356ccdb4f3537f0b1f2c239f76282ff9a))
+* replace non-null assertions with nullish coalescing to satisfy eslint ([79c6174](https://github.com/bthurlow/artificer-mcp/commit/79c6174d5522048b07cf33b60b5b27238d0ce340))
+* route all input and output params through storage abstraction for remote URI support ([bc986da](https://github.com/bthurlow/artificer-mcp/commit/bc986daa8053b966b28edcf682614401bb36e96c))
+
 ## [0.9.0](https://github.com/bthurlow/artificer-mcp/compare/v0.8.0...v0.9.0) (2026-04-18)
 
 
