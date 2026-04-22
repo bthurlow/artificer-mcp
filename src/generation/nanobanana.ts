@@ -57,80 +57,80 @@ export function registerNanobananaTools(server: McpServer): void {
         }
       }
       try {
-      // Build the multimodal parts array: prompt text + any reference images.
-      const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [
-        { text: prompt },
-      ];
-      if (reference_images) {
-        for (let i = 0; i < reference_images.length; i++) {
-          const bytes = await readFile(resolvedRefs[i].localPath);
-          parts.push({
-            inlineData: {
-              mimeType: mimeFromPath(reference_images[i]),
-              data: bytes.toString('base64'),
-            },
-          });
+        // Build the multimodal parts array: prompt text + any reference images.
+        const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [
+          { text: prompt },
+        ];
+        if (reference_images) {
+          for (let i = 0; i < reference_images.length; i++) {
+            const bytes = await readFile(resolvedRefs[i].localPath);
+            parts.push({
+              inlineData: {
+                mimeType: mimeFromPath(reference_images[i]),
+                data: bytes.toString('base64'),
+              },
+            });
+          }
         }
-      }
 
-      const responseModalities = include_text ? ['IMAGE', 'TEXT'] : ['IMAGE'];
+        const responseModalities = include_text ? ['IMAGE', 'TEXT'] : ['IMAGE'];
 
-      // Nano-banana models take aspect ratio as a generation-config hint when supported.
-      const config: Record<string, unknown> = { responseModalities };
-      if (aspect_ratio) {
-        config.imageConfig = { aspectRatio: aspect_ratio };
-      }
-
-      // The @google/genai SDK typings for generateContent are strict on unions;
-      // cast through unknown for the multimodal parts + imageConfig fields.
-      const response = await client.models.generateContent({
-        model,
-        contents: [{ role: 'user', parts }],
-        config,
-      } as unknown as Parameters<typeof client.models.generateContent>[0]);
-
-      const candidate = response.candidates?.[0];
-      const responseParts = candidate?.content?.parts ?? [];
-
-      const lines: string[] = [];
-      let written = 0;
-      let imageIndex = 0;
-      const ext = extname(output) || '.png';
-      const base = output.slice(0, -ext.length);
-
-      for (const part of responseParts) {
-        const inline = (part as { inlineData?: { data?: string; mimeType?: string } }).inlineData;
-        const text = (part as { text?: string }).text;
-        if (inline?.data) {
-          imageIndex++;
-          const path = imageIndex === 1 ? output : `${base}_${imageIndex}${ext}`;
-          const bytes = Buffer.from(inline.data, 'base64');
-          await getProvider(path).write(path, bytes, inline.mimeType ?? 'image/png');
-          written++;
-          lines.push(`Image ${imageIndex}: saved to ${path}`);
-        } else if (text) {
-          lines.push(`Text: ${text}`);
+        // Nano-banana models take aspect ratio as a generation-config hint when supported.
+        const config: Record<string, unknown> = { responseModalities };
+        if (aspect_ratio) {
+          config.imageConfig = { aspectRatio: aspect_ratio };
         }
-      }
 
-      if (written === 0) {
-        const finishReason = candidate?.finishReason;
-        const safety = candidate?.safetyRatings
-          ?.filter((r) => r.blocked)
-          ?.map((r) => r.category)
-          ?.join(', ');
-        const reason =
-          safety && safety.length > 0
-            ? `blocked by safety filter (${safety})`
-            : finishReason
-              ? `finishReason=${finishReason}`
-              : 'no image data returned';
-        lines.unshift(`No images were generated — ${reason}.`);
-      }
+        // The @google/genai SDK typings for generateContent are strict on unions;
+        // cast through unknown for the multimodal parts + imageConfig fields.
+        const response = await client.models.generateContent({
+          model,
+          contents: [{ role: 'user', parts }],
+          config,
+        } as unknown as Parameters<typeof client.models.generateContent>[0]);
 
-      return {
-        content: [{ type: 'text', text: lines.join('\n') }],
-      };
+        const candidate = response.candidates?.[0];
+        const responseParts = candidate?.content?.parts ?? [];
+
+        const lines: string[] = [];
+        let written = 0;
+        let imageIndex = 0;
+        const ext = extname(output) || '.png';
+        const base = output.slice(0, -ext.length);
+
+        for (const part of responseParts) {
+          const inline = (part as { inlineData?: { data?: string; mimeType?: string } }).inlineData;
+          const text = (part as { text?: string }).text;
+          if (inline?.data) {
+            imageIndex++;
+            const path = imageIndex === 1 ? output : `${base}_${imageIndex}${ext}`;
+            const bytes = Buffer.from(inline.data, 'base64');
+            await getProvider(path).write(path, bytes, inline.mimeType ?? 'image/png');
+            written++;
+            lines.push(`Image ${imageIndex}: saved to ${path}`);
+          } else if (text) {
+            lines.push(`Text: ${text}`);
+          }
+        }
+
+        if (written === 0) {
+          const finishReason = candidate?.finishReason;
+          const safety = candidate?.safetyRatings
+            ?.filter((r) => r.blocked)
+            ?.map((r) => r.category)
+            ?.join(', ');
+          const reason =
+            safety && safety.length > 0
+              ? `blocked by safety filter (${safety})`
+              : finishReason
+                ? `finishReason=${finishReason}`
+                : 'no image data returned';
+          lines.unshift(`No images were generated — ${reason}.`);
+        }
+
+        return {
+          content: [{ type: 'text', text: lines.join('\n') }],
+        };
       } finally {
         await Promise.all(resolvedRefs.map((r) => r.cleanup?.()));
       }

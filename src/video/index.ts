@@ -96,9 +96,7 @@ export function registerVideoTools(server: McpServer): void {
         if (transition) {
           // Transition mode — chain xfade filters between each pair.
           // Requires identical resolution/frame rate across inputs.
-          const infos = await Promise.all(
-            localInputs.slice(0, -1).map((p) => getVideoInfo(p)),
-          );
+          const infos = await Promise.all(localInputs.slice(0, -1).map((p) => getVideoInfo(p)));
 
           const videoChain: string[] = [];
           const audioChain: string[] = [];
@@ -180,15 +178,7 @@ export function registerVideoTools(server: McpServer): void {
           }
           const streamSpec = localInputs.map((_, i) => `[${i}:v:0][${i}:a:0]`).join('');
           const filter = `${streamSpec}concat=n=${inputs.length}:v=1:a=1[outv][outa]`;
-          args.push(
-            '-filter_complex',
-            filter,
-            '-map',
-            '[outv]',
-            '-map',
-            '[outa]',
-            outR.localPath,
-          );
+          args.push('-filter_complex', filter, '-map', '[outv]', '-map', '[outa]', outR.localPath);
           await ffmpegBatch(args);
         }
         await outR.commit();
@@ -488,9 +478,7 @@ export function registerVideoTools(server: McpServer): void {
         await mkdir(dirname(outR.localPath), { recursive: true });
 
         // Probe durations of all but the last input so we can place each xfade at the right offset.
-        const infos = await Promise.all(
-          localInputs.slice(0, -1).map((p) => getVideoInfo(p)),
-        );
+        const infos = await Promise.all(localInputs.slice(0, -1).map((p) => getVideoInfo(p)));
 
         // Build chained xfade filter:
         //   [0:v][1:v]xfade=transition=fade:duration=1:offset=<d0 - D>[v01];
@@ -928,14 +916,7 @@ export function registerVideoTools(server: McpServer): void {
               '/dev/null',
             ]);
             // Pass 2: encode with stats.
-            await ffmpegBatch([
-              ...baseArgs,
-              '-pass',
-              '2',
-              '-passlogfile',
-              passLog,
-              outR.localPath,
-            ]);
+            await ffmpegBatch([...baseArgs, '-pass', '2', '-passlogfile', passLog, outR.localPath]);
           } finally {
             await rm(`${passLog}-0.log`, { force: true }).catch(() => {});
             await rm(`${passLog}-0.log.mbtree`, { force: true }).catch(() => {});
