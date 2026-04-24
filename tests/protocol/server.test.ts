@@ -11,7 +11,7 @@ import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { createTestServerClient } from '../helpers/server.js';
 
 /**
- * All 117 tool names registered by the artificer-mcp server, grouped by category.
+ * All 118 tool names registered by the artificer-mcp server, grouped by category.
  */
 const EXPECTED_TOOLS = {
   core: [
@@ -136,6 +136,9 @@ const EXPECTED_TOOLS = {
     'veed_fabric_prompt_guide',
     'brand_spec_get',
   ],
+  catalog: [
+    'model_catalog',
+  ],
   workflows: [
     'workflow_brand_asset_pack',
     'workflow_social_carousel',
@@ -184,15 +187,15 @@ describe('MCP Protocol — artificer-mcp Server', () => {
   // ── 2. Tool discovery ─────────────────────────────────────────────────────
 
   describe('tool discovery', () => {
-    it('should return exactly 117 tools', () => {
-      expect(tools).toHaveLength(117);
+    it('should return exactly 118 tools', () => {
+      expect(tools).toHaveLength(118);
     });
   });
 
   // ── 3. Tool names ─────────────────────────────────────────────────────────
 
   describe('tool names', () => {
-    it('should contain all 117 expected tool names', () => {
+    it('should contain all 118 expected tool names', () => {
       const registeredNames = tools.map((t) => t.name).sort();
       const expectedNames = [...ALL_TOOL_NAMES].sort();
 
@@ -247,8 +250,8 @@ describe('MCP Protocol — artificer-mcp Server', () => {
       },
     );
 
-    it('should cover exactly 14 categories', () => {
-      expect(Object.keys(EXPECTED_TOOLS)).toHaveLength(14);
+    it('should cover exactly 15 categories', () => {
+      expect(Object.keys(EXPECTED_TOOLS)).toHaveLength(15);
     });
   });
 
