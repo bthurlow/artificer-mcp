@@ -7,6 +7,17 @@ import { registerLyriaPromptGuide } from './lyria.js';
 import { registerWanPromptGuide } from './wan.js';
 import { registerKlingAvatarPromptGuide } from './kling-avatar.js';
 import { registerVeedFabricPromptGuide } from './veed-fabric.js';
+import { registerElevenlabsSpeechPromptGuide } from './elevenlabs-speech.js';
+import { registerElevenlabsDialoguePromptGuide } from './elevenlabs-dialogue.js';
+import { registerElevenlabsMusicPromptGuide } from './elevenlabs-music.js';
+import { registerElevenlabsSfxPromptGuide } from './elevenlabs-sfx.js';
+import { registerMinimaxSpeechPromptGuide } from './minimax-speech.js';
+import { registerMinimaxVoiceClonePromptGuide } from './minimax-voice-clone.js';
+import { registerMinimaxMusicPromptGuide } from './minimax-music.js';
+import { registerDiaDialoguePromptGuide } from './dia-dialogue.js';
+import { registerLyria2PromptGuide } from './lyria2.js';
+import { registerStableAudioPromptGuide } from './stable-audio.js';
+import { registerCassetteSfxPromptGuide } from './cassette-sfx.js';
 import { registerBrandSpecTool } from './brand-spec.js';
 
 /**
@@ -15,6 +26,11 @@ import { registerBrandSpecTool } from './brand-spec.js';
  * Covers: gemini_image_prompt_guide, gemini_nanobanana_prompt_guide,
  * veo_video_prompt_guide, gemini_tts_prompt_guide, gemini_lyria_prompt_guide,
  * wan_video_prompt_guide, kling_avatar_prompt_guide, veed_fabric_prompt_guide,
+ * elevenlabs_speech_prompt_guide, elevenlabs_dialogue_prompt_guide,
+ * elevenlabs_music_prompt_guide, elevenlabs_sfx_prompt_guide,
+ * minimax_speech_prompt_guide, minimax_voice_clone_prompt_guide,
+ * minimax_music_prompt_guide, dia_dialogue_prompt_guide, lyria2_prompt_guide,
+ * stable_audio_prompt_guide, cassette_sfx_prompt_guide,
  * brand_spec_get.
  *
  * Per-model content lives in its own file under `src/guides/{slug}.ts` —
@@ -34,5 +50,16 @@ export function registerGuideTools(server: McpServer): void {
   registerWanPromptGuide(server);
   registerKlingAvatarPromptGuide(server);
   registerVeedFabricPromptGuide(server);
+  registerElevenlabsSpeechPromptGuide(server);
+  registerElevenlabsDialoguePromptGuide(server);
+  registerElevenlabsMusicPromptGuide(server);
+  registerElevenlabsSfxPromptGuide(server);
+  registerMinimaxSpeechPromptGuide(server);
+  registerMinimaxVoiceClonePromptGuide(server);
+  registerMinimaxMusicPromptGuide(server);
+  registerDiaDialoguePromptGuide(server);
+  registerLyria2PromptGuide(server);
+  registerStableAudioPromptGuide(server);
+  registerCassetteSfxPromptGuide(server);
   registerBrandSpecTool(server);
 }
