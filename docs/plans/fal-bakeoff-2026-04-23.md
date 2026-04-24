@@ -67,29 +67,58 @@ veed/fabric-1.0 stays in the catalog because:
 
 The pipeline / caller may route to veed/fabric explicitly by passing `model: "veed/fabric-1.0"` to `fal_generate_video`. Prompt guide (`veed_fabric_prompt_guide`) documents when this is appropriate.
 
-## Wan 2.7 dispatch issue (unresolved)
+## Wan 2.7 dispatch issue — root cause: generation timeout at default 1080p
 
-Wan 2.7 submissions were accepted by fal (HTTP 200/202, valid `request_id`, `IN_QUEUE` status) but did not dispatch to our account. Three data points:
+Initial framing assumed an account-routing or dispatch-queue issue on fal's side. **Later inspection resolved this as a `generation_timeout` error on fal's Wan 2.7 runner when invoked at default resolution (1080p) with audio-driven mode.**
 
-| Attempt | Queue position | Observation |
-|---------|-----------------|-------------|
-| Submission 1 (parallel with Kling + veed) | 0 → 0 for 40+ min | Stuck at "next up" indefinitely, never dispatched |
-| Submission 2 (retry, solo, duration=7 int) | 163 → 163 | Zero movement in 5+ min polling |
-| Submission 3 (test, duration=5 string, 720p) | 213 → 213 | Zero movement in 60s polling; **left queued** for future completion |
+### Timeline
 
-Other fal models on the same account key (`kling-video/ai-avatar/v2/pro`, `veed/fabric-1.0`) dispatched and completed normally during this window. Not a key-level issue — specifically Wan 2.7 did not drain for us. User reported the fal dashboard does not show our Wan requests even though they were submitted successfully.
+| Attempt | Queue position | Observation | Final state |
+|---------|-----------------|-------------|-------------|
+| Submission 1 (`019dbc7d-*`, parallel with Kling + veed, resolution defaulted to 1080p, duration 7s) | 0 → 0 for 40+ min | Dashboard eventually showed HTTP 504 | **COMPLETED with error** — `generation_timeout` after 2723.9s of inference time |
+| Submission 2 (`019dbca2-*`, retry, duration=7 int, resolution defaulted to 1080p) | 163 → 163 for 5+ min | Cancelled before dispatch | Clean cancel, no data |
+| Submission 3 (`019dbcac-*`, duration="5" string, **resolution="720p" explicit**) | 213 → 0 | **Pending** at time of writing; 720p path may actually complete | Unknown |
 
-**Diagnosis:** fal-side issue, not a parameter problem. Params verified against the live schema at `https://fal.ai/models/fal-ai/wan/v2.7/image-to-video/api`; all required fields present, all types match. Submissions accepted.
+### Root cause (confirmed 2026-04-23 post-bake-off)
 
-**Likely causes (rank-ordered):**
-1. Fal-specific Wan 2.7 capacity / dispatch routing issue on this account tier
-2. Wan 2.7 model-family capacity outage at submission time (not reflected on status page)
-3. Some account-scoped queue wedge — dashboard-invisibility supports this
+Querying `GET queue.fal.run/fal-ai/wan/requests/019dbc7d-.../` after the dashboard showed 504 returned the full error detail:
 
-**Action:**
-- Submission 3 (request_id `019dbcac-80df-77a3-b94f-de167e38a8c2`) left queued. Check status at `https://queue.fal.run/fal-ai/wan/requests/019dbcac-80df-77a3-b94f-de167e38a8c2/status` periodically. If it eventually completes, compare against the other two and update this doc.
-- File fal support ticket referencing the three stuck `019dbc7d-*`, `019dbca2-*`, `019dbcac-*` request IDs.
-- Not a Phase 1 blocker. Talking-head default is Kling Avatar regardless of Wan's eventual result, unless Wan produces dramatically better output that changes the decision.
+```
+{
+  "detail": [{
+    "loc": ["body"],
+    "msg": "Generation timeout",
+    "type": "generation_timeout",
+    "url": "https://docs.fal.ai/errors#generation_timeout",
+    "input": {
+      "prompt": "...",
+      "image_url": "...",
+      "audio_url": "...",
+      "resolution": "1080p",
+      "duration": 7,
+      ...
+    }
+  }]
+}
+```
+
+`metrics.inference_time: 2723.9` confirms the runner spent ~45 minutes of compute before fal's internal generation timeout killed it. Fal's Wan 2.7 runner cannot complete a 7-second audio-driven 1080p generation within its timeout budget on this account tier.
+
+**Kling AI Avatar v2 Pro** (default 1080p-class output) and **veed/fabric-1.0** (explicit 480p in our call) did not hit this issue — their runners complete within fal's generation budget for similar inputs.
+
+### Actionable findings
+
+1. **Any artificer code that calls `fal-ai/wan/v2.7/image-to-video` in audio-driven mode MUST set `resolution: "720p"` explicitly.** The model schema's default of 1080p is not viable on fal's current runner. This is a Phase 1 implementation note (Wan's transport defaults) and a prompt-guide note (when Wan's guide lands).
+2. **Partial-failure billing (Q1 unresolved item) has a partial answer:** fal's `generation_timeout` returns HTTP 504 (server error). Per fal's billing docs, server errors are not billed. A $272-worth-of-inference-time failure appears unbilled on this account. Confirm on dashboard.
+3. **Submission 3 (`019dbcac-*`)** remains queued with explicit `resolution: "720p"`, `duration: 5`. If it completes, it's the first real Wan 2.7 data point. Compare against Kling Avatar and update the default-model decision only if Wan's output is dramatically better (unlikely to override the 191s vs probable 1000s+ wall-time gap).
+4. **Not a Phase 1 blocker.** Talking-head default is Kling AI Avatar v2 Pro. Wan 2.7 stays as a catalog entry but with explicit notes in its future prompt guide about the 720p requirement and the extended wall-time expectation.
+
+### Amended likely-cause ranking (superseded by the root cause above)
+
+1. ~~Fal-specific Wan 2.7 capacity / dispatch routing issue on this account tier~~ — REJECTED
+2. ~~Wan 2.7 model-family capacity outage~~ — REJECTED
+3. ~~Account-scoped queue wedge~~ — REJECTED
+4. **Confirmed:** fal Wan 2.7 runner generation timeout on default-1080p audio-driven inputs. Not an account issue. Not a dispatch issue. A per-request timeout on the model's own runner.
 
 ## Q1 load-bearing questions — status after Q2
 

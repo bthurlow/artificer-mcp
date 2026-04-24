@@ -254,7 +254,7 @@ Phase 0 (already complete as of 2026-04-23) fed the design; Phases 1–5 ship th
 
 **Q1 (docs read, ~1 hour, $0)** — captured in `docs/plans/fal-q1-research-2026-04-23.md`. Output: shortlist of 3 audio-decoupled candidates (Wan 2.7, Kling AI Avatar v2 Pro, veed/fabric-1.0); infra posture for URL handling, concurrency, TTL, uploads.
 
-**Q2 (scripted bake-off, afternoon, ~$5 capped)** — captured in `docs/plans/fal-bakeoff-2026-04-23.md`. Output: Kling AI Avatar v2 Pro as default, veed/fabric-1.0 as fallback, Wan 2.7 deferred (fal dispatch issue — submissions accepted, zero queue movement, cannot reproduce via parameter changes).
+**Q2 (scripted bake-off, afternoon, ~$5 capped)** — captured in `docs/plans/fal-bakeoff-2026-04-23.md`. Output: Kling AI Avatar v2 Pro as default, veed/fabric-1.0 as fallback, Wan 2.7 deferred (root cause: `generation_timeout` on fal's Wan runner at default 1080p audio-driven mode — 2723s of inference time before fal's internal timeout; workaround is explicit `resolution: "720p"` per bake-off doc's post-session diagnosis).
 
 ### Phase 1 — `fal_generate_video` transport tool
 
@@ -307,7 +307,7 @@ Phase 0 (already complete as of 2026-04-23) fed the design; Phases 1–5 ship th
    - Unit tests: filter correctness per key configuration, capability param, `include_unavailable` flag, zero-keys warning, stub filtering, runtime-missing-tool filtering.
 6. **Seed `models.json`** with:
    - Talking-head entries for Kling AI Avatar v2 Pro, veed/fabric-1.0 — `stub: false` (transport ships in Phase 1).
-   - Cinematic entries for Veo 3.1 (Google route `stub: false`, fal route `stub: false` since `fal_generate_video` ships in Phase 1), Wan 2.7 (fal route with `available: false` explanatory note until fal dispatch resolves).
+   - Cinematic entries for Veo 3.1 (Google route `stub: false`, fal route `stub: false` since `fal_generate_video` ships in Phase 1), Wan 2.7 (fal route `stub: false` with a prompt-guide note mandating `resolution: "720p"` for audio-driven mode to avoid `generation_timeout` at 1080p).
    - Image entries for Gemini 2.5 / Nano Banana (Google route `stub: false` since `gemini_generate_image` already ships). Fal image route entries are NOT seeded — they land in Phase 4 with the `fal_generate_image` transport.
    - Music entry for Lyria (Google route `stub: false` since `gemini_generate_music` already ships).
    - Speech entry for Gemini TTS (Google route `stub: false` since `gemini_generate_speech` already ships).
@@ -344,7 +344,7 @@ Load-bearing infra questions answered in Q1 (`fal-q1-research-2026-04-23.md`). R
 1. **Does `fal.storage.upload` accept a Node `Buffer` directly** or must we wrap in `Blob`? Q1 says public API types `Blob` only. Verify at Phase 1 start; wrap if needed.
 2. **Default TTL for `fal.storage.upload`-ed files.** Not documented. If significant cost, add a cleanup step post-generation.
 3. **Partial-failure billing** — Phase 1 deliberate-failure probe resolves this.
-4. **Wan 2.7 dispatch issue on our account.** Fal support ticket open (to be filed); Phase 1 can re-attempt once fal responds.
+4. **Wan 2.7 generation timeout at default 1080p** — root-caused 2026-04-23 as a runner-timeout issue, not a dispatch issue. Phase 1 retry uses explicit `resolution: "720p"` per the bake-off doc's post-session findings. Still-queued submission `019dbcac-*` may produce the first real Wan data point. No support ticket needed unless the 720p path also times out.
 
 ## Success Criteria
 
@@ -400,6 +400,8 @@ Artificer-mcp ships via npm and GitHub Releases (release-please). Each phase shi
 **2026-04-23 (v2) — `model_catalog` is env-key-filtered, static-JSON-backed.** No dynamic fetching from fal / Google model lists. Every entry is a curated, tested integration with a real guide and a real tool. Trade-off: new models require a PR rather than showing up automatically. Worth it for correctness.
 
 **2026-04-23 (v2) — Q2 bake-off result: Kling AI Avatar v2 Pro as talking-head default.** Rubric pass for both completed candidates; indistinguishable on the avatar + prompt tested. Decision based on resolution headroom, vendor stability, and purpose fit. veed/fabric-1.0 as fallback / fast-preview. Wan 2.7 deferred.
+
+**2026-04-23 (post-commit) — Wan 2.7 failure root-caused as `generation_timeout` at 1080p.** Initial framing assumed an account-dispatch issue on fal's side. Post-session inspection of the failed request (019dbc7d) returned fal's full error response: `{"type": "generation_timeout"}` after 2723.9 seconds of runner inference time on resolution=1080p audio-driven mode. Dashboard showed HTTP 504, which surfaced the clue. Workaround is explicit `resolution: "720p"` on every Wan audio-driven call; this becomes a Phase 1 transport-layer default (or a tool-description warning) and a prompt-guide mandate when the Wan guide lands. Server-side 504 appears unbilled per fal's policy — confirms partial-failure billing posture for future cases.
 
 **2026-04-23 (v2-review) — Fixes from adversarial review (8/10 → 9/10 expected).** Applied before approval: renamed catalog's logical identifier from `model` to `slug` to remove collision with the wire-level `model` param on transport tools; reworded Principle #1 to distinguish transport tools (required `model`) from non-transport tools (deterministic single-entry default); softened Principle #3 to distinguish prompt *language* (model-keyed) from request *shape* (route-keyed); added Terminology section up front to define capability / sub-class / slug / access route / transport tool / non-transport tool; replaced `cost_per_sec_usd` numeric field with free-form `cost` string to accommodate per-video, per-token, tier-based pricing; added `stub: true/false` field to catalog entries to cleanly seed dormant future routes; specified `poll_timeout_seconds: 300` default matching Veo; added Phase 2 Veo-via-fal prompt-parity smoke to validate Principle #3 empirically before publishing the retrofitted guide; replaced Phase 3's "obvious choice" default language with a deterministic single-entry rule; added model_catalog MCP tool description string; specified zero-keys-configured behavior; specified `extra_params` URL-param pass-through semantics; specified runtime tool-registration filter protecting callers against catalog drift.
 
