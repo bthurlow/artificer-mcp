@@ -1,10 +1,9 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { readFile } from 'node:fs/promises';
 import { registerTool } from '../../utils/register.js';
-import { resolveInput, guessMime } from '../../utils/resource.js';
 import { downloadAndWrite } from '../utils/download-and-write.js';
 import { getFalClient } from './client.js';
 import { parseFalError } from './errors.js';
+import { resolveForFal, isPublicHttpsUrl } from './inputs.js';
 import { type FalGenerateVideoParams, falGenerateVideoSchema } from './types.js';
 
 /**
@@ -22,43 +21,6 @@ const STRUCTURAL_FAL_KEYS = new Set([
   'resolution',
   'negative_prompt',
 ]);
-
-function isPublicHttpsUrl(s: string): boolean {
-  return /^https?:\/\//i.test(s);
-}
-
-/**
- * Resolve an input that may be a public HTTP(S) URL, a `gs://` / `s3://`
- * URI, or a local path, into a URL fal can fetch.
- *
- * Public HTTPS URLs pass straight through (Q2 bake-off confirmed fal
- * fetches `storage.googleapis.com/...` objects without re-upload). For
- * anything else we resolve to a local path via the storage registry and
- * upload to fal's object store, returning the fal-hosted URL.
- *
- * Returns `{ url, cleanup }` where cleanup removes any temp download from
- * the resolveInput step. Safe to call `cleanup()` even when no temp was
- * created (it's a no-op in that case).
- */
-async function resolveForFal(
-  input: string,
-  upload: (blob: Blob) => Promise<string>,
-): Promise<{ url: string; cleanup: () => Promise<void> }> {
-  if (isPublicHttpsUrl(input)) {
-    return { url: input, cleanup: async () => {} };
-  }
-  const resolved = await resolveInput(input);
-  const bytes = await readFile(resolved.localPath);
-  const mime = guessMime(input) ?? 'application/octet-stream';
-  const blob = new Blob([bytes], { type: mime });
-  const url = await upload(blob);
-  return {
-    url,
-    cleanup: async () => {
-      await resolved.cleanup?.();
-    },
-  };
-}
 
 /**
  * Build the fal input payload from tool args + extra_params, enforcing

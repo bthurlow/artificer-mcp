@@ -1,0 +1,340 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/lyria2",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/lyria2 queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/lyria2",
+      "category": "text-to-audio",
+      "thumbnailUrl": "https://storage.googleapis.com/fal_cdn/fal/Sound-4.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/lyria2",
+      "documentationUrl": "https://fal.ai/models/fal-ai/lyria2/api"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "Lyria2Input": {
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "title": "TextToMusicInput",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "examples": [
+              "A lush, ambient soundscape featuring the serene sounds of a flowing river, complemented by the distant chirping of birds, and a gentle, melancholic piano melody that slowly unfolds."
+            ],
+            "minLength": 1,
+            "description": "The text prompt describing the music you want to generate",
+            "title": "Prompt",
+            "maxLength": 2000
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A seed for deterministic generation. If provided, the model will attempt to produce the same audio given the same prompt and other parameters.",
+            "title": "Seed"
+          },
+          "negative_prompt": {
+            "default": "low quality",
+            "type": "string",
+            "description": "A description of what to exclude from the generated audio",
+            "title": "Negative Prompt",
+            "examples": [
+              "vocals, slow tempo",
+              "low quality"
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "prompt",
+          "negative_prompt",
+          "seed"
+        ]
+      },
+      "Lyria2Output": {
+        "type": "object",
+        "required": [
+          "audio"
+        ],
+        "title": "TextToMusicOutput",
+        "properties": {
+          "audio": {
+            "$ref": "#/components/schemas/File",
+            "description": "The generated music",
+            "examples": [
+              {
+                "url": "https://v3.fal.media/files/koala/9V6ADhxcZrZr2FcaiNA7H_output.wav"
+              }
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "audio"
+        ]
+      },
+      "File": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "File",
+        "properties": {
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "examples": [
+              4404019
+            ]
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/lyria2/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/lyria2/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/lyria2": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Lyria2Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/lyria2/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Lyria2Output"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

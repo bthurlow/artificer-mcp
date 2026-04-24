@@ -1,0 +1,393 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/minimax/voice-clone",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/minimax/voice-clone queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/minimax/voice-clone",
+      "category": "text-to-speech",
+      "thumbnailUrl": "https://storage.googleapis.com/falserverless/web-examples/minimax-tts/minimax-tts.webp",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/minimax/voice-clone",
+      "documentationUrl": "https://fal.ai/models/fal-ai/minimax/voice-clone/api"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "MinimaxVoiceCloneInput": {
+        "properties": {
+          "text": {
+            "examples": [
+              "Hello, this is a preview of your cloned voice! I hope you like it!"
+            ],
+            "title": "Text",
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "Hello, this is a preview of your cloned voice! I hope you like it!",
+            "description": "Text to generate a TTS preview with the cloned voice (optional)"
+          },
+          "audio_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/model_tests/zonos/demo_voice_zonos.wav"
+            ],
+            "type": "string",
+            "title": "Audio Url",
+            "description": "\n            URL of the input audio file for voice cloning. Should be at least 10 seconds\n            long. To retain the voice permanently, use it with a TTS (text-to-speech)\n            endpoint at least once within 7 days. Otherwise, it will be\n            automatically deleted.\n        "
+          },
+          "need_volume_normalization": {
+            "type": "boolean",
+            "title": "Need Volume Normalization",
+            "default": false,
+            "description": "Enable volume normalization for the cloned voice"
+          },
+          "noise_reduction": {
+            "type": "boolean",
+            "title": "Noise Reduction",
+            "default": false,
+            "description": "Enable noise reduction for the cloned voice"
+          },
+          "model": {
+            "examples": [
+              "speech-02-hd",
+              "speech-02-turbo",
+              "speech-01-hd",
+              "speech-01-turbo"
+            ],
+            "type": "string",
+            "title": "Model",
+            "enum": [
+              "speech-02-hd",
+              "speech-02-turbo",
+              "speech-01-hd",
+              "speech-01-turbo"
+            ],
+            "default": "speech-02-hd",
+            "description": "TTS model to use for preview. Options: speech-02-hd, speech-02-turbo, speech-01-hd, speech-01-turbo"
+          },
+          "accuracy": {
+            "title": "Accuracy",
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Text validation accuracy threshold (0-1)"
+          }
+        },
+        "x-fal-order-properties": [
+          "audio_url",
+          "noise_reduction",
+          "need_volume_normalization",
+          "accuracy",
+          "text",
+          "model"
+        ],
+        "title": "VoiceCloneRequest",
+        "type": "object",
+        "required": [
+          "audio_url"
+        ]
+      },
+      "MinimaxVoiceCloneOutput": {
+        "properties": {
+          "audio": {
+            "examples": [
+              {
+                "url": "https://fal.media/files/kangaroo/kojPUCNZ9iUGFGMR-xb7h_speech.mp3"
+              }
+            ],
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/File"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Preview audio generated with the cloned voice (if requested)"
+          },
+          "custom_voice_id": {
+            "type": "string",
+            "title": "Custom Voice Id",
+            "description": "The cloned voice ID for use with TTS"
+          }
+        },
+        "x-fal-order-properties": [
+          "custom_voice_id",
+          "audio"
+        ],
+        "title": "VoiceCloneOutput",
+        "type": "object",
+        "required": [
+          "custom_voice_id"
+        ]
+      },
+      "File": {
+        "properties": {
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes."
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file."
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "title": "File",
+        "type": "object",
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/minimax/voice-clone/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/minimax/voice-clone/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/minimax/voice-clone": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MinimaxVoiceCloneInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/minimax/voice-clone/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MinimaxVoiceCloneOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

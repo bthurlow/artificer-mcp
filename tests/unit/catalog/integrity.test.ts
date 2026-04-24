@@ -99,6 +99,13 @@ describe('catalog integrity', () => {
         capData as Record<string, CatalogEntry[]>,
       )) {
         for (const entry of entries) {
+          // Seed entries whose access routes are ALL stubbed don't need a
+          // live prompt_guide yet — the guide lands with the transport
+          // flip. The non-stub route integrity check below still guards
+          // against drift for entries actually surfaced to callers.
+          const allStubbed = entry.access_routes.every((r) => r.stub);
+          if (allStubbed) continue;
+
           if (entry.prompt_guide === null) {
             // Null prompt_guide is only valid on safety entries
             expect(cap, `${subClass}/${entry.slug}: null prompt_guide on non-safety capability`).toBe(

@@ -1,0 +1,392 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/minimax-music/v2.6",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/minimax-music/v2.6 queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/minimax-music/v2.6",
+      "category": "text-to-audio",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a959abf/bBuGvGbMCy6eYzC8n05Ql_7f5c08f2be3f495cb9847f89217309a8.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/minimax-music/v2.6",
+      "documentationUrl": "https://fal.ai/models/fal-ai/minimax-music/v2.6/api"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "MinimaxMusicV26Input": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "prompt",
+          "lyrics",
+          "lyrics_optimizer",
+          "is_instrumental",
+          "audio_setting"
+        ],
+        "title": "TextToMusic26Request",
+        "properties": {
+          "is_instrumental": {
+            "type": "boolean",
+            "description": "When true, generates vocal-free instrumental music.",
+            "title": "Is Instrumental",
+            "default": false
+          },
+          "audio_setting": {
+            "$ref": "#/components/schemas/AudioSetting25",
+            "description": "Audio configuration settings"
+          },
+          "lyrics": {
+            "type": "string",
+            "description": "Lyrics of the song. Use \\n to separate lines. Supports structure tags: [Intro], [Verse], [Pre Chorus], [Chorus], [Post Chorus], [Hook], [Bridge], [Interlude], [Transition], [Build Up], [Break], [Inst], [Solo], [Outro]. Max 3500 characters. Required when is_instrumental is false.",
+            "title": "Lyrics",
+            "default": "",
+            "examples": [
+              "[verse]\nStreetlights flicker, the night breeze sighs\nShadows stretch as I walk alone\n[chorus]\nWandering, longing, where should I go"
+            ],
+            "maxLength": 3500
+          },
+          "prompt": {
+            "type": "string",
+            "description": "A description of the music style, mood, genre, and scenario. 10-2000 characters.",
+            "title": "Prompt",
+            "examples": [
+              "City Pop, 80s retro, groovy synth bass, warm female vocal, 104 BPM, nostalgic urban night"
+            ],
+            "minLength": 10,
+            "maxLength": 2000
+          },
+          "lyrics_optimizer": {
+            "type": "boolean",
+            "description": "When true and lyrics is empty, auto-generates lyrics from the prompt.",
+            "title": "Lyrics Optimizer",
+            "default": false
+          }
+        },
+        "required": [
+          "prompt"
+        ]
+      },
+      "MinimaxMusicV26Output": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "audio"
+        ],
+        "title": "MusicV26Output",
+        "properties": {
+          "audio": {
+            "$ref": "#/components/schemas/File",
+            "description": "The generated music",
+            "examples": [
+              {
+                "url": "https://v3b.fal.media/files/b/kangaroo/GJe3sQehFteUTmpDROzOs_output.mp3"
+              }
+            ]
+          }
+        },
+        "required": [
+          "audio"
+        ]
+      },
+      "AudioSetting25": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "sample_rate",
+          "bitrate",
+          "format"
+        ],
+        "title": "AudioSetting25",
+        "properties": {
+          "sample_rate": {
+            "type": "integer",
+            "description": "Sample rate of generated audio",
+            "title": "Sample Rate",
+            "default": 44100,
+            "enum": [
+              16000,
+              24000,
+              32000,
+              44100
+            ]
+          },
+          "format": {
+            "type": "string",
+            "description": "Audio format",
+            "title": "Format",
+            "default": "mp3",
+            "enum": [
+              "mp3",
+              "wav",
+              "pcm"
+            ]
+          },
+          "bitrate": {
+            "type": "integer",
+            "description": "Bitrate of generated audio",
+            "title": "Bitrate",
+            "default": 256000,
+            "enum": [
+              32000,
+              64000,
+              128000,
+              256000
+            ]
+          }
+        }
+      },
+      "File": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "title": "File",
+        "properties": {
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/minimax-music/v2.6/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/minimax-music/v2.6/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/minimax-music/v2.6": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MinimaxMusicV26Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/minimax-music/v2.6/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MinimaxMusicV26Output"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}
