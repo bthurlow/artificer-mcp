@@ -98,6 +98,17 @@ The \`aspect_ratio\` you pass must match the aspect ratio of the downstream dest
 - **include_text**: If true, the model can emit a text commentary alongside the image — useful when you want the model to _explain_ what it changed.
 - **No negative prompts / seed / enhance_prompt / safety knobs** — these are Imagen-only. Use explicit preservation language in the prompt instead ("keep the lighting", "do not change the pose").
 
+## Access routes
+
+| Provider | Tool                                  | Model ID                    | Cost                   | Notes |
+|----------|---------------------------------------|-----------------------------|------------------------|-------|
+| google   | \`gemini_nanobanana_generate_image\`  | \`gemini-2.5-flash-image\`  | See Google Cloud pricing | Multimodal (text + reference images). Exposes \`aspect_ratio\`, \`reference_images[]\`, \`include_text\`. No \`seed\` / \`number_of_images\` / \`negative_prompt\` / safety knobs — those are Imagen-only. |
+
+Nano-banana is Google-route only. Fal hosts other multimodal image models (Flux, Seedream, etc.) but not gemini-2.5-flash-image specifically — those are their own logical models with their own guides when Phase 4 lands.
+
+## Last verified
+2026-04-24 against artificer-mcp v0.9.0 — prompt structure, aspect interop rule, and reference-image limits validated through shipping use.
+
 ## Official References
 - Gemini image-generation docs: https://ai.google.dev/gemini-api/docs/image-generation
 - Model card (gemini-2.5-flash-image): https://ai.google.dev/gemini-api/docs/models

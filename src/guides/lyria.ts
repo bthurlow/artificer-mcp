@@ -97,6 +97,18 @@ Lyria applies safety filters. Common triggers:
 
 Describe style via attributes, not by referencing named artists.
 
+## Access routes
+
+| Provider | Tool                              | Model ID                         | Cost                   | Notes |
+|----------|-----------------------------------|----------------------------------|------------------------|-------|
+| google   | \`gemini_generate_music\`         | \`lyria-3-clip-preview\` (default, 30s MP3) / \`lyria-3-pro-preview\` (up to ~2min WAV) | See Google Cloud pricing | Batch, synchronous. Pro supports timeline prompts with \`[mm:ss - mm:ss]\` markers and intensity scales. No dedicated \`negative_prompt\` field on Lyria 3 — artificer appends \`\\nAvoid: ...\` as prompt guidance. |
+| google   | \`gemini_generate_music_live\`    | \`models/lyria-realtime-exp\`    | See Google Cloud pricing | Streaming WebSocket session. Caller-side deadline capped 120s in artificer. Output is 16-bit PCM 48kHz stereo wrapped in WAV. |
+
+Fal hosts alternative music generation (Suno, MusicGen) — those are separate logical models with their own guides when Phase 5 lands.
+
+## Last verified
+2026-04-24 against artificer-mcp v0.9.0 — Lyria 3 / 3 Pro prompt anatomy, timeline-marker syntax, and realtime session lifecycle validated through shipping use.
+
 ## Reference
 - [Music generation (Lyria 3 batch) docs](https://ai.google.dev/gemini-api/docs/music-generation)
 - [Realtime music generation (Lyria RealTime) docs](https://ai.google.dev/gemini-api/docs/realtime-music-generation)

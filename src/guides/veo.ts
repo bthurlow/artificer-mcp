@@ -109,6 +109,18 @@ Override the default via \`ARTIFICER_VEO_MODEL\` env var.
 - **Aspect ratios**: 16:9 (landscape) or 9:16 (portrait). Choose based on platform.
 - **Polling**: Video generation typically takes 60-180 seconds. Default poll timeout is 5 minutes.
 
+## Access routes
+
+| Provider | Tool                     | Model ID                       | Cost                              | Notes |
+|----------|--------------------------|--------------------------------|-----------------------------------|-------|
+| google   | \`gemini_generate_video\`  | \`veo-3.1-lite-generate-preview\` (default) / \`veo-3.1-generate-preview\` / \`veo-3.1-fast-generate-preview\` | See Google Cloud pricing          | Exposes \`generate_audio\` (rejected by Developer API — omit), \`person_generation\`, \`seed\`, \`negative_prompt\` (not on Lite), \`reference_images\` (Standard only). Uses Google's long-running operations API with polling. |
+| fal      | \`fal_generate_video\`     | \`fal-ai/veo3.1/image-to-video\` | Per-second pricing; see fal model page | Same Veo model hosted through fal's queue. Per-second billing instead of Google's per-video. Stub — fal route entry lands with Phase 4+ once a caller need emerges and a parity smoke has run. |
+
+The prompt *language* is identical across routes — Veo's dialogue patterns, camera directives, and image-to-video rules apply regardless of which tool you call. Per-route differences are request-shape only (which config knobs each provider surfaces).
+
+## Last verified
+2026-04-24 against artificer-mcp v0.9.0 — prompt structure and Gemini Developer API quirks validated through shipping use; fal-route notes are stubbed pending a parity smoke (tracked in docs/plans/fal-multi-provider-design-2026-04-23.md, Phase 2 step 2).
+
 ## Official References
 - Veo API: https://ai.google.dev/gemini-api/docs/veo
 - Model cards: https://ai.google.dev/gemini-api/docs/models/veo

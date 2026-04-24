@@ -99,6 +99,17 @@ Baker: I just use twice the ingredients...
 - **Keep punctuation natural.** Periods add short pauses; em-dashes work for mid-sentence pauses.
 - **For ingestion into video workflows**, .wav is preferred — no transcode cost.
 
+## Access routes
+
+| Provider | Tool                        | Model ID                              | Cost                   | Notes |
+|----------|-----------------------------|---------------------------------------|------------------------|-------|
+| google   | \`gemini_generate_speech\`  | \`gemini-2.5-flash-preview-tts\` (default) / Pro / Flash 3.1 | See Google Cloud pricing | Exposes \`voice\`, \`language_code\`, \`style\`. 30 prebuilt voices. Emits WAV natively; other formats transcoded via ffmpeg. |
+
+Fal hosts alternative TTS providers (ElevenLabs, OpenAI-compatible voices) — those are their own logical models with their own guides when Phase 5 lands.
+
+## Last verified
+2026-04-24 against artificer-mcp v0.9.0 — voice list, style/audio-tag patterns, and multi-speaker behavior validated through shipping use.
+
 ## Reference
 - [Speech generation docs](https://ai.google.dev/gemini-api/docs/speech-generation)
 - [Gemini 2.5 Flash TTS model page](https://ai.google.dev/gemini-api/docs/models/gemini-2.5-flash-preview-tts)

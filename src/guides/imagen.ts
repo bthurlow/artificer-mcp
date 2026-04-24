@@ -40,6 +40,17 @@ Google Imagen generates high-quality images from text prompts. It excels at phot
 ## When to use nano-banana instead
 For **edits, composites, style transfer, text rendering, or reference-guided generation**, prefer \`gemini_nanobanana_generate_image\` and its dedicated \`gemini_nanobanana_prompt_guide\`. Imagen is stronger for clean one-shot photorealism and multi-variation batches; nano-banana is stronger when you need to work _with_ existing imagery.
 
+## Access routes
+
+| Provider | Tool                     | Model ID                       | Cost                   | Notes |
+|----------|--------------------------|--------------------------------|------------------------|-------|
+| google   | \`gemini_generate_image\`  | \`imagen-4.0-generate-001\` (default) | See Google Cloud pricing | Exposes \`number_of_images\` (1-4), \`aspect_ratio\`, \`seed\`, \`safety_filter_level\`, \`person_generation\`, \`enhance_prompt\`, \`negative_prompt\`. |
+
+Fal hosts Imagen routes as well; they land in Phase 4 alongside the \`fal_generate_image\` transport when a pipeline use case emerges. Until then, Imagen is Google-route only.
+
+## Last verified
+2026-04-24 against artificer-mcp v0.9.0 — prompt structure and parameter set validated through shipping use.
+
 ## Official References
 - Imagen API: https://ai.google.dev/gemini-api/docs/imagen
 - Model cards: https://ai.google.dev/gemini-api/docs/models/imagen
