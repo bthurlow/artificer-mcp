@@ -4,6 +4,9 @@ import { registerNanobananaPromptGuide } from './nanobanana.js';
 import { registerVeoPromptGuide } from './veo.js';
 import { registerGeminiTtsPromptGuide } from './gemini-tts.js';
 import { registerLyriaPromptGuide } from './lyria.js';
+import { registerWanPromptGuide } from './wan.js';
+import { registerKlingAvatarPromptGuide } from './kling-avatar.js';
+import { registerVeedFabricPromptGuide } from './veed-fabric.js';
 import { registerBrandSpecTool } from './brand-spec.js';
 
 /**
@@ -11,6 +14,7 @@ import { registerBrandSpecTool } from './brand-spec.js';
  *
  * Covers: gemini_image_prompt_guide, gemini_nanobanana_prompt_guide,
  * veo_video_prompt_guide, gemini_tts_prompt_guide, gemini_lyria_prompt_guide,
+ * wan_video_prompt_guide, kling_avatar_prompt_guide, veed_fabric_prompt_guide,
  * brand_spec_get.
  *
  * Per-model content lives in its own file under `src/guides/{slug}.ts` —
@@ -27,5 +31,8 @@ export function registerGuideTools(server: McpServer): void {
   registerVeoPromptGuide(server);
   registerGeminiTtsPromptGuide(server);
   registerLyriaPromptGuide(server);
+  registerWanPromptGuide(server);
+  registerKlingAvatarPromptGuide(server);
+  registerVeedFabricPromptGuide(server);
   registerBrandSpecTool(server);
 }
