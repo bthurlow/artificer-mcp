@@ -218,9 +218,13 @@ describe('Generation Tools', () => {
     });
 
     it('downloads video from URI when videoBytes not present', async () => {
-      // Mock global fetch for URI download
+      // Mock global fetch for URI download. Response needs `.headers.get()`
+      // because the shared downloadAndWrite helper checks Content-Type.
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,
+        status: 200,
+        statusText: 'OK',
+        headers: { get: (key: string) => (key.toLowerCase() === 'content-type' ? 'video/mp4' : null) },
         arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
       });
       vi.stubGlobal('fetch', mockFetch);
@@ -242,9 +246,12 @@ describe('Generation Tools', () => {
         },
       });
 
-      expect(mockFetch).toHaveBeenCalledWith('https://storage.googleapis.com/video.mp4', {
-        headers: {},
-      });
+      // When no auth headers are needed (non-Gemini-Files URL), the helper
+      // calls fetch without options rather than with an empty headers object.
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://storage.googleapis.com/video.mp4',
+        undefined,
+      );
       const content = result.content as Array<{ type: string; text: string }>;
       expect(content[0].text).toContain('downloaded from');
 
@@ -254,6 +261,9 @@ describe('Generation Tools', () => {
     it('sends x-goog-api-key header when downloading from Gemini Files API', async () => {
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,
+        status: 200,
+        statusText: 'OK',
+        headers: { get: (key: string) => (key.toLowerCase() === 'content-type' ? 'video/mp4' : null) },
         arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
       });
       vi.stubGlobal('fetch', mockFetch);

@@ -5,6 +5,7 @@ import { registerTool } from '../utils/register.js';
 import { getGenAIClient } from './client.js';
 import { getProvider } from '../storage/providers/registry.js';
 import { resolveInput } from '../utils/resource.js';
+import { downloadAndWrite } from './utils/download-and-write.js';
 import { type GenerateVideoParams, generateVideoSchema } from './types.js';
 import type { Image } from '@google/genai';
 
@@ -131,11 +132,10 @@ export function registerVideoGenTools(server: McpServer): void {
           if (isGeminiFilesApi && process.env.GOOGLE_API_KEY) {
             headers['x-goog-api-key'] = process.env.GOOGLE_API_KEY;
           }
-          const resp = await fetch(video.uri, { headers });
-          if (!resp.ok)
-            throw new Error(`Failed to download video from ${video.uri}: ${resp.status}`);
-          const buf = Buffer.from(await resp.arrayBuffer());
-          await getProvider(output).write(output, buf, mime);
+          await downloadAndWrite(video.uri, output, {
+            headers: Object.keys(headers).length > 0 ? headers : undefined,
+            defaultMime: mime,
+          });
           return {
             content: [
               {
