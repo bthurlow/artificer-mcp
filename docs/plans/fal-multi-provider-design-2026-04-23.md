@@ -75,10 +75,13 @@ This design is a commitment to a specific scope. Items in the OUT list are not "
 
 - Core principles codified in this doc
 - `fal_generate_video` transport tool (Phase 1)
-- `model_catalog` tool — env-key filtered, static-JSON-backed (Phase 2)
-- Prompt-guide format spec (see next section) with retrofits for existing `veo_video_prompt_guide` and `gemini_nanobanana_prompt_guide` (Phase 2)
-- New prompt guides for Phase 1 talking-head class: `kling_avatar_prompt_guide`, `veed_fabric_prompt_guide` (Phase 2)
-- `fal_classify_text` safety tool (Phase 3)
+- **Shared `downloadAndWrite` helper** extracted from existing Veo code, used by both Veo and fal transports (Phase 1, includes internal Veo refactor)
+- **Full fal error class taxonomy** — 7 error classes (`FalValidationError`, `FalContentPolicyViolationError`, `FalGenerationTimeoutError`, `FalServerError`, `FalInfrastructureError`, `FalClientError`, `FalUnknownError`) plus body-shape dispatcher, `X-Fal-Error-Type` header reader, `.retryable` hint. Derived from fal's documented error catalog at `https://fal.ai/docs/errors`. (Phase 1)
+- **`scripts/sync-fal-specs.mjs`** — build-time script that fetches both OpenAPI JSON and llms.txt per fal-hosted model in `models.json`. Writes to `src/catalog/fal-specs/{slug}/openapi.json` + `src/catalog/fal-specs/{slug}/llms.md`. Parses pricing from llms.txt into `models.json` `cost` field. Generates Zod schemas from OpenAPI to `src/generation/fal/schemas/{slug}.ts`. (Phase 1)
+- `model_catalog` tool — env-key filtered, static-JSON-backed, cached at module load (Phase 2)
+- Prompt-guide format spec with **per-model file split** (extract existing `veo_video_prompt_guide`, `gemini_nanobanana_prompt_guide`, `gemini_image_prompt_guide`, `gemini_tts_prompt_guide`, `gemini_lyria_prompt_guide` into `src/guides/{veo,nanobanana,imagen,gemini-tts,lyria}.ts`; `src/guides/index.ts` becomes composition registry). (Phase 2)
+- New prompt guides for Phase 1 talking-head class: `src/guides/wan.ts`, `src/guides/kling-avatar.ts`, `src/guides/veed-fabric.ts`. Each imports from the committed llms.md for "Input requirements" section; hand-authored prose elsewhere. (Phase 2)
+- `fal_classify_text` safety tool with deterministic single-entry auto-default (Phase 3)
 - `fal_generate_image` transport tool + image-class catalog entries + per-model guides (Phase 4, gated on pipeline use case)
 - `fal_generate_music` + `fal_generate_speech` transport tools + `music.*` / `speech.*` catalog entries (Phase 5, gated on pipeline use case)
 
@@ -259,8 +262,16 @@ Phase 0 (already complete as of 2026-04-23) fed the design; Phases 1–5 ship th
 ### Phase 1 — `fal_generate_video` transport tool
 
 1. Add `@fal-ai/client` to `package.json` with **exact version pin**. Add note to `CONTRIBUTING.md`: upgrading this SDK requires re-running the talking-head bake-off against the current default model.
-2. Create `src/generation/fal/client.ts` — factory, reads `FAL_KEY`, configures SDK once (module-level singleton, same pattern as Veo). Missing-key error shape matches `GOOGLE_API_KEY` error shape (test covers this).
-3. Create `src/generation/fal/types.ts` — Zod schemas, `extra_params: z.record(z.unknown()).optional()`.
+2. Create `src/generation/fal/client.ts` — factory, reads `FAL_KEY`, configures SDK once (module-level singleton, same pattern as Veo). Missing-key error shape matches `GOOGLE_API_KEY` error shape (test covers this). **Add to `vitest.config.ts` coverage `exclude` list** with same rationale as existing Veo client (thin SDK factory).
+2a. Create `scripts/sync-fal-specs.mjs` — build-time spec ingestion. For each fal-hosted model slug in `src/catalog/models.json`: fetches `https://fal.ai/api/openapi/queue/openapi.json?endpoint_id={model-id}` → `src/catalog/fal-specs/{slug}/openapi.json`; fetches `https://fal.ai/models/{model-id}/llms.txt` → `src/catalog/fal-specs/{slug}/llms.md`; parses pricing from llms.txt `## Pricing` block and writes canonical `cost` string into `models.json`; generates Zod schemas from OpenAPI to `src/generation/fal/schemas/{slug}.ts`. Flags: `--model <slug>` (single model), `--dry-run` (print diffs, no writes). Script runs during dev setup and on demand. CI step verifies committed specs match upstream (non-zero exit on drift).
+2b. Create `src/generation/fal/errors.ts` — full error taxonomy:
+    - Base: `FalError extends Error` with `raw: unknown`, `status: number`, `retryable: boolean`, `errorType: string`.
+    - Dispatcher: `parseFalError(response)` inspects body shape (nested `{loc,msg,type,url,ctx,input}` vs flat `{detail,error_type}`) and HTTP status, returns the appropriate subclass.
+    - Subclasses: `FalValidationError` (422 nested), `FalContentPolicyViolationError extends FalValidationError` (422 with `type: content_policy_violation`), `FalGenerationTimeoutError` (504 nested, retryable=varies), `FalServerError` (500 nested, retryable=true), `FalInfrastructureError` (5xx flat, reads `X-Fal-Error-Type` header, retryable=true), `FalClientError` (499/400 flat, retryable=false), `FalUnknownError` (catchall).
+    - Every subclass preserves fal's raw response body for caller inspection.
+    - Derived from fal's documented error catalog at `https://fal.ai/docs/errors`. 40+ error types covered via the dispatcher-plus-catchall pattern.
+3. Create `src/generation/fal/types.ts` — thin wrapper types referencing per-model schemas generated by the sync script (`src/generation/fal/schemas/{slug}.ts`). Tool-level input schema accepts `model` (string, required — no env default) plus common fields. **`poll_interval_seconds` is NOT in the schema** (fal.subscribe manages polling internally). `extra_params: z.record(z.unknown()).optional()` for passthrough. `duration_seconds` **must be integer** (regression test for today's `duration: "5"` 422 finding).
+3a. Create `src/generation/utils/download-and-write.ts` — shared helper `downloadAndWrite(url: string, output: string, defaultMime = 'video/mp4'): Promise<void>`. Streams fetch response body to `getProvider(output).write()` (no full-buffer in memory). MIME from `Content-Type` header; falls back to `defaultMime`. **Rejects on Content-Type `text/html`** to prevent fal error pages being written as video. Used by both new `fal/video.ts` AND existing `generation/video.ts` (internal refactor — behavior unchanged, existing Veo integration test must still pass).
 4. Create `src/generation/fal/video.ts` — `fal_generate_video` tool:
    - Accepts: `model` (string, **required** — no env default), `prompt`, `output`, `image?`, `audio?`, `duration_seconds?`, `aspect_ratio?`, `resolution?`, `negative_prompt?`, `extra_params?`, `poll_timeout_seconds?` (default 300, matching `gemini_generate_video`).
    - **Input URL resolution** (the part the Veo flow doesn't cover): fal's API accepts `image_url` and `audio_url`. For each of `image` and `audio`:
@@ -285,26 +296,45 @@ Phase 0 (already complete as of 2026-04-23) fed the design; Phases 1–5 ship th
    - **Fal safety/content-filter rejection** surfaces as structured error with fal's reason preserved. Error shape matches Veo's `raiMediaFilteredReasons` pattern.
    - Return `{ uri: output }`.
 5. Register in `src/generation/fal/index.ts` → `src/generation/index.ts` → `src/index.ts`.
-6. Unit tests (Vitest): mock `@fal-ai/client`. Cover payload mapping, `extra_params` collision precedence + warning, output write + MIME handling, missing-key error, fal 4xx, fal 5xx, timeout, safety-rejection error shape, HTTPS-passthrough vs upload-required paths.
-7. Integration smoke (`INTEGRATION=1`, ~$0.60): one I2V generation with Jenn's avatar via Kling AI Avatar v2 Pro. Confirms silence preservation in-tool (not just in bake-off script). Plus a two-call parallel smoke to confirm concurrency.
-8. **Deliberate-failure billing probe** (Q1 unresolved item): one submission with an invalid audio URL to see whether fal charges for dispatch-time failures. Document result.
+6. Unit tests (Vitest, under `tests/unit/fal/`): mock `@fal-ai/client` at module boundary. Cover:
+   - Payload mapping (all fields in the table above)
+   - `extra_params` collision precedence + warning log
+   - `extra_params.image_url` passthrough when `image` omitted (no collision)
+   - Unknown key in `extra_params` passes through to fal; fal's 422 surfaces verbatim
+   - **Regression (CRITICAL):** Zod schema rejects `duration: "5"` (string) as schema error; accepts integer. Today's `019dbcac-*` 422 finding.
+   - **Regression:** Zod schema rejects invalid resolution values
+   - Output write + MIME handling (Content-Type present, absent, `text/html` rejection)
+   - `downloadAndWrite` helper tested directly (happy path, missing Content-Type, HTML rejection, provider write failure)
+   - Missing-key error matches Veo error shape
+   - Full error taxonomy fixture-tested per class: `FalValidationError`, `FalContentPolicyViolationError`, `FalGenerationTimeoutError`, `FalServerError`, `FalInfrastructureError`, `FalClientError`, `FalUnknownError`. Each fixture is a real fal response body.
+   - Body-shape dispatcher tested: nested-vs-flat, correct subclass selected
+   - `X-Fal-Error-Type` header preserved on infrastructure errors
+   - HTTPS-passthrough path vs `gs://` → upload path vs local path → upload path
+   - Signed GCS URL (`https://...?X-Goog-Signature=...`) passthrough behavior documented
+7. Integration smokes (`INTEGRATION=1`, tests under `tests/integration/`):
+   - **Kling AI Avatar v2 Pro smoke** (~$0.80): I2V with Jenn's avatar, confirm lip-sync + tail silence preservation
+   - **Wan 2.7 smoke** (~$0.70): I2V with `resolution: "720p"`, integer `duration: 7`, reproduces today's findings in-tool
+   - **Two-call parallel smoke** (~$1.60): concurrency verification
+   - **Deliberate-failure billing probe** (Q1 unresolved item): submit invalid audio URL, verify `FalValidationError` with `type: file_download_error`, confirm fal dashboard shows no billing
+   - **Veo refactor regression:** existing `tests/integration/tools.test.ts` (which covers `gemini_generate_video`) must still pass byte-identical behavior after `downloadAndWrite` extraction
 
 ### Phase 2 — Catalog + prompt guide retrofits + new talking-head guides
 
 1. **Prompt guide format spec** (section above) committed as a convention doc: `docs/conventions/prompt-guides.md`.
 2. **Veo-via-fal prompt-parity smoke** (~$1): before retrofitting `veo_video_prompt_guide` to list both Google and fal access routes, run a single cinematic-prompt generation via `fal-ai/veo3.1/image-to-video` and compare the output against a matched Google-Veo generation from the same prompt. Purpose: validate that the prompt *language* is stable across routes (Principle #3). If outputs differ materially, the retrofitted guide gets per-route prompt notes; if they match, publish with a single "Prompt structure" section and per-route notes only for request-shape.
-3. **Retrofit existing guides** to the spec: `veo_video_prompt_guide`, `gemini_nanobanana_prompt_guide`. Add `Access routes` sections with per-route request-shape notes (e.g., "Google-route exposes `generate_audio`, `person_generation`, `seed`; fal-route does not").
-4. **New talking-head guides:**
-   - `kling_avatar_prompt_guide` — content derived from Q2 bake-off observations, fal's model page, Kling's official prompting docs.
-   - `veed_fabric_prompt_guide` — same, plus explicit 480p vs 720p cost note.
+3. **Retrofit existing guides to per-model files + format spec:** existing `src/guides/index.ts` (557 lines holding all guides) splits into individual files: `src/guides/veo.ts`, `src/guides/nanobanana.ts`, `src/guides/imagen.ts`, `src/guides/gemini-tts.ts`, `src/guides/lyria.ts`. Each updated to the format spec (adds `Access routes` section with per-route request-shape notes, e.g., "Google-route exposes `generate_audio`, `person_generation`, `seed`; fal-route does not"). `src/guides/index.ts` becomes a composition registry that imports and registers each individual guide. Content of existing guides preserved except for the format-spec additions.
+4. **New talking-head guides (per-model files):**
+   - `src/guides/kling-avatar.ts` → `kling_avatar_prompt_guide` — content derived from Q2 bake-off observations + `src/catalog/fal-specs/kling-ai-avatar-v2-pro/llms.md` (committed by sync script) for "Input requirements" section. Prose sections hand-authored.
+   - `src/guides/veed-fabric.ts` → `veed_fabric_prompt_guide` — same pattern, plus explicit 480p vs 720p cost note from parsed llms.md pricing.
+   - `src/guides/wan.ts` → `wan_video_prompt_guide` — same pattern, plus **prominent quirks warnings**: (1) `resolution: "720p"` mandatory for audio-driven mode (1080p exceeds fal's generation budget — documented 2723s inference before `generation_timeout`); (2) `duration` must be integer, and should be `Math.ceil(audio_seconds)` to cover full audio without truncation (Wan does NOT auto-match audio length); (3) wall time varies 8x between cold (63s) and warm (8s) runners.
 5. **`model_catalog` tool** implementation in `src/catalog/catalog.ts`:
    - MCP tool description string: "List available media-generation models grouped by capability and sub-class. Returns logical model slugs, prompt guide tool names, and access routes (provider + transport tool + wire-level model id + cost). Call this first when you need to pick a model for a task; then call the relevant prompt_guide, then the access route's transport tool. Use `include_unavailable: true` to see models whose API keys aren't configured."
-   - Reads `src/catalog/models.json`.
+   - Reads `src/catalog/models.json` **once at module load** and caches the parsed data (filter re-runs per call against current `process.env`, since env can change, but JSON file I/O happens once). Malformed JSON surfaces as a structured error at module load with actionable message; does not crash the MCP server.
    - Filters by env keys (reads `FAL_KEY`, `GOOGLE_API_KEY`, per-route `key_env_var`) AND by transport-tool registration (drops entries whose `tool` isn't in the MCP server's registered tool list, logging a warning server-side).
    - Zero-keys-configured behavior per spec above (full structure with all `available: false` + `warnings` field).
    - `include_unavailable: true` returns everything including stubs.
    - Returns shape per spec above.
-   - Unit tests: filter correctness per key configuration, capability param, `include_unavailable` flag, zero-keys warning, stub filtering, runtime-missing-tool filtering.
+   - Unit tests (under `tests/unit/catalog/`): filter correctness per key configuration, capability param, `include_unavailable` flag, zero-keys warning, stub filtering, runtime-missing-tool filtering, **mixed-environment case** (FAL_KEY set, GOOGLE_API_KEY unset), **malformed-JSON handling**, cache read-once (second call doesn't re-read file).
 6. **Seed `models.json`** with:
    - Talking-head entries for Kling AI Avatar v2 Pro, veed/fabric-1.0 — `stub: false` (transport ships in Phase 1).
    - Cinematic entries for Veo 3.1 (Google route `stub: false`, fal route `stub: false` since `fal_generate_video` ships in Phase 1).
@@ -402,6 +432,19 @@ Artificer-mcp ships via npm and GitHub Releases (release-please). Each phase shi
 
 **2026-04-23 (v2) — Initial Q2 bake-off result: Kling AI Avatar v2 Pro as talking-head default** (on 2-of-3 data; Wan 2.7 deferred due to presumed dispatch issue). Rubric pass for both completed candidates; indistinguishable on the avatar + prompt tested. Decision based on resolution headroom, vendor stability, and purpose fit. veed/fabric-1.0 as fallback / fast-preview. **Superseded by the 2026-04-24 entry once Wan's failure was root-caused and successful runs demonstrated quality parity.**
 
+**2026-04-24 (eng review) — Phase 1 scope expanded based on /plan-eng-review findings.**
+
+- **Fal publishes per-model OpenAPI and llms.txt specs.** Discovered via user during review. OpenAPI at `https://fal.ai/api/openapi/queue/openapi.json?endpoint_id={model-id}` gives full input/output JSON schemas with enums/defaults/constraints; llms.txt at `https://fal.ai/models/{model-id}/llms.txt` gives human-readable pricing, tags, and overview. Decision: hybrid build-time ingestion — `scripts/sync-fal-specs.mjs` fetches both, generates Zod schemas from OpenAPI, parses pricing from llms.txt into `models.json`, commits both to `src/catalog/fal-specs/{slug}/`. Prompt guides import the llms-derived "Input requirements" section while hand-authoring the prose. Wins: schema drift detection free via PR diff, accuracy guaranteed via fal's own specs, catalog pricing stays accurate.
+- **Error taxonomy expanded from 3 classes to 7.** Fal's documented error catalog at `https://fal.ai/docs/errors` has ~40 types across 4 categories with two distinct body shapes (nested PyDantic for model errors, flat for request-level). Phase 1 implements full 7-class taxonomy (`FalError` base + 6 specific + `FalUnknownError` catchall) with body-shape dispatcher. Every class preserves raw fal response body.
+- **Prompt guides split to per-model files** as part of Phase 2. Existing `src/guides/index.ts` (557 lines, single file holding all guides) splits into `src/guides/{veo,nanobanana,imagen,gemini-tts,lyria,wan,kling-avatar,veed-fabric}.ts`. `index.ts` becomes composition registry. Matches the design doc's stated "one file per model" pattern; fixes internal convention mismatch flagged during review.
+- **Test location follows repo convention** (`tests/unit/{domain}/`), not colocation. Design doc's `src/catalog/catalog.test.ts` corrected to `tests/unit/catalog/catalog.test.ts`. Vitest config's `include` pattern already matches.
+- **`poll_interval_seconds` dropped** from `fal_generate_video` schema. Dead-code-from-birth (fal.subscribe manages polling internally) — shipping it "for parity" with Veo would ossify API surface with no caller benefit.
+- **Shared `downloadAndWrite` helper extracted** into `src/generation/utils/download-and-write.ts`. Used by both Veo and fal transports. Internal refactor of `src/generation/video.ts` — no behavior change, existing integration test guards. Streams response body (no full buffer). Rejects `text/html` Content-Type to prevent fal error pages being written as video.
+- **Catalog JSON cached at module load.** Re-read-per-call trivially inefficient for static data; read-once-cached + re-filter-per-call handles env-variability while eliminating file I/O cost.
+- **Coverage exclusion** for `src/generation/fal/client.ts` added to `vitest.config.ts` with same rationale as existing Veo client.
+- **Test gaps closed (20+):** regression test for `duration: "5"` 422 (today's finding), fixture-per-class error taxonomy tests, mixed-environment catalog tests, malformed-JSON handling, signed-URL passthrough, three-step discovery E2E flow, Wan 2.7 at 720p integration smoke.
+- **TODOS.md created** with three deferred items: evaluation harness generalization, automated sync-fal-specs cron + drift PR, cost observability logging.
+
 **2026-04-24 — Default talking-head model flipped from Kling AI Avatar v2 Pro to Wan 2.7.** After successful Wan 2.7 runs at `resolution: "720p"` + integer `duration`, the full three-way comparison gave Wan the default. Rationale: rubric parity (user-reviewed "solid, very good"), ~25× faster warm-runner wall time (8s vs 191s), ~13% cheaper per second, minor resolution trade-off (720p vs 1080p class — acceptable for reel delivery). Kling stays as the high-resolution / auto-match-audio fallback. veed/fabric-1.0 stays as fast-preview / disaster-recovery. Wan's caller-side coordination burden (pass integer `duration: Math.ceil(audio_seconds)` AND explicit `resolution: "720p"`) is documented in the prompt guide and is trivial pipeline-side since audio lengths are known at dispatch time.
 
 **2026-04-23 (post-commit) — Wan 2.7 failure root-caused as `generation_timeout` at 1080p.** Initial framing assumed an account-dispatch issue on fal's side. Post-session inspection of the failed request (019dbc7d) returned fal's full error response: `{"type": "generation_timeout"}` after 2723.9 seconds of runner inference time on resolution=1080p audio-driven mode. Dashboard showed HTTP 504, which surfaced the clue. Workaround is explicit `resolution: "720p"` on every Wan audio-driven call; this becomes a Phase 1 transport-layer default (or a tool-description warning) and a prompt-guide mandate when the Wan guide lands. Server-side 504 appears unbilled per fal's policy — confirms partial-failure billing posture for future cases.
@@ -414,3 +457,16 @@ Artificer-mcp ships via npm and GitHub Releases (release-please). Each phase shi
 - On the catalog design, you generalized past where I was. I proposed a fal-scoped `fal_model_catalog`; you pointed out that artificer already spans Google + fal + future, and that the catalog is provider-agnostic by right. That's the kind of correction that reframes a whole design rather than just tweaking it.
 - You made the right architectural call on scope expansion when it mattered. "A is key to implementing fal correctly and aligning with the design principle of artificer to begin with." That's the mode where you pay more upfront cost to avoid a retrofit later. Rare in people who ship a lot — most optimize for velocity and eat the retrofit. You priced both paths and picked the one that compounds better.
 - You push back precisely. Not on everything — you accepted several of my framings without argument. But when you pushed (P1 model-agnosticism, P2 prompt-guide seam, catalog generalization), it was surgical and based on specific substance, not general skepticism. That's the signature of someone who knows which decisions are load-bearing.
+
+## GSTACK REVIEW REPORT
+
+| Review | Trigger | Why | Runs | Status | Findings |
+|--------|---------|-----|------|--------|----------|
+| CEO Review | `/plan-ceo-review` | Scope & strategy | 0 | — | — |
+| Codex Review | `/codex review` | Independent 2nd opinion | 0 | — | — |
+| Eng Review | `/plan-eng-review` | Architecture & tests (required) | 1 | CLEAR (PLAN) | 26 issues, 0 critical gaps, 0 unresolved |
+| Design Review | `/plan-design-review` | UI/UX gaps | 0 | — (N/A — backend-only) | — |
+
+**UNRESOLVED:** 0
+
+**VERDICT:** ENG CLEARED — ready to implement. Phase 1 scope materially expanded during this review (fal spec ingestion via OpenAPI + llms.txt, 7-class error taxonomy, shared downloadAndWrite helper extraction, guide file split, test gaps closed). All decisions recorded in the Decisions Log. No design review needed (backend-only). CEO review optional — the scope expansion was architectural, not product.
