@@ -8,7 +8,7 @@ Mode: Builder
 Source plan: `docs/plans/fal-ai-integration.md` (this design supersedes that plan and widens scope beyond fal to the full multi-provider architecture)
 Related artifacts:
   - `docs/plans/fal-q1-research-2026-04-23.md` — architecture screen + infra posture
-  - `docs/plans/fal-bakeoff-2026-04-23.md` — talking-head (talking-head) bake-off result: Kling AI Avatar v2 Pro default, veed/fabric fallback
+  - `docs/plans/fal-bakeoff-2026-04-23.md` — talking-head bake-off: Wan 2.7 default (720p + integer duration), Kling AI Avatar v2 Pro as high-res fallback, veed/fabric as fast-preview path (revised 2026-04-24)
 
 ## Context
 
@@ -254,7 +254,7 @@ Phase 0 (already complete as of 2026-04-23) fed the design; Phases 1–5 ship th
 
 **Q1 (docs read, ~1 hour, $0)** — captured in `docs/plans/fal-q1-research-2026-04-23.md`. Output: shortlist of 3 audio-decoupled candidates (Wan 2.7, Kling AI Avatar v2 Pro, veed/fabric-1.0); infra posture for URL handling, concurrency, TTL, uploads.
 
-**Q2 (scripted bake-off, afternoon, ~$5 capped)** — captured in `docs/plans/fal-bakeoff-2026-04-23.md`. Output: Kling AI Avatar v2 Pro as default, veed/fabric-1.0 as fallback, Wan 2.7 deferred (root cause: `generation_timeout` on fal's Wan runner at default 1080p audio-driven mode — 2723s of inference time before fal's internal timeout; workaround is explicit `resolution: "720p"` per bake-off doc's post-session diagnosis).
+**Q2 (scripted bake-off, afternoon, ~$5 capped)** — captured in `docs/plans/fal-bakeoff-2026-04-23.md`. Final output (revised 2026-04-24 after Wan 2.7 successful runs at explicit 720p + integer duration): **Wan 2.7 as default** (`resolution: "720p"`, `duration: Math.ceil(audio_seconds)`) for talking-head use case — rubric parity with Kling, ~25× faster warm, 13% cheaper per second. **Kling AI Avatar v2 Pro** as high-resolution fallback (native 1080p, auto-matches audio). **veed/fabric-1.0** as fast-preview / disaster-recovery path. Total bake-off spend: $2.57.
 
 ### Phase 1 — `fal_generate_video` transport tool
 
@@ -307,7 +307,8 @@ Phase 0 (already complete as of 2026-04-23) fed the design; Phases 1–5 ship th
    - Unit tests: filter correctness per key configuration, capability param, `include_unavailable` flag, zero-keys warning, stub filtering, runtime-missing-tool filtering.
 6. **Seed `models.json`** with:
    - Talking-head entries for Kling AI Avatar v2 Pro, veed/fabric-1.0 — `stub: false` (transport ships in Phase 1).
-   - Cinematic entries for Veo 3.1 (Google route `stub: false`, fal route `stub: false` since `fal_generate_video` ships in Phase 1), Wan 2.7 (fal route `stub: false` with a prompt-guide note mandating `resolution: "720p"` for audio-driven mode to avoid `generation_timeout` at 1080p).
+   - Cinematic entries for Veo 3.1 (Google route `stub: false`, fal route `stub: false` since `fal_generate_video` ships in Phase 1).
+   - Talking-head entries **ordered by default preference**: Wan 2.7 first (fal route `stub: false`, prompt-guide mandates `resolution: "720p"` + integer `Math.ceil(audio_seconds)` as `duration`), Kling AI Avatar v2 Pro second (fal route `stub: false`, auto-matches audio), veed/fabric-1.0 third (fal route `stub: false`, 480p default).
    - Image entries for Gemini 2.5 / Nano Banana (Google route `stub: false` since `gemini_generate_image` already ships). Fal image route entries are NOT seeded — they land in Phase 4 with the `fal_generate_image` transport.
    - Music entry for Lyria (Google route `stub: false` since `gemini_generate_music` already ships).
    - Speech entry for Gemini TTS (Google route `stub: false` since `gemini_generate_speech` already ships).
@@ -399,7 +400,9 @@ Artificer-mcp ships via npm and GitHub Releases (release-please). Each phase shi
 
 **2026-04-23 (v2) — `model_catalog` is env-key-filtered, static-JSON-backed.** No dynamic fetching from fal / Google model lists. Every entry is a curated, tested integration with a real guide and a real tool. Trade-off: new models require a PR rather than showing up automatically. Worth it for correctness.
 
-**2026-04-23 (v2) — Q2 bake-off result: Kling AI Avatar v2 Pro as talking-head default.** Rubric pass for both completed candidates; indistinguishable on the avatar + prompt tested. Decision based on resolution headroom, vendor stability, and purpose fit. veed/fabric-1.0 as fallback / fast-preview. Wan 2.7 deferred.
+**2026-04-23 (v2) — Initial Q2 bake-off result: Kling AI Avatar v2 Pro as talking-head default** (on 2-of-3 data; Wan 2.7 deferred due to presumed dispatch issue). Rubric pass for both completed candidates; indistinguishable on the avatar + prompt tested. Decision based on resolution headroom, vendor stability, and purpose fit. veed/fabric-1.0 as fallback / fast-preview. **Superseded by the 2026-04-24 entry once Wan's failure was root-caused and successful runs demonstrated quality parity.**
+
+**2026-04-24 — Default talking-head model flipped from Kling AI Avatar v2 Pro to Wan 2.7.** After successful Wan 2.7 runs at `resolution: "720p"` + integer `duration`, the full three-way comparison gave Wan the default. Rationale: rubric parity (user-reviewed "solid, very good"), ~25× faster warm-runner wall time (8s vs 191s), ~13% cheaper per second, minor resolution trade-off (720p vs 1080p class — acceptable for reel delivery). Kling stays as the high-resolution / auto-match-audio fallback. veed/fabric-1.0 stays as fast-preview / disaster-recovery. Wan's caller-side coordination burden (pass integer `duration: Math.ceil(audio_seconds)` AND explicit `resolution: "720p"`) is documented in the prompt guide and is trivial pipeline-side since audio lengths are known at dispatch time.
 
 **2026-04-23 (post-commit) — Wan 2.7 failure root-caused as `generation_timeout` at 1080p.** Initial framing assumed an account-dispatch issue on fal's side. Post-session inspection of the failed request (019dbc7d) returned fal's full error response: `{"type": "generation_timeout"}` after 2723.9 seconds of runner inference time on resolution=1080p audio-driven mode. Dashboard showed HTTP 504, which surfaced the clue. Workaround is explicit `resolution: "720p"` on every Wan audio-driven call; this becomes a Phase 1 transport-layer default (or a tool-description warning) and a prompt-guide mandate when the Wan guide lands. Server-side 504 appears unbilled per fal's policy — confirms partial-failure billing posture for future cases.
 
