@@ -218,3 +218,32 @@ Also unlocks the simpler cases — generic transcription for content moderation,
 **Depends on / blocked by:** TODO #4 (`fal_transcribe`) shipping first.
 
 ---
+
+## 8. fal text-to-video (t2v) catalog + guides
+
+**What:** Seed `models.json` with fal-hosted text-to-video models — Luma Dream Machine, Runway Gen-3 / Gen-4, MiniMax Hailuo-02, Kling text-to-video variants, Wan text-to-video, fal-ai/veo3.1 (the t2v sibling of the existing veo3.1/image-to-video stub), etc. Add prompt guides per model family. Run a bake-off to pick a recommended default for each meaningful sub-class (cinematic, motion-graphic, abstract, etc.).
+
+**Why:** Phase 1 shipped `fal_generate_video` as a generic transport, but the catalog only seeded image-driven and audio-driven models (Wan 2.7, Kling Avatar, VEED Fabric — all need an image or audio input). Pure t2v on fal — "make a 5-second establishing shot of X" — has zero catalog coverage today. The transport itself is t2v-capable (the schema makes `image` optional, `prompt` is structural), but a caller asking `model_catalog` for video options sees only i2v and talking-head. The capability is half-shipped.
+
+**Pros:**
+- **No new transport code.** `fal_generate_video` already handles t2v — pass any t2v model id with just a prompt, no `image`. Closing the gap is purely catalog + guides + bake-off.
+- Unblocks "establishing shot" / "B-roll" / "stock-style cinematic" pipeline use cases that today have no fal home (Google Veo via `gemini_generate_video` is the only path).
+- Same playbook every other phase has used — sync specs, seed routes, write guides, bake-off, flip recommended-default in the matching guide.
+
+**Cons:**
+- T2V model surface is wide and quality varies enormously. A meaningful bake-off needs a fixed prompt set + scoring rubric (cinematic coherence, motion realism, prompt adherence, cost-per-second). The talking-head bake-off rubric doesn't transfer — TODO #1 (eval harness generalization) becomes load-bearing here.
+- Sub-class taxonomy is unobvious. `video.cinematic` already exists for Veo; do we add `video.t2v_general` and `video.t2v_motion_graphic`, or push everything under `video.cinematic`? Probably needs the model list before deciding.
+- T2V is expensive per second (Runway / Veo / Luma all in the $0.20-$0.60/sec range). A bake-off of 5 models × 5 prompts × 5s clips = ~$30-$50 in fal credits, more if 1080p.
+
+**Context:**
+- Transport schema reference: `src/generation/fal/types.ts` — `image` and `audio` are both optional, `prompt` is the structural arg.
+- Existing fal-Veo route in `video.cinematic` is already wired (currently `stub: true` — flipping is one line). That covers fal's Veo3.1 i2v path. The t2v sibling (`fal-ai/veo3.1`, no `/image-to-video` suffix) is a separate route.
+- Candidate model IDs to enumerate (verify availability via fal explore): `fal-ai/luma-dream-machine`, `fal-ai/runway-gen3`, `fal-ai/runway-gen4`, `fal-ai/minimax-hailuo-02/standard/text-to-video`, `fal-ai/kling-video/v2.5/master/text-to-video`, `fal-ai/wan/v2.7/text-to-video`, `fal-ai/veo3.1`, `fal-ai/veo3.1/fast`, `fal-ai/pika/v2.2/text-to-video`.
+- Bake-off needs: fixed prompt set (probably 5 prompts spanning cinematic / abstract / character-action / B-roll / motion-graphic), 5-second clip target, 1080p where supported, scored against a pluggable rubric (which is exactly what TODO #1 unblocks).
+- Prompt guide pattern: per-model file under `src/guides/`, registered in `src/guides/index.ts`, following the 10-section format spec at `docs/conventions/prompt-guides.md`. Or a single combined `fal_t2v_prompt_guide` if model count is small enough — call it after the model list is confirmed.
+
+**Trigger to pick this up:** User-provided fal t2v model URL (e.g. `https://fal.ai/explore/search?categories=text-to-video`) plus a real pipeline use case (e.g. "make B-roll for the narrated explainer workflow"). Best bundled with TODO #1 (eval harness generalization) since the bake-off is the bottleneck, not the catalog edits.
+
+**Depends on / blocked by:** Nothing technical. Ideally do TODO #1 first so the bake-off scoring is reusable for future v2v / cinematic-class additions.
+
+---
