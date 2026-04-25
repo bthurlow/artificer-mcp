@@ -18,6 +18,7 @@ import { registerDiaDialoguePromptGuide } from './dia-dialogue.js';
 import { registerLyria2PromptGuide } from './lyria2.js';
 import { registerStableAudioPromptGuide } from './stable-audio.js';
 import { registerCassetteSfxPromptGuide } from './cassette-sfx.js';
+import { registerTranscriptionPromptGuide } from './transcription.js';
 import { registerBrandSpecTool } from './brand-spec.js';
 
 /**
@@ -31,7 +32,7 @@ import { registerBrandSpecTool } from './brand-spec.js';
  * minimax_speech_prompt_guide, minimax_voice_clone_prompt_guide,
  * minimax_music_prompt_guide, dia_dialogue_prompt_guide, lyria2_prompt_guide,
  * stable_audio_prompt_guide, cassette_sfx_prompt_guide,
- * brand_spec_get.
+ * transcription_prompt_guide, brand_spec_get.
  *
  * Per-model content lives in its own file under `src/guides/{slug}.ts` —
  * this module is the composition registry only. New guides land by adding
@@ -61,5 +62,6 @@ export function registerGuideTools(server: McpServer): void {
   registerLyria2PromptGuide(server);
   registerStableAudioPromptGuide(server);
   registerCassetteSfxPromptGuide(server);
+  registerTranscriptionPromptGuide(server);
   registerBrandSpecTool(server);
 }

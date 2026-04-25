@@ -28,7 +28,7 @@ import { isToolRegistered } from '../../../src/catalog/tool-registry.js';
 // stub route (prompt_guide may be null only for safety capability per
 // the design contract). Failing either rule breaks the build.
 
-const CAPABILITIES = ['video', 'image', 'music', 'speech', 'safety'] as const;
+const CAPABILITIES = ['video', 'image', 'music', 'speech', 'safety', 'transcription'] as const;
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const MODELS_PATH = resolve(__dirname, '../../../src/catalog/models.json');
