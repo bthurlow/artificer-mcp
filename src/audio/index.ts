@@ -14,6 +14,7 @@ import {
   type AudioSetSampleRateParams,
   type AudioRemoveSilenceParams,
   type AudioMixParams,
+  type AudioPadParams,
   audioExtractFromVideoSchema,
   audioNormalizeSchema,
   audioConvertFormatSchema,
@@ -23,6 +24,7 @@ import {
   audioSetSampleRateSchema,
   audioRemoveSilenceSchema,
   audioMixSchema,
+  audioPadSchema,
 } from './types.js';
 
 /** Video container extensions — when the output is one of these, the audio tools
@@ -78,7 +80,7 @@ function isVideoContainer(ext: string): boolean {
  *
  * Covers: audio_extract_from_video, audio_normalize, audio_convert_format,
  * audio_convert_properties, audio_set_bitrate, audio_set_channels,
- * audio_set_sample_rate, audio_remove_silence.
+ * audio_set_sample_rate, audio_remove_silence, audio_mix, audio_pad.
  */
 export function registerAudioTools(server: McpServer): void {
   // ── audio_extract_from_video ───────────────────────────────────────────
@@ -559,6 +561,75 @@ export function registerAudioTools(server: McpServer): void {
         };
       } finally {
         await Promise.all(trackInputRs.map((r) => r.cleanup?.()));
+        await outR.cleanup?.();
+      }
+    },
+  );
+
+  // ── audio_pad ──────────────────────────────────────────────────────────
+  registerTool<AudioPadParams>(
+    server,
+    'audio_pad',
+    'Prepend and/or append silence to an audio file. Specify pad_start_seconds, pad_end_seconds, or both (at least one required). Float seconds supported (e.g., 0.25). Re-encodes via the output extension default codec.',
+    audioPadSchema.shape,
+    async ({ input, output, pad_start_seconds, pad_end_seconds, codec }) => {
+      if (
+        (pad_start_seconds === undefined || pad_start_seconds === 0) &&
+        (pad_end_seconds === undefined || pad_end_seconds === 0)
+      ) {
+        throw new Error(
+          'Specify at least one of pad_start_seconds or pad_end_seconds (must be > 0).',
+        );
+      }
+
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
+
+        // adelay prepends silence by delaying samples; pad_dur appends silence after EOF.
+        // Both inherit sample rate / channel layout from the source automatically.
+        const steps: string[] = [];
+        if (pad_start_seconds !== undefined && pad_start_seconds > 0) {
+          const delayMs = Math.round(pad_start_seconds * 1000);
+          steps.push(`adelay=delays=${delayMs}:all=1`);
+        }
+        if (pad_end_seconds !== undefined && pad_end_seconds > 0) {
+          steps.push(`apad=pad_dur=${pad_end_seconds}`);
+        }
+        const filter = steps.join(',');
+
+        const chosenCodec = codec ?? defaultCodecForExt(extOf(output));
+        await ffmpegBatch([
+          '-y',
+          '-i',
+          inR.localPath,
+          '-vn',
+          '-af',
+          filter,
+          '-c:a',
+          chosenCodec,
+          outR.localPath,
+        ]);
+        await outR.commit();
+
+        const parts: string[] = [];
+        if (pad_start_seconds !== undefined && pad_start_seconds > 0) {
+          parts.push(`+${pad_start_seconds}s start`);
+        }
+        if (pad_end_seconds !== undefined && pad_end_seconds > 0) {
+          parts.push(`+${pad_end_seconds}s end`);
+        }
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Padded audio (${parts.join(', ')}, codec=${chosenCodec}) → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
         await outR.cleanup?.();
       }
     },

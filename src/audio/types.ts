@@ -210,6 +210,38 @@ export const audioRemoveSilenceSchema = z.object({
     ),
 });
 
+/** Parameters for the audio_pad tool */
+export interface AudioPadParams {
+  input: string;
+  output: string;
+  pad_start_seconds?: number;
+  pad_end_seconds?: number;
+  codec?: string;
+}
+
+export const audioPadSchema = z.object({
+  input: z.string().describe('Path to the source audio (or video with audio).'),
+  output: z.string().describe('Path for the padded output (format inferred from extension).'),
+  pad_start_seconds: z
+    .number()
+    .nonnegative()
+    .optional()
+    .describe(
+      'Seconds of silence to prepend to the audio. Float OK (e.g., 0.25). Specify pad_start_seconds and/or pad_end_seconds — at least one is required.',
+    ),
+  pad_end_seconds: z
+    .number()
+    .nonnegative()
+    .optional()
+    .describe(
+      'Seconds of silence to append to the audio. Float OK (e.g., 1.5). Specify pad_start_seconds and/or pad_end_seconds — at least one is required.',
+    ),
+  codec: z
+    .string()
+    .optional()
+    .describe('Codec override. If omitted, picks a default for the output extension.'),
+});
+
 /** Parameters for the audio_mix tool */
 export interface AudioMixTrack {
   input: string;

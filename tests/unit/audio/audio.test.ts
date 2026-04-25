@@ -504,4 +504,115 @@ describe('Audio Tools', () => {
       expect(result.isError === true || /out of range/.test(text)).toBe(true);
     });
   });
+
+  // ── audio_pad ─────────────────────────────────────────────────────────
+
+  describe('audio_pad', () => {
+    it('prepends silence with adelay when only pad_start_seconds is set', async () => {
+      await client.callTool({
+        name: 'audio_pad',
+        arguments: {
+          input: '/tmp/in.mp3',
+          output: '/tmp/out.mp3',
+          pad_start_seconds: 0.5,
+        },
+      });
+
+      const args = ffmpegState.calls[0].args;
+      const af = args[args.indexOf('-af') + 1];
+      expect(af).toBe('adelay=delays=500:all=1');
+      expect(args).toContain('-c:a');
+      expect(args).toContain('libmp3lame');
+      expect(args).toContain('-vn');
+    });
+
+    it('appends silence with apad when only pad_end_seconds is set', async () => {
+      await client.callTool({
+        name: 'audio_pad',
+        arguments: {
+          input: '/tmp/in.mp3',
+          output: '/tmp/out.mp3',
+          pad_end_seconds: 1.5,
+        },
+      });
+
+      const af = ffmpegState.calls[0].args[ffmpegState.calls[0].args.indexOf('-af') + 1];
+      expect(af).toBe('apad=pad_dur=1.5');
+    });
+
+    it('chains adelay,apad when both pads are set', async () => {
+      await client.callTool({
+        name: 'audio_pad',
+        arguments: {
+          input: '/tmp/in.mp3',
+          output: '/tmp/out.mp3',
+          pad_start_seconds: 0.25,
+          pad_end_seconds: 2,
+        },
+      });
+
+      const af = ffmpegState.calls[0].args[ffmpegState.calls[0].args.indexOf('-af') + 1];
+      expect(af).toBe('adelay=delays=250:all=1,apad=pad_dur=2');
+    });
+
+    it('respects an explicit codec override', async () => {
+      await client.callTool({
+        name: 'audio_pad',
+        arguments: {
+          input: '/tmp/in.wav',
+          output: '/tmp/out.m4a',
+          pad_start_seconds: 1,
+          codec: 'aac',
+        },
+      });
+
+      const args = ffmpegState.calls[0].args;
+      expect(args).toContain('aac');
+    });
+
+    it('errors when neither pad is provided', async () => {
+      const result = await client.callTool({
+        name: 'audio_pad',
+        arguments: {
+          input: '/tmp/in.mp3',
+          output: '/tmp/out.mp3',
+        },
+      });
+
+      const content = result.content as Array<{ type: string; text: string }>;
+      const text = content.map((c) => c.text).join(' ');
+      expect(result.isError === true || /at least one/.test(text)).toBe(true);
+    });
+
+    it('errors when both pads are zero', async () => {
+      const result = await client.callTool({
+        name: 'audio_pad',
+        arguments: {
+          input: '/tmp/in.mp3',
+          output: '/tmp/out.mp3',
+          pad_start_seconds: 0,
+          pad_end_seconds: 0,
+        },
+      });
+
+      const content = result.content as Array<{ type: string; text: string }>;
+      const text = content.map((c) => c.text).join(' ');
+      expect(result.isError === true || /at least one/.test(text)).toBe(true);
+    });
+
+    it('rejects negative pad values via schema', async () => {
+      const result = await client.callTool({
+        name: 'audio_pad',
+        arguments: {
+          input: '/tmp/in.mp3',
+          output: '/tmp/out.mp3',
+          pad_start_seconds: -1,
+        },
+      });
+
+      const content = result.content as Array<{ type: string; text: string }>;
+      const text = content.map((c) => c.text).join(' ');
+      expect(result.isError === true || /invalid|nonnegative|negative/i.test(text)).toBe(true);
+    });
+  });
 });
