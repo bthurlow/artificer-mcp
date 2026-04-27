@@ -21,6 +21,7 @@ import { registerGenerationTools } from './generation/index.js';
 import { registerGuideTools } from './guides/index.js';
 import { registerWorkflowTools } from './workflows/index.js';
 import { registerCatalogTools } from './catalog/catalog.js';
+import { registerKaraokeTools } from './karaoke/index.js';
 
 /**
  * artificer-mcp Server
@@ -64,6 +65,7 @@ async function main(): Promise<void> {
   registerGuideTools(server);
   registerWorkflowTools(server);
   registerCatalogTools(server);
+  registerKaraokeTools(server);
 
   // Connect via stdio transport
   const transport = new StdioServerTransport();

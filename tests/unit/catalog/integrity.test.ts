@@ -20,6 +20,7 @@ import { registerGenerationTools } from '../../../src/generation/index.js';
 import { registerGuideTools } from '../../../src/guides/index.js';
 import { registerWorkflowTools } from '../../../src/workflows/index.js';
 import { registerCatalogTools } from '../../../src/catalog/catalog.js';
+import { registerKaraokeTools } from '../../../src/karaoke/index.js';
 import { isToolRegistered } from '../../../src/catalog/tool-registry.js';
 
 // Guards against catalog drift: every prompt_guide and access_route.tool
@@ -77,6 +78,7 @@ describe('catalog integrity', () => {
     registerGuideTools(server);
     registerWorkflowTools(server);
     registerCatalogTools(server);
+    registerKaraokeTools(server);
 
     // Connect + disconnect the server so the SDK's own bookkeeping has
     // run — protects against future SDK changes that lazy-register.
