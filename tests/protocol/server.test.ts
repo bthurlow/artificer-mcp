@@ -11,7 +11,7 @@ import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { createTestServerClient } from '../helpers/server.js';
 
 /**
- * All 137 tool names registered by the artificer-mcp server, grouped by category.
+ * All 162 tool names registered by the artificer-mcp server, grouped by category.
  */
 const EXPECTED_TOOLS = {
   core: [
@@ -153,6 +153,31 @@ const EXPECTED_TOOLS = {
     'cassette_sfx_prompt_guide',
     'transcription_prompt_guide',
     'ass_karaoke_prompt_guide',
+    'sora_video_prompt_guide',
+    'luma_ray_prompt_guide',
+    'kling_video_prompt_guide',
+    'seedance_prompt_guide',
+    'marey_prompt_guide',
+    'hailuo_prompt_guide',
+    'minimax_video_prompt_guide',
+    'pika_prompt_guide',
+    'pixverse_prompt_guide',
+    'ltx_video_prompt_guide',
+    'hunyuan_video_prompt_guide',
+    'vidu_prompt_guide',
+    'kandinsky_video_prompt_guide',
+    'grok_imagine_prompt_guide',
+    'decart_lucy_prompt_guide',
+    'cogvideox_prompt_guide',
+    'mochi_prompt_guide',
+    'nvidia_cosmos_prompt_guide',
+    'longcat_prompt_guide',
+    'magi_prompt_guide',
+    'sana_prompt_guide',
+    'specialized_video_prompt_guide',
+    'legacy_video_prompt_guide',
+    'happy_horse_prompt_guide',
+    'bytedance_lynx_prompt_guide',
     'brand_spec_get',
   ],
   catalog: [
@@ -206,15 +231,15 @@ describe('MCP Protocol — artificer-mcp Server', () => {
   // ── 2. Tool discovery ─────────────────────────────────────────────────────
 
   describe('tool discovery', () => {
-    it('should return exactly 137 tools', () => {
-      expect(tools).toHaveLength(137);
+    it('should return exactly 162 tools', () => {
+      expect(tools).toHaveLength(162);
     });
   });
 
   // ── 3. Tool names ─────────────────────────────────────────────────────────
 
   describe('tool names', () => {
-    it('should contain all 137 expected tool names', () => {
+    it('should contain all 162 expected tool names', () => {
       const registeredNames = tools.map((t) => t.name).sort();
       const expectedNames = [...ALL_TOOL_NAMES].sort();
 

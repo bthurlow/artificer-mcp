@@ -60,12 +60,11 @@ describe('Guide Tools', () => {
       const text = content[0].text;
 
       expect(text).toContain('# Veo Video Generation');
-      expect(text).toContain('## Overview');
-      expect(text).toContain('## Prompt Template');
-      expect(text).toContain('## Good Examples');
-      expect(text).toContain('## Bad Examples');
-      expect(text).toContain('## Image-to-Video Tips');
-      expect(text).toContain('## Official References');
+      expect(text).toContain('## What this model is best for');
+      expect(text).toContain('## Picking a model');
+      expect(text).toContain('## Access routes');
+      expect(text).toContain('## Last verified');
+      expect(text).toContain('## Official references');
     });
   });
 

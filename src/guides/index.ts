@@ -20,20 +20,41 @@ import { registerStableAudioPromptGuide } from './stable-audio.js';
 import { registerCassetteSfxPromptGuide } from './cassette-sfx.js';
 import { registerTranscriptionPromptGuide } from './transcription.js';
 import { registerAssKaraokePromptGuide } from './ass-karaoke.js';
+import { registerSoraPromptGuide } from './sora-video.js';
+import { registerLumaRayPromptGuide } from './luma-ray.js';
+import { registerKlingVideoPromptGuide } from './kling-video.js';
+import { registerSeedancePromptGuide } from './seedance.js';
+import { registerMareyPromptGuide } from './marey.js';
+import { registerHailuoPromptGuide } from './hailuo.js';
+import { registerMinimaxVideoPromptGuide } from './minimax-video.js';
+import { registerPikaPromptGuide } from './pika.js';
+import { registerPixversePromptGuide } from './pixverse.js';
+import { registerLtxVideoPromptGuide } from './ltx-video.js';
+import { registerHunyuanVideoPromptGuide } from './hunyuan-video.js';
+import { registerViduPromptGuide } from './vidu.js';
+import { registerKandinskyVideoPromptGuide } from './kandinsky-video.js';
+import { registerGrokImaginePromptGuide } from './grok-imagine.js';
+import { registerDecartLucyPromptGuide } from './decart-lucy.js';
+import { registerCogVideoxPromptGuide } from './cogvideox.js';
+import { registerMochiPromptGuide } from './mochi.js';
+import { registerNvidiaCosmosPromptGuide } from './nvidia-cosmos.js';
+import { registerLongcatPromptGuide } from './longcat-video.js';
+import { registerMagiPromptGuide } from './magi.js';
+import { registerSanaPromptGuide } from './sana-video.js';
+import { registerSpecializedVideoPromptGuide } from './specialized-video.js';
+import { registerLegacyVideoPromptGuide } from './legacy-video.js';
+import { registerHappyHorsePromptGuide } from './happy-horse.js';
+import { registerBytedanceLynxPromptGuide } from './bytedance-lynx.js';
 import { registerBrandSpecTool } from './brand-spec.js';
 
 /**
  * Register prompt guide tools with the MCP server.
  *
- * Covers: gemini_image_prompt_guide, gemini_nanobanana_prompt_guide,
- * veo_video_prompt_guide, gemini_tts_prompt_guide, gemini_lyria_prompt_guide,
- * wan_video_prompt_guide, kling_avatar_prompt_guide, veed_fabric_prompt_guide,
- * elevenlabs_speech_prompt_guide, elevenlabs_dialogue_prompt_guide,
- * elevenlabs_music_prompt_guide, elevenlabs_sfx_prompt_guide,
- * minimax_speech_prompt_guide, minimax_voice_clone_prompt_guide,
- * minimax_music_prompt_guide, dia_dialogue_prompt_guide, lyria2_prompt_guide,
- * stable_audio_prompt_guide, cassette_sfx_prompt_guide,
- * transcription_prompt_guide, ass_karaoke_prompt_guide, brand_spec_get.
+ * Existing guides cover the original audio / image / video model surface
+ * plus transcription and ASS karaoke. The 2026-04-28 video catalog seed
+ * added 23 new prompt guide families covering every fal-hosted t2v / i2v /
+ * multi-ref / FLF model — see `src/catalog/models.json` for the full route
+ * list grouped by sub-class (cinematic / general / stylized / talking_head).
  *
  * Per-model content lives in its own file under `src/guides/{slug}.ts` —
  * this module is the composition registry only. New guides land by adding
@@ -44,14 +65,19 @@ import { registerBrandSpecTool } from './brand-spec.js';
  * They return structured markdown to help compose effective prompts.
  */
 export function registerGuideTools(server: McpServer): void {
+  // Image
   registerImagenPromptGuide(server);
   registerNanobananaPromptGuide(server);
+
+  // Existing video (Veo, Wan, Kling Avatar, VEED Fabric)
   registerVeoPromptGuide(server);
-  registerGeminiTtsPromptGuide(server);
-  registerLyriaPromptGuide(server);
   registerWanPromptGuide(server);
   registerKlingAvatarPromptGuide(server);
   registerVeedFabricPromptGuide(server);
+
+  // Audio (TTS / dialogue / music / sfx / transcription / karaoke)
+  registerGeminiTtsPromptGuide(server);
+  registerLyriaPromptGuide(server);
   registerElevenlabsSpeechPromptGuide(server);
   registerElevenlabsDialoguePromptGuide(server);
   registerElevenlabsMusicPromptGuide(server);
@@ -65,5 +91,38 @@ export function registerGuideTools(server: McpServer): void {
   registerCassetteSfxPromptGuide(server);
   registerTranscriptionPromptGuide(server);
   registerAssKaraokePromptGuide(server);
+
+  // Video — cinematic (premium tier)
+  registerSoraPromptGuide(server);
+  registerLumaRayPromptGuide(server);
+  registerKlingVideoPromptGuide(server);
+  registerSeedancePromptGuide(server);
+  registerMareyPromptGuide(server);
+
+  // Video — general (mid-tier + niche)
+  registerHailuoPromptGuide(server);
+  registerMinimaxVideoPromptGuide(server);
+  registerPikaPromptGuide(server);
+  registerPixversePromptGuide(server);
+  registerLtxVideoPromptGuide(server);
+  registerHunyuanVideoPromptGuide(server);
+  registerViduPromptGuide(server);
+  registerKandinskyVideoPromptGuide(server);
+  registerGrokImaginePromptGuide(server);
+  registerDecartLucyPromptGuide(server);
+  registerCogVideoxPromptGuide(server);
+  registerMochiPromptGuide(server);
+  registerNvidiaCosmosPromptGuide(server);
+  registerLongcatPromptGuide(server);
+  registerMagiPromptGuide(server);
+  registerSanaPromptGuide(server);
+  registerSpecializedVideoPromptGuide(server);
+  registerLegacyVideoPromptGuide(server);
+
+  // Video — talking-head (audio-driven / lip-sync / character-id)
+  registerHappyHorsePromptGuide(server);
+  registerBytedanceLynxPromptGuide(server);
+
+  // Branding
   registerBrandSpecTool(server);
 }
