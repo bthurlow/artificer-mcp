@@ -190,13 +190,16 @@ async function main() {
   );
 
   let catalogDirty = false;
+  /** @type {Array<{slug: string, endpointId: string, error: string}>} */
+  const failures = [];
   for (const r of routes) {
     try {
       const changed = await syncOne(r, { dryRun });
       catalogDirty = catalogDirty || changed;
     } catch (err) {
-      console.error(`[${r.slug}] FAILED:`, err instanceof Error ? err.message : err);
-      process.exit(1);
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`[${r.slug}] FAILED:`, msg);
+      failures.push({ slug: r.slug, endpointId: r.endpointId, error: msg });
     }
   }
 
@@ -212,7 +215,19 @@ async function main() {
     }
   }
 
+  if (failures.length > 0) {
+    console.log(`\n${failures.length} failures (script continued past each):`);
+    for (const f of failures) {
+      console.log(`  ${f.slug} (${f.endpointId})`);
+      console.log(`    ${f.error}`);
+    }
+    console.log(
+      '\nFix: remove failed slugs from src/catalog/models.json or correct the endpoint id.',
+    );
+  }
+
   console.log('\ndone.');
+  if (failures.length > 0) process.exit(1);
 }
 
 // Only run main() when invoked directly (not when imported by tests).

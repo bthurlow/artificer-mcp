@@ -1,0 +1,509 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/wan/v2.7/text-to-video",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/wan/v2.7/text-to-video queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/wan/v2.7/text-to-video",
+      "category": "text-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a94047b/ktfxD5Hs3lGJdXwk7FurU_856b1abaad064b23bb2ae7dee66cf2f3.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/wan/v2.7/text-to-video",
+      "documentationUrl": "https://fal.ai/models/fal-ai/wan/v2.7/text-to-video/api"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "WanV27TextToVideoInput": {
+        "required": [
+          "prompt"
+        ],
+        "x-fal-order-properties": [
+          "prompt",
+          "audio_url",
+          "aspect_ratio",
+          "resolution",
+          "duration",
+          "negative_prompt",
+          "enable_prompt_expansion",
+          "seed",
+          "enable_safety_checker"
+        ],
+        "description": "Input for Wan 2.7 text-to-video generation.",
+        "type": "object",
+        "title": "Wan27TextToVideoInput",
+        "properties": {
+          "aspect_ratio": {
+            "default": "16:9",
+            "description": "Aspect ratio of the generated video.",
+            "type": "string",
+            "title": "Aspect Ratio",
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1",
+              "4:3",
+              "3:4"
+            ]
+          },
+          "negative_prompt": {
+            "examples": [
+              "low resolution, errors, worst quality, low quality"
+            ],
+            "description": "Content to avoid in the video. Max 500 characters.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Negative Prompt"
+          },
+          "resolution": {
+            "default": "1080p",
+            "description": "Output video resolution tier.",
+            "type": "string",
+            "title": "Resolution",
+            "enum": [
+              "720p",
+              "1080p"
+            ]
+          },
+          "prompt": {
+            "minLength": 1,
+            "examples": [
+              "A kitten running in a meadow, cinematic lighting, smooth camera movement."
+            ],
+            "description": "Text prompt describing the desired video. Max 5000 characters.",
+            "type": "string",
+            "title": "Prompt"
+          },
+          "audio_url": {
+            "description": "URL of driving audio. Supports WAV and MP3. Duration: 3-30s. Max 15 MB. If not provided, the model auto-generates matching background music.",
+            "anyOf": [
+              {
+                "ui": {
+                  "field": "audio"
+                },
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Url"
+          },
+          "seed": {
+            "description": "Random seed for reproducibility (0-2147483647).",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Enable content moderation for input and output.",
+            "type": "boolean",
+            "title": "Enable Safety Checker"
+          },
+          "duration": {
+            "default": 5,
+            "examples": [
+              5,
+              10,
+              15
+            ],
+            "description": "Output video duration in seconds (2-15).",
+            "type": "integer",
+            "title": "Duration",
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+              11,
+              12,
+              13,
+              14,
+              15
+            ]
+          },
+          "enable_prompt_expansion": {
+            "default": true,
+            "description": "Enable intelligent prompt rewriting.",
+            "type": "boolean",
+            "title": "Enable Prompt Expansion"
+          }
+        }
+      },
+      "WanV27TextToVideoOutput": {
+        "required": [
+          "video",
+          "seed"
+        ],
+        "x-fal-order-properties": [
+          "video",
+          "seed",
+          "actual_prompt"
+        ],
+        "description": "Output for Wan 2.7 text-to-video generation.",
+        "type": "object",
+        "title": "Wan27TextToVideoOutput",
+        "properties": {
+          "video": {
+            "description": "The generated video file.",
+            "$ref": "#/components/schemas/VideoFile"
+          },
+          "actual_prompt": {
+            "description": "The actual prompt used if prompt rewriting was enabled.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Prompt"
+          },
+          "seed": {
+            "description": "The seed used for generation.",
+            "type": "integer",
+            "title": "Seed"
+          }
+        }
+      },
+      "VideoFile": {
+        "properties": {
+          "fps": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The FPS of the video",
+            "title": "Fps"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The height of the video",
+            "title": "Height"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type"
+          },
+          "duration": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The duration of the video",
+            "title": "Duration"
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The width of the video",
+            "title": "Width"
+          },
+          "num_frames": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The number of frames in the video",
+            "title": "Num Frames"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height",
+          "fps",
+          "duration",
+          "num_frames"
+        ],
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "title": "VideoFile"
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/wan/v2.7/text-to-video/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/wan/v2.7/text-to-video/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/wan/v2.7/text-to-video": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WanV27TextToVideoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/wan/v2.7/text-to-video/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WanV27TextToVideoOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

@@ -1,0 +1,410 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/pika/v2.2/pikascenes",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/pika/v2.2/pikascenes queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/pika/v2.2/pikascenes",
+      "category": "image-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/lion/3FYXmzqtjqf6xQ5YVxbKi_bf6ff3d3904a42c783662e7e1fa21ce9.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/pika/v2.2/pikascenes",
+      "documentationUrl": "https://fal.ai/models/fal-ai/pika/v2.2/pikascenes/api"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "PikaV22PikascenesInput": {
+        "type": "object",
+        "description": "Request model for Pika 2.2 Pikascenes (collection-to-video) generation",
+        "title": "Pika22PikascenesRequest",
+        "required": [
+          "image_urls",
+          "prompt"
+        ],
+        "properties": {
+          "seed": {
+            "description": "The seed for the random number generator",
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resolution": {
+            "type": "string",
+            "description": "The resolution of the generated video",
+            "title": "Resolution",
+            "enum": [
+              "720p",
+              "1080p"
+            ],
+            "default": "1080p",
+            "examples": [
+              "1080p",
+              "720p"
+            ]
+          },
+          "negative_prompt": {
+            "type": "string",
+            "description": "A negative prompt to guide the model",
+            "title": "Negative Prompt",
+            "default": "ugly, bad, terrible"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Text prompt describing the desired video",
+            "title": "Prompt",
+            "examples": [
+              "The gorilla is wearing the coat and sitting in the living room, cinematic scene, camera orbit and dolly out"
+            ]
+          },
+          "image_urls": {
+            "type": "array",
+            "description": "URLs of images to combine into a video",
+            "title": "Image Urls",
+            "items": {
+              "type": "string"
+            },
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/example_inputs/pika/pika_scenes/a.png",
+                "https://storage.googleapis.com/falserverless/example_inputs/pika/pika_scenes/b.png",
+                "https://storage.googleapis.com/falserverless/example_inputs/pika/pika_scenes/c.png"
+              ]
+            ]
+          },
+          "aspect_ratio": {
+            "type": "string",
+            "description": "The aspect ratio of the generated video",
+            "title": "Aspect Ratio",
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1",
+              "4:5",
+              "5:4",
+              "3:2",
+              "2:3"
+            ],
+            "default": "16:9"
+          },
+          "duration": {
+            "type": "integer",
+            "description": "The duration of the generated video in seconds",
+            "title": "Duration",
+            "enum": [
+              5,
+              10
+            ],
+            "default": 5,
+            "examples": [
+              5,
+              10
+            ]
+          },
+          "ingredients_mode": {
+            "type": "string",
+            "description": "Mode for integrating multiple images. Precise mode is more accurate, creative mode is more creative.",
+            "title": "Ingredients Mode",
+            "enum": [
+              "precise",
+              "creative"
+            ],
+            "default": "precise"
+          }
+        },
+        "x-fal-order-properties": [
+          "image_urls",
+          "prompt",
+          "negative_prompt",
+          "seed",
+          "aspect_ratio",
+          "resolution",
+          "duration",
+          "ingredients_mode"
+        ]
+      },
+      "PikaV22PikascenesOutput": {
+        "type": "object",
+        "description": "Output model for Pika 2.2 Pikascenes generation",
+        "title": "Pika22PikascenesOutput",
+        "required": [
+          "video"
+        ],
+        "properties": {
+          "video": {
+            "description": "The generated video combining multiple images",
+            "$ref": "#/components/schemas/File",
+            "examples": [
+              {
+                "url": "https://storage.googleapis.com/falserverless/example_outputs/pika/pika_scenes/output.mp4"
+              }
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "video"
+        ]
+      },
+      "File": {
+        "type": "object",
+        "title": "File",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "content_type": {
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ]
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ]
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/pika/v2.2/pikascenes/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/pika/v2.2/pikascenes/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/pika/v2.2/pikascenes": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PikaV22PikascenesInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/pika/v2.2/pikascenes/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PikaV22PikascenesOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

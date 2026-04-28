@@ -1,0 +1,556 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/ltxv-13b-098-distilled",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/ltxv-13b-098-distilled queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/ltxv-13b-098-distilled",
+      "category": "text-to-video",
+      "thumbnailUrl": "https://storage.googleapis.com/fal_cdn/fal/Training-4.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/ltxv-13b-098-distilled",
+      "documentationUrl": "https://fal.ai/models/fal-ai/ltxv-13b-098-distilled/api"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "Ltxv13b098DistilledInput": {
+        "properties": {
+          "num_frames": {
+            "title": "Number of Frames",
+            "description": "The number of frames in the video.",
+            "minimum": 9,
+            "type": "integer",
+            "maximum": 1441,
+            "examples": [
+              121
+            ],
+            "default": 121
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "description": "Whether to enable the safety checker.",
+            "type": "boolean",
+            "examples": [
+              true
+            ],
+            "default": true
+          },
+          "negative_prompt": {
+            "title": "Negative Prompt",
+            "description": "Negative prompt for generation",
+            "type": "string",
+            "default": "worst quality, inconsistent motion, blurry, jittery, distorted"
+          },
+          "aspect_ratio": {
+            "title": "Aspect Ratio",
+            "description": "Aspect ratio of the generated video.",
+            "enum": [
+              "9:16",
+              "1:1",
+              "16:9"
+            ],
+            "type": "string",
+            "examples": [
+              "16:9"
+            ],
+            "default": "16:9"
+          },
+          "second_pass_num_inference_steps": {
+            "title": "Second Pass Number of Inference Steps",
+            "description": "Number of inference steps during the second pass.",
+            "minimum": 2,
+            "type": "integer",
+            "maximum": 12,
+            "examples": [
+              8
+            ],
+            "default": 8
+          },
+          "loras": {
+            "title": "Loras",
+            "description": "LoRA weights to use for generation",
+            "type": "array",
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/LoRAWeight"
+            }
+          },
+          "temporal_adain_factor": {
+            "multipleOf": 0.05,
+            "title": "Temporal AdaIN Factor",
+            "minimum": 0,
+            "type": "number",
+            "maximum": 1,
+            "examples": [
+              0.5
+            ],
+            "default": 0.5,
+            "description": "The factor for adaptive instance normalization (AdaIN) applied to generated video chunks after the first. This can help deal with a gradual increase in saturation/contrast in the generated video by normalizing the color distribution across the video. A high value will ensure the color distribution is more consistent across the video, while a low value will allow for more variation in color distribution."
+          },
+          "seed": {
+            "title": "Seed",
+            "description": "Random seed for generation",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expand_prompt": {
+            "title": "Expand Prompt",
+            "description": "Whether to expand the prompt using a language model.",
+            "type": "boolean",
+            "examples": [
+              false
+            ],
+            "default": false
+          },
+          "resolution": {
+            "title": "Resolution",
+            "description": "Resolution of the generated video.",
+            "enum": [
+              "480p",
+              "720p"
+            ],
+            "type": "string",
+            "examples": [
+              "720p"
+            ],
+            "default": "720p"
+          },
+          "tone_map_compression_ratio": {
+            "multipleOf": 0.05,
+            "title": "Tone Map Compression Ratio",
+            "minimum": 0,
+            "type": "number",
+            "maximum": 1,
+            "examples": [
+              0
+            ],
+            "default": 0,
+            "description": "The compression ratio for tone mapping. This is used to compress the dynamic range of the video to improve visual quality. A value of 0.0 means no compression, while a value of 1.0 means maximum compression."
+          },
+          "first_pass_num_inference_steps": {
+            "title": "Number of Inference Steps",
+            "description": "Number of inference steps during the first pass.",
+            "minimum": 2,
+            "type": "integer",
+            "maximum": 12,
+            "examples": [
+              8
+            ],
+            "default": 8
+          },
+          "frame_rate": {
+            "title": "Frame Rate",
+            "description": "The frame rate of the video.",
+            "minimum": 1,
+            "type": "integer",
+            "maximum": 60,
+            "examples": [
+              24
+            ],
+            "default": 24
+          },
+          "reverse_video": {
+            "title": "Reverse Video",
+            "description": "Whether to reverse the video.",
+            "type": "boolean",
+            "examples": [
+              false
+            ],
+            "default": false
+          },
+          "second_pass_skip_initial_steps": {
+            "title": "Second Pass Skip Initial Steps",
+            "description": "The number of inference steps to skip in the initial steps of the second pass. By skipping some steps at the beginning, the second pass can focus on smaller details instead of larger changes.",
+            "minimum": 1,
+            "type": "integer",
+            "maximum": 11,
+            "examples": [
+              5
+            ],
+            "default": 5
+          },
+          "enable_detail_pass": {
+            "title": "Enable Detail Pass",
+            "description": "Whether to use a detail pass. If True, the model will perform a second pass to refine the video and enhance details. This incurs a 2.0x cost multiplier on the base price.",
+            "type": "boolean",
+            "examples": [
+              false
+            ],
+            "default": false
+          },
+          "prompt": {
+            "title": "Prompt",
+            "description": "Text prompt to guide generation",
+            "type": "string",
+            "examples": [
+              "A cinematic fast-tracking shot follows a vintage, teal camper van as it descends a winding mountain trail. The van, slightly weathered but well-maintained, is the central focus, its retro design emphasized by the motion blur. Medium shot reveals the dusty, ochre trail, edged with vibrant green pine trees. Close-up on the van's tires shows the gravel spraying, highlighting the speed and rugged terrain. Sunlight filters through the trees, casting dappled shadows on the van and the trail. The background is a hazy, majestic mountain range bathed in warm, golden light. The overall mood is adventurous and exhilarating. High resolution 4k movie scene."
+            ]
+          }
+        },
+        "title": "DistilledTextToVideoInput",
+        "x-fal-order-properties": [
+          "prompt",
+          "negative_prompt",
+          "loras",
+          "resolution",
+          "aspect_ratio",
+          "seed",
+          "num_frames",
+          "first_pass_num_inference_steps",
+          "second_pass_num_inference_steps",
+          "second_pass_skip_initial_steps",
+          "frame_rate",
+          "expand_prompt",
+          "reverse_video",
+          "enable_safety_checker",
+          "enable_detail_pass",
+          "temporal_adain_factor",
+          "tone_map_compression_ratio"
+        ],
+        "required": [
+          "prompt"
+        ],
+        "type": "object",
+        "description": "Distilled model input"
+      },
+      "Ltxv13b098DistilledOutput": {
+        "properties": {
+          "video": {
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video file.",
+            "examples": [
+              {
+                "url": "https://storage.googleapis.com/falserverless/example_outputs/ltxv-multiscale-text-to-video.mp4"
+              }
+            ]
+          },
+          "prompt": {
+            "title": "Prompt",
+            "description": "The prompt used for generation.",
+            "type": "string",
+            "examples": [
+              "A cinematic fast-tracking shot follows a vintage, teal camper van as it descends a winding mountain trail. The van, slightly weathered but well-maintained, is the central focus, its retro design emphasized by the motion blur. Medium shot reveals the dusty, ochre trail, edged with vibrant green pine trees. Close-up on the van's tires shows the gravel spraying, highlighting the speed and rugged terrain. Sunlight filters through the trees, casting dappled shadows on the van and the trail. The background is a hazy, majestic mountain range bathed in warm, golden light. The overall mood is adventurous and exhilarating. High resolution 4k movie scene."
+            ]
+          },
+          "seed": {
+            "title": "Seed",
+            "description": "The seed used for generation.",
+            "type": "integer"
+          }
+        },
+        "title": "TextToVideoOutput",
+        "x-fal-order-properties": [
+          "video",
+          "prompt",
+          "seed"
+        ],
+        "required": [
+          "video",
+          "prompt",
+          "seed"
+        ],
+        "type": "object"
+      },
+      "LoRAWeight": {
+        "properties": {
+          "weight_name": {
+            "title": "Weight Name",
+            "description": "Name of the LoRA weight. Only used if `path` is a HuggingFace repository, and is only required when the repository contains multiple LoRA weights.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scale": {
+            "title": "Scale",
+            "description": "Scale of the LoRA weight. This is a multiplier applied to the LoRA weight when loading it.",
+            "minimum": 0,
+            "type": "number",
+            "maximum": 4,
+            "default": 1
+          },
+          "path": {
+            "title": "Path",
+            "description": "URL or path to the LoRA weights.",
+            "type": "string"
+          }
+        },
+        "title": "LoRAWeight",
+        "x-fal-order-properties": [
+          "path",
+          "weight_name",
+          "scale"
+        ],
+        "required": [
+          "path"
+        ],
+        "type": "object"
+      },
+      "File": {
+        "properties": {
+          "content_type": {
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ]
+          },
+          "file_size": {
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ]
+          },
+          "file_name": {
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          }
+        },
+        "title": "File",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "required": [
+          "url"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/ltxv-13b-098-distilled/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/ltxv-13b-098-distilled/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/ltxv-13b-098-distilled": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Ltxv13b098DistilledInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/ltxv-13b-098-distilled/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ltxv13b098DistilledOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

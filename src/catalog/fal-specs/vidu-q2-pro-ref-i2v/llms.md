@@ -1,0 +1,205 @@
+# Vidu
+
+> Use the latest Vidu Q2 Pro models which much more better quality and control on your videos.
+
+
+## Overview
+
+- **Endpoint**: `https://fal.run/fal-ai/vidu/q2/reference-to-video/pro`
+- **Model ID**: `fal-ai/vidu/q2/reference-to-video/pro`
+- **Category**: image-to-video
+- **Kind**: inference
+
+
+## Pricing
+
+The model will cost 0.1 $ for every 360p video, 0.2 $ for every 520p video, 0.3 $ for 720 p video. For 1080 p the cost would be 0.2 $ along with 0.1 $ for every video second.
+
+For more details, see [fal.ai pricing](https://fal.ai/pricing).
+
+## API Information
+
+This model can be used via our HTTP API or more conveniently via our client libraries.
+See the input and output schema below, as well as the usage examples.
+
+
+### Input Schema
+
+The API accepts the following input parameters:
+
+
+- **`prompt`** (`string`, _required_):
+  Text prompt for video generation, max 2000 characters
+  - Examples: "@Figure 1 Character Reference@Refer to the special effects, movements, and camera work of Video 1."
+
+- **`reference_image_urls`** (`list<string>`, _optional_):
+  URLs of the reference images for subject appearance. If videos are provided, up to 4 images are allowed; otherwise up to 7 images.
+  - Array of string
+  - Examples: ["https://storage.googleapis.com/falserverless/model_tests/video_models/vidu-image-3123041388101890.png"]
+
+- **`reference_video_urls`** (`list<string>`, _optional_):
+  URLs of the reference videos for video editing or motion reference. Supports up to 2 videos.
+  - Array of string
+  - Examples: ["https://storage.googleapis.com/falserverless/model_tests/video_models/vidu-video-3123002003131623.mp4"]
+
+- **`seed`** (`integer`, _optional_):
+  Random seed for reproducibility. If None, a random seed is chosen.
+
+- **`duration`** (`integer`, _optional_):
+  Duration of the video in seconds (0 for automatic duration) Default value: `4`
+  - Default: `4`
+  - Range: `1` to `8`
+
+- **`resolution`** (`ResolutionEnum`, _optional_):
+  Output video resolution Default value: `"720p"`
+  - Default: `"720p"`
+  - Options: `"540p"`, `"720p"`, `"1080p"`
+
+- **`aspect_ratio`** (`string`, _optional_):
+  Aspect ratio of the output video (e.g., auto, 16:9, 9:16, 1:1, or any W:H) Default value: `"16:9"`
+  - Default: `"16:9"`
+
+- **`movement_amplitude`** (`MovementAmplitudeEnum`, _optional_):
+  The movement amplitude of objects in the frame Default value: `"auto"`
+  - Default: `"auto"`
+  - Options: `"auto"`, `"small"`, `"medium"`, `"large"`
+
+- **`bgm`** (`boolean`, _optional_):
+  Whether to add background music to the generated video
+  - Default: `false`
+
+
+
+**Required Parameters Example**:
+
+```json
+{
+  "prompt": "@Figure 1 Character Reference@Refer to the special effects, movements, and camera work of Video 1."
+}
+```
+
+**Full Example**:
+
+```json
+{
+  "prompt": "@Figure 1 Character Reference@Refer to the special effects, movements, and camera work of Video 1.",
+  "reference_image_urls": [
+    "https://storage.googleapis.com/falserverless/model_tests/video_models/vidu-image-3123041388101890.png"
+  ],
+  "reference_video_urls": [
+    "https://storage.googleapis.com/falserverless/model_tests/video_models/vidu-video-3123002003131623.mp4"
+  ],
+  "duration": 4,
+  "resolution": "720p",
+  "aspect_ratio": "16:9",
+  "movement_amplitude": "auto"
+}
+```
+
+
+### Output Schema
+
+The API returns the following output format:
+
+- **`video`** (`File`, _required_):
+  The generated video with video/image references using the Q2 Pro model
+  - Examples: {"url":"https://v3b.fal.media/files/b/0a8aa38a/_nfU-t1qY1HEVcDqct-M__output.mp4"}
+
+
+
+**Example Response**:
+
+```json
+{
+  "video": {
+    "url": "https://v3b.fal.media/files/b/0a8aa38a/_nfU-t1qY1HEVcDqct-M__output.mp4"
+  }
+}
+```
+
+
+## Usage Examples
+
+### cURL
+
+```bash
+curl --request POST \
+  --url https://fal.run/fal-ai/vidu/q2/reference-to-video/pro \
+  --header "Authorization: Key $FAL_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{
+     "prompt": "@Figure 1 Character Reference@Refer to the special effects, movements, and camera work of Video 1."
+   }'
+```
+
+### Python
+
+Ensure you have the Python client installed:
+
+```bash
+pip install fal-client
+```
+
+Then use the API client to make requests:
+
+```python
+import fal_client
+
+def on_queue_update(update):
+    if isinstance(update, fal_client.InProgress):
+        for log in update.logs:
+           print(log["message"])
+
+result = fal_client.subscribe(
+    "fal-ai/vidu/q2/reference-to-video/pro",
+    arguments={
+        "prompt": "@Figure 1 Character Reference@Refer to the special effects, movements, and camera work of Video 1."
+    },
+    with_logs=True,
+    on_queue_update=on_queue_update,
+)
+print(result)
+```
+
+### JavaScript
+
+Ensure you have the JavaScript client installed:
+
+```bash
+npm install --save @fal-ai/client
+```
+
+Then use the API client to make requests:
+
+```javascript
+import { fal } from "@fal-ai/client";
+
+const result = await fal.subscribe("fal-ai/vidu/q2/reference-to-video/pro", {
+  input: {
+    prompt: "@Figure 1 Character Reference@Refer to the special effects, movements, and camera work of Video 1."
+  },
+  logs: true,
+  onQueueUpdate: (update) => {
+    if (update.status === "IN_PROGRESS") {
+      update.logs.map((log) => log.message).forEach(console.log);
+    }
+  },
+});
+console.log(result.data);
+console.log(result.requestId);
+```
+
+
+## Additional Resources
+
+### Documentation
+
+- [Model Playground](https://fal.ai/models/fal-ai/vidu/q2/reference-to-video/pro)
+- [API Documentation](https://fal.ai/models/fal-ai/vidu/q2/reference-to-video/pro/api)
+- [OpenAPI Schema](https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/vidu/q2/reference-to-video/pro)
+
+### fal.ai Platform
+
+- [Platform Documentation](https://docs.fal.ai)
+- [Python Client](https://docs.fal.ai/clients/python)
+- [JavaScript Client](https://docs.fal.ai/clients/javascript)

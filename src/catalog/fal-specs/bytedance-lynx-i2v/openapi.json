@@ -1,0 +1,504 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for bytedance/lynx",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the bytedance/lynx queue.",
+    "x-fal-metadata": {
+      "endpointId": "bytedance/lynx",
+      "category": "image-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/lion/46Az_CH4LkzpoBBIJYiSf_c6c1e1cb386b4e30b7c0e8eee627379c.jpg",
+      "playgroundUrl": "https://fal.ai/models/bytedance/lynx",
+      "documentationUrl": "https://fal.ai/models/bytedance/lynx/api"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "LynxInput": {
+        "properties": {
+          "ip_scale": {
+            "minimum": 0,
+            "maximum": 2,
+            "default": 1,
+            "description": "Identity preservation scale. Controls how closely the generated video preserves the subject's identity from the reference image.",
+            "title": "Ip Scale",
+            "type": "number"
+          },
+          "aspect_ratio": {
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1"
+            ],
+            "default": "16:9",
+            "description": "Aspect ratio of the generated video (16:9, 9:16, or 1:1)",
+            "title": "Aspect Ratio",
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Text prompt to guide video generation",
+            "title": "Prompt",
+            "examples": [
+              "A person carves a pumpkin on a porch in the evening. The camera captures their upper body as they draw a face with a marker, carefully cut along the lines, then lift the lid with both hands. Their face lights up with excitement as they peek inside"
+            ]
+          },
+          "guidance_scale_2": {
+            "minimum": 0,
+            "maximum": 10,
+            "default": 2,
+            "description": "Image guidance scale. Controls how closely the generated video follows the reference image. Higher values increase adherence to the reference image but may decrease quality.",
+            "title": "Guidance Scale 2",
+            "type": "number"
+          },
+          "guidance_scale": {
+            "minimum": 1,
+            "maximum": 20,
+            "default": 5,
+            "description": "Classifier-free guidance scale. Higher values give better adherence to the prompt but may decrease quality.",
+            "title": "Guidance Scale",
+            "type": "number"
+          },
+          "frames_per_second": {
+            "minimum": 5,
+            "maximum": 30,
+            "default": 16,
+            "description": "Frames per second of the generated video. Must be between 5 to 30.",
+            "title": "Frames Per Second",
+            "type": "integer"
+          },
+          "num_inference_steps": {
+            "minimum": 1,
+            "maximum": 75,
+            "default": 50,
+            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
+            "title": "Num Inference Steps",
+            "type": "integer"
+          },
+          "negative_prompt": {
+            "default": "Bright tones, overexposed, blurred background, static, subtitles, style, works, paintings, images, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, misshapen limbs, fused fingers, still picture, messy background, three legs, many people in the background, walking backwards",
+            "description": "Negative prompt to guide what should not appear in the generated video",
+            "title": "Negative Prompt",
+            "type": "string"
+          },
+          "seed": {
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resolution": {
+            "enum": [
+              "480p",
+              "580p",
+              "720p"
+            ],
+            "default": "720p",
+            "description": "Resolution of the generated video (480p, 580p, or 720p)",
+            "title": "Resolution",
+            "type": "string"
+          },
+          "strength": {
+            "minimum": 0,
+            "maximum": 2,
+            "default": 1,
+            "description": "Reference image scale. Controls the influence of the reference image on the generated video.",
+            "title": "Strength",
+            "type": "number"
+          },
+          "image_url": {
+            "type": "string",
+            "description": "The URL of the subject image to be used for video generation",
+            "title": "Image Url",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/lynx/example_in.png"
+            ]
+          },
+          "num_frames": {
+            "minimum": 9,
+            "maximum": 81,
+            "default": 81,
+            "description": "Number of frames in the generated video. Must be between 9 to 100.",
+            "title": "Num Frames",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "image_url",
+          "prompt"
+        ],
+        "x-fal-order-properties": [
+          "image_url",
+          "prompt",
+          "negative_prompt",
+          "num_inference_steps",
+          "seed",
+          "resolution",
+          "aspect_ratio",
+          "ip_scale",
+          "strength",
+          "frames_per_second",
+          "guidance_scale",
+          "guidance_scale_2",
+          "num_frames"
+        ],
+        "type": "object",
+        "title": "LynxInput"
+      },
+      "LynxOutput": {
+        "properties": {
+          "video": {
+            "$ref": "#/components/schemas/VideoFile",
+            "description": "The generated video file",
+            "examples": [
+              {
+                "url": "https://storage.googleapis.com/falserverless/example_outputs/lynx/example_out.mp4",
+                "content_type": "video/mp4"
+              }
+            ]
+          },
+          "seed": {
+            "description": "The seed used for generation",
+            "title": "Seed",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "video",
+          "seed"
+        ],
+        "x-fal-order-properties": [
+          "video",
+          "seed"
+        ],
+        "type": "object",
+        "title": "LynxOutput"
+      },
+      "VideoFile": {
+        "properties": {
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "duration": {
+            "description": "The duration of the video",
+            "title": "Duration",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "examples": [
+              4404019
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "fps": {
+            "description": "The FPS of the video",
+            "title": "Fps",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "width": {
+            "description": "The width of the video",
+            "title": "Width",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "num_frames": {
+            "description": "The number of frames in the video",
+            "title": "Num Frames",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "height": {
+            "description": "The height of the video",
+            "title": "Height",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height",
+          "fps",
+          "duration",
+          "num_frames"
+        ],
+        "type": "object",
+        "title": "VideoFile"
+      }
+    }
+  },
+  "paths": {
+    "/bytedance/lynx/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bytedance/lynx/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bytedance/lynx": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LynxInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bytedance/lynx/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LynxOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

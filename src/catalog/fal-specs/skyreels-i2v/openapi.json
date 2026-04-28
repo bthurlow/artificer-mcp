@@ -1,0 +1,388 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/skyreels-i2v",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/skyreels-i2v queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/skyreels-i2v",
+      "category": "image-to-video",
+      "thumbnailUrl": "https://storage.googleapis.com/falserverless/gallery/skyreels-i2v.webp",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/skyreels-i2v",
+      "documentationUrl": "https://fal.ai/models/fal-ai/skyreels-i2v/api"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "SkyreelsI2vInput": {
+        "properties": {
+          "negative_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Negative Prompt",
+            "description": "Negative prompt to guide generation away from certain attributes."
+          },
+          "aspect_ratio": {
+            "description": "Aspect ratio of the output video",
+            "enum": [
+              "16:9",
+              "9:16"
+            ],
+            "default": "16:9",
+            "title": "Aspect Ratio",
+            "type": "string"
+          },
+          "guidance_scale": {
+            "description": "Guidance scale for generation (between 1.0 and 20.0)",
+            "minimum": 1,
+            "default": 6,
+            "maximum": 20,
+            "title": "Guidance Scale",
+            "type": "number"
+          },
+          "prompt": {
+            "description": "The prompt to generate the video from.",
+            "examples": [
+              "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage. She wears a black leather jacket, a long red dress, and black boots, and carries a black purse."
+            ],
+            "title": "Prompt",
+            "type": "string"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "Random seed for generation. If not provided, a random seed will be used."
+          },
+          "image_url": {
+            "description": "URL of the image input.",
+            "examples": [
+              "https://fal.media/files/panda/TuXlMwArpQcdYNCLAEM8K.webp"
+            ],
+            "title": "Image Url",
+            "type": "string"
+          },
+          "num_inference_steps": {
+            "description": "Number of denoising steps (between 1 and 50). Higher values give better quality but take longer.",
+            "minimum": 1,
+            "default": 30,
+            "maximum": 50,
+            "title": "Num Inference Steps",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "prompt",
+          "image_url"
+        ],
+        "x-fal-order-properties": [
+          "prompt",
+          "image_url",
+          "seed",
+          "guidance_scale",
+          "num_inference_steps",
+          "negative_prompt",
+          "aspect_ratio"
+        ],
+        "title": "SkyreelsI2VRequest",
+        "type": "object"
+      },
+      "SkyreelsI2vOutput": {
+        "properties": {
+          "video": {
+            "examples": [
+              {
+                "url": "https://fal.media/files/elephant/yOOdaiC5clkH9K_5TTD32_video.mp4"
+              }
+            ],
+            "$ref": "#/components/schemas/File"
+          },
+          "seed": {
+            "description": "The seed used for generation",
+            "examples": [
+              42
+            ],
+            "title": "Seed",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "video",
+          "seed"
+        ],
+        "x-fal-order-properties": [
+          "video",
+          "seed"
+        ],
+        "title": "SkyreelsI2VResponse",
+        "type": "object"
+      },
+      "File": {
+        "properties": {
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes."
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file."
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "title": "File",
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/skyreels-i2v/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/skyreels-i2v/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/skyreels-i2v": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkyreelsI2vInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/skyreels-i2v/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkyreelsI2vOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

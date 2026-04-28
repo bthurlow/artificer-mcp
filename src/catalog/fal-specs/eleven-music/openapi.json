@@ -71,9 +71,17 @@
       },
       "ElevenlabsMusicInput": {
         "type": "object",
+        "description": "Request format for Elevenlabs Music API",
+        "x-fal-order-properties": [
+          "prompt",
+          "composition_plan",
+          "music_length_ms",
+          "force_instrumental",
+          "respect_sections_durations",
+          "output_format"
+        ],
         "properties": {
           "output_format": {
-            "default": "mp3_44100_128",
             "type": "string",
             "enum": [
               "mp3_22050_32",
@@ -96,14 +104,35 @@
               "opus_48000_128",
               "opus_48000_192"
             ],
-            "title": "Output Format",
-            "description": "Output format of the generated audio. Formatted as codec_sample_rate_bitrate. So an mp3 with 22.05kHz sample rate at 32kbs is represented as mp3_22050_32. MP3 with 192kbps bitrate requires you to be subscribed to Creator tier or above. PCM with 44.1kHz sample rate requires you to be subscribed to Pro tier or above. Note that the μ-law format (sometimes written mu-law, often approximated as u-law) is commonly used for Twilio audio inputs."
+            "default": "mp3_44100_128",
+            "description": "Output format of the generated audio. Formatted as codec_sample_rate_bitrate. So an mp3 with 22.05kHz sample rate at 32kbs is represented as mp3_22050_32. MP3 with 192kbps bitrate requires you to be subscribed to Creator tier or above. PCM with 44.1kHz sample rate requires you to be subscribed to Pro tier or above. Note that the μ-law format (sometimes written mu-law, often approximated as u-law) is commonly used for Twilio audio inputs.",
+            "title": "Output Format"
+          },
+          "music_length_ms": {
+            "description": "The length of the song to generate in milliseconds. Used only in conjunction with prompt. Must be between 3000ms and 600000ms. Optional - if not provided, the model will choose a length based on the prompt.",
+            "title": "Music Length Ms",
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 3000,
+                "maximum": 600000
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "force_instrumental": {
-            "default": false,
             "type": "boolean",
-            "title": "Force Instrumental",
-            "description": "If true, guarantees that the generated song will be instrumental. If false, the song may or may not be instrumental depending on the prompt. Can only be used with prompt."
+            "description": "If true, guarantees that the generated song will be instrumental. If false, the song may or may not be instrumental depending on the prompt. Can only be used with prompt.",
+            "default": false,
+            "title": "Force Instrumental"
+          },
+          "respect_sections_durations": {
+            "type": "boolean",
+            "description": "Controls how strictly section durations in the composition_plan are enforced. It will only have an effect if it is used with composition_plan. When set to true, the model will precisely respect each section's duration_ms from the plan. When set to false, the model may adjust individual section durations which will generally lead to better generation quality and improved latency, while always preserving the total song duration from the plan.",
+            "default": true,
+            "title": "Respect Sections Durations"
           },
           "composition_plan": {
             "description": "The composition plan for the music",
@@ -116,32 +145,12 @@
               }
             ]
           },
-          "respect_sections_durations": {
-            "default": true,
-            "type": "boolean",
-            "title": "Respect Sections Durations",
-            "description": "Controls how strictly section durations in the composition_plan are enforced. It will only have an effect if it is used with composition_plan. When set to true, the model will precisely respect each section's duration_ms from the plan. When set to false, the model may adjust individual section durations which will generally lead to better generation quality and improved latency, while always preserving the total song duration from the plan."
-          },
-          "music_length_ms": {
-            "title": "Music Length Ms",
-            "description": "The length of the song to generate in milliseconds. Used only in conjunction with prompt. Must be between 3000ms and 600000ms. Optional - if not provided, the model will choose a length based on the prompt.",
-            "anyOf": [
-              {
-                "maximum": 600000,
-                "type": "integer",
-                "minimum": 3000
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "prompt": {
             "examples": [
               "Mysterious original soundtrack, themes of jungle, rainforest, nature, woodwinds, busy rhythmic tribal percussion."
             ],
-            "title": "Prompt",
             "description": "The text prompt describing the music to generate",
+            "title": "Prompt",
             "anyOf": [
               {
                 "type": "string"
@@ -152,28 +161,19 @@
             ]
           }
         },
-        "title": "MusicRequest",
-        "description": "Request format for Elevenlabs Music API",
-        "x-fal-order-properties": [
-          "prompt",
-          "composition_plan",
-          "music_length_ms",
-          "force_instrumental",
-          "respect_sections_durations",
-          "output_format"
-        ]
+        "title": "MusicRequest"
       },
       "ElevenlabsMusicOutput": {
-        "required": [
+        "type": "object",
+        "x-fal-order-properties": [
           "audio"
         ],
-        "type": "object",
         "properties": {
           "audio": {
             "examples": [
               {
-                "file_name": "music_generated.mp3",
                 "content_type": "audio/mpeg",
+                "file_name": "music_generated.mp3",
                 "url": "https://storage.googleapis.com/falserverless/example_outputs/elevenlabs/music_generated.mp3"
               }
             ],
@@ -181,78 +181,71 @@
             "$ref": "#/components/schemas/File"
           }
         },
-        "title": "MusicOutput",
-        "x-fal-order-properties": [
+        "required": [
           "audio"
-        ]
+        ],
+        "title": "MusicOutput"
       },
       "MusicCompositionPlan": {
-        "required": [
+        "type": "object",
+        "x-fal-order-properties": [
           "positive_global_styles",
           "negative_global_styles",
           "sections"
         ],
-        "type": "object",
         "properties": {
+          "negative_global_styles": {
+            "type": "array",
+            "description": "The styles that should not be present in the entire song.",
+            "title": "Negative Global Styles",
+            "items": {
+              "type": "string"
+            }
+          },
           "sections": {
             "type": "array",
+            "description": "The sections of the song.",
+            "title": "Sections",
             "items": {
               "$ref": "#/components/schemas/MusicSection"
-            },
-            "title": "Sections",
-            "description": "The sections of the song."
+            }
           },
           "positive_global_styles": {
             "type": "array",
-            "items": {
-              "type": "string"
-            },
+            "description": "The styles that should be present in the entire song.",
             "title": "Positive Global Styles",
-            "description": "The styles that should be present in the entire song."
-          },
-          "negative_global_styles": {
-            "type": "array",
             "items": {
               "type": "string"
-            },
-            "title": "Negative Global Styles",
-            "description": "The styles that should not be present in the entire song."
+            }
           }
         },
-        "title": "MusicCompositionPlan",
-        "x-fal-order-properties": [
+        "required": [
           "positive_global_styles",
           "negative_global_styles",
           "sections"
-        ]
+        ],
+        "title": "MusicCompositionPlan"
       },
       "File": {
-        "required": [
-          "url"
-        ],
         "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
         "properties": {
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
           },
           "file_name": {
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "title": "File Name",
             "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -266,8 +259,8 @@
             "examples": [
               "image/png"
             ],
-            "title": "Content Type",
             "description": "The mime type of the file.",
+            "title": "Content Type",
             "anyOf": [
               {
                 "type": "string"
@@ -277,21 +270,76 @@
               }
             ]
           },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
-        "title": "File",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ]
+        "required": [
+          "url"
+        ],
+        "title": "File"
       },
       "MusicSection": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "section_name",
+          "positive_local_styles",
+          "negative_local_styles",
+          "duration_ms",
+          "lines"
+        ],
+        "properties": {
+          "section_name": {
+            "type": "string",
+            "description": "The name of the section. Must be between 1 and 100 characters.",
+            "minLength": 1,
+            "maxLength": 100,
+            "title": "Section Name"
+          },
+          "duration_ms": {
+            "type": "integer",
+            "description": "The duration of the section in milliseconds. Must be between 3000ms and 120000ms.",
+            "minimum": 3000,
+            "title": "Duration Ms",
+            "maximum": 120000
+          },
+          "negative_local_styles": {
+            "type": "array",
+            "description": "The styles that should not be present in this section.",
+            "title": "Negative Local Styles",
+            "items": {
+              "type": "string"
+            }
+          },
+          "positive_local_styles": {
+            "type": "array",
+            "description": "The styles that should be present in this section.",
+            "title": "Positive Local Styles",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lines": {
+            "type": "array",
+            "description": "The lyrics of the section. Each line must be at most 200 characters long.",
+            "title": "Lines",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
         "required": [
           "section_name",
           "positive_local_styles",
@@ -299,55 +347,7 @@
           "duration_ms",
           "lines"
         ],
-        "type": "object",
-        "properties": {
-          "section_name": {
-            "maxLength": 100,
-            "type": "string",
-            "title": "Section Name",
-            "minLength": 1,
-            "description": "The name of the section. Must be between 1 and 100 characters."
-          },
-          "positive_local_styles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "title": "Positive Local Styles",
-            "description": "The styles that should be present in this section."
-          },
-          "negative_local_styles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "title": "Negative Local Styles",
-            "description": "The styles that should not be present in this section."
-          },
-          "duration_ms": {
-            "maximum": 120000,
-            "type": "integer",
-            "title": "Duration Ms",
-            "description": "The duration of the section in milliseconds. Must be between 3000ms and 120000ms.",
-            "minimum": 3000
-          },
-          "lines": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "title": "Lines",
-            "description": "The lyrics of the section. Each line must be at most 200 characters long."
-          }
-        },
-        "title": "MusicSection",
-        "x-fal-order-properties": [
-          "section_name",
-          "positive_local_styles",
-          "negative_local_styles",
-          "duration_ms",
-          "lines"
-        ]
+        "title": "MusicSection"
       }
     }
   },

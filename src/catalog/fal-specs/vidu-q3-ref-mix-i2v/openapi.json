@@ -1,0 +1,388 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/vidu/q3/reference-to-video/mix",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/vidu/q3/reference-to-video/mix queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/vidu/q3/reference-to-video/mix",
+      "category": "image-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a957345/pZ89MiBhy31s0LcoTlN0N_895614a220bb4020a3e1410421a18b26.png",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/vidu/q3/reference-to-video/mix",
+      "documentationUrl": "https://fal.ai/models/fal-ai/vidu/q3/reference-to-video/mix/api"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "ViduQ3ReferenceToVideoMixInput": {
+        "title": "Q3ReferenceToVideoRequest",
+        "properties": {
+          "resolution": {
+            "description": "Output video resolution",
+            "enum": [
+              "360p",
+              "540p",
+              "720p",
+              "1080p"
+            ],
+            "default": "720p",
+            "title": "Resolution",
+            "type": "string"
+          },
+          "reference_image_urls": {
+            "description": "URLs of 1 to 4 reference images used to keep subjects or scenes consistent",
+            "items": {
+              "type": "string"
+            },
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference1.png",
+                "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference2.png",
+                "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference3.png"
+              ]
+            ],
+            "title": "Reference Image Urls",
+            "type": "array"
+          },
+          "audio": {
+            "description": "Whether to use direct audio-video generation. When true, outputs video with sound.",
+            "default": true,
+            "title": "Audio",
+            "type": "boolean"
+          },
+          "aspect_ratio": {
+            "description": "The aspect ratio of the output video",
+            "enum": [
+              "16:9",
+              "9:16",
+              "4:3",
+              "3:4",
+              "1:1"
+            ],
+            "default": "16:9",
+            "title": "Aspect Ratio",
+            "type": "string"
+          },
+          "prompt": {
+            "description": "Text prompt for video generation, max 2000 characters",
+            "examples": [
+              "A character walking through a beach catching an apple."
+            ],
+            "maxLength": 2000,
+            "title": "Prompt",
+            "type": "string"
+          },
+          "seed": {
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "duration": {
+            "description": "Duration of the video in seconds (1-16 for Q3 models)",
+            "type": "integer",
+            "default": 5,
+            "minimum": 1,
+            "title": "Duration",
+            "maximum": 16
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt",
+          "reference_image_urls"
+        ],
+        "x-fal-order-properties": [
+          "prompt",
+          "reference_image_urls",
+          "duration",
+          "seed",
+          "aspect_ratio",
+          "resolution",
+          "audio"
+        ]
+      },
+      "ViduQ3ReferenceToVideoMixOutput": {
+        "title": "Q3ReferenceToVideoOutput",
+        "properties": {
+          "video": {
+            "examples": [
+              {
+                "url": "https://v3b.fal.media/files/b/0a8c9189/n9z3uUDPqmU2msAtqr25-_output.mp4"
+              }
+            ],
+            "description": "The generated video from reference images using the Q3 model",
+            "$ref": "#/components/schemas/File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "video"
+        ],
+        "x-fal-order-properties": [
+          "video"
+        ]
+      },
+      "File": {
+        "title": "File",
+        "properties": {
+          "content_type": {
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name"
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/vidu/q3/reference-to-video/mix/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/vidu/q3/reference-to-video/mix/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/vidu/q3/reference-to-video/mix": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ViduQ3ReferenceToVideoMixInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/vidu/q3/reference-to-video/mix/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViduQ3ReferenceToVideoMixOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}
