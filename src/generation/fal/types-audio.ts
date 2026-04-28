@@ -44,6 +44,12 @@ export const falGenerateSpeechSchema = z.object({
     .describe(
       'Free-form passthrough for model-specific knobs (stability, similarity_boost, language_code, apply_text_normalization, etc.). Keys spread as top-level fal input fields. Structural args (text, voice, audio_url) win on collision; fal returns 422 for unknown keys.',
     ),
+  extra_files: z
+    .record(z.union([z.string(), z.array(z.string())]))
+    .optional()
+    .describe(
+      'File-bearing extension to extra_params. Each value is uploaded through fal storage (or passed through if already https) and the resulting URL is merged into the fal payload under the same key. Use for secondary audio refs (e.g. dialogue scene guidance) the model exposes only via extra params. extra_files wins on key collision with extra_params.',
+    ),
   poll_timeout_seconds: z
     .number()
     .positive()
@@ -60,6 +66,7 @@ export interface FalGenerateSpeechParams {
   voice?: string;
   reference_audio?: string;
   extra_params?: Record<string, unknown>;
+  extra_files?: Record<string, string | string[]>;
   poll_timeout_seconds: number;
 }
 
@@ -102,6 +109,12 @@ export const falGenerateMusicSchema = z.object({
     .describe(
       'Free-form passthrough for model-specific knobs (music_length_ms, force_instrumental, output_format, duration_seconds, composition_plan, etc.). Keys spread as top-level fal input fields. Structural args win on collision.',
     ),
+  extra_files: z
+    .record(z.union([z.string(), z.array(z.string())]))
+    .optional()
+    .describe(
+      'File-bearing extension to extra_params. Each value is uploaded through fal storage (or passed through if already https) and the resulting URL is merged into the fal payload under the same key. Use for secondary audio refs the model exposes only via extra params. extra_files wins on key collision with extra_params.',
+    ),
   poll_timeout_seconds: z.number().positive().default(300),
 });
 
@@ -112,5 +125,6 @@ export interface FalGenerateMusicParams {
   lyrics?: string;
   reference_audio?: string;
   extra_params?: Record<string, unknown>;
+  extra_files?: Record<string, string | string[]>;
   poll_timeout_seconds: number;
 }

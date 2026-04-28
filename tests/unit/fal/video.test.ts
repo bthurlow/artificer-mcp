@@ -397,5 +397,88 @@ describe('fal_generate_video (MCP)', () => {
     expect(result.isError).toBe(true);
     expect(mockSubscribe).not.toHaveBeenCalled();
   });
+
+  it('resolves extra_files: local paths upload, https passes through', async () => {
+    mockUpload
+      .mockResolvedValueOnce('https://v3.fal.media/u/start.png')
+      .mockResolvedValueOnce('https://v3.fal.media/u/end.png');
+    mockSubscribe.mockResolvedValue({
+      data: { video: { url: 'https://v3.fal.media/out.mp4' } },
+      requestId: 'req-ef-1',
+    });
+    stubFetch();
+
+    await client.callTool({
+      name: 'fal_generate_video',
+      arguments: {
+        model: 'fal-ai/kling-video/v2.5/master/text-to-video',
+        prompt: 'transition',
+        output: '/tmp/out.mp4',
+        extra_files: {
+          start_image_url: '/local/start.png',
+          end_image_url: 'gs://bucket/end.png',
+          ref_url: 'https://example.com/ref.png',
+        },
+      },
+    });
+
+    expect(mockUpload).toHaveBeenCalledTimes(2);
+    const input = mockSubscribe.mock.calls[0][1].input;
+    expect(input.start_image_url).toBe('https://v3.fal.media/u/start.png');
+    expect(input.end_image_url).toBe('https://v3.fal.media/u/end.png');
+    expect(input.ref_url).toBe('https://example.com/ref.png');
+  });
+
+  it('extra_files wins over extra_params on key collision', async () => {
+    mockUpload.mockResolvedValueOnce('https://v3.fal.media/u/uploaded.png');
+    mockSubscribe.mockResolvedValue({
+      data: { video: { url: 'https://v3.fal.media/out.mp4' } },
+      requestId: 'req-ef-2',
+    });
+    stubFetch();
+
+    await client.callTool({
+      name: 'fal_generate_video',
+      arguments: {
+        model: 'fal-ai/kling-video/v2.5/master/text-to-video',
+        prompt: 'x',
+        output: '/tmp/out.mp4',
+        extra_params: { start_image_url: 'https://stale.example/old.png' },
+        extra_files: { start_image_url: '/local/fresh.png' },
+      },
+    });
+
+    const input = mockSubscribe.mock.calls[0][1].input;
+    expect(input.start_image_url).toBe('https://v3.fal.media/u/uploaded.png');
+  });
+
+  it('extra_files supports array values for multi-reference models', async () => {
+    mockUpload
+      .mockResolvedValueOnce('https://v3.fal.media/u/r1.png')
+      .mockResolvedValueOnce('https://v3.fal.media/u/r2.png');
+    mockSubscribe.mockResolvedValue({
+      data: { video: { url: 'https://v3.fal.media/out.mp4' } },
+      requestId: 'req-ef-3',
+    });
+    stubFetch();
+
+    await client.callTool({
+      name: 'fal_generate_video',
+      arguments: {
+        model: 'fal-ai/wan/v2.7/reference-to-video',
+        prompt: 'multi-ref',
+        output: '/tmp/out.mp4',
+        extra_files: {
+          reference_image_urls: ['/local/r1.png', '/local/r2.png'],
+        },
+      },
+    });
+
+    const input = mockSubscribe.mock.calls[0][1].input;
+    expect(input.reference_image_urls).toEqual([
+      'https://v3.fal.media/u/r1.png',
+      'https://v3.fal.media/u/r2.png',
+    ]);
+  });
 });
 

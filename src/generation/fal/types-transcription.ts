@@ -28,6 +28,12 @@ export const falTranscribeSchema = z.object({
     .describe(
       'Free-form passthrough for model-specific knobs (language / language_code, diarize, keyterms, batch_size, num_speakers, chunk_level, max_segment_len, prompt, task, tag_audio_events, etc.). Keys spread as top-level fal input fields. Structural args win on collision.',
     ),
+  extra_files: z
+    .record(z.union([z.string(), z.array(z.string())]))
+    .optional()
+    .describe(
+      'File-bearing extension to extra_params. Each value is uploaded through fal storage (or passed through if already https) and the resulting URL is merged into the fal payload under the same key. Rarely needed for ASR (audio is the only structural input) — included for symmetry with the other fal transports. extra_files wins on key collision with extra_params.',
+    ),
   poll_timeout_seconds: z
     .number()
     .positive()
@@ -41,6 +47,7 @@ export interface FalTranscribeParams {
   model: string;
   audio: string;
   extra_params?: Record<string, unknown>;
+  extra_files?: Record<string, string | string[]>;
   poll_timeout_seconds: number;
 }
 

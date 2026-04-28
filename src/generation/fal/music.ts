@@ -3,7 +3,7 @@ import { registerTool } from '../../utils/register.js';
 import { downloadAndWrite } from '../utils/download-and-write.js';
 import { getFalClient } from './client.js';
 import { parseFalError } from './errors.js';
-import { resolveForFal } from './inputs.js';
+import { resolveForFal, resolveExtraFiles } from './inputs.js';
 import { type FalGenerateMusicParams, falGenerateMusicSchema } from './types-audio.js';
 
 const STRUCTURAL_FAL_KEYS = new Set(['prompt', 'lyrics', 'audio_url']);
@@ -73,6 +73,7 @@ export function registerFalMusicTools(server: McpServer): void {
       lyrics,
       reference_audio,
       extra_params,
+      extra_files,
       poll_timeout_seconds,
     }) => {
       const client = getFalClient();
@@ -80,11 +81,15 @@ export function registerFalMusicTools(server: McpServer): void {
       const audioResolved = reference_audio
         ? await resolveForFal(reference_audio, (b) => client.storage.upload(b))
         : undefined;
+      const extraFilesResolved = await resolveExtraFiles(extra_files, (b) =>
+        client.storage.upload(b),
+      );
 
       try {
+        const mergedExtra = { ...(extra_params ?? {}), ...extraFilesResolved.resolved };
         const { input, collisions } = buildMusicInput(
           { prompt, lyrics, audioUrl: audioResolved?.url },
-          extra_params,
+          mergedExtra,
         );
 
         if (collisions.length > 0) {
@@ -136,6 +141,7 @@ export function registerFalMusicTools(server: McpServer): void {
         };
       } finally {
         await audioResolved?.cleanup?.();
+        await extraFilesResolved.cleanup();
       }
     },
   );

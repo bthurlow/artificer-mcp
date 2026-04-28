@@ -3,7 +3,7 @@ import { registerTool } from '../../utils/register.js';
 import { downloadAndWrite } from '../utils/download-and-write.js';
 import { getFalClient } from './client.js';
 import { parseFalError } from './errors.js';
-import { resolveForFal, isPublicHttpsUrl } from './inputs.js';
+import { resolveForFal, isPublicHttpsUrl, resolveExtraFiles } from './inputs.js';
 import { type FalGenerateVideoParams, falGenerateVideoSchema } from './types.js';
 
 /**
@@ -101,6 +101,7 @@ export function registerFalVideoTools(server: McpServer): void {
       resolution,
       negative_prompt,
       extra_params,
+      extra_files,
       poll_timeout_seconds,
     }) => {
       const client = getFalClient();
@@ -111,8 +112,12 @@ export function registerFalVideoTools(server: McpServer): void {
       const audioResolved = audio
         ? await resolveForFal(audio, (b) => client.storage.upload(b))
         : undefined;
+      const extraFilesResolved = await resolveExtraFiles(extra_files, (b) =>
+        client.storage.upload(b),
+      );
 
       try {
+        const mergedExtra = { ...(extra_params ?? {}), ...extraFilesResolved.resolved };
         const { input, collisions } = buildFalInput(
           {
             prompt,
@@ -123,7 +128,7 @@ export function registerFalVideoTools(server: McpServer): void {
             resolution,
             negativePrompt: negative_prompt,
           },
-          extra_params,
+          mergedExtra,
         );
 
         if (collisions.length > 0) {
@@ -176,6 +181,7 @@ export function registerFalVideoTools(server: McpServer): void {
       } finally {
         await imageResolved?.cleanup?.();
         await audioResolved?.cleanup?.();
+        await extraFilesResolved.cleanup();
       }
     },
   );

@@ -2,7 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerTool } from '../../utils/register.js';
 import { getFalClient } from './client.js';
 import { parseFalError } from './errors.js';
-import { resolveForFal } from './inputs.js';
+import { resolveForFal, resolveExtraFiles } from './inputs.js';
 import {
   type FalTranscribeParams,
   type NormalizedTranscription,
@@ -143,12 +143,16 @@ export function registerFalTranscriptionTools(server: McpServer): void {
     'fal_transcribe',
     'Transcribe audio via any fal-hosted ASR model. Transport tool — pass explicit `model`. Returns JSON with `text`, `language`, `words[]` (scribe only — word-level timing for karaoke), `segments[]` (whisper/wizper — segment timing), and the model-specific `raw` payload. Uses FAL_KEY env var. Recommended default for karaoke captions: fal-ai/elevenlabs/speech-to-text/scribe-v2.',
     falTranscribeSchema.shape,
-    async ({ model, audio, extra_params, poll_timeout_seconds }) => {
+    async ({ model, audio, extra_params, extra_files, poll_timeout_seconds }) => {
       const client = getFalClient();
       const audioResolved = await resolveForFal(audio, (b) => client.storage.upload(b));
+      const extraFilesResolved = await resolveExtraFiles(extra_files, (b) =>
+        client.storage.upload(b),
+      );
 
       try {
-        const { input, collisions } = buildTranscriptionInput(audioResolved.url, extra_params);
+        const mergedExtra = { ...(extra_params ?? {}), ...extraFilesResolved.resolved };
+        const { input, collisions } = buildTranscriptionInput(audioResolved.url, mergedExtra);
         if (collisions.length > 0) {
           console.error(
             `fal_transcribe: ${collisions.join(', ')} present in extra_params ` +
@@ -186,6 +190,7 @@ export function registerFalTranscriptionTools(server: McpServer): void {
         };
       } finally {
         await audioResolved.cleanup?.();
+        await extraFilesResolved.cleanup();
       }
     },
   );

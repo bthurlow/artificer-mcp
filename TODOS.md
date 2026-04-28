@@ -219,7 +219,11 @@ Also unlocks the simpler cases — generic transcription for content moderation,
 
 ---
 
-## 8. fal text-to-video (t2v) catalog + guides
+## 8. fal text-to-video (t2v) catalog + guides — DONE 2026-04-28
+
+**Shipped:** Full coverage seeded — 244 video routes across 4 sub-classes (53 cinematic, 182 general, 2 stylized, 7 talking-head) plus 25 prompt guide families covering every fal-hosted t2v / i2v / multi-ref / FLF model. See `src/catalog/models.json` and `src/guides/` (commits 412da8a, 8f2c03e, a81476c). Bake-off intentionally deferred — see TODO #1 trigger.
+
+**Original scope below kept for history.**
 
 **What:** Seed `models.json` with fal-hosted text-to-video models — Luma Dream Machine, Runway Gen-3 / Gen-4, MiniMax Hailuo-02, Kling text-to-video variants, Wan text-to-video, fal-ai/veo3.1 (the t2v sibling of the existing veo3.1/image-to-video stub), etc. Add prompt guides per model family. Run a bake-off to pick a recommended default for each meaningful sub-class (cinematic, motion-graphic, abstract, etc.).
 
