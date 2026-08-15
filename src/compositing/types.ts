@@ -118,6 +118,7 @@ export const gradientOverlaySchema = z.object({
 export interface BackgroundRemoveParams {
   input: string;
   output?: string;
+  mode: 'color-key' | 'flood-fill';
   target_color: string;
   fuzz: number;
   replace_color: string;
@@ -127,10 +128,67 @@ export interface BackgroundRemoveParams {
 export const backgroundRemoveSchema = z.object({
   input: z.string().describe('Path to the input image'),
   output: z.string().optional().describe('Path for the output image'),
-  target_color: z.string().default('white').describe('Background color to remove'),
+  mode: z
+    .enum(['color-key', 'flood-fill'])
+    .default('color-key')
+    .describe(
+      '"color-key" removes EVERY pixel matching target_color anywhere in the image — fast, but it also punches holes in the subject wherever the same color appears inside it (white eyes, highlights, text). "flood-fill" removes only background-connected pixels, seeded from the image corners, so interior detail survives. Use flood-fill when the subject contains the background color.',
+    ),
+  target_color: z
+    .string()
+    .default('white')
+    .describe(
+      'Background color to remove. Used as the key in color-key mode. Ignored in flood-fill mode, where the seed color is sampled from each corner instead.',
+    ),
   fuzz: z.number().min(0).max(100).default(20).describe('Color tolerance percentage'),
   replace_color: z.string().default('none').describe('Replacement color ("none" for transparent)'),
   format: z.string().optional().describe('Output format (use png for transparency)'),
+});
+
+/** Parameters for the extend-canvas tool */
+export interface ExtendCanvasParams {
+  input: string;
+  output?: string;
+  width?: number;
+  height?: number;
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+  gravity: Gravity;
+  background: string;
+  format?: string;
+}
+
+export const extendCanvasSchema = z.object({
+  input: z.string().describe('Path to the input image'),
+  output: z.string().optional().describe('Path for the output image'),
+  width: z
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe(
+      'Target canvas width. Provide with `height` to place the image on a canvas of exactly this size (canvas mode). Mutually exclusive with the per-side padding args.',
+    ),
+  height: z
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe('Target canvas height. Provide with `width`.'),
+  top: z.number().int().min(0).default(0).describe('Padding to add above (padding mode).'),
+  right: z.number().int().min(0).default(0).describe('Padding to add to the right (padding mode).'),
+  bottom: z.number().int().min(0).default(0).describe('Padding to add below (padding mode).'),
+  left: z.number().int().min(0).default(0).describe('Padding to add to the left (padding mode).'),
+  gravity: gravityEnum
+    .default('Center')
+    .describe('Where the existing image sits on the new canvas. Canvas mode only.'),
+  background: z
+    .string()
+    .default('none')
+    .describe('Fill color for the added area. "none" for transparent (requires a png output).'),
+  format: z.string().optional().describe('Output format'),
 });
 
 /** Parameters for the drop-shadow tool */
