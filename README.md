@@ -117,6 +117,7 @@ See [docs/](docs/) for detailed documentation per area.
 
 | Doc | Covers |
 |-----|--------|
+| [UPGRADING.md](UPGRADING.md) | **Breaking changes and migrations between versions — read this first when a call that used to work starts failing** |
 | [docs/storage.md](docs/storage.md) | Storage providers, URI routing, extending with new providers |
 | [docs/image-gen.md](docs/image-gen.md) | Gemini image generation tools (Imagen + Nano Banana), prompt patterns |
 | [docs/video-gen.md](docs/video-gen.md) | Veo video generation tools, model selection, prompt patterns |
