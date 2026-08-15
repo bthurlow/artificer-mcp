@@ -137,6 +137,15 @@ async function writeIfChanged(path, next, { dryRun, label }) {
   return true;
 }
 
+/**
+ * Sync one route's specs and reconcile its catalog fields.
+ *
+ * Returns a structured outcome rather than a bare "changed" boolean so the
+ * cron can act on *what* changed without scraping console output. `changed`
+ * still drives whether models.json gets rewritten.
+ *
+ * @returns {Promise<{changed: boolean, deprecated?: string, newlyDeprecated?: boolean, undeprecated?: boolean, costChange?: {from: string|null, to: string}}>}
+ */
 async function syncOne({ slug, endpointId, route }, { dryRun }) {
   console.log(`\n[${slug}] ${endpointId}`);
   const specDir = resolve(SPECS_ROOT, slug);
@@ -165,29 +174,35 @@ async function syncOne({ slug, endpointId, route }, { dryRun }) {
   if (deprecation) {
     // Keep the last known price: a deprecated route still bills, just not
     // necessarily at this rate any more. The `deprecated` string says so.
-    let changed = false;
-    if (route.deprecated !== deprecation) {
+    const newlyDeprecated = route.deprecated !== deprecation;
+    if (newlyDeprecated) {
       console.warn(`  DEPRECATED ${deprecation}`);
       route.deprecated = deprecation;
-      changed = true;
     } else {
       console.warn(`  DEPRECATED (already flagged)`);
     }
-    return changed;
+    // Report the deprecation every run, not just the first. A route that
+    // stays retired stays a finding until someone repoints or removes it.
+    return { changed: newlyDeprecated, deprecated: deprecation, newlyDeprecated };
   }
 
   // Recovered upstream — drop a stale flag rather than leaving a route
   // permanently marked dead.
   let changed = false;
+  let undeprecated = false;
   if (route.deprecated) {
     console.log(`  un-deprecated (upstream publishes pricing again)`);
     delete route.deprecated;
     changed = true;
+    undeprecated = true;
   }
 
+  /** @type {{from: string|null, to: string} | undefined} */
+  let costChange;
   if (pricing) {
     if (route.cost !== pricing) {
       console.log(`  cost       ${route.cost ?? '(unset)'} → ${pricing}`);
+      costChange = { from: route.cost ?? null, to: pricing };
       route.cost = pricing;
       changed = true;
     } else {
@@ -196,18 +211,69 @@ async function syncOne({ slug, endpointId, route }, { dryRun }) {
   } else {
     console.warn(`  cost       WARNING: no Pricing section found in llms.txt`);
   }
-  return changed;
+  return { changed, undeprecated, costChange };
+}
+
+/**
+ * Summarize per-route outcomes into the report the drift cron consumes.
+ *
+ * Pure, and exported for unit testing — the cron's behavior (open a PR vs
+ * fail the job) hinges entirely on this shape, so it is worth testing
+ * without hitting the network.
+ *
+ * `blocking` is the "something is wrong and there is nothing to review"
+ * signal: a 404 produces no file diff, so it would otherwise vanish. The
+ * cron fails the job on it rather than closing quietly.
+ *
+ * @param {Array<{slug: string, endpointId: string, outcome?: any, error?: string}>} entries
+ * @returns {{routes: number, deprecated: Array<object>, failures: Array<object>, costChanges: Array<object>, undeprecated: Array<object>, blocking: boolean}}
+ */
+export function buildReport(entries) {
+  const deprecated = [];
+  const failures = [];
+  const costChanges = [];
+  const undeprecated = [];
+
+  for (const { slug, endpointId, outcome, error } of entries) {
+    if (error !== undefined) {
+      failures.push({ slug, endpointId, error });
+      continue;
+    }
+    if (!outcome) continue;
+    if (outcome.deprecated) {
+      deprecated.push({
+        slug,
+        endpointId,
+        notice: outcome.deprecated,
+        newly: Boolean(outcome.newlyDeprecated),
+      });
+    }
+    if (outcome.undeprecated) undeprecated.push({ slug, endpointId });
+    if (outcome.costChange) {
+      costChanges.push({ slug, endpointId, ...outcome.costChange });
+    }
+  }
+
+  return {
+    routes: entries.length,
+    deprecated,
+    failures,
+    costChanges,
+    undeprecated,
+    blocking: failures.length > 0,
+  };
 }
 
 function parseArgs(argv) {
-  const args = { model: null, dryRun: false };
+  const args = { model: null, dryRun: false, report: null };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--dry-run') args.dryRun = true;
     else if (arg === '--model') args.model = argv[++i] ?? null;
+    else if (arg === '--report') args.report = argv[++i] ?? null;
     else if (arg === '--help' || arg === '-h') {
       console.log(
-        'Usage: node scripts/sync-fal-specs.mjs [--model <slug>] [--dry-run]',
+        'Usage: node scripts/sync-fal-specs.mjs [--model <slug>] [--dry-run] [--report <file.json>]',
       );
       process.exit(0);
     } else {
@@ -219,7 +285,7 @@ function parseArgs(argv) {
 }
 
 async function main() {
-  const { model: onlyModel, dryRun } = parseArgs(process.argv.slice(2));
+  const { model: onlyModel, dryRun, report: reportPath } = parseArgs(process.argv.slice(2));
 
   const catalogText = await readFile(MODELS_JSON, 'utf8');
   const catalog = JSON.parse(catalogText);
@@ -238,18 +304,22 @@ async function main() {
   );
 
   let catalogDirty = false;
-  /** @type {Array<{slug: string, endpointId: string, error: string}>} */
-  const failures = [];
+  /** @type {Array<{slug: string, endpointId: string, outcome?: any, error?: string}>} */
+  const entries = [];
   for (const r of routes) {
     try {
-      const changed = await syncOne(r, { dryRun });
-      catalogDirty = catalogDirty || changed;
+      const outcome = await syncOne(r, { dryRun });
+      catalogDirty = catalogDirty || outcome.changed;
+      entries.push({ slug: r.slug, endpointId: r.endpointId, outcome });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error(`[${r.slug}] FAILED:`, msg);
-      failures.push({ slug: r.slug, endpointId: r.endpointId, error: msg });
+      entries.push({ slug: r.slug, endpointId: r.endpointId, error: msg });
     }
   }
+
+  const report = buildReport(entries);
+  const failures = report.failures;
 
   if (catalogDirty) {
     const nextCatalog = JSON.stringify(catalog, null, 2) + '\n';
@@ -266,12 +336,12 @@ async function main() {
   // Surface retirements as their own block. These are the changes that
   // actually alter what a caller gets back, so they must not be buried in
   // several hundred lines of per-file "wrote" chatter.
-  const deprecated = routes.filter((r) => r.route.deprecated);
+  const deprecated = report.deprecated;
   if (deprecated.length > 0) {
     console.log(`\n${deprecated.length} DEPRECATED route(s) — review before shipping:`);
     for (const d of deprecated) {
-      console.log(`  ${d.slug} (${d.endpointId})`);
-      console.log(`    ${d.route.deprecated}`);
+      console.log(`  ${d.slug} (${d.endpointId})${d.newly ? ' [NEW]' : ''}`);
+      console.log(`    ${d.notice}`);
     }
     console.log(
       '\nDeprecated routes are hidden from model_catalog by default. Repoint callers at the ' +
@@ -290,14 +360,33 @@ async function main() {
     );
   }
 
+  if (reportPath) {
+    await mkdir(dirname(resolve(reportPath)), { recursive: true });
+    await writeFile(resolve(reportPath), JSON.stringify(report, null, 2) + '\n');
+    console.log(`\nwrote report ${reportPath}`);
+  }
+
   console.log('\ndone.');
-  if (failures.length > 0) process.exit(1);
+  // Non-zero on fetch failures only. Deprecations and price moves produce a
+  // models.json diff the cron can open a PR against, but a 404 writes
+  // nothing — so without this exit code a dead route would leave no trace
+  // at all and the job would close green.
+  //
+  // `exitCode`, not `process.exit()`: calling exit() here races undici's
+  // socket teardown and can abort the process with a libuv assertion
+  // (observed on Windows: `!(handle->flags & UV_HANDLE_CLOSING)`, exit
+  // 127). Any non-zero code still fails the cron, but 127-with-a-crash
+  // looks like a broken script rather than the dead route it is actually
+  // reporting. Setting exitCode lets the loop drain and exit 1 cleanly.
+  if (report.blocking) process.exitCode = 1;
 }
 
 // Only run main() when invoked directly (not when imported by tests).
 if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('sync-fal-specs.mjs')) {
   main().catch((err) => {
     console.error(err);
-    process.exit(1);
+    // Same reasoning as the blocking-exit above: never process.exit() with
+    // fetch sockets still closing.
+    process.exitCode = 1;
   });
 }

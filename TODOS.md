@@ -31,7 +31,38 @@ Deferred work with enough context that someone picking it up in 3 months knows w
 
 ---
 
-## 2. Automated fal spec drift detection
+## 2. Automated fal spec drift detection — DONE 2026-08-15
+
+**Shipped:** `.github/workflows/fal-spec-drift.yml` — Mondays 06:17 UTC plus `workflow_dispatch`.
+
+**The design problem was signal-to-noise, not scheduling.** "The diff is non-empty" is useless as an alert when fal rewrites docs boilerplate across all 263 routes on a whim. The job keys off the two findings that actually change what a caller gets back:
+
+| Finding | Produces a diff? | How it surfaces |
+|---------|------------------|-----------------|
+| Deprecated route (still 200, serves a different model) | yes — `deprecated` field | rides the PR, called out at the top of the body |
+| Fetch failure / 404 | **no** | script exits non-zero → **job goes red** |
+| Price change | yes — `cost` field | PR body, with both sides shown |
+| Recovery (flag cleared) | yes | PR body |
+
+The 404 case is why the job can fail rather than just PR: a dead route writes *nothing*, so without a red job it would leave no trace at all and the cron would close green with a broken route still in the catalog.
+
+**Supporting changes:**
+- `sync-fal-specs.mjs` — `syncOne` now returns a structured outcome instead of a boolean; new pure `buildReport()` (unit-tested) summarizes into `{deprecated, failures, costChanges, undeprecated, blocking}`; new `--report <file>` writes it as JSON.
+- **New `scripts/format-drift-report.mjs`** renders the PR body. Deliberately a script, not inline `jq`: the body *is* the product of this cron — if it drops a finding, the finding is lost, because nobody re-reads a 500-file spec diff to double-check. A script gets unit tests; a YAML `run:` block does not.
+- **`process.exit()` → `process.exitCode`.** Calling `exit()` while undici's sockets are closing raced and aborted the process with a libuv assertion (`!(handle->flags & UV_HANDLE_CLOSING)`, exit 127) instead of a clean 1. Non-deterministic — it exited cleanly earlier the same day. Since the whole cron keys off this exit code, a crash-vs-clean coin flip was not acceptable.
+
+**Answers to the original Cons:**
+- ~~"Requires the sync script to be stable first"~~ — it is, and #18b proved the diffs will *never* be non-noisy, so waiting was the wrong plan.
+- ~~"Auto-PRs can be ignored; drift accumulates"~~ — one rolling branch (`chore/fal-spec-drift`), force-pushed weekly, so it is always a single current PR rather than twelve stale ones.
+- ~~"Adds a CI credential requirement (FAL_KEY)"~~ — **not needed.** The script reads `fal.ai/api/openapi` and `llms.txt`, both public. Verified unauthenticated.
+
+**Known limitation:** PRs opened with `GITHUB_TOKEN` do not trigger other workflows, so the drift PR gets no CI of its own. Worked around by running `yarn typecheck && yarn test:unit` *inside* the drift job and stamping a loud "❌ Catalog guards failed" section into the PR body when they fail — the integrity suite is exactly what catches a deprecation notice landing in `cost`, a route pointing at an unregistered tool, or a duplicate slug. A PAT would fix it properly if that ever matters.
+
+**Not verified:** the workflow has never run on GitHub. YAML validity, step-output references, the report shape, the exit codes, and the rendered markdown are all verified locally, but the first real Monday run is the smoke test. Watch it, and check the repo allows Actions to create PRs (Settings → Actions → *Allow GitHub Actions to create and approve pull requests*) — that switch being off is the most likely first failure.
+
+**Also hardened (same PR):** both `wget` calls in `ci.yml` now retry (`--tries=3 --timeout=30 --retry-connrefused`). That fetch failed twice on 2026-08-15 — once a genuine URL rot, once a transient blip — and the integration job is the *only* place ffmpeg- and ImageMagick-backed code is ever actually exercised, so a flaky red there trains everyone to ignore a signal that matters.
+
+### Original filing (kept for history)
 
 **What:** Add a scheduled CI job (weekly cron) that runs `scripts/sync-fal-specs.mjs` and opens a PR if any spec has changed.
 
@@ -52,13 +83,9 @@ Deferred work with enough context that someone picking it up in 3 months knows w
 - Suggested implementation: GitHub Actions workflow on cron, runs sync, commits changes to a branch, opens PR with changed spec files + diff summary.
 - Naming convention: PRs titled `chore: sync fal-ai specs ({date})`.
 
-**Trigger to pick this up:** ~~After sync script has been running manually for a month or two and the diffs are stable / non-noisy.~~ **Trigger fired.** The 2026-08-15 sync (#18b) found three silently re-routing models and six 404'd endpoints that had been wrong for months. The diffs are *not* non-noisy — fal churns docs boilerplate constantly — but #18b added the two signals a cron can assert on without drowning in that noise:
-- `extractDeprecation` splits retirement notices out of `cost` into a `deprecated` field, and the script prints a dedicated "N DEPRECATED route(s)" block.
-- The script already exits non-zero on fetch failures, which is exactly the 404-detection a cron needs.
+**Trigger to pick this up:** ~~After sync script has been running manually for a month or two and the diffs are stable / non-noisy.~~ Fired 2026-08-15 by #18b; implemented the same day.
 
-So the cron does not need to diff 500 spec files. It needs to fail on those two conditions and open a PR for the rest. **This is the next item.**
-
-**Depends on / blocked by:** ~~`scripts/sync-fal-specs.mjs` shipping in Phase 1.~~ Shipped. Unblocked.
+**Depends on / blocked by:** ~~`scripts/sync-fal-specs.mjs` shipping in Phase 1.~~ Shipped.
 
 ---
 

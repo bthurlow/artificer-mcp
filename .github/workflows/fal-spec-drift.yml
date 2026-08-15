@@ -1,0 +1,137 @@
+name: Fal Spec Drift
+
+# Weekly re-sync of fal.ai OpenAPI + llms.txt specs.
+#
+# Why this exists: the hybrid spec integration only sees drift when a
+# contributor happens to re-run the sync script. The 2026-08-15 sync found
+# three models that had been silently re-routing to *different* models and
+# six endpoints that had 404'd — drift that had sat undetected for months
+# because nobody had a reason to run the script.
+#
+# The hard part is signal-to-noise: fal churns docs boilerplate constantly,
+# so "the diff is non-empty" is not a useful alert. This job keys off the
+# two findings that actually change what a caller gets back:
+#
+#   1. DEPRECATED routes — still return 200, but serve a different model.
+#      These produce a models.json diff, so they ride the PR.
+#   2. Fetch failures (404) — write no diff at all, so they would vanish
+#      silently. The sync script exits non-zero and this job fails on it.
+
+on:
+  schedule:
+    # Mondays 06:17 UTC. Off-the-hour to avoid GitHub's cron congestion,
+    # which silently delays jobs scheduled at :00.
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: fal-spec-drift
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync fal specs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+
+      - name: Sync fal specs
+        id: sync
+        # The script deliberately continues past per-route failures so one
+        # dead endpoint doesn't hide drift in the other 260. It reports the
+        # failures and exits non-zero at the end; we capture that rather
+        # than letting it abort the job, because we still want the PR.
+        run: |
+          set +e
+          node scripts/sync-fal-specs.mjs --report "$RUNNER_TEMP/drift-report.json"
+          code=$?
+          set -e
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          if [ ! -f "$RUNNER_TEMP/drift-report.json" ]; then
+            echo "::error::Sync produced no report (exit $code) — it failed before finishing. Nothing to review; investigate the log above."
+            exit 1
+          fi
+
+      - name: Verify the synced catalog still passes its own guards
+        # GITHUB_TOKEN-created PRs do NOT trigger other workflows, so the
+        # drift PR would otherwise sit with no CI at all. Run the checks
+        # that matter for a catalog change here instead: the integrity
+        # suite is what catches a deprecation notice landing in `cost`, a
+        # route pointing at an unregistered tool, or a duplicate slug.
+        id: verify
+        run: |
+          set +e
+          yarn typecheck && yarn test:unit
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Build findings summary
+        # Rendered by a script, not inline jq, because this body IS the
+        # product of the cron — if it drops a finding, the finding is lost;
+        # nobody re-reads a 500-file spec diff to double-check. A script is
+        # unit-tested (tests/unit/scripts/), a YAML `run:` block is not.
+        run: |
+          node scripts/format-drift-report.mjs \
+            "$RUNNER_TEMP/drift-report.json" \
+            ${{ steps.verify.outputs.exit_code != '0' && '--verify-failed' || '' }} \
+            > "$RUNNER_TEMP/pr-body.md"
+          cat "$RUNNER_TEMP/pr-body.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open or update the drift PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # --porcelain, not `git diff --quiet`: a newly added route creates
+          # an untracked spec dir, which `git diff` does not see.
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "No spec changes to propose."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # One rolling branch, force-pushed. Twelve stale weekly PRs is
+          # how auto-sync jobs get muted; a single PR that stays current
+          # is reviewable.
+          git switch -C chore/fal-spec-drift
+          git add -A
+          git commit -m "chore(catalog): weekly fal spec sync"
+          git push -f origin chore/fal-spec-drift
+
+          if gh pr view chore/fal-spec-drift --json number >/dev/null 2>&1; then
+            gh pr edit chore/fal-spec-drift \
+              --title "chore(catalog): fal spec drift sync" \
+              --body-file "$RUNNER_TEMP/pr-body.md"
+            echo "Updated existing PR."
+          else
+            gh pr create \
+              --base main \
+              --head chore/fal-spec-drift \
+              --title "chore(catalog): fal spec drift sync" \
+              --body-file "$RUNNER_TEMP/pr-body.md"
+            echo "Opened new PR."
+          fi
+
+      - name: Fail on unresolvable routes or broken guards
+        # Last step so the PR is already open and the summary already
+        # written before the job goes red. A 404 leaves no diff to review,
+        # so a red job is the only thing that will make anyone look.
+        if: steps.sync.outputs.exit_code != '0' || steps.verify.outputs.exit_code != '0'
+        run: |
+          if [ "${{ steps.sync.outputs.exit_code }}" != "0" ]; then
+            echo "::error::One or more fal routes could not be fetched. See the job summary — these produce no file diff and will not show up in any PR."
+          fi
+          if [ "${{ steps.verify.outputs.exit_code }}" != "0" ]; then
+            echo "::error::The synced catalog fails typecheck or the unit suite. The drift PR (if opened) is not safe to merge as-is."
+          fi
+          exit 1

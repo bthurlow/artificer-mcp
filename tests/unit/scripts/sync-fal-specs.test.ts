@@ -1,7 +1,11 @@
 import { describe, it, expect } from 'vitest';
 // @ts-expect-error — scripts/*.mjs is outside tsconfig rootDir; we import
 // it only for parser testing. Vitest handles the ESM resolution at runtime.
-import { extractPricing, extractDeprecation } from '../../../scripts/sync-fal-specs.mjs';
+import {
+  extractPricing,
+  extractDeprecation,
+  buildReport,
+} from '../../../scripts/sync-fal-specs.mjs';
 
 describe('extractPricing', () => {
   it('extracts a simple Price bullet (Kling shape)', () => {
@@ -144,5 +148,95 @@ describe('extractDeprecation', () => {
 
   it('returns null when there was no Pricing section at all', () => {
     expect(extractDeprecation(null)).toBeNull();
+  });
+});
+
+describe('buildReport', () => {
+  const ok = (slug: string, outcome: Record<string, unknown> = {}) => ({
+    slug,
+    endpointId: `fal-ai/${slug}`,
+    outcome: { changed: false, ...outcome },
+  });
+
+  it('reports nothing when every route is clean', () => {
+    const r = buildReport([ok('a'), ok('b')]);
+    expect(r.routes).toBe(2);
+    expect(r.deprecated).toEqual([]);
+    expect(r.failures).toEqual([]);
+    expect(r.costChanges).toEqual([]);
+    expect(r.blocking).toBe(false);
+  });
+
+  it('marks fetch failures blocking — they leave no diff to review', () => {
+    // This is the whole reason the cron exits non-zero. A 404 writes no
+    // spec file and no catalog change, so without `blocking` the job
+    // would close green with a dead route still in the catalog.
+    const r = buildReport([
+      ok('alive'),
+      { slug: 'dead', endpointId: 'fal-ai/dead', error: 'GET ... 404 Not Found' },
+    ]);
+    expect(r.failures).toHaveLength(1);
+    expect(r.failures[0].slug).toBe('dead');
+    expect(r.blocking).toBe(true);
+  });
+
+  it('does NOT mark deprecations blocking — those ride the PR diff', () => {
+    const r = buildReport([
+      ok('gone', { deprecated: 're-routed to X', newlyDeprecated: true, changed: true }),
+    ]);
+    expect(r.deprecated).toHaveLength(1);
+    expect(r.blocking).toBe(false);
+  });
+
+  it('reports a deprecation on every run, flagging only the first as new', () => {
+    // A route that stays retired stays a finding until someone acts on
+    // it; only the "newly" flag distinguishes the first sighting.
+    const first = buildReport([
+      ok('x', { deprecated: 'notice', newlyDeprecated: true, changed: true }),
+    ]);
+    const later = buildReport([ok('x', { deprecated: 'notice', newlyDeprecated: false })]);
+
+    expect(first.deprecated[0].newly).toBe(true);
+    expect(later.deprecated[0].newly).toBe(false);
+    expect(later.deprecated[0].notice).toBe('notice');
+  });
+
+  it('collects price changes with both sides', () => {
+    const r = buildReport([
+      ok('p', { costChange: { from: '$0.04 per video', to: '$0.04 per second' }, changed: true }),
+    ]);
+    expect(r.costChanges).toEqual([
+      {
+        slug: 'p',
+        endpointId: 'fal-ai/p',
+        from: '$0.04 per video',
+        to: '$0.04 per second',
+      },
+    ]);
+  });
+
+  it('handles a first-time cost with no prior value', () => {
+    const r = buildReport([ok('n', { costChange: { from: null, to: '$1' }, changed: true })]);
+    expect(r.costChanges[0].from).toBeNull();
+  });
+
+  it('reports recoveries so a cleared flag is visible in review', () => {
+    const r = buildReport([ok('back', { undeprecated: true, changed: true })]);
+    expect(r.undeprecated).toEqual([{ slug: 'back', endpointId: 'fal-ai/back' }]);
+    expect(r.blocking).toBe(false);
+  });
+
+  it('separates findings across a mixed batch', () => {
+    const r = buildReport([
+      ok('clean'),
+      ok('dep', { deprecated: 'notice', newlyDeprecated: true }),
+      ok('priced', { costChange: { from: 'a', to: 'b' } }),
+      { slug: 'dead', endpointId: 'fal-ai/dead', error: '404' },
+    ]);
+    expect(r.routes).toBe(4);
+    expect(r.deprecated).toHaveLength(1);
+    expect(r.costChanges).toHaveLength(1);
+    expect(r.failures).toHaveLength(1);
+    expect(r.blocking).toBe(true);
   });
 });
