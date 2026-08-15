@@ -180,6 +180,142 @@ describe('Integration: Compositing', () => {
     const text = (result.content as { type: string; text: string }[])[0].text;
     expect(text).toContain('Border added');
   });
+
+  /**
+   * Regression: a colored layer composited onto a grayscale base used to come
+   * back gray — a gold overlay on black rendered silver, on every blend mode.
+   * ImageMagick adopts the FIRST image's colorspace, and a solid dark
+   * background is routinely stored as a grayscale PNG.
+   *
+   * These assert real pixel color, not the generated argv, so they fail if the
+   * colorspace promotion is ever dropped.
+   */
+  describe('colored layer on a grayscale base preserves color', () => {
+    const GOLD = '#D4AF37';
+    /** Read a single pixel as an `srgb(r,g,b)` / `gray(v)` string. */
+    async function pixelAt(file: string, x: number, y: number): Promise<string> {
+      const { stdout } = await execFileAsync('magick', [
+        file,
+        '-format',
+        `%[pixel:p{${x},${y}}]`,
+        'info:',
+      ]);
+      return stdout.trim();
+    }
+
+    /** Build a solid black base. ImageMagick stores this as grayscale. */
+    async function grayscaleBlackBase(name: string): Promise<string> {
+      const path = join(testDir, name);
+      await execFileAsync('magick', ['-size', '200x200', 'xc:#0A0A0A', path]);
+      // Guard the premise: if this ever stops being grayscale, these tests
+      // would pass for the wrong reason.
+      const { stdout } = await execFileAsync('magick', [
+        'identify',
+        '-format',
+        '%[colorspace]',
+        path,
+      ]);
+      expect(stdout.trim()).toBe('Gray');
+      return path;
+    }
+
+    it.skipIf(!hasImageMagick)('composite keeps the overlay gold (Over)', async () => {
+      const base = await grayscaleBlackBase('c-base-over.png');
+      const overlay = join(testDir, 'c-gold.png');
+      const output = join(testDir, 'c-out-over.png');
+      await execFileAsync('magick', ['-size', '80x80', `xc:${GOLD}`, overlay]);
+
+      await client.callTool({
+        name: 'composite',
+        arguments: { base, overlay, output, blend: 'Over' },
+      });
+
+      expect(await pixelAt(output, 100, 100)).toBe('srgb(212,175,55)');
+      // Base region must be untouched — the promotion is not allowed to
+      // shift tone.
+      expect(await pixelAt(output, 5, 5)).toBe('srgb(10,10,10)');
+    });
+
+    it.skipIf(!hasImageMagick)('composite keeps the overlay gold (Lighten)', async () => {
+      const base = await grayscaleBlackBase('c-base-lighten.png');
+      const overlay = join(testDir, 'c-gold2.png');
+      const output = join(testDir, 'c-out-lighten.png');
+      await execFileAsync('magick', ['-size', '80x80', `xc:${GOLD}`, overlay]);
+
+      await client.callTool({
+        name: 'composite',
+        arguments: { base, overlay, output, blend: 'Lighten' },
+      });
+
+      expect(await pixelAt(output, 100, 100)).toBe('srgb(212,175,55)');
+    });
+
+    it.skipIf(!hasImageMagick)('watermark keeps its color', async () => {
+      const base = await grayscaleBlackBase('w-base.png');
+      const mark = join(testDir, 'w-gold.png');
+      const output = join(testDir, 'w-out.png');
+      await execFileAsync('magick', ['-size', '80x80', `xc:${GOLD}`, mark]);
+
+      await client.callTool({
+        name: 'watermark',
+        arguments: {
+          input: base,
+          watermark: mark,
+          output,
+          mode: 'position',
+          gravity: 'Center',
+          opacity: 100,
+        },
+      });
+
+      expect(await pixelAt(output, 100, 100)).toBe('srgb(212,175,55)');
+    });
+
+    it.skipIf(!hasImageMagick)('gradient-overlay stays colored', async () => {
+      const base = await grayscaleBlackBase('g-base.png');
+      const output = join(testDir, 'g-out.png');
+
+      await client.callTool({
+        name: 'gradient-overlay',
+        arguments: {
+          input: base,
+          output,
+          type: 'linear',
+          direction: 'top-bottom',
+          color_start: GOLD,
+          color_end: '#8B0000',
+        },
+      });
+
+      // Not asserting exact stops — only that the result carries chroma at all.
+      const top = await pixelAt(output, 100, 3);
+      expect(top).toMatch(/^srgb\(/);
+      const [r, , b] = top
+        .replace(/[^\d,]/g, '')
+        .split(',')
+        .map(Number);
+      expect(r).toBeGreaterThan(b + 20);
+    });
+
+    it.skipIf(!hasImageMagick)('an all-grayscale composite still writes grayscale', async () => {
+      const base = await grayscaleBlackBase('n-base.png');
+      const overlay = join(testDir, 'n-gray.png');
+      const output = join(testDir, 'n-out.png');
+      await execFileAsync('magick', ['-size', '80x80', 'xc:gray(180)', overlay]);
+
+      await client.callTool({ name: 'composite', arguments: { base, overlay, output } });
+
+      // Promotion must not bloat genuinely colorless output to full RGB.
+      const { stdout } = await execFileAsync('magick', [
+        'identify',
+        '-format',
+        '%[colorspace]',
+        output,
+      ]);
+      expect(stdout.trim()).toBe('Gray');
+      expect(await pixelAt(output, 100, 100)).toBe('gray(180)');
+    });
+  });
 });
 
 describe('Integration: Color', () => {

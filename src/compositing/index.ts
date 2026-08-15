@@ -22,6 +22,26 @@ import {
 } from './types.js';
 
 /**
+ * Promote the base image to sRGB before a colored layer is composited onto it.
+ *
+ * ImageMagick adopts the FIRST image's colorspace for a composite operation.
+ * A solid dark background is routinely stored as a grayscale PNG — ImageMagick
+ * itself writes one that way when an image has no color — so compositing a
+ * colored overlay onto it silently converts the overlay to gray. A gold
+ * overlay on black comes back silver, on every blend mode.
+ *
+ * Gray -> sRGB is value-preserving (verified across the tonal range: 0, 10,
+ * 64, 128, 192, 255 all round-trip exactly), so this introduces no brightness
+ * shift. And ImageMagick still writes a genuinely colorless result back out as
+ * grayscale, so it costs nothing when both layers really are gray.
+ *
+ * Only needed where a COLORED layer lands on a caller-supplied base. Mask
+ * operations (`rounded_corners`, `mask_apply`) composite a grayscale mask onto
+ * a color base, so the base's colorspace already wins and color is preserved.
+ */
+const FORCE_SRGB = ['-colorspace', 'sRGB'];
+
+/**
  * Register compositing and layer tools with the MCP server.
  */
 export function registerCompositingTools(server: McpServer): void {
@@ -37,7 +57,7 @@ export function registerCompositingTools(server: McpServer): void {
       try {
         await ensureOutputDir(io.outputLocal);
 
-        const args = [io.inputLocal];
+        const args = [io.inputLocal, ...FORCE_SRGB];
         if (opacity < 100) {
           args.push(
             '(',
@@ -102,6 +122,7 @@ export function registerCompositingTools(server: McpServer): void {
         if (mode === 'tile') {
           await magick([
             io.inputLocal,
+            ...FORCE_SRGB,
             '(',
             wmR.localPath,
             '-alpha',
@@ -128,6 +149,7 @@ export function registerCompositingTools(server: McpServer): void {
         } else {
           await magick([
             io.inputLocal,
+            ...FORCE_SRGB,
             '(',
             wmR.localPath,
             '-alpha',
@@ -204,6 +226,7 @@ export function registerCompositingTools(server: McpServer): void {
 
         await magick([
           io.inputLocal,
+          ...FORCE_SRGB,
           '(',
           '-size',
           dimensions,
