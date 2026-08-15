@@ -289,7 +289,43 @@ Also unlocks the simpler cases — generic transcription for content moderation,
 
 ---
 
-## 9. Brand spec — broaden nested schema OR tighten nested validation
+## 9. Brand spec — broaden nested schema OR tighten nested validation — DONE 2026-08-15
+
+**Shipped: both (a) and (b)**, which the filing itself called ideal. Broadening alone would have left the next unknown key silently dropped; tightening alone would have rejected the fields callers legitimately need.
+
+**Broadened.** `colors` gains `background` / `background_name` / `highlight` / `highlight_name`; `fonts` gains `mono` / `sans` / `display`. Both gain an `extras: Record<string, string>` bag.
+
+**Tightened.** Every nested object — `colors`, `fonts`, `tts`, `music`, `logo` — is now `.strict()`. Unknown keys throw instead of vanishing.
+
+**`extras` is what makes strict safe.** Sealing the nested objects without an escape hatch would just move the problem: a brand with a fifth color would have nowhere legitimate to put it and no option but to give up on the spec. `extras` means strict rejects *typos* rather than rejecting *needs*.
+
+**The error message is the actual deliverable.** The old failure wasted the caller's time twice: once writing fields that disappeared, then again round-tripping `brand_spec_get` to reverse-engineer what the schema really took. So an unknown key now reports the accepted slots and points at `extras`:
+
+> `ARTIFICER_BRAND_SPEC failed schema validation: colors: unknown key(s) "backgroundColor" — accepted here: primary, primary_name, secondary, secondary_name, background, background_name, highlight, highlight_name, extras. Put anything else under colors.extras (an object of name → value)`
+
+That map is **derived from the schema at module load**, not hand-listed, so adding a slot can't leave the error describing a shape that no longer exists — which would be this same bug wearing a different hat. `brand_spec_get` also returns the accepted shape when nothing is configured.
+
+**Resolver policy — the deliberate asymmetry.** `resolveColor` gained `background` / `highlight`; `resolveFont` gained `mono` / `sans` / `display`. A **missing weight still falls back to `regular`** (same typeface, reasonable degradation), but a **missing family does not**, and **no color role falls back to another**. Substituting a display serif where `mono` was asked for defeats the exact reason mono was requested — column alignment in credits and lyric sheets, which is btmusic's use case — and `background` silently returning the brand accent would paint a surface in entirely the wrong color. Returning `undefined` lets the consumer apply its own default knowingly.
+
+**⚠️ Breaking for any spec with stray nested keys.** That is the intent — loud beats silent — but a project whose `ARTIFICER_BRAND_SPEC` carries an unused or typo'd nested key will now fail at load rather than starting up and quietly ignoring it. The error names the offending key and the fix.
+
+**Verified:** the Cathode Saint spec from the original 2026-06-07 report now round-trips all 8 color keys and all 6 font keys. Both halves of the fix were proven to bite by reverting them (dropping nested `.strict()` fails 3 tests; deleting the new color slots fails 4). +13 tests, 877 passing.
+
+**Left undone deliberately:** the filing's third Con — "does `gemini_generate_image` know to inject `colors.background` into prompts?" — is still open. The resolvers now expose the slots, so a consuming tool can opt in, but actually injecting new fields into generation prompts would change output for existing callers and is its own decision, not a schema fix. Filed below as **#9b**.
+
+Also note the live caller doc `D:\projects\btmusic\instructions\artificer-prompts.md` records the *old* accepted shape in its 2026-06-07 learnings entry; it is in another repo and was not updated here.
+
+## 9b. Teach generation tools to consume the new brand slots (NEW, filed 2026-08-15)
+
+**What:** `colors.background`, `colors.highlight`, `fonts.mono` / `sans` / `display` are now first-class in the spec and resolvable, but no tool reads them automatically. Decide which should: e.g. should `gemini_generate_image` compose `colors.background` into prompts, should text-overlay tools pick `fonts.mono` for technical text, should social-card workflows use `highlight` for contrast text?
+
+**Why:** #9 fixed the schema; this is the half that makes the new slots do anything on their own. Until then callers pass them per-call, which works but is what the spec abstraction was supposed to remove.
+
+**Caution:** any tool that starts auto-injecting a brand slot changes output for existing callers who never asked for it. Prefer opt-in parameters or an explicit precedence rule over silent injection.
+
+**Trigger:** when a caller asks why setting `colors.background` didn't change anything, or when the btmusic pipeline wants it wired.
+
+## 9c. Original #9 filing (kept for history)
 
 **What:** `brandSpecSchema` in `src/brand.ts` is `.strict()` at the root but unsealed at every nested level (`colors`, `fonts`, `tts`, `music`, `logo`). Unknown keys inside those nested objects are silently dropped by Zod's default behavior with no warning. Two acceptable fixes:
 - **(a) Broaden the schema** — add optional slots for the fields callers naturally reach for: `colors.background`, `colors.background_name`, `colors.highlight`, `colors.highlight_name`, `fonts.mono`, `fonts.sans`, and probably leave room for an arbitrary `colors.extras: Record<string, string>` and `fonts.extras: Record<string, string>` so future projects with multi-family or multi-mode palettes don't keep hitting this.
