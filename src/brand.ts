@@ -18,28 +18,91 @@ import { rm } from 'node:fs/promises';
  *   a parameter (e.g., `gemini_generate_speech` falls back to
  *   `brandSpec.tts.voice`).
  */
+/**
+ * Brand palette.
+ *
+ * The four named slots are ordered by canonical role: `primary` is *the*
+ * brand color, `secondary` the main accent, and `background` / `highlight`
+ * are surface colors — a brand-mandated ground and the tone that sits on
+ * it. Reach for `primary` when you just need "the brand color".
+ *
+ * Anything outside those roles goes in `extras`, keyed by whatever name
+ * the brand system uses. That escape hatch is what makes `.strict()` here
+ * safe: unknown keys fail loudly instead of vanishing, and there is still
+ * somewhere legitimate to put a fifth color.
+ */
+const colorsSchema = z
+  .object({
+    primary: z.string().optional().describe('Hex color string, e.g. "#e11d48". The brand color.'),
+    primary_name: z
+      .string()
+      .optional()
+      .describe('Semantic name for the primary color, e.g. "rose-600".'),
+    secondary: z.string().optional().describe('Accent color. Hex string.'),
+    secondary_name: z.string().optional(),
+    background: z
+      .string()
+      .optional()
+      .describe('Brand-mandated ground/surface color, e.g. "#0A0A0A". Hex string.'),
+    background_name: z.string().optional(),
+    highlight: z
+      .string()
+      .optional()
+      .describe('Highlight/contrast tone that sits on the background, e.g. "#F4ECD8". Hex string.'),
+    highlight_name: z.string().optional(),
+    extras: z
+      .record(z.string())
+      .optional()
+      .describe(
+        'Any additional named colors, e.g. {"phosphor_green": "#39FF14"}. Use this for multi-mode palettes rather than inventing top-level keys — unknown top-level keys are rejected.',
+      ),
+  })
+  .strict();
+
+/**
+ * Brand typography.
+ *
+ * Two independent axes share this object, which is worth stating plainly:
+ * `regular` / `medium` / `semibold` / `bold` are **weights of the primary
+ * family**, while `mono` / `sans` / `display` are **separate families**.
+ * A brand with display + body + mono is routine, so both axes are needed.
+ *
+ * The distinction matters at resolve time — see `resolveFont`. A missing
+ * weight falls back to `regular`; a missing family does not, because
+ * silently substituting a display serif where mono was asked for defeats
+ * the reason mono was requested.
+ */
+const fontsSchema = z
+  .object({
+    regular: z.string().optional().describe('Path/URI to the regular-weight font.'),
+    medium: z.string().optional(),
+    semibold: z.string().optional(),
+    bold: z.string().optional(),
+    mono: z
+      .string()
+      .optional()
+      .describe(
+        'Monospace family, for technical text / credits / lyric sheets where column alignment matters.',
+      ),
+    sans: z.string().optional().describe('Sans-serif family, typically for body and press copy.'),
+    display: z
+      .string()
+      .optional()
+      .describe('Display/wordmark family, for titles and headline treatments.'),
+    extras: z
+      .record(z.string())
+      .optional()
+      .describe(
+        'Any additional named font families or weights. Use this rather than inventing top-level keys — unknown top-level keys are rejected.',
+      ),
+  })
+  .strict();
+
 export const brandSpecSchema = z
   .object({
     name: z.string().optional().describe('Brand/project display name.'),
-    colors: z
-      .object({
-        primary: z.string().optional().describe('Hex color string, e.g. "#e11d48".'),
-        primary_name: z
-          .string()
-          .optional()
-          .describe('Semantic name for the primary color, e.g. "rose-600".'),
-        secondary: z.string().optional(),
-        secondary_name: z.string().optional(),
-      })
-      .optional(),
-    fonts: z
-      .object({
-        regular: z.string().optional().describe('Path/URI to the regular-weight font.'),
-        medium: z.string().optional(),
-        semibold: z.string().optional(),
-        bold: z.string().optional(),
-      })
-      .optional(),
+    colors: colorsSchema.optional(),
+    fonts: fontsSchema.optional(),
     scene_description: z
       .string()
       .optional()
@@ -71,6 +134,7 @@ export const brandSpecSchema = z
           .optional()
           .describe('Optional ISO language code (e.g., "en-US"). Passed through when set.'),
       })
+      .strict()
       .optional(),
     music: z
       .object({
@@ -79,6 +143,7 @@ export const brandSpecSchema = z
           .optional()
           .describe('Default Lyria prompt for music beds (genre, tempo, mood, instruments).'),
       })
+      .strict()
       .optional(),
     logo: z
       .object({
@@ -107,6 +172,7 @@ export const brandSpecSchema = z
             'Overlay-optimized logo variant (semi-transparent or tone-adjusted for video overlay). Falls back to `wordmark`, then `icon` when unset. Accepts .svg or raster.',
           ),
       })
+      .strict()
       .optional()
       .describe(
         'Brand logo variants. All fields accept both SVG (rasterized on demand) and raster images.',
@@ -115,6 +181,59 @@ export const brandSpecSchema = z
   .strict();
 
 export type BrandSpec = z.infer<typeof brandSpecSchema>;
+
+/**
+ * The accepted key set for each object in the spec, used to make an
+ * unknown-key error actionable.
+ *
+ * Every nested object is `.strict()`, so a stray key now throws instead of
+ * being silently dropped. That is only an improvement if the error tells
+ * the caller what they *can* write — otherwise they are back to
+ * round-tripping `brand_spec_get` to reverse-engineer the shape, which is
+ * the exact frustration this replaces.
+ */
+const ACCEPTED_KEYS: Record<string, readonly string[]> = (() => {
+  // Derived from the schema rather than hand-listed, so adding a slot
+  // cannot leave the error message describing a shape that no longer
+  // exists — the failure mode this whole change is meant to end.
+  const map: Record<string, readonly string[]> = {
+    '(root)': Object.keys(brandSpecSchema.shape),
+  };
+  for (const [key, node] of Object.entries(brandSpecSchema.shape)) {
+    let inner: z.ZodTypeAny = node;
+    while (inner instanceof z.ZodOptional || inner instanceof z.ZodDefault) {
+      inner = inner._def.innerType as z.ZodTypeAny;
+    }
+    if (inner instanceof z.ZodObject) {
+      map[key] = Object.keys(inner.shape as Record<string, unknown>);
+    }
+  }
+  return map;
+})();
+
+/** Objects that offer an `extras` bag for anything outside the named slots. */
+const HAS_EXTRAS = new Set(['colors', 'fonts']);
+
+/**
+ * Render one Zod issue as a line the caller can act on.
+ *
+ * Unknown-key issues get the accepted slots appended (and a pointer at
+ * `extras` where one exists). Everything else keeps the plain
+ * `path: message` form.
+ */
+function formatIssue(issue: z.ZodIssue): string {
+  const path = issue.path.join('.') || '(root)';
+  if (issue.code !== 'unrecognized_keys') return `${path}: ${issue.message}`;
+
+  const accepted = ACCEPTED_KEYS[path];
+  const unknown = issue.keys.map((k) => `"${k}"`).join(', ');
+  let line = `${path}: unknown key(s) ${unknown}`;
+  if (accepted) line += ` — accepted here: ${accepted.join(', ')}`;
+  if (HAS_EXTRAS.has(path)) {
+    line += `. Put anything else under ${path}.extras (an object of name → value)`;
+  }
+  return line;
+}
 
 type CacheState =
   | { kind: 'unloaded' }
@@ -160,7 +279,7 @@ export function loadBrandSpec(): BrandSpec | null {
   const result = brandSpecSchema.safeParse(parsed);
   if (!result.success) {
     const msg = `ARTIFICER_BRAND_SPEC failed schema validation: ${result.error.issues
-      .map((i) => `${i.path.join('.') || '(root)'}: ${i.message}`)
+      .map(formatIssue)
       .join('; ')}`;
     cache = { kind: 'error', message: msg };
     throw new Error(msg);
@@ -171,40 +290,66 @@ export function loadBrandSpec(): BrandSpec | null {
 }
 
 /**
- * Font weight keys for `resolveFont` — maps to `brandSpec.fonts.*`.
+ * Weights of the primary family — `brandSpec.fonts.{regular,…,bold}`.
  */
 export type BrandFontWeight = 'regular' | 'medium' | 'semibold' | 'bold';
 
 /**
- * Resolve a font path/URI. Returns the explicit value when provided, else
- * the brand spec font for the requested weight (falling back through
- * weight → regular), else `undefined`. Tool handlers should pass the
- * caller's font param as `explicit` so explicit values always win.
+ * Distinct families — `brandSpec.fonts.{mono,sans,display}`.
+ */
+export type BrandFontFamily = 'mono' | 'sans' | 'display';
+
+/** Anything `resolveFont` can be asked for. */
+export type BrandFontKey = BrandFontWeight | BrandFontFamily;
+
+const FONT_FAMILIES: ReadonlySet<string> = new Set<BrandFontFamily>(['mono', 'sans', 'display']);
+
+/**
+ * Resolve a font path/URI. Explicit value always wins; otherwise read the
+ * brand spec.
+ *
+ * **Weights fall back to `regular`. Families do not.** Asking for `bold`
+ * and getting the regular cut is a reasonable degradation — it is the same
+ * typeface. Asking for `mono` and getting a display serif is not: mono is
+ * requested precisely when column alignment matters (credits, lyric
+ * sheets, technical text), so a proportional substitute silently breaks
+ * the thing the caller was trying to achieve. Better to return `undefined`
+ * and let the consumer fall back to its own default explicitly.
  */
 export function resolveFont(
   explicit: string | undefined,
-  weight: BrandFontWeight = 'regular',
+  key: BrandFontKey = 'regular',
 ): string | undefined {
   if (explicit !== undefined && explicit !== '') return explicit;
   const fonts = loadBrandSpec()?.fonts;
   if (!fonts) return undefined;
-  return fonts[weight] ?? fonts.regular;
+  if (FONT_FAMILIES.has(key)) return fonts[key as BrandFontFamily];
+  return fonts[key as BrandFontWeight] ?? fonts.regular;
 }
 
 /**
+ * Color roles `resolveColor` can look up.
+ */
+export type BrandColorRole = 'primary' | 'secondary' | 'background' | 'highlight';
+
+/**
  * Resolve a color value. Returns explicit when provided, else the brand
- * spec primary/secondary color, else `undefined`. Accepts a hex string
- * directly or the semantic name "primary"/"secondary" to look up in the
- * brand spec.
+ * spec color for the requested role, else `undefined`.
+ *
+ * No cross-role fallback: `background` returning `primary` when unset
+ * would paint a surface in the brand's accent color, which is worse than
+ * letting the consumer apply its own default. Roles outside these four
+ * live in `colors.extras` and are read from the spec directly rather than
+ * through this helper.
  */
 export function resolveColor(
   explicit: string | undefined,
-  which: 'primary' | 'secondary' = 'primary',
+  which: BrandColorRole = 'primary',
 ): string | undefined {
   if (explicit !== undefined && explicit !== '') return explicit;
   const colors = loadBrandSpec()?.colors;
   if (!colors) return undefined;
-  return which === 'secondary' ? colors.secondary : colors.primary;
+  return colors[which];
 }
 
 /**
