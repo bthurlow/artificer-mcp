@@ -170,6 +170,16 @@ There is **no top-level \`audio_format\` parameter** on this model. Passing one 
 
 If you are running a WAV-throughout pipeline, check the returned \`mime\` — a silent MP3 will otherwise propagate all the way to master.
 
+**\`fal_generate_music\` now warns on this.** Any \`extra_params\` key the model's spec doesn't accept produces a stderr line naming the key and the nested path it probably meant:
+
+\`\`\`
+fal_generate_music: extra_params key "audio_format" is not an input on
+fal-ai/minimax-music/v2.6 — fal will silently ignore it. Did you mean
+"audio_setting.format"? Nest it, e.g. {"audio_setting": {"format": ...}}.
+\`\`\`
+
+The request is still sent exactly as you built it — the warning does not rewrite or relocate anything. Check stderr if output format surprises you.
+
 ## Prompt structure
 **Prompt field** — stack these in order:
 
