@@ -2,33 +2,25 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerTool } from '../utils/register.js';
 import { z } from 'zod';
 
-const NANOBANANA_GUIDE = `# Gemini Nano-Banana (gemini-2.5-flash-image) — Prompt Guide
+const NANOBANANA_GUIDE = `# Gemini Nano-Banana (gemini-3.1-flash-image) — Prompt Guide
 
 ## Overview
-Nano-banana is a multimodal image model accessed via \`generateContent\` with IMAGE response modality. Unlike Imagen (text-only input), nano-banana accepts **text + reference images** as multimodal parts — enabling edits, composites, style transfer, and reference-guided generation from a single tool.
+Nano-banana is a multimodal image model accessed via \`generateContent\` with IMAGE response modality. It accepts **text + reference images** as multimodal parts — enabling generation, edits, composites, style transfer, and reference-guided work from a single tool.
+
+**This is artificer's only Google image route.** Imagen is deprecated by Google and retired from the catalog (see \`gemini_image_prompt_guide\` for the migration mapping), so nano-banana now covers both the from-scratch and the work-with-existing-imagery lanes.
 
 **Strengths:**
+- Photoreal generation from text alone
 - Edits (add/remove/replace elements in an existing image)
 - Composites across multiple references (subject from A, scene from B)
 - Style transfer from a reference
-- **Text rendering** inside images (usually more reliable than Imagen)
+- **Text rendering** inside images
 - Character consistency across iterations
 
 **Weaknesses:**
-- Lower max fidelity than Imagen 4 for pristine photorealism
 - No native batch variations (one image per call; loop for multiples)
+- No \`negative_prompt\`, \`seed\`, or \`enhance_prompt\` — these were Imagen-only and did not carry over
 - No explicit safety-level knob (server-side defaults only)
-
-## When to use nano-banana vs Imagen
-| Task | Pick |
-|---|---|
-| Generate a brand-new image from text only, photoreal quality matters | Imagen |
-| Edit an existing image (remove/add/change something) | Nano-banana |
-| Composite multiple images | Nano-banana |
-| Apply the style of reference A to image B | Nano-banana |
-| Render specific text inside the image | Nano-banana |
-| 4 variations of the same prompt | Imagen (\`number_of_images\`) |
-| Maintain a character across edits | Nano-banana |
 
 ## Prompt Templates
 
@@ -93,32 +85,35 @@ The \`aspect_ratio\` you pass must match the aspect ratio of the downstream dest
 **Pre-generation workflow for campaign assets:** if one reference asset will be used across multiple destinations (e.g., a character, a product shot), generate it once per target aspect up front. Don't generate at 1:1 and try to reuse for 9:16 video or 2:3 Pinterest — quality degrades from cropping, and image-to-video breaks.
 
 ## Model-Specific Notes
-- **gemini-2.5-flash-image** — Production model. Fast (seconds, not minutes). Override via \`ARTIFICER_NANOBANANA_MODEL\` env var.
+- **gemini-3.1-flash-image** (Nano Banana 2) — Production default. Fast (seconds, not minutes). Override via \`ARTIFICER_NANOBANANA_MODEL\` env var.
+- **Siblings** you can pass explicitly via \`model\` or the env override: \`gemini-3.1-flash-lite-image\` (Nano Banana 2 Lite — cheaper/faster) and \`gemini-3-pro-image\` (Nano Banana Pro — highest fidelity). \`gemini-2.5-flash-image\` is the previous generation and still active.
+- **Resolution drives cost** — roughly $0.045 per 0.5K image, $0.067 per 1K, $0.101 per 2K, $0.151 per 4K.
 - **aspect_ratio**: Optional hint but strongly recommended when composition matters. Common values: 1:1, 3:4, 4:3, 9:16, 16:9, 4:5, 2:3, 1.91:1. See "Aspect ratio" section above for the interop rule with Veo image-to-video.
 - **include_text**: If true, the model can emit a text commentary alongside the image — useful when you want the model to _explain_ what it changed.
-- **No negative prompts / seed / enhance_prompt / safety knobs** — these are Imagen-only. Use explicit preservation language in the prompt instead ("keep the lighting", "do not change the pose").
+- **No negative prompts / seed / enhance_prompt / safety knobs.** These were Imagen-only and Imagen is retired — there is no route that offers them. **Express exclusions as positive prompt language**: instead of \`negative_prompt: "blurry, text, watermark"\`, write "…sharp focus throughout, clean composition with no text, lettering, or watermarks." Use explicit preservation language on edits ("keep the lighting", "do not change the pose").
 
 ## Access routes
 
 | Provider | Tool                                  | Model ID                    | Cost                   | Notes |
 |----------|---------------------------------------|-----------------------------|------------------------|-------|
-| google   | \`gemini_nanobanana_generate_image\`  | \`gemini-2.5-flash-image\`  | See Google Cloud pricing | Multimodal (text + reference images). Exposes \`aspect_ratio\`, \`reference_images[]\`, \`include_text\`. No \`seed\` / \`number_of_images\` / \`negative_prompt\` / safety knobs — those are Imagen-only. |
+| google   | \`gemini_nanobanana_generate_image\`  | \`gemini-3.1-flash-image\`  | $0.045 (0.5K) / $0.067 (1K) / $0.101 (2K) / $0.151 (4K) per image | Multimodal (text + reference images). Exposes \`aspect_ratio\`, \`reference_images[]\`, \`include_text\`. No \`seed\` / \`number_of_images\` / \`negative_prompt\` / safety knobs. |
 
-Nano-banana is Google-route only. Fal hosts other multimodal image models (Flux, Seedream, etc.) but not gemini-2.5-flash-image specifically — those are their own logical models with their own guides when Phase 4 lands.
+Nano-banana is Google-route only. Fal hosts other multimodal image models (Flux, Seedream, etc.) — those are their own logical models with their own guides when the fal image transport lands.
 
 ## Last verified
-2026-04-24 against artificer-mcp v0.9.0 — prompt structure, aspect interop rule, and reference-image limits validated through shipping use.
+2026-08-15 against artificer-mcp — prompt structure, aspect interop rule, and reference-image limits validated through shipping use. Model ID promoted from \`gemini-2.5-flash-image\` to \`gemini-3.1-flash-image\` and pricing added, verified against ai.google.dev model + pricing docs 2026-08-15.
 
 ## Official References
 - Gemini image-generation docs: https://ai.google.dev/gemini-api/docs/image-generation
-- Model card (gemini-2.5-flash-image): https://ai.google.dev/gemini-api/docs/models
+- Model list: https://ai.google.dev/gemini-api/docs/models
+- Pricing: https://ai.google.dev/gemini-api/docs/pricing
 `;
 
 export function registerNanobananaPromptGuide(server: McpServer): void {
   registerTool<Record<string, never>>(
     server,
     'gemini_nanobanana_prompt_guide',
-    'Get structured prompt guidance for Gemini nano-banana (gemini-2.5-flash-image). Covers when to use it over Imagen, templates for generation/edit/composite/style transfer, reference-image tips, and model-specific notes. No API call — pure reference.',
+    "Get structured prompt guidance for Gemini nano-banana (gemini-3.1-flash-image) — artificer's only Google image route now that Imagen is retired. Covers templates for generation/edit/composite/style transfer, reference-image tips, the aspect-ratio interop rule for image-to-video, model siblings and per-resolution pricing, and how to express exclusions without negative_prompt. No API call — pure reference.",
     z.object({}).shape,
     async () => ({
       content: [{ type: 'text', text: NANOBANANA_GUIDE }],

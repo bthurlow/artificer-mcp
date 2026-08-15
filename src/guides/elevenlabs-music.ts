@@ -16,12 +16,13 @@ Full music track generation from a text description — genre, mood, instrumenta
 ## Known weaknesses / quirks
 - **Uses \`music_length_ms\`, not \`duration_seconds\`.** Pass via \`extra_params\` — the tool-level structural args do not include a duration field.
 - **Billing rounds up to the nearest minute.** A 10-second clip costs the same as a 55-second clip. For rapid iteration, generate at 60s and edit down, not at 10s × 6.
-- **No native lyrics support in prompt mode** — for songs with vocals use MiniMax Music 2.6 (\`minimax_music_prompt_guide\`). Eleven Music is primarily for instrumental / soundtrack-style generation.
+- **Lyrics are a \`composition_plan\` feature, not a prompt-mode one.** Eleven Music *does* generate vocals and *does* accept authored lyrics — but only through \`composition_plan\` sections, each carrying a \`lines\` array (max 30 lines per section, max 200 characters per line). There is no lyrics field in prompt mode; a prose prompt can ask for vocals but cannot specify what gets sung.
+- **No vocalist-level control.** The API exposes style direction and \`force_instrumental\`, but nothing that assigns distinct vocalists. Per-section multi-vocalist arrangements are partial and unreliable in practice — the model may collapse them to one voice. If a track needs authored lyrics with dependable vocal character, MiniMax Music 2.6 (\`minimax_music_prompt_guide\`) is the better route; Eleven Music remains the stronger pick for instrumental beds and soundtrack-style generation.
 - **No reference-audio style transfer.** Style comes entirely from the text prompt.
 
 ## Input requirements
 - **prompt** (optional) — text description. Required unless you pass \`composition_plan\` instead.
-- **composition_plan** (optional) — structured plan (see Eleven docs for format). Mutually exclusive with prompt when you want precise section control.
+- **composition_plan** (optional) — structured plan of \`sections\`, each with a \`section_name\`, its own style direction, duration, and a \`lines\` array carrying that section's lyrics. Mutually exclusive with prompt when you want precise section or lyric control. This is the only path to authored vocals.
 - **music_length_ms** (optional) — integer 3000-600000. Passed via extra_params.
 - **force_instrumental** (optional, boolean) — guarantees no vocals. Only applies when using \`prompt\`.
 - **respect_sections_durations** (optional, boolean) — strict enforcement of composition_plan section durations. Only applies when \`composition_plan\` is used.
@@ -79,10 +80,10 @@ Lead with genre, then mood, then instrumentation. Tempo and soundscape go last.
 
 | Provider | Tool                   | Model ID                    | Cost                                                                    | Notes |
 |----------|------------------------|-----------------------------|-------------------------------------------------------------------------|-------|
-| fal      | \`fal_generate_music\` | \`fal-ai/elevenlabs/music\` | $0.80 per output audio minute (rounded up to the nearest whole minute)  | Lyrics-less by default. Composition plan supported via extra_params. |
+| fal      | \`fal_generate_music\` | \`fal-ai/elevenlabs/music\` | $0.80 per output audio minute (rounded up to the nearest whole minute)  | Vocal-capable. Authored lyrics require \`composition_plan\` via extra_params; prompt mode has no lyrics field. \`force_instrumental: true\` guarantees no vocals. |
 
 ## Last verified
-2026-04-24 against artificer-mcp v0.9.0 — schema from \`src/catalog/fal-specs/eleven-music/llms.md\`. Output format list matches committed spec.
+2026-08-15 against artificer-mcp — schema from \`src/catalog/fal-specs/eleven-music/llms.md\`; vocals/lyrics behavior re-verified against the ElevenLabs Music API reference (composition-plan \`lines\` field). Output format list matches committed spec.
 
 ## Official references
 - Model page: https://fal.ai/models/fal-ai/elevenlabs/music

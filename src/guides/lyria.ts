@@ -88,11 +88,19 @@ Output: 16-bit PCM 48kHz stereo, wrapped in WAV by artificer.
 - Sessions can stall silently — artificer enforces \`duration_seconds + 15s\` hard deadline
 - Cap \`duration_seconds\` at 120; for longer beds, use the batch tool (Pro supports ~2min) or concatenate multiple generations
 
+## Vocals — Lyria 3 sings
+
+Lyria 3 is **not instrumental-only.** Google documents it as delivering "structural coherence, including vocals, timed lyrics, and full instrumental arrangements." Both \`lyria-3-clip-preview\` and \`lyria-3-pro-preview\` can return vocal tracks; both output 44.1 kHz high-fidelity stereo.
+
+There is no dedicated lyrics field — vocals and lyric content are steered through the prompt, and on Pro through the \`[mm:ss - mm:ss]\` timeline markers. To force an instrumental result, say so explicitly in the prompt ("instrumental, no vocals"); it is a prompt-level request, not a parameter.
+
+Contrast with the fal-hosted Lyria 2 (\`lyria2_prompt_guide\`), which **is** instrumental-only. Don't carry Lyria 2's constraint over to Lyria 3.
+
 ## Safety / content filters
 
 Lyria applies safety filters. Common triggers:
 - Copyrighted artist names ("in the style of Taylor Swift") — blocked
-- Explicit lyrics — Lyria 3 is mostly instrumental; avoid vocal requests
+- Explicit lyric content
 - Specific commercial brand sounds
 
 Describe style via attributes, not by referencing named artists.
@@ -101,13 +109,13 @@ Describe style via attributes, not by referencing named artists.
 
 | Provider | Tool                              | Model ID                         | Cost                   | Notes |
 |----------|-----------------------------------|----------------------------------|------------------------|-------|
-| google   | \`gemini_generate_music\`         | \`lyria-3-clip-preview\` (default, 30s MP3) / \`lyria-3-pro-preview\` (up to ~2min WAV) | See Google Cloud pricing | Batch, synchronous. Pro supports timeline prompts with \`[mm:ss - mm:ss]\` markers and intensity scales. No dedicated \`negative_prompt\` field on Lyria 3 — artificer appends \`\\nAvoid: ...\` as prompt guidance. |
+| google   | \`gemini_generate_music\`         | \`lyria-3-clip-preview\` (default, 30s MP3) / \`lyria-3-pro-preview\` (up to ~2min WAV) | See Google Cloud pricing | Batch, synchronous. **Vocal-capable** — supports vocals and timed lyrics; prompt for "instrumental" if you want none. 44.1 kHz stereo. Pro supports timeline prompts with \`[mm:ss - mm:ss]\` markers and intensity scales. No dedicated \`negative_prompt\` field on Lyria 3 — artificer appends \`\\nAvoid: ...\` as prompt guidance. |
 | google   | \`gemini_generate_music_live\`    | \`models/lyria-realtime-exp\`    | See Google Cloud pricing | Streaming WebSocket session. Caller-side deadline capped 120s in artificer. Output is 16-bit PCM 48kHz stereo wrapped in WAV. |
 
 Fal hosts alternative music generation (Suno, MusicGen) — those are separate logical models with their own guides when Phase 5 lands.
 
 ## Last verified
-2026-04-24 against artificer-mcp v0.9.0 — Lyria 3 / 3 Pro prompt anatomy, timeline-marker syntax, and realtime session lifecycle validated through shipping use.
+2026-08-15 against artificer-mcp — Lyria 3 / 3 Pro prompt anatomy, timeline-marker syntax, and realtime session lifecycle validated through shipping use. Vocal capability re-verified 2026-08-15 against Google's music-generation docs, correcting an earlier "avoid vocal requests" note that had carried Lyria 2's instrumental-only constraint over to Lyria 3.
 
 ## Reference
 - [Music generation (Lyria 3 batch) docs](https://ai.google.dev/gemini-api/docs/music-generation)

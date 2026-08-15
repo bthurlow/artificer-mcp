@@ -29,10 +29,22 @@ describe('model env overrides', () => {
     expect(parsed.model).toBe('imagen-4.0-ultra-preview');
   });
 
-  it('generateImageSchema falls back to baked default when env unset', async () => {
+  // Imagen is deprecated by Google and retired from the catalog, so these
+  // schemas ship no baked default — an unpinned caller must pass `model`.
+  it('generateImageSchema requires an explicit model when env unset', async () => {
     const { generateImageSchema } = await import('../../../src/generation/types.js');
-    const parsed = generateImageSchema.parse({ prompt: 'x', output: 'y.png' });
+    expect(() => generateImageSchema.parse({ prompt: 'x', output: 'y.png' })).toThrow();
+    const parsed = generateImageSchema.parse({
+      prompt: 'x',
+      output: 'y.png',
+      model: 'imagen-4.0-generate-001',
+    });
     expect(parsed.model).toBe('imagen-4.0-generate-001');
+  });
+
+  it('editImageSchema requires an explicit model when env unset', async () => {
+    const { editImageSchema } = await import('../../../src/generation/types.js');
+    expect(() => editImageSchema.parse({ prompt: 'x', image: 'a.png', output: 'b.png' })).toThrow();
   });
 
   it('editImageSchema picks up ARTIFICER_IMAGEN_EDIT_MODEL', async () => {
@@ -70,7 +82,13 @@ describe('model env overrides', () => {
   it('treats empty string env var as unset', async () => {
     process.env.ARTIFICER_IMAGEN_MODEL = '   ';
     const { generateImageSchema } = await import('../../../src/generation/types.js');
-    const parsed = generateImageSchema.parse({ prompt: 'x', output: 'y.png' });
-    expect(parsed.model).toBe('imagen-4.0-generate-001');
+    // Whitespace-only pin does not count as a default — model stays required.
+    expect(() => generateImageSchema.parse({ prompt: 'x', output: 'y.png' })).toThrow();
+  });
+
+  it('nanobananaGenerateImageSchema defaults to the current Nano Banana 2 model', async () => {
+    const { nanobananaGenerateImageSchema } = await import('../../../src/generation/types.js');
+    const parsed = nanobananaGenerateImageSchema.parse({ prompt: 'x', output: 'y.png' });
+    expect(parsed.model).toBe('gemini-3.1-flash-image');
   });
 });

@@ -7,6 +7,24 @@ import { z } from 'zod';
 const envDefault = (envVar: string, fallback: string): string =>
   process.env[envVar]?.trim() || fallback;
 
+/**
+ * Model slot for a tool whose default has been retired. Honors an env
+ * override when an operator has pinned one; otherwise the caller must pass
+ * `model` explicitly rather than silently inheriting a dead model ID.
+ *
+ * Used by the Imagen tools — Google deprecated Imagen 4 with a shutdown
+ * notice, so artificer ships no maintained default for them. See
+ * `gemini_image_prompt_guide`.
+ */
+const retiredDefault = (
+  envVar: string,
+  description: string,
+): z.ZodString | z.ZodDefault<z.ZodString> => {
+  const pinned = process.env[envVar]?.trim();
+  const base = z.string().describe(description);
+  return pinned ? base.default(pinned) : base;
+};
+
 // ── gemini_generate_image ──────────────────────────────────────────────────
 
 export interface GenerateImageParams {
@@ -23,12 +41,10 @@ export interface GenerateImageParams {
 }
 
 export const generateImageSchema = z.object({
-  model: z
-    .string()
-    .default(envDefault('ARTIFICER_IMAGEN_MODEL', 'imagen-4.0-generate-001'))
-    .describe(
-      'Imagen model ID. Pass any valid model string — no hardcoded enum. Default: imagen-4.0-generate-001 (override via ARTIFICER_IMAGEN_MODEL env var).',
-    ),
+  model: retiredDefault(
+    'ARTIFICER_IMAGEN_MODEL',
+    'Imagen model ID — REQUIRED, no default. Google deprecated Imagen 4 (shutdown notice on imagen-4.0-generate-001), so artificer ships no default here. Prefer gemini_nanobanana_generate_image; see gemini_image_prompt_guide for the migration map. Pin a model via ARTIFICER_IMAGEN_MODEL to restore a default.',
+  ),
   prompt: z.string().describe('Text description of the image to generate.'),
   output: z
     .string()
@@ -81,12 +97,10 @@ export interface EditImageParams {
 }
 
 export const editImageSchema = z.object({
-  model: z
-    .string()
-    .default(envDefault('ARTIFICER_IMAGEN_EDIT_MODEL', 'imagen-3.0-capability-001'))
-    .describe(
-      'Imagen editing model ID. Default: imagen-3.0-capability-001 (override via ARTIFICER_IMAGEN_EDIT_MODEL env var).',
-    ),
+  model: retiredDefault(
+    'ARTIFICER_IMAGEN_EDIT_MODEL',
+    'Imagen editing model ID — REQUIRED, no default. The Imagen family is deprecated; prefer gemini_nanobanana_generate_image with reference_images for edits. Pin a model via ARTIFICER_IMAGEN_EDIT_MODEL to restore a default.',
+  ),
   prompt: z.string().describe('Description of the edit to apply.'),
   image: z.string().describe('Path to the source image to edit.'),
   output: z
@@ -129,7 +143,7 @@ export const upscaleImageSchema = z.object({
     .string()
     .default(envDefault('ARTIFICER_IMAGEN_UPSCALE_MODEL', 'imagen-4.0-upscale-preview'))
     .describe(
-      'Upscale model ID. Default: imagen-4.0-upscale-preview (override via ARTIFICER_IMAGEN_UPSCALE_MODEL env var).',
+      'Upscale model ID. Default: imagen-4.0-upscale-preview (override via ARTIFICER_IMAGEN_UPSCALE_MODEL env var). Note: upscaling is Vertex-AI-only — GOOGLE_CLOUD_PROJECT must be set.',
     ),
   image: z.string().describe('Path to the image to upscale.'),
   output: z.string().describe('Output path for the upscaled image.'),
@@ -150,9 +164,9 @@ export interface NanobananaGenerateImageParams {
 export const nanobananaGenerateImageSchema = z.object({
   model: z
     .string()
-    .default(envDefault('ARTIFICER_NANOBANANA_MODEL', 'gemini-2.5-flash-image'))
+    .default(envDefault('ARTIFICER_NANOBANANA_MODEL', 'gemini-3.1-flash-image'))
     .describe(
-      'Gemini image model ID (nano-banana family). Default: gemini-2.5-flash-image (override via ARTIFICER_NANOBANANA_MODEL env var).',
+      'Gemini image model ID (nano-banana family). Default: gemini-3.1-flash-image (Nano Banana 2). Siblings: gemini-3.1-flash-lite-image (cheaper), gemini-3-pro-image (highest fidelity), gemini-2.5-flash-image (previous generation). Override the default via ARTIFICER_NANOBANANA_MODEL env var.',
     ),
   prompt: z
     .string()

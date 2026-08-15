@@ -2,65 +2,67 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerTool } from '../utils/register.js';
 import { z } from 'zod';
 
-const IMAGE_GUIDE = `# Gemini Image Generation — Prompt Guide
+const IMAGE_GUIDE = `# Google Imagen — RETIRED
 
-## Overview
-Google Imagen generates high-quality images from text prompts. It excels at photorealistic scenes, artistic styles, and product visualization. It can struggle with precise text rendering, complex spatial relationships, and counting specific numbers of objects.
+## ⚠️ Imagen is retired in artificer. Use nano-banana.
 
-## Prompt Template
+Google has **deprecated Imagen 4**. \`imagen-4.0-generate-001\` and its siblings are listed under "Previous models" with a shutdown notice ("will be shut down soon; migrate to newer models to prevent service interruptions").
+
+Artificer has retired the Imagen route accordingly:
+
+- **\`model_catalog\` no longer lists an Imagen entry.** \`image.general\` now offers nano-banana only.
+- **\`gemini_generate_image\` / \`gemini_edit_image\` remain registered** as thin transports — they take any model ID you pass, so they keep working for anyone with a live Imagen deployment (notably Vertex AI, where deprecation timelines differ). They are no longer a recommended route and have no maintained default.
+- **New work should call \`gemini_nanobanana_generate_image\`** and follow \`gemini_nanobanana_prompt_guide\`.
+
+## What to use instead
+
+| You wanted Imagen for… | Use instead |
+|---|---|
+| Text-to-image generation | \`gemini_nanobanana_generate_image\` (no reference images) |
+| Photorealism | \`gemini_nanobanana_generate_image\` — Nano Banana 2 closed most of the fidelity gap that made Imagen the photoreal pick |
+| Edits / inpainting / background swap | \`gemini_nanobanana_generate_image\` with \`reference_images\` |
+| Composites and style transfer | \`gemini_nanobanana_generate_image\` with \`reference_images\` |
+| Text rendering inside an image | \`gemini_nanobanana_generate_image\` (was already the stronger route) |
+| N variations of one prompt | Loop \`gemini_nanobanana_generate_image\` client-side — there is no \`number_of_images\` equivalent |
+| Upscaling | \`gemini_upscale_image\` (**requires Vertex AI credentials** — see that tool's error message), or a fal upscale route |
+
+## Capabilities that do not carry over
+
+Nano-banana does **not** expose these Imagen-only knobs. Plan around them:
+
+- **\`negative_prompt\`** — unsupported. The Gemini Developer API rejects it outright. Fold exclusions into the positive prompt instead: instead of \`negative_prompt: "text, watermark"\`, write "…clean composition with no text, lettering, or watermarks."
+- **\`seed\`** — no reproducibility knob.
+- **\`number_of_images\`** — one image per call.
+- **\`safety_filter_level\` / \`person_generation\`** — server-side defaults only.
+- **\`enhance_prompt\`** — no automatic prompt rewriting.
+
+## Prompt structure still applies
+
+The prompt anatomy that worked for Imagen carries over to nano-banana generation:
+
 \`[Subject] [doing action] in [setting/environment], [style/aesthetic], [lighting], [camera angle/composition], [mood/atmosphere]\`
 
-## Good Examples
-
-**Photorealistic product shot:**
 > "A sleek matte black coffee mug on a marble countertop, morning sunlight streaming through a window, shallow depth of field, warm tones, product photography"
 
-**Artistic illustration:**
-> "A cozy bookshop interior with floor-to-ceiling shelves, a cat sleeping on a stack of books, warm golden lamp light, watercolor illustration style, whimsical atmosphere"
-
-**Social media content:**
-> "Flat lay of fresh baking ingredients on a rustic wooden table — flour, eggs, butter, vanilla, chocolate chips — overhead shot, bright natural lighting, food photography style"
-
-## Bad Examples
-
-> "A nice picture" — Too vague. Specify subject, style, lighting, composition.
-
-> "Generate me 5 red cars and 3 blue trucks" — Imagen struggles with precise counting. Keep object counts simple.
-
-> "Text that says SALE 50% OFF" — Text rendering is unreliable. Use ImageMagick text-overlay tools for precise text.
-
-## Model-Specific Notes
-
-- **imagen-4.0-generate-001** — Latest model. Best quality. Supports \`enhancePrompt\` for automatic prompt improvement.
-- **Aspect ratios**: 1:1, 3:4, 4:3, 9:16, 16:9. Choose based on platform (1:1 for Instagram, 9:16 for Stories/Reels, 16:9 for YouTube thumbnails).
-- **Negative prompts**: Use to exclude unwanted elements ("blurry, low quality, text, watermark").
-- **Safety filters**: Default is BLOCK_MEDIUM_AND_ABOVE. Lower to BLOCK_ONLY_HIGH for creative freedom; raise for child-safe content.
-- **Seed**: Set for reproducibility. Same seed + same prompt = same image.
-
-## When to use nano-banana instead
-For **edits, composites, style transfer, text rendering, or reference-guided generation**, prefer \`gemini_nanobanana_generate_image\` and its dedicated \`gemini_nanobanana_prompt_guide\`. Imagen is stronger for clean one-shot photorealism and multi-variation batches; nano-banana is stronger when you need to work _with_ existing imagery.
+See \`gemini_nanobanana_prompt_guide\` for the full templates, reference-image tips, and the aspect-ratio interop rule for image-to-video handoffs.
 
 ## Access routes
 
-| Provider | Tool                     | Model ID                       | Cost                   | Notes |
-|----------|--------------------------|--------------------------------|------------------------|-------|
-| google   | \`gemini_generate_image\`  | \`imagen-4.0-generate-001\` (default) | See Google Cloud pricing | Exposes \`number_of_images\` (1-4), \`aspect_ratio\`, \`seed\`, \`safety_filter_level\`, \`person_generation\`, \`enhance_prompt\`, \`negative_prompt\`. |
-
-Fal hosts Imagen routes as well; they land in Phase 4 alongside the \`fal_generate_image\` transport when a pipeline use case emerges. Until then, Imagen is Google-route only.
+Imagen has no catalog route. \`gemini_generate_image\` and \`gemini_edit_image\` remain callable with an explicit \`model\` argument but are unsupported and undefaulted.
 
 ## Last verified
-2026-04-24 against artificer-mcp v0.9.0 — prompt structure and parameter set validated through shipping use.
+2026-08-15 — Imagen 4 deprecation confirmed against ai.google.dev model docs ("Previous models", shutdown notice). Route retired from \`models.json\`; guide converted to a migration pointer.
 
 ## Official References
-- Imagen API: https://ai.google.dev/gemini-api/docs/imagen
-- Model cards: https://ai.google.dev/gemini-api/docs/models/imagen
+- Model list (current + previous): https://ai.google.dev/gemini-api/docs/models
+- Gemini image generation: https://ai.google.dev/gemini-api/docs/image-generation
 `;
 
 export function registerImagenPromptGuide(server: McpServer): void {
   registerTool<Record<string, never>>(
     server,
     'gemini_image_prompt_guide',
-    'Get structured prompt guidance for Gemini/Imagen image generation. Returns best practices, templates, good/bad examples, and model-specific notes. No API call — pure reference.',
+    'RETIRED — Google Imagen is deprecated and has no artificer catalog route. Returns a migration pointer to gemini_nanobanana_generate_image, a capability-mapping table, and the Imagen-only knobs (negative_prompt, seed, number_of_images, safety levels) that do not carry over. No API call — pure reference.',
     z.object({}).shape,
     async () => ({
       content: [{ type: 'text', text: IMAGE_GUIDE }],

@@ -30,7 +30,9 @@ describe('Guide Tools', () => {
   });
 
   describe('gemini_image_prompt_guide', () => {
-    it('returns structured markdown with all sections', async () => {
+    // Imagen is deprecated by Google; this guide is now a migration pointer
+    // to nano-banana rather than a prompt reference.
+    it('returns a retirement notice pointing at nano-banana', async () => {
       const result = await client.callTool({
         name: 'gemini_image_prompt_guide',
         arguments: {},
@@ -39,12 +41,10 @@ describe('Guide Tools', () => {
       const content = result.content as Array<{ type: string; text: string }>;
       const text = content[0].text;
 
-      expect(text).toContain('# Gemini Image Generation');
-      expect(text).toContain('## Overview');
-      expect(text).toContain('## Prompt Template');
-      expect(text).toContain('## Good Examples');
-      expect(text).toContain('## Bad Examples');
-      expect(text).toContain('## Model-Specific Notes');
+      expect(text).toContain('# Google Imagen — RETIRED');
+      expect(text).toContain('## What to use instead');
+      expect(text).toContain('gemini_nanobanana_generate_image');
+      expect(text).toContain('## Capabilities that do not carry over');
       expect(text).toContain('## Official References');
     });
   });

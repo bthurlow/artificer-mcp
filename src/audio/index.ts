@@ -2,9 +2,10 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { registerTool } from '../utils/register.js';
-import { ffmpegBatch } from '../utils/exec-ffmpeg.js';
+import { ffmpegBatch, ffprobe } from '../utils/exec-ffmpeg.js';
 import { resolveInput, resolveOutput } from '../utils/resource.js';
 import {
+  type AudioInfoParams,
   type AudioExtractFromVideoParams,
   type AudioNormalizeParams,
   type AudioConvertFormatParams,
@@ -25,6 +26,7 @@ import {
   audioRemoveSilenceSchema,
   audioMixSchema,
   audioPadSchema,
+  audioInfoSchema,
 } from './types.js';
 
 /** Video container extensions — when the output is one of these, the audio tools
@@ -75,14 +77,116 @@ function isVideoContainer(ext: string): boolean {
   return VIDEO_CONTAINERS.has(ext.toLowerCase());
 }
 
+/** Shape of the ffprobe JSON we ask for in `audio_info`. */
+interface ProbeResult {
+  streams?: Array<{
+    codec_name?: string;
+    codec_long_name?: string;
+    sample_rate?: string;
+    channels?: number;
+    channel_layout?: string;
+    bit_rate?: string;
+    duration?: string;
+  }>;
+  format?: {
+    format_name?: string;
+    format_long_name?: string;
+    duration?: string;
+    bit_rate?: string;
+    size?: string;
+  };
+}
+
+/** Format a duration in seconds as `H:MM:SS.mmm`, or `—` when unknown. */
+function formatDuration(seconds: number | undefined): string {
+  if (seconds === undefined || !Number.isFinite(seconds)) return '—';
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  return `${hours}:${String(minutes).padStart(2, '0')}:${secs.toFixed(3).padStart(6, '0')}`;
+}
+
+/** Parse a numeric ffprobe string field, tolerating "N/A" and absent values. */
+function probeNumber(value: string | undefined): number | undefined {
+  if (value === undefined) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 /**
  * Register audio post-processing tools with the MCP server.
  *
- * Covers: audio_extract_from_video, audio_normalize, audio_convert_format,
- * audio_convert_properties, audio_set_bitrate, audio_set_channels,
- * audio_set_sample_rate, audio_remove_silence, audio_mix, audio_pad.
+ * Covers: audio_info, audio_extract_from_video, audio_normalize,
+ * audio_convert_format, audio_convert_properties, audio_set_bitrate,
+ * audio_set_channels, audio_set_sample_rate, audio_remove_silence,
+ * audio_mix, audio_pad.
  */
 export function registerAudioTools(server: McpServer): void {
+  // ── audio_info ─────────────────────────────────────────────────────────
+  registerTool<AudioInfoParams>(
+    server,
+    'audio_info',
+    'Get audio metadata: duration, codec, sample rate, channels, bitrate, container format, and file size. The audio counterpart to the image-only `info` tool — use it to inspect a file before or after a transform instead of shelling out to ffprobe.',
+    audioInfoSchema.shape,
+    async ({ input }) => {
+      const inR = await resolveInput(input);
+      try {
+        const stdout = await ffprobe([
+          '-v',
+          'error',
+          '-select_streams',
+          'a:0',
+          '-show_entries',
+          'stream=codec_name,codec_long_name,sample_rate,channels,channel_layout,bit_rate,duration:format=format_name,format_long_name,duration,bit_rate,size',
+          '-print_format',
+          'json',
+          inR.localPath,
+        ]);
+
+        const probe = JSON.parse(stdout) as ProbeResult;
+        const stream = probe.streams?.[0];
+        const format = probe.format;
+
+        if (!stream) {
+          return {
+            content: [
+              {
+                type: 'text' as const,
+                text: `No audio stream found in ${input}. (Container: ${format?.format_name ?? 'unknown'})`,
+              },
+            ],
+          };
+        }
+
+        // Stream duration is absent on some containers; fall back to the
+        // container-level duration, which is what ffprobe reports for MP3.
+        const durationSeconds = probeNumber(stream.duration) ?? probeNumber(format?.duration);
+        const bitrate = probeNumber(stream.bit_rate) ?? probeNumber(format?.bit_rate);
+        const sizeBytes = probeNumber(format?.size);
+
+        const lines = [
+          `Codec: ${stream.codec_name ?? 'unknown'}${
+            stream.codec_long_name ? ` (${stream.codec_long_name})` : ''
+          }`,
+          `Container: ${format?.format_name ?? 'unknown'}`,
+          `Duration: ${formatDuration(durationSeconds)}${
+            durationSeconds !== undefined ? ` (${durationSeconds.toFixed(3)}s)` : ''
+          }`,
+          `Sample Rate: ${stream.sample_rate ? `${stream.sample_rate} Hz` : '—'}`,
+          `Channels: ${stream.channels ?? '—'}${
+            stream.channel_layout ? ` (${stream.channel_layout})` : ''
+          }`,
+          `Bitrate: ${bitrate !== undefined ? `${Math.round(bitrate / 1000)} kb/s` : '—'}`,
+          `Size: ${sizeBytes !== undefined ? `${(sizeBytes / 1024 / 1024).toFixed(2)} MB` : '—'}`,
+        ];
+
+        return { content: [{ type: 'text' as const, text: lines.join('\n') }] };
+      } finally {
+        await inR.cleanup?.();
+      }
+    },
+  );
+
   // ── audio_extract_from_video ───────────────────────────────────────────
   registerTool<AudioExtractFromVideoParams>(
     server,

@@ -1,5 +1,18 @@
 import { z } from 'zod';
 
+/** Parameters for the audio_info tool */
+export interface AudioInfoParams {
+  input: string;
+}
+
+export const audioInfoSchema = z.object({
+  input: z
+    .string()
+    .describe(
+      'Path to the audio file to probe (or a video file — the first audio stream is reported).',
+    ),
+});
+
 /** Parameters for the audio_extract_from_video tool */
 export interface AudioExtractFromVideoParams {
   input: string;

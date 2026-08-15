@@ -18,9 +18,18 @@ interface AccessRoute {
   stub: boolean;
 }
 
+/**
+ * Whether a music model can produce sung vocals. Set on `music.*` entries
+ * only — the sub-class says what a model is *for*, this says what it *can
+ * do*, and the two differ (Lyria 3 sits in `music.general` but sings).
+ * Omitted on non-music capabilities.
+ */
+type VocalCapability = 'vocal_capable' | 'instrumental_only';
+
 interface CatalogEntry {
   slug: string;
   prompt_guide: string | null;
+  vocals?: VocalCapability;
   access_routes: AccessRoute[];
 }
 
@@ -146,6 +155,7 @@ export function filterCatalog(
         filteredEntries.push({
           slug: entry.slug,
           prompt_guide: entry.prompt_guide,
+          ...(entry.vocals ? { vocals: entry.vocals } : {}),
           access_routes: visibleRoutes,
         });
       }
@@ -187,7 +197,7 @@ export function registerCatalogTools(server: McpServer): void {
   registerTool<ModelCatalogParams>(
     server,
     'model_catalog',
-    "List available media-generation models grouped by capability and sub-class. Returns logical model slugs, prompt guide tool names, and access routes (provider + transport tool + wire-level model id + cost). Call this first when you need to pick a model for a task; then call the relevant prompt_guide, then the access route's transport tool. Use `include_unavailable: true` to see models whose API keys aren't configured.",
+    'List available media-generation models grouped by capability and sub-class. Returns logical model slugs, prompt guide tool names, and access routes (provider + transport tool + wire-level model id + cost). Music entries also carry `vocals` ("vocal_capable" or "instrumental_only") — the sub-class says what a model is for, `vocals` says whether it can sing. Call this first when you need to pick a model for a task; then call the relevant prompt_guide, then the access route\'s transport tool. Use `include_unavailable: true` to see models whose API keys aren\'t configured.',
     catalogSchema.shape,
     async ({ capability, include_unavailable }) => {
       const load = await loadCatalog();

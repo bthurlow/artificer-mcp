@@ -5,7 +5,12 @@ vi.mock('../../../src/utils/exec-ffmpeg.js', async () => {
   return createFfmpegMock();
 });
 
-import { ffmpegState, resetFfmpegMock } from '../../helpers/mock-ffmpeg.js';
+import {
+  ffmpegState,
+  resetFfmpegMock,
+  setProbeOutput,
+  mockFfprobe,
+} from '../../helpers/mock-ffmpeg.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -40,6 +45,96 @@ describe('Audio Tools', () => {
   });
 
   // ── audio_extract_from_video ───────────────────────────────────────────
+
+  describe('audio_info', () => {
+    /** Call audio_info and return its single text block. */
+    async function probeText(input = '/tmp/track.wav'): Promise<string> {
+      const result = await client.callTool({ name: 'audio_info', arguments: { input } });
+      const content = result.content as Array<{ type: string; text: string }>;
+      return content[0].text;
+    }
+
+    it('reports codec, duration, sample rate, channels, bitrate, and size', async () => {
+      setProbeOutput(
+        JSON.stringify({
+          streams: [
+            {
+              codec_name: 'pcm_s16le',
+              codec_long_name: 'PCM signed 16-bit little-endian',
+              sample_rate: '44100',
+              channels: 2,
+              channel_layout: 'stereo',
+              bit_rate: '1411200',
+              duration: '3.500000',
+            },
+          ],
+          format: {
+            format_name: 'wav',
+            duration: '3.500000',
+            bit_rate: '1411249',
+            size: '617516',
+          },
+        }),
+      );
+
+      const text = await probeText();
+
+      expect(text).toContain('Codec: pcm_s16le (PCM signed 16-bit little-endian)');
+      expect(text).toContain('Container: wav');
+      expect(text).toContain('Duration: 0:00:03.500 (3.500s)');
+      expect(text).toContain('Sample Rate: 44100 Hz');
+      expect(text).toContain('Channels: 2 (stereo)');
+      expect(text).toContain('Bitrate: 1411 kb/s');
+      expect(text).toContain('Size: 0.59 MB');
+    });
+
+    it('requests the first audio stream as JSON', async () => {
+      setProbeOutput(JSON.stringify({ streams: [{ codec_name: 'mp3' }], format: {} }));
+      await probeText();
+
+      const args = mockFfprobe.mock.calls[0][0];
+      expect(args).toContain('-select_streams');
+      expect(args).toContain('a:0');
+      expect(args).toContain('-print_format');
+      expect(args).toContain('json');
+    });
+
+    it('falls back to container duration and bitrate when the stream omits them', async () => {
+      // MP3 in particular often reports duration only at the format level.
+      setProbeOutput(
+        JSON.stringify({
+          streams: [{ codec_name: 'mp3', sample_rate: '44100', channels: 2 }],
+          format: { format_name: 'mp3', duration: '212.897', bit_rate: '192000' },
+        }),
+      );
+
+      const text = await probeText('/tmp/track.mp3');
+
+      expect(text).toContain('Duration: 0:03:32.897 (212.897s)');
+      expect(text).toContain('Bitrate: 192 kb/s');
+    });
+
+    it('renders unknown fields as em dashes rather than NaN', async () => {
+      setProbeOutput(JSON.stringify({ streams: [{ codec_name: 'flac' }], format: {} }));
+
+      const text = await probeText('/tmp/track.flac');
+
+      expect(text).toContain('Duration: —');
+      expect(text).toContain('Sample Rate: —');
+      expect(text).toContain('Bitrate: —');
+      expect(text).toContain('Size: —');
+      expect(text).not.toContain('NaN');
+    });
+
+    it('reports a clear message when the file has no audio stream', async () => {
+      setProbeOutput(JSON.stringify({ streams: [], format: { format_name: 'mov,mp4,m4a' } }));
+
+      const text = await probeText('/tmp/silent.mp4');
+
+      expect(text).toContain('No audio stream found');
+      expect(text).toContain('mov,mp4,m4a');
+    });
+  });
 
   describe('audio_extract_from_video', () => {
     it('strips video track with -vn and picks codec by extension', async () => {
