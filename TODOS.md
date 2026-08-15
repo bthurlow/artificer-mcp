@@ -318,17 +318,25 @@ Source: btmusic Album 2 cover session (`decisions.md` 2026-08-07, `instructions/
 
 Source: btmusic upscale bake-off blocked 2026-05-26 (`instructions/artificer-prompts.md` Learnings 2026-05-26).
 
-## 12. Image composite/canvas fixes
+## 12. Image composite/canvas fixes — DONE 2026-08-15
 
-**What:** (a) Fix `composite` **color desaturation** — a gold overlay composited onto black came back silver on both `Over` and `Lighten` blends; source + resize verified gold, so the op is at fault. (b) Add an **asymmetric-pad / extend-canvas** tool so "logo centered on a banner" doesn't need the resize-fit + border + stretch workaround.
-**Why:** hit while building YouTube/Bandcamp banners 2026-05-27. Source: btmusic `instructions/artificer-prompts.md` Learnings 2026-05-27.
-**Trigger:** next brand-asset/banner pass.
+**(a) Composite desaturation — root-caused and fixed.** ImageMagick adopts the **first** image's colorspace for a composite. A solid dark background is routinely stored as a *grayscale* PNG — ImageMagick writes one that way itself whenever an image carries no color — so the colored overlay was converted to gray on the way in. That is why the source and the resize both checked out gold: the color died at the composite, in the base image nobody inspected. Reproduced exactly as reported: `srgb(212,175,55)` → `gray(212)`, identical on `Over` and `Lighten`.
 
-## 13. background-remove — flood-fill toggle + ML-segmentation mode
+**Scope was wider than filed.** The same defect hit every tool landing a colored layer on a caller-supplied base: `composite`, `watermark`, AND `gradient-overlay` (gold→darkred gradient collapsed to `gray(211)`→`gray(140)`). So every branded banner, watermark, and gradient built on a dark background has been silently desaturating. Fixed via a shared `FORCE_SRGB` promotion of the base. `rounded_corners` / `mask_apply` composite a grayscale *mask* onto a color base, so the base colorspace already wins — verified unaffected, left alone.
 
-**What:** (a) The tool description advertises "color keying or flood fill" but the schema only exposes `target_color`/`fuzz`/`replace_color` — add the **flood-fill** (BG-connected pixels only) path; fixes the white-BG swiss-cheese case. (b) Add an **ML-segmentation mode** (wrap rembg / U²-Net) for soft-glow and photographic backgrounds that color-keying can't handle.
-**Why:** brand glow-on-dark assets currently require a luminance-as-alpha ffmpeg workaround. Source: btmusic `instructions/bg-removal-recipes.md` "Artificer upstream gaps".
-**Trigger:** next asset needing a soft/photographic BG cutout.
+Two risks checked before adopting the approach: Gray→sRGB is **value-preserving** across the tonal range (0/10/64/128/192/255 all round-trip exactly, so no brightness shift), and ImageMagick still writes a genuinely colorless result back as grayscale (so no file bloat).
+
+**(b) `extend-canvas` shipped.** Canvas mode (`width`+`height`+`gravity`) or padding mode (`top`/`right`/`bottom`/`left`). Replaces the resize-fit + border + stretch workaround. Transparent fill by default; both-modes or neither-mode is a loud error.
+
+Commits `1a1a4f1`, `e122be7`. 9 integration tests assert real pixel color and geometry; verified they fail with the fixes reverted.
+
+## 13. background-remove — flood-fill toggle + ML-segmentation mode — (a) DONE 2026-08-15, (b) OPEN
+
+**(a) Flood-fill shipped.** `mode: "color-key" | "flood-fill"`, default `color-key` so existing callers are unaffected. The description had advertised flood fill since day one while only keying was implemented. Keying removes every matching pixel, so a white background punches holes through white *inside* the subject — the swiss-cheese failure. Flood-fill seeds from **all four corners** (one seed is not enough: a subject touching an edge, or a background split by the subject, leaves unreachable regions) and honors `replace_color`. `target_color` is ignored in this mode — each seed samples the color already at that corner.
+
+**(b) ML-segmentation mode — still open.** Wrapping rembg / U²-Net for soft-glow and photographic backgrounds remains the real fix for cutouts that color-keying and flood-fill both can't handle; flood-fill only helps when the background is flat and edge-connected. This still carries a new binary/model dependency, which is the reason it was deferred and remains so. Brand glow-on-dark assets continue to need the luminance-as-alpha ffmpeg workaround. Source: btmusic `instructions/bg-removal-recipes.md`.
+
+**Trigger for (b):** next asset needing a soft or photographic BG cutout.
 
 ## 14. audio_info probe primitive — DONE 2026-08-15
 
