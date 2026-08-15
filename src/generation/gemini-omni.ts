@@ -79,7 +79,7 @@ export function registerOmniVideoTools(server: McpServer): void {
   registerTool<OmniGenerateVideoParams>(
     server,
     'gemini_omni_generate_video',
-    'Generate video via Google Gemini Omni Flash (Interactions API). Text-to-video, image-to-video, or reference-to-video, plus stateful conversational editing of a previous result via previous_interaction_id. Output is SILENT — Omni does not produce native audio (Veo 3.1 does). Long-running; polls until complete or timeout. Uses GOOGLE_API_KEY env var.',
+    'Generate video via Google Gemini Omni Flash (Interactions API). Text-to-video, image-to-video, or reference-to-video, plus stateful conversational editing of a previous result via previous_interaction_id. Output carries NATIVE AUDIO (speech/music/SFX) generated in the same pass, with no flag to disable it — describe the audio you want in the prompt, or strip the track downstream if you are laying your own music under the clip. Long-running; polls until complete or timeout. Uses GOOGLE_API_KEY env var.',
     omniGenerateVideoSchema.shape,
     async ({
       model,
@@ -205,7 +205,14 @@ export function registerOmniVideoTools(server: McpServer): void {
                   video: { uri: output, bytes, mime },
                   // Callers need this to chain a conversational edit.
                   interaction_id: interaction.id,
-                  audio: 'none — Omni Flash does not generate native audio',
+                  // Omni bakes a soundtrack into every clip and offers no way
+                  // to disable it. Callers laying their own music underneath
+                  // must strip this track — saying so here is cheaper than
+                  // discovering it when two audio beds collide in a master.
+                  audio:
+                    'native — Omni Flash generates a soundtrack (speech/music/SFX) in the same pass. ' +
+                    'There is no off switch: steer it in the prompt, or strip it downstream before ' +
+                    'laying your own audio under the clip.',
                 },
                 null,
                 2,
