@@ -2,7 +2,18 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # release-please branches are included because its PR is created with
+    # GITHUB_TOKEN, and GITHUB_TOKEN-created PRs do NOT trigger
+    # `pull_request` workflows. `main` requires Lint & Format / Typecheck /
+    # Build / Unit Tests, so those checks were never *failing* on the
+    # release PR — they were absent, which blocks the merge just as hard
+    # and reads far more confusingly.
+    #
+    # Running on push produces those same check contexts against the same
+    # head SHA, which is what branch protection actually matches on. The
+    # coverage-badge steps are already gated to refs/heads/main, so a
+    # release-branch push runs the checks without republishing the badge.
+    branches: [main, 'release-please--**']
   pull_request:
     branches: [main]
 
