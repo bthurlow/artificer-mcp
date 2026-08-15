@@ -421,7 +421,45 @@ Source: btmusic memory `artificer_mcp.md`.
 
 **Still open:** the paren-singing divergence is worth reporting upstream to MiniMax — not done.
 
-## 16. fal_generate_music — WAV output knob — PARTIALLY DONE 2026-08-15
+## 16. fal_generate_music — WAV output knob — DONE 2026-08-15
+
+**Remaining work shipped: `extra_params` keys the model does not accept now produce a stderr warning.**
+
+```
+fal_generate_music: extra_params key "audio_format" is not an input on
+fal-ai/minimax-music/v2.6 — fal will silently ignore it. Did you mean
+"audio_setting.format"? Nest it, e.g. {"audio_setting": {"format": ...}}.
+```
+
+**Built generically off the committed specs, not a hand-written table of known-bad keys.** A table would cover MiniMax and nothing else, and would rot the moment fal changed a schema. Instead `scripts/build-fal-input-keys.mjs` distils every committed `openapi.json` into `src/catalog/fal-input-keys.json` — accepted top-level keys plus dotted nested paths, for **262 models**. The check therefore covers the whole catalog and self-updates: the sync script regenerates the map, so the weekly drift cron (#2) keeps it current with no separate step.
+
+The input schema is located via the POST operation's `requestBody.$ref`, not by matching schema names — fal's naming varies per model (`LynxInput`, `SoundEffectsGeneratorInput`, …) and a name heuristic would silently yield nothing for the ones that don't match.
+
+**Why a distilled map rather than reading specs at runtime:** the specs are 6.2MB across 263 directories and are **not shipped** — `package.json` `files` publishes only `dist/`, where tsup copies `models.json`. The distilled map is 75KB and is now copied alongside it.
+
+**Suggestion heuristic:** for an unknown top-level key, match nested leaves either exactly (`format` → `audio_setting.format`) or on the key's last underscore-token (`audio_format` → `audio_setting.format`). That second rule is what catches the reported bug — a caller flattening a nested knob into a plausible-sounding top-level name. Capped at 3 suggestions; falls back to listing accepted keys when nothing resembles the input.
+
+**Still diagnostic only — the thin-transport stance is intact.** The warning never rewrites, relocates, or drops a key; the request is sent exactly as the caller built it. A test asserts the payload reaches fal unmodified, precisely so a future change can't quietly turn this into normalization.
+
+**False warnings are treated as worse than missed ones.** An unknown model, or an unreadable map, returns zero warnings silently — a caller on a brand-new fal route must not be told their valid keys are wrong, because one false warning discredits every later one.
+
+**Staleness guard:** `yarn catalog:keys:check` fails if the map no longer matches the specs, wired into the Typecheck CI job and the `ci` script. Without it the warning could start describing a schema that no longer exists — the same class of lie it was built to prevent.
+
+**Verified:** +17 tests (895 passing). The end-to-end path is tested against the *real committed map* in `music-warning.test.ts`, deliberately a separate file from `music.test.ts` because that one mocks `node:fs/promises` wholesale and would mask the load. Wiring proven to bite by deleting it (1 test fails). Guide updated with the warning text.
+
+**Scope note:** wired to `fal_generate_music` only, which is what this item filed. `fal_generate_video` / `_speech` / `_transcribe` have the identical silent-drop exposure and the checker is model-agnostic — adopting it there is a one-line change per transport, deliberately not taken here to keep the blast radius to the filed scope. Filed as **#16b**.
+
+## 16b. Extend the extra_params warning to the other fal transports (NEW, filed 2026-08-15)
+
+**What:** `checkExtraParams` is generic and covers all 262 catalogued models, but only `fal_generate_music` calls it. Add the same three-line block to `fal_generate_video`, `fal_generate_speech`, and `fal_transcribe`.
+
+**Why:** the silent-drop failure mode is not music-specific — any caller passing a plausible-but-wrong top-level key to any fal model gets it dropped with no error. Video is the likeliest next victim given how many models have nested `*_setting` style knobs.
+
+**Caution:** this adds stderr output to pipelines that currently produce none. Warnings only fire for keys fal is already discarding, so nothing that works today would start failing, but a noisy pipeline log is a real cost worth a deliberate decision.
+
+**Trigger:** next time someone is surprised by an ignored parameter on a non-music fal tool.
+
+## 16c. Original #16 filing (kept for history) — PARTIALLY DONE 2026-08-15
 
 **Documented, not normalized.** The MiniMax guide (#15) now carries an explicit warning section: there is **no top-level `audio_format` parameter** on `fal-ai/minimax-music/v2.6` — confirmed against the committed spec at `src/catalog/fal-specs/minimax-music-2.6/openapi.json`, which exposes only nested `audio_setting` (`format` mp3|wav|pcm, `sample_rate`, `bitrate`). fal drops the unknown key silently, hence the MP3 surprise. The guide gives the canonical `extra_params` shape and tells WAV-pipeline callers to check the returned `mime`.
 

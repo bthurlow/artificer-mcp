@@ -291,3 +291,77 @@ describe('fal_generate_music (MCP)', () => {
     expect(text).toContain('FalContentPolicyViolationError');
   });
 });
+
+describe('fal_generate_music — extra_params warnings', () => {
+  let client: Client;
+  let server: McpServer;
+  let cleanup: () => Promise<void>;
+
+  beforeAll(async () => {
+    server = new McpServer({ name: 'test', version: '0.1.0' });
+    registerFalMusicTools(server);
+    client = new Client({ name: 'test-client', version: '1.0.0' });
+    const [c, s] = InMemoryTransport.createLinkedPair();
+    await server.connect(s);
+    await client.connect(c);
+    cleanup = async (): Promise<void> => {
+      await client.close();
+      await server.close();
+    };
+  });
+
+  afterAll(async () => {
+    await cleanup();
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    stubFetch();
+    mockSubscribe.mockResolvedValue({ data: { audio: { url: 'https://x/a.mp3' } } });
+  });
+
+  it('sends extra_params through untouched even when they would be warned about', async () => {
+    // The warning is diagnostic. Rewriting or dropping the caller's key
+    // would put model-shape knowledge in the request path, which is the
+    // thing the thin-transport stance exists to prevent.
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await client.callTool({
+        name: 'fal_generate_music',
+        arguments: {
+          model: 'fal-ai/minimax-music/v2.6',
+          prompt: 'city pop',
+          output: '/tmp/s.mp3',
+          extra_params: { audio_format: 'wav' },
+        },
+      });
+    } finally {
+      spy.mockRestore();
+    }
+
+    const input = mockSubscribe.mock.calls[0][1].input;
+    expect(input.audio_format).toBe('wav');
+  });
+
+  it('stays silent when the key map cannot be read', async () => {
+    // node:fs/promises is mocked in this file, so the map fails to parse
+    // and the checker must degrade to saying nothing rather than
+    // erroring or warning falsely.
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      await client.callTool({
+        name: 'fal_generate_music',
+        arguments: {
+          model: 'fal-ai/minimax-music/v2.6',
+          prompt: 'city pop',
+          output: '/tmp/s.mp3',
+          extra_params: { audio_format: 'wav' },
+        },
+      });
+      const warned = spy.mock.calls.some((c) => String(c[0]).includes('silently ignore'));
+      expect(warned).toBe(false);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+});

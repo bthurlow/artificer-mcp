@@ -4,6 +4,7 @@ import { downloadAndWrite } from '../utils/download-and-write.js';
 import { getFalClient } from './client.js';
 import { parseFalError } from './errors.js';
 import { resolveForFal, resolveExtraFiles } from './inputs.js';
+import { checkExtraParams } from './extra-params.js';
 import { type FalGenerateMusicParams, falGenerateMusicSchema } from './types-audio.js';
 
 const STRUCTURAL_FAL_KEYS = new Set(['prompt', 'lyrics', 'audio_url']);
@@ -99,6 +100,16 @@ export function registerFalMusicTools(server: McpServer): void {
               `but also as structural arg(s); structural args win. ` +
               `Remove from extra_params to silence this warning.`,
           );
+        }
+
+        // Warn about keys fal will drop on the floor. The motivating case:
+        // callers pass a top-level `audio_format: "wav"` to MiniMax Music,
+        // fal ignores it (the knob is `audio_setting.format`), and the
+        // pipeline gets MP3 with no error anywhere. Diagnostic only — the
+        // request is still sent exactly as the caller built it.
+        for (const warning of await checkExtraParams('fal_generate_music', model, mergedExtra)) {
+          // eslint-disable-next-line no-console
+          console.error(warning);
         }
 
         let result;

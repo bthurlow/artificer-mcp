@@ -20,11 +20,13 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildMap as buildFalInputKeyMap } from './build-fal-input-keys.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..');
 const MODELS_JSON = resolve(REPO_ROOT, 'src/catalog/models.json');
 const SPECS_ROOT = resolve(REPO_ROOT, 'src/catalog/fal-specs');
+const FAL_INPUT_KEYS_JSON = resolve(REPO_ROOT, 'src/catalog/fal-input-keys.json');
 
 const OPENAPI_URL = (id) =>
   `https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=${id}`;
@@ -358,6 +360,24 @@ async function main() {
     console.log(
       '\nFix: remove failed slugs from src/catalog/models.json or correct the endpoint id.',
     );
+  }
+
+  // Re-distil the input-key map so the extra_params check can never
+  // describe a schema the specs no longer have. Running it here means the
+  // weekly drift cron keeps it current with no separate step to forget.
+  if (!dryRun && !onlyModel) {
+    const { map } = await buildFalInputKeyMap();
+    const nextKeys = JSON.stringify(map, null, 2) + '\n';
+    let prevKeys = null;
+    try {
+      prevKeys = await readFile(FAL_INPUT_KEYS_JSON, 'utf8');
+    } catch {
+      // first run
+    }
+    if (prevKeys !== nextKeys) {
+      await writeFile(FAL_INPUT_KEYS_JSON, nextKeys);
+      console.log(`\nupdated src/catalog/fal-input-keys.json (${Object.keys(map).length} models)`);
+    }
   }
 
   if (reportPath) {
