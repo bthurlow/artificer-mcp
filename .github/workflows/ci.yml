@@ -159,7 +159,14 @@ jobs:
           sudo apt-get install -y fontconfig ghostscript
           # Upstream moved the static binaries to the download. subdomain;
           # the bare imagemagick.org/archive path now 404s (wget exit 8).
-          wget -q -O /tmp/magick "https://download.imagemagick.org/archive/binaries/magick"
+          #
+          # Retries because this is the only place ffmpeg- and
+          # ImageMagick-backed code is ever actually exercised — a transient
+          # fetch failure here reads as "integration tests broken" and
+          # trains everyone to ignore a red integration job. Seen twice on
+          # 2026-08-15: once a real URL rot, once a network blip (exit 4).
+          wget -q --tries=3 --timeout=30 --retry-connrefused \
+            -O /tmp/magick "https://download.imagemagick.org/archive/binaries/magick"
           chmod +x /tmp/magick
           sudo mv /tmp/magick /usr/local/bin/magick
           magick --version | head -1
@@ -168,7 +175,8 @@ jobs:
         # and --enable-libfontconfig, so the drawtext filter is available.
         # Pinned to the n7.1 line (matches the prior 7.0.2 baseline, minor bump only).
         run: |
-          wget -q -O /tmp/ffmpeg.tar.xz https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n7.1-latest-linux64-gpl-7.1.tar.xz
+          wget -q --tries=3 --timeout=30 --retry-connrefused \
+            -O /tmp/ffmpeg.tar.xz https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n7.1-latest-linux64-gpl-7.1.tar.xz
           mkdir -p /tmp/ffmpeg-extract
           tar -xf /tmp/ffmpeg.tar.xz -C /tmp/ffmpeg-extract --strip-components=2 --wildcards '*/bin/*'
           sudo mv /tmp/ffmpeg-extract/ffmpeg /usr/local/bin/ffmpeg
