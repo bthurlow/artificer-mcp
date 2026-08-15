@@ -26,6 +26,9 @@ export default defineConfig({
       //  - `src/generation/client.ts` — pure SDK factory; a one-liner
       //    wrapper around `new GoogleGenAI(...)`. Verified at integration
       //    time the moment any generation tool runs.
+      //  - `src/generation/fal/client.ts` — same pattern for the fal
+      //    SDK. Pure factory wrapping `createFalClient(...)`. Verified
+      //    at integration time when any fal tool runs.
       //  - `src/generation/speech.ts` — registers the Gemini TTS tool;
       //    every non-trivial branch requires a live API call (PCM→WAV
       //    framing helpers aside). Covered by tests/integration/.
@@ -38,6 +41,7 @@ export default defineConfig({
       exclude: [
         'src/index.ts',
         'src/generation/client.ts',
+        'src/generation/fal/client.ts',
         'src/generation/speech.ts',
         'src/generation/music.ts',
       ],

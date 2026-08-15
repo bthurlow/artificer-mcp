@@ -2,7 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { readFile } from 'node:fs/promises';
 import { extname } from 'node:path';
 import { registerTool } from '../utils/register.js';
-import { getGenAIClient } from './client.js';
+import { getGenAIClient, getGenAIClientForVertex } from './client.js';
 import { getProvider } from '../storage/providers/registry.js';
 import { resolveInput } from '../utils/resource.js';
 import {
@@ -61,6 +61,27 @@ async function writeGeneratedImages(
 }
 
 /**
+ * Reject `negative_prompt` when running against the Gemini Developer API.
+ *
+ * The gen-language endpoint rejects `negativePrompt` outright ("negativePrompt
+ * parameter is not supported in Gemini API"), which surfaces as an opaque
+ * 400 from deep inside the SDK. Vertex AI still accepts it, so this only
+ * fires on the API-key path.
+ */
+function assertNegativePromptSupported(toolName: string, negativePrompt?: string): void {
+  if (!negativePrompt) return;
+  if (process.env['GOOGLE_CLOUD_PROJECT']?.trim()) return;
+
+  throw new Error(
+    `${toolName}: negative_prompt is not supported on the Gemini Developer API ` +
+      '(the endpoint rejects negativePrompt outright). Fold the exclusion into the ' +
+      'positive prompt instead — e.g. rather than negative_prompt "blurry, watermark", ' +
+      'write "...sharp focus throughout, clean composition with no text or watermarks". ' +
+      'Vertex AI deployments do accept negative_prompt; set GOOGLE_CLOUD_PROJECT to use that path.',
+  );
+}
+
+/**
  * Register image generation tools with the MCP server.
  *
  * Covers: gemini_generate_image, gemini_edit_image, gemini_upscale_image.
@@ -84,6 +105,7 @@ export function registerImageGenTools(server: McpServer): void {
       person_generation,
       enhance_prompt,
     }) => {
+      assertNegativePromptSupported('gemini_generate_image', negative_prompt);
       const client = getGenAIClient();
       const response = await client.models.generateImages({
         model,
@@ -128,6 +150,7 @@ export function registerImageGenTools(server: McpServer): void {
       number_of_images,
       seed,
     }) => {
+      assertNegativePromptSupported('gemini_edit_image', negative_prompt);
       const client = getGenAIClient();
       const imageR = await resolveInput(image);
       const maskR = mask_image ? await resolveInput(mask_image) : undefined;
@@ -185,10 +208,13 @@ export function registerImageGenTools(server: McpServer): void {
   registerTool<UpscaleImageParams>(
     server,
     'gemini_upscale_image',
-    'Upscale an image 2x or 4x via Google Imagen. Improves resolution while preserving quality.',
+    'Upscale an image 2x or 4x via Google Imagen. REQUIRES VERTEX AI — this method is not available on the Gemini Developer API, so a GOOGLE_API_KEY alone will not work. Set GOOGLE_CLOUD_PROJECT (and optionally GOOGLE_CLOUD_LOCATION) plus Application Default Credentials.',
     upscaleImageSchema.shape,
     async ({ model, image, output, upscale_factor }) => {
-      const client = getGenAIClient();
+      // Vertex-only method — fail fast with a configuration message rather
+      // than letting the SDK surface an opaque "only supported by the Vertex
+      // AI client" error from several frames deep.
+      const client = getGenAIClientForVertex('gemini_upscale_image');
       const imageR = await resolveInput(image);
       try {
         const imageBytes = await readFile(imageR.localPath);

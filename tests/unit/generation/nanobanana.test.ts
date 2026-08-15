@@ -76,7 +76,7 @@ describe('gemini_nanobanana_generate_image', () => {
 
     expect(mockGenerateContent).toHaveBeenCalledOnce();
     const call = mockGenerateContent.mock.calls[0][0];
-    expect(call.model).toBe('gemini-2.5-flash-image');
+    expect(call.model).toBe('gemini-3.1-flash-image');
     expect(call.contents[0].parts[0]).toEqual({ text: 'a loaf of bread' });
     expect(call.config.responseModalities).toEqual(['IMAGE']);
 

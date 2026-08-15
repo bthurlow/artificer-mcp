@@ -1,0 +1,474 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/multishot-master",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/multishot-master queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/multishot-master",
+      "category": "text-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a8fcff7/QhDSLUuNs_tNXH-EmoI9Q_5a919a68470d429cb098f2bdace1ae1b.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/multishot-master",
+      "documentationUrl": "https://fal.ai/models/fal-ai/multishot-master/api"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "MultishotMasterInput": {
+        "title": "MultiShotInput",
+        "properties": {
+          "aspect_ratio": {
+            "description": "Aspect ratio of the generated video.",
+            "enum": [
+              "16:9",
+              "9:16"
+            ],
+            "default": "16:9",
+            "type": "string",
+            "title": "Aspect Ratio"
+          },
+          "enable_safety_checker": {
+            "description": "Enable safety checker for input/output content.",
+            "default": true,
+            "type": "boolean",
+            "title": "Enable Safety Checker"
+          },
+          "shots": {
+            "items": {
+              "$ref": "#/components/schemas/Shot"
+            },
+            "examples": [
+              [
+                {
+                  "prompt": "Subject 1 is smiling and gesturing with his right hand while facing the camera. Subject 2 is seen from behind, facing Subject 1. The scene is indoors in a well-decorated room, with a dark door and ornate glass visible in the background. The camera is static, providing a medium close-up shot of Subject 1.",
+                  "num_frames": 65
+                },
+                {
+                  "prompt": "Subject 2 is standing, looking at Subject 1 with a smile. Subject 1 is seen from the back, facing Subject 2. The scene is an indoor, spacious, and well-decorated room with a patterned rug and elegant furniture. The camera is static, providing a medium close-up shot of Subject 2.",
+                  "num_frames": 65
+                },
+                {
+                  "prompt": "Subject 1 is speaking animatedly, gesturing with his right hand, facing the camera. Subject 2 stands with her back to the camera, listening to Subject 1. The scene is indoors in a well-decorated room, with a dark door and ornate glass visible in the background. The camera maintains a close medium shot, capturing the subjects.",
+                  "num_frames": 65
+                }
+              ]
+            ],
+            "description": "List of shots to generate. Each shot has its own caption and frame count. Maximum 5 shots with a combined maximum of 308 frames.",
+            "maxItems": 5,
+            "minItems": 1,
+            "type": "array",
+            "title": "Shots"
+          },
+          "guidance_scale": {
+            "title": "Guidance Scale",
+            "description": "Classifier-free guidance scale.",
+            "maximum": 20,
+            "default": 5,
+            "type": "number",
+            "minimum": 0
+          },
+          "resolution": {
+            "description": "Resolution of the generated video.",
+            "enum": [
+              "480p",
+              "720p"
+            ],
+            "default": "480p",
+            "type": "string",
+            "title": "Resolution"
+          },
+          "prompt": {
+            "type": "string",
+            "examples": [
+              "Subject 1: A man wearing a grey t-shirt, dark vest. Subject 2: A woman with long brown hair, wearing a soft pink floral sundress. The whole scene takes place indoors in a spacious, well-decorated room. The visual style is modern television production, featuring clear imagery and naturalistic representation."
+            ],
+            "maxLength": 2500,
+            "description": "Global story caption describing the overall scene, subjects, setting, and visual style. This provides inter-shot consistency.",
+            "minLength": 1,
+            "title": "Prompt"
+          },
+          "seed": {
+            "title": "Seed",
+            "description": "Random seed for reproducibility.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "num_inference_steps": {
+            "title": "Num Inference Steps",
+            "description": "Number of denoising steps. Higher values produce better quality but take longer.",
+            "maximum": 50,
+            "default": 50,
+            "type": "integer",
+            "minimum": 1
+          },
+          "negative_prompt": {
+            "description": "Negative prompt describing undesired content in the generated video.",
+            "default": "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards",
+            "type": "string",
+            "title": "Negative Prompt"
+          },
+          "frames_per_second": {
+            "title": "Frames Per Second",
+            "description": "Frames per second of the output video.",
+            "maximum": 30,
+            "default": 16,
+            "type": "integer",
+            "minimum": 5
+          }
+        },
+        "required": [
+          "prompt",
+          "shots"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
+          "prompt",
+          "shots",
+          "negative_prompt",
+          "resolution",
+          "aspect_ratio",
+          "num_inference_steps",
+          "guidance_scale",
+          "seed",
+          "frames_per_second",
+          "enable_safety_checker"
+        ]
+      },
+      "MultishotMasterOutput": {
+        "title": "MultiShotOutput",
+        "properties": {
+          "video": {
+            "examples": [
+              {
+                "url": "https://v3b.fal.media/files/b/0a8fb858/x6xEQNBP9m61inmR6p_WH_output.mp4",
+                "content_type": "video/mp4",
+                "file_name": "output.mp4",
+                "file_size": 837114
+              }
+            ],
+            "$ref": "#/components/schemas/File",
+            "description": "The generated multi-shot narrative video."
+          },
+          "seed": {
+            "description": "The seed used for generation.",
+            "examples": [
+              680491931
+            ],
+            "type": "integer",
+            "title": "Seed"
+          },
+          "timings": {
+            "type": "object",
+            "description": "Performance timing information.",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Timings"
+          }
+        },
+        "required": [
+          "video",
+          "seed",
+          "timings"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
+          "video",
+          "seed",
+          "timings"
+        ]
+      },
+      "Shot": {
+        "title": "Shot",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "examples": [
+              "Subject 1 is smiling and gesturing with his right hand while facing the camera. Subject 2 is seen from behind, facing Subject 1. The scene is indoors in a well-decorated room, with a dark door and ornate glass visible in the background. The camera is static, providing a medium close-up shot of Subject 1."
+            ],
+            "maxLength": 2500,
+            "description": "Caption describing what happens in this shot, including subject actions, camera angles, and scene details.",
+            "minLength": 1,
+            "title": "Prompt"
+          },
+          "num_frames": {
+            "title": "Num Frames",
+            "description": "Number of frames for this shot. Each shot must have between 17 and 100 frames.",
+            "maximum": 100,
+            "default": 65,
+            "type": "integer",
+            "minimum": 17
+          }
+        },
+        "required": [
+          "prompt"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
+          "prompt",
+          "num_frames"
+        ]
+      },
+      "File": {
+        "title": "File",
+        "properties": {
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "content_type": {
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/multishot-master/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/multishot-master/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/multishot-master": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MultishotMasterInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/multishot-master/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MultishotMasterOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

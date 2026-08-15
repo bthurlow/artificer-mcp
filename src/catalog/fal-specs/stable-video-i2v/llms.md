@@ -1,0 +1,191 @@
+# High Quality Stable Video Diffusion
+
+> Generate short video clips from your images using SVD v1.1
+
+
+## Overview
+
+- **Endpoint**: `https://fal.run/fal-ai/stable-video`
+- **Model ID**: `fal-ai/stable-video`
+- **Category**: image-to-video
+- **Kind**: inference
+
+
+## Pricing
+
+- **Price**: $0.075 per videos
+
+For more details, see [fal.ai pricing](https://fal.ai/pricing).
+
+## API Information
+
+This model can be used via our HTTP API or more conveniently via our client libraries.
+See the input and output schema below, as well as the usage examples.
+
+
+### Input Schema
+
+The API accepts the following input parameters:
+
+
+- **`image_url`** (`string`, _required_):
+  The URL of the image to use as a starting point for the generation.
+  - Examples: "https://storage.googleapis.com/falserverless/model_tests/svd/rocket.png", "https://storage.googleapis.com/falserverless/model_tests/svd/mustang.png", "https://storage.googleapis.com/falserverless/model_tests/svd/ship.png", "https://storage.googleapis.com/falserverless/model_tests/svd/rocket2.png"
+
+- **`seed`** (`integer`, _optional_):
+  The same seed and the same prompt given to the same version of Stable Diffusion
+  will output the same image every time.
+
+- **`motion_bucket_id`** (`integer`, _optional_):
+  The motion bucket id determines the motion of the generated video. The
+  higher the number, the more motion there will be. Default value: `127`
+  - Default: `127`
+  - Range: `1` to `255`
+
+- **`cond_aug`** (`float`, _optional_):
+  The conditoning augmentation determines the amount of noise that will be
+  added to the conditioning frame. The higher the number, the more noise
+  there will be, and the less the video will look like the initial image.
+  Increase it for more motion. Default value: `0.02`
+  - Default: `0.02`
+  - Range: `0` to `10`
+
+- **`fps`** (`integer`, _optional_):
+  The frames per second of the generated video. Default value: `25`
+  - Default: `25`
+  - Range: `10` to `100`
+
+
+
+**Required Parameters Example**:
+
+```json
+{
+  "image_url": "https://storage.googleapis.com/falserverless/model_tests/svd/rocket.png"
+}
+```
+
+**Full Example**:
+
+```json
+{
+  "image_url": "https://storage.googleapis.com/falserverless/model_tests/svd/rocket.png",
+  "motion_bucket_id": 127,
+  "cond_aug": 0.02,
+  "fps": 25
+}
+```
+
+
+### Output Schema
+
+The API returns the following output format:
+
+- **`video`** (`File`, _required_):
+  Generated video
+
+- **`seed`** (`integer`, _required_):
+  Seed for random number generator
+
+
+
+**Example Response**:
+
+```json
+{
+  "video": {
+    "url": "",
+    "content_type": "image/png",
+    "file_name": "z9RV14K95DvU.png",
+    "file_size": 4404019
+  }
+}
+```
+
+
+## Usage Examples
+
+### cURL
+
+```bash
+curl --request POST \
+  --url https://fal.run/fal-ai/stable-video \
+  --header "Authorization: Key $FAL_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{
+     "image_url": "https://storage.googleapis.com/falserverless/model_tests/svd/rocket.png"
+   }'
+```
+
+### Python
+
+Ensure you have the Python client installed:
+
+```bash
+pip install fal-client
+```
+
+Then use the API client to make requests:
+
+```python
+import fal_client
+
+def on_queue_update(update):
+    if isinstance(update, fal_client.InProgress):
+        for log in update.logs:
+           print(log["message"])
+
+result = fal_client.subscribe(
+    "fal-ai/stable-video",
+    arguments={
+        "image_url": "https://storage.googleapis.com/falserverless/model_tests/svd/rocket.png"
+    },
+    with_logs=True,
+    on_queue_update=on_queue_update,
+)
+print(result)
+```
+
+### JavaScript
+
+Ensure you have the JavaScript client installed:
+
+```bash
+npm install --save @fal-ai/client
+```
+
+Then use the API client to make requests:
+
+```javascript
+import { fal } from "@fal-ai/client";
+
+const result = await fal.subscribe("fal-ai/stable-video", {
+  input: {
+    image_url: "https://storage.googleapis.com/falserverless/model_tests/svd/rocket.png"
+  },
+  logs: true,
+  onQueueUpdate: (update) => {
+    if (update.status === "IN_PROGRESS") {
+      update.logs.map((log) => log.message).forEach(console.log);
+    }
+  },
+});
+console.log(result.data);
+console.log(result.requestId);
+```
+
+
+## Additional Resources
+
+### Documentation
+
+- [Model Playground](https://fal.ai/models/fal-ai/stable-video)
+- [API Documentation](https://fal.ai/models/fal-ai/stable-video/api)
+- [OpenAPI Schema](https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/stable-video)
+- [GitHub Repository](https://huggingface.co/stabilityai/stable-video-diffusion-img2vid-xt-1-1/blob/main/LICENSE)
+
+### fal.ai Platform
+
+- [Platform Documentation](https://docs.fal.ai)
+- [Python Client](https://docs.fal.ai/clients/python)
+- [JavaScript Client](https://docs.fal.ai/clients/javascript)

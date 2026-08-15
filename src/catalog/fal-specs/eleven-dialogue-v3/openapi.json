@@ -1,0 +1,477 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/elevenlabs/text-to-dialogue/eleven-v3",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/elevenlabs/text-to-dialogue/eleven-v3 queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/elevenlabs/text-to-dialogue/eleven-v3",
+      "category": "text-to-audio",
+      "thumbnailUrl": "https://fal.media/files/panda/twZsKdCTiF8JXv-rRcPZu_8414166d52a548859a8df01bf720fe46.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/elevenlabs/text-to-dialogue/eleven-v3",
+      "documentationUrl": "https://fal.ai/models/fal-ai/elevenlabs/text-to-dialogue/eleven-v3/api"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "ElevenlabsTextToDialogueElevenV3Input": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "inputs",
+          "stability",
+          "use_speaker_boost",
+          "pronunciation_dictionary_locators",
+          "seed",
+          "language_code"
+        ],
+        "properties": {
+          "use_speaker_boost": {
+            "description": "This setting boosts the similarity to the original speaker. Using this setting requires a slightly higher computational load, which in turn increases latency.",
+            "title": "Use Speaker Boost",
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "stability": {
+            "description": "Determines how stable the voice is and the randomness between each generation. Lower values introduce broader emotional range for the voice. Higher values can result in a monotonous voice with limited emotion. Must be one of 0.0, 0.5, 1.0, else it will be rounded to the nearest value.",
+            "title": "Stability",
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pronunciation_dictionary_locators": {
+            "type": "array",
+            "description": "A list of pronunciation dictionary locators (id, version_id) to be applied to the text. They will be applied in order. You may have up to 3 locators per request",
+            "default": [],
+            "title": "Pronunciation Dictionary Locators",
+            "items": {
+              "$ref": "#/components/schemas/PronunciationDictionaryLocator"
+            }
+          },
+          "inputs": {
+            "type": "array",
+            "examples": [
+              [
+                {
+                  "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us.",
+                  "voice": "Aria"
+                },
+                {
+                  "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day.",
+                  "voice": "Charlotte"
+                }
+              ]
+            ],
+            "description": "A list of dialogue inputs, each containing text and a voice ID which will be converted into speech.",
+            "title": "Inputs",
+            "items": {
+              "$ref": "#/components/schemas/DialogueBlock"
+            }
+          },
+          "seed": {
+            "description": "Random seed for reproducibility.",
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "language_code": {
+            "description": "Language code (ISO 639-1) used to enforce a language for the model. An error will be returned if language code is not supported by the model.",
+            "title": "Language Code",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "inputs"
+        ],
+        "title": "TextToDialogueRequest"
+      },
+      "ElevenlabsTextToDialogueElevenV3Output": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "audio",
+          "seed"
+        ],
+        "properties": {
+          "audio": {
+            "examples": [
+              {
+                "url": "https://v3.fal.media/files/zebra/XFeGS8Fq-q1eAPG2sSAo__output.mp3"
+              }
+            ],
+            "description": "The generated audio file",
+            "$ref": "#/components/schemas/File"
+          },
+          "seed": {
+            "type": "integer",
+            "description": "Random seed for reproducibility.",
+            "title": "Seed"
+          }
+        },
+        "required": [
+          "audio",
+          "seed"
+        ],
+        "title": "TextToDialogueOutput"
+      },
+      "PronunciationDictionaryLocator": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "pronunciation_dictionary_id",
+          "version_id"
+        ],
+        "properties": {
+          "version_id": {
+            "description": "The ID of the version of the pronunciation dictionary. If not provided, the latest version will be used.",
+            "title": "Version Id",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pronunciation_dictionary_id": {
+            "description": "The ID of the pronunciation dictionary.",
+            "title": "Pronunciation Dictionary Id",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "PronunciationDictionaryLocator"
+      },
+      "DialogueBlock": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "text",
+          "voice"
+        ],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "The dialogue text",
+            "title": "Text"
+          },
+          "voice": {
+            "type": "string",
+            "examples": [
+              "Aria",
+              "Roger",
+              "Sarah",
+              "Laura",
+              "Charlie",
+              "George",
+              "Callum",
+              "River",
+              "Liam",
+              "Charlotte",
+              "Alice",
+              "Matilda",
+              "Will",
+              "Jessica",
+              "Eric",
+              "Chris",
+              "Brian",
+              "Daniel",
+              "Lily",
+              "Bill"
+            ],
+            "description": "The name or the ID of the voice to be used for the generation.",
+            "title": "Voice"
+          }
+        },
+        "required": [
+          "text",
+          "voice"
+        ],
+        "title": "DialogueBlock"
+      },
+      "File": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "File"
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/elevenlabs/text-to-dialogue/eleven-v3/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/elevenlabs/text-to-dialogue/eleven-v3/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/elevenlabs/text-to-dialogue/eleven-v3": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElevenlabsTextToDialogueElevenV3Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/elevenlabs/text-to-dialogue/eleven-v3/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElevenlabsTextToDialogueElevenV3Output"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

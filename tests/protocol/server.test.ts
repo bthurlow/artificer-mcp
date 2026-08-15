@@ -11,7 +11,7 @@ import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { createTestServerClient } from '../helpers/server.js';
 
 /**
- * All 113 tool names registered by the artificer-mcp server, grouped by category.
+ * All 164 tool names registered by the artificer-mcp server, grouped by category.
  */
 const EXPECTED_TOOLS = {
   core: [
@@ -102,8 +102,10 @@ const EXPECTED_TOOLS = {
     'video_set_frame_rate',
     'video_from_image',
     'video_set_audio',
+    'build_ass_karaoke',
   ],
   audio: [
+    'audio_info',
     'audio_extract_from_video',
     'audio_normalize',
     'audio_convert_format',
@@ -113,6 +115,7 @@ const EXPECTED_TOOLS = {
     'audio_set_sample_rate',
     'audio_remove_silence',
     'audio_mix',
+    'audio_pad',
   ],
   generation: [
     'gemini_generate_image',
@@ -123,6 +126,12 @@ const EXPECTED_TOOLS = {
     'gemini_generate_speech',
     'gemini_generate_music',
     'gemini_generate_music_live',
+    'fal_generate_video',
+    'fal_classify_text',
+    'fal_generate_speech',
+    'fal_generate_music',
+    'fal_transcribe',
+    'fal_upload',
   ],
   guides: [
     'gemini_image_prompt_guide',
@@ -130,7 +139,51 @@ const EXPECTED_TOOLS = {
     'veo_video_prompt_guide',
     'gemini_tts_prompt_guide',
     'gemini_lyria_prompt_guide',
+    'wan_video_prompt_guide',
+    'kling_avatar_prompt_guide',
+    'veed_fabric_prompt_guide',
+    'elevenlabs_speech_prompt_guide',
+    'elevenlabs_dialogue_prompt_guide',
+    'elevenlabs_music_prompt_guide',
+    'elevenlabs_sfx_prompt_guide',
+    'minimax_speech_prompt_guide',
+    'minimax_voice_clone_prompt_guide',
+    'minimax_music_prompt_guide',
+    'dia_dialogue_prompt_guide',
+    'lyria2_prompt_guide',
+    'stable_audio_prompt_guide',
+    'cassette_sfx_prompt_guide',
+    'transcription_prompt_guide',
+    'ass_karaoke_prompt_guide',
+    'sora_video_prompt_guide',
+    'luma_ray_prompt_guide',
+    'kling_video_prompt_guide',
+    'seedance_prompt_guide',
+    'marey_prompt_guide',
+    'hailuo_prompt_guide',
+    'minimax_video_prompt_guide',
+    'pika_prompt_guide',
+    'pixverse_prompt_guide',
+    'ltx_video_prompt_guide',
+    'hunyuan_video_prompt_guide',
+    'vidu_prompt_guide',
+    'kandinsky_video_prompt_guide',
+    'grok_imagine_prompt_guide',
+    'decart_lucy_prompt_guide',
+    'cogvideox_prompt_guide',
+    'mochi_prompt_guide',
+    'nvidia_cosmos_prompt_guide',
+    'longcat_prompt_guide',
+    'magi_prompt_guide',
+    'sana_prompt_guide',
+    'specialized_video_prompt_guide',
+    'legacy_video_prompt_guide',
+    'happy_horse_prompt_guide',
+    'bytedance_lynx_prompt_guide',
     'brand_spec_get',
+  ],
+  catalog: [
+    'model_catalog',
   ],
   workflows: [
     'workflow_brand_asset_pack',
@@ -180,15 +233,15 @@ describe('MCP Protocol — artificer-mcp Server', () => {
   // ── 2. Tool discovery ─────────────────────────────────────────────────────
 
   describe('tool discovery', () => {
-    it('should return exactly 113 tools', () => {
-      expect(tools).toHaveLength(113);
+    it('should return exactly 164 tools', () => {
+      expect(tools).toHaveLength(164);
     });
   });
 
   // ── 3. Tool names ─────────────────────────────────────────────────────────
 
   describe('tool names', () => {
-    it('should contain all 113 expected tool names', () => {
+    it('should contain all 163 expected tool names', () => {
       const registeredNames = tools.map((t) => t.name).sort();
       const expectedNames = [...ALL_TOOL_NAMES].sort();
 
@@ -243,8 +296,8 @@ describe('MCP Protocol — artificer-mcp Server', () => {
       },
     );
 
-    it('should cover exactly 14 categories', () => {
-      expect(Object.keys(EXPECTED_TOOLS)).toHaveLength(14);
+    it('should cover exactly 15 categories', () => {
+      expect(Object.keys(EXPECTED_TOOLS)).toHaveLength(15);
     });
   });
 

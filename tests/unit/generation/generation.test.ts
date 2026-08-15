@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock the genai client before any imports that use it.
 const mockGenerateImages = vi.fn();
@@ -7,18 +7,28 @@ const mockUpscaleImage = vi.fn();
 const mockGenerateVideos = vi.fn();
 const mockGetVideosOperation = vi.fn();
 
+const fakeGenAIClient = {
+  models: {
+    generateImages: mockGenerateImages,
+    editImage: mockEditImage,
+    upscaleImage: mockUpscaleImage,
+    generateVideos: mockGenerateVideos,
+  },
+  operations: {
+    getVideosOperation: mockGetVideosOperation,
+  },
+};
+
 vi.mock('../../../src/generation/client.js', () => ({
-  getGenAIClient: () => ({
-    models: {
-      generateImages: mockGenerateImages,
-      editImage: mockEditImage,
-      upscaleImage: mockUpscaleImage,
-      generateVideos: mockGenerateVideos,
-    },
-    operations: {
-      getVideosOperation: mockGetVideosOperation,
-    },
-  }),
+  getGenAIClient: () => fakeGenAIClient,
+  // Mirrors the real implementation's contract: throws unless a Vertex
+  // project is configured. Keeps the upscale fail-fast under test.
+  getGenAIClientForVertex: (toolName: string) => {
+    if (!process.env.GOOGLE_CLOUD_PROJECT?.trim()) {
+      throw new Error(`${toolName} requires Vertex AI credentials, which are not configured.`);
+    }
+    return fakeGenAIClient;
+  },
 }));
 
 // Mock fs operations so tests don't hit the real filesystem.
@@ -83,6 +93,7 @@ describe('Generation Tools', () => {
       const result = await client.callTool({
         name: 'gemini_generate_image',
         arguments: {
+          model: 'imagen-4.0-generate-001',
           prompt: 'a cat on a beach',
           output: '/tmp/cat.png',
         },
@@ -109,6 +120,7 @@ describe('Generation Tools', () => {
       const result = await client.callTool({
         name: 'gemini_generate_image',
         arguments: {
+          model: 'imagen-4.0-generate-001',
           prompt: 'blocked content',
           output: '/tmp/out.png',
         },
@@ -135,6 +147,7 @@ describe('Generation Tools', () => {
       const result = await client.callTool({
         name: 'gemini_edit_image',
         arguments: {
+          model: 'imagen-3.0-capability-001',
           prompt: 'remove the background',
           image: '/tmp/input.png',
           output: '/tmp/edited.png',
@@ -156,7 +169,15 @@ describe('Generation Tools', () => {
   // ── gemini_upscale_image ───────────────────────────────────────────────
 
   describe('gemini_upscale_image', () => {
-    it('calls upscaleImage with correct factor', async () => {
+    const originalProject = process.env.GOOGLE_CLOUD_PROJECT;
+
+    afterEach(() => {
+      if (originalProject === undefined) delete process.env.GOOGLE_CLOUD_PROJECT;
+      else process.env.GOOGLE_CLOUD_PROJECT = originalProject;
+    });
+
+    it('calls upscaleImage with correct factor when Vertex is configured', async () => {
+      process.env.GOOGLE_CLOUD_PROJECT = 'test-project';
       mockUpscaleImage.mockResolvedValue({
         generatedImages: [
           {
@@ -180,6 +201,91 @@ describe('Generation Tools', () => {
 
       const content = result.content as Array<{ type: string; text: string }>;
       expect(content[0].text).toContain('saved to /tmp/big.png');
+    });
+
+    it('fails fast with a configuration message when Vertex is not configured', async () => {
+      delete process.env.GOOGLE_CLOUD_PROJECT;
+
+      const result = await client.callTool({
+        name: 'gemini_upscale_image',
+        arguments: { image: '/tmp/small.png', output: '/tmp/big.png' },
+      });
+
+      expect(result.isError).toBe(true);
+      const content = result.content as Array<{ type: string; text: string }>;
+      expect(content[0].text).toContain('requires Vertex AI credentials');
+      expect(mockUpscaleImage).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── negative_prompt guard (Gemini Developer API rejects it) ────────────
+
+  describe('negative_prompt on the gen-language key', () => {
+    const originalProject = process.env.GOOGLE_CLOUD_PROJECT;
+
+    afterEach(() => {
+      if (originalProject === undefined) delete process.env.GOOGLE_CLOUD_PROJECT;
+      else process.env.GOOGLE_CLOUD_PROJECT = originalProject;
+    });
+
+    it('rejects negative_prompt on gemini_generate_image with an actionable message', async () => {
+      delete process.env.GOOGLE_CLOUD_PROJECT;
+
+      const result = await client.callTool({
+        name: 'gemini_generate_image',
+        arguments: {
+          model: 'imagen-4.0-generate-001',
+          prompt: 'a cat',
+          output: '/tmp/cat.png',
+          negative_prompt: 'blurry, watermark',
+        },
+      });
+
+      expect(result.isError).toBe(true);
+      const content = result.content as Array<{ type: string; text: string }>;
+      expect(content[0].text).toContain('not supported on the Gemini Developer API');
+      expect(content[0].text).toContain('positive prompt');
+      expect(mockGenerateImages).not.toHaveBeenCalled();
+    });
+
+    it('rejects negative_prompt on gemini_edit_image too', async () => {
+      delete process.env.GOOGLE_CLOUD_PROJECT;
+
+      const result = await client.callTool({
+        name: 'gemini_edit_image',
+        arguments: {
+          model: 'imagen-3.0-capability-001',
+          prompt: 'swap the background',
+          image: '/tmp/input.png',
+          output: '/tmp/edited.png',
+          negative_prompt: 'text',
+        },
+      });
+
+      expect(result.isError).toBe(true);
+      expect(mockEditImage).not.toHaveBeenCalled();
+    });
+
+    it('allows negative_prompt through when a Vertex project is configured', async () => {
+      process.env.GOOGLE_CLOUD_PROJECT = 'test-project';
+      mockGenerateImages.mockResolvedValue({
+        generatedImages: [
+          { image: { imageBytes: Buffer.from('ok').toString('base64'), mimeType: 'image/png' } },
+        ],
+      });
+
+      await client.callTool({
+        name: 'gemini_generate_image',
+        arguments: {
+          model: 'imagen-4.0-generate-001',
+          prompt: 'a cat',
+          output: '/tmp/cat.png',
+          negative_prompt: 'blurry',
+        },
+      });
+
+      expect(mockGenerateImages).toHaveBeenCalledOnce();
+      expect(mockGenerateImages.mock.calls[0][0].config.negativePrompt).toBe('blurry');
     });
   });
 
@@ -218,9 +324,13 @@ describe('Generation Tools', () => {
     });
 
     it('downloads video from URI when videoBytes not present', async () => {
-      // Mock global fetch for URI download
+      // Mock global fetch for URI download. Response needs `.headers.get()`
+      // because the shared downloadAndWrite helper checks Content-Type.
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,
+        status: 200,
+        statusText: 'OK',
+        headers: { get: (key: string) => (key.toLowerCase() === 'content-type' ? 'video/mp4' : null) },
         arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
       });
       vi.stubGlobal('fetch', mockFetch);
@@ -242,9 +352,12 @@ describe('Generation Tools', () => {
         },
       });
 
-      expect(mockFetch).toHaveBeenCalledWith('https://storage.googleapis.com/video.mp4', {
-        headers: {},
-      });
+      // When no auth headers are needed (non-Gemini-Files URL), the helper
+      // calls fetch without options rather than with an empty headers object.
+      expect(mockFetch).toHaveBeenCalledWith(
+        'https://storage.googleapis.com/video.mp4',
+        undefined,
+      );
       const content = result.content as Array<{ type: string; text: string }>;
       expect(content[0].text).toContain('downloaded from');
 
@@ -254,6 +367,9 @@ describe('Generation Tools', () => {
     it('sends x-goog-api-key header when downloading from Gemini Files API', async () => {
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,
+        status: 200,
+        statusText: 'OK',
+        headers: { get: (key: string) => (key.toLowerCase() === 'content-type' ? 'video/mp4' : null) },
         arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
       });
       vi.stubGlobal('fetch', mockFetch);

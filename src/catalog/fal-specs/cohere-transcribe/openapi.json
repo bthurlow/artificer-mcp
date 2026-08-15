@@ -1,0 +1,293 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/cohere-transcribe",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/cohere-transcribe queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/cohere-transcribe",
+      "category": "speech-to-text",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a974bf5/gs1fpTrvtdkrKcBDh2gS8_ac4876872fb34e42a438031bb4fcdd00.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/cohere-transcribe",
+      "documentationUrl": "https://fal.ai/models/fal-ai/cohere-transcribe/api"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "CohereTranscribeInput": {
+        "title": "TranscribeInput",
+        "required": [
+          "audio_url"
+        ],
+        "properties": {
+          "language": {
+            "title": "Language",
+            "enum": [
+              "en",
+              "fr",
+              "de",
+              "it",
+              "es",
+              "pt",
+              "el",
+              "nl",
+              "pl",
+              "zh",
+              "ja",
+              "ko",
+              "vi",
+              "ar"
+            ],
+            "description": "Language of the audio (ISO 639-1 code). Supported: en, fr, de, it, es, pt, el, nl, pl, zh, ja, ko, vi, ar.",
+            "default": "en",
+            "type": "string"
+          },
+          "punctuation": {
+            "title": "Punctuation",
+            "description": "Whether to include punctuation and capitalization in the output.",
+            "default": true,
+            "type": "boolean"
+          },
+          "max_new_tokens": {
+            "title": "Max New Tokens",
+            "description": "Maximum number of tokens to generate per audio chunk.",
+            "default": 256,
+            "minimum": 1,
+            "maximum": 1024,
+            "type": "integer"
+          },
+          "audio_url": {
+            "title": "Audio Url",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/model_tests/whisper/dinner_conversation.mp3"
+            ],
+            "description": "URL of the audio file to transcribe. Supported formats: mp3, mp4, mpeg, mpga, m4a, wav, webm, ogg, flac.",
+            "type": "string"
+          }
+        },
+        "x-fal-order-properties": [
+          "audio_url",
+          "language",
+          "punctuation",
+          "max_new_tokens"
+        ],
+        "type": "object"
+      },
+      "CohereTranscribeOutput": {
+        "title": "TranscribeOutput",
+        "required": [
+          "text"
+        ],
+        "properties": {
+          "timings": {
+            "title": "Timings",
+            "description": "Performance timing breakdown in seconds.",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object"
+          },
+          "text": {
+            "title": "Text",
+            "description": "Transcribed text from the audio file.",
+            "type": "string"
+          }
+        },
+        "x-fal-order-properties": [
+          "text",
+          "timings"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/cohere-transcribe/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/cohere-transcribe/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/cohere-transcribe": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CohereTranscribeInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/cohere-transcribe/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CohereTranscribeOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

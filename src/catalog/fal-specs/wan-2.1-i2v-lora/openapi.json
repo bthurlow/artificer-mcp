@@ -1,0 +1,520 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/wan-i2v-lora",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/wan-i2v-lora queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/wan-i2v-lora",
+      "category": "image-to-video",
+      "thumbnailUrl": "https://storage.googleapis.com/fal_cdn/Fal_Visuals_V1_02.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/wan-i2v-lora",
+      "documentationUrl": "https://fal.ai/models/fal-ai/wan-i2v-lora/api"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "WanI2vLoraInput": {
+        "properties": {
+          "guide_scale": {
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Classifier-free guidance scale. Higher values give better adherence to the prompt but may decrease quality.",
+            "default": 5,
+            "type": "number",
+            "title": "Guide Scale"
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "description": "If set to true, the safety checker will be enabled.",
+            "default": false,
+            "type": "boolean",
+            "examples": [
+              true
+            ]
+          },
+          "frames_per_second": {
+            "description": "Frames per second of the generated video. Must be between 5 to 24.",
+            "default": 16,
+            "title": "Frames Per Second",
+            "anyOf": [
+              {
+                "minimum": 5,
+                "maximum": 24,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "num_inference_steps": {
+            "minimum": 2,
+            "maximum": 40,
+            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
+            "default": 30,
+            "type": "integer",
+            "title": "Num Inference Steps"
+          },
+          "negative_prompt": {
+            "title": "Negative Prompt",
+            "description": "Negative prompt for video generation.",
+            "default": "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards",
+            "type": "string",
+            "examples": [
+              "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards"
+            ]
+          },
+          "seed": {
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "enable_prompt_expansion": {
+            "title": "Enable Prompt Expansion",
+            "description": "Whether to enable prompt expansion.",
+            "default": false,
+            "type": "boolean",
+            "examples": [
+              false
+            ]
+          },
+          "shift": {
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Shift parameter for video generation.",
+            "default": 5,
+            "type": "number",
+            "title": "Shift"
+          },
+          "aspect_ratio": {
+            "enum": [
+              "auto",
+              "16:9",
+              "9:16",
+              "1:1"
+            ],
+            "description": "Aspect ratio of the output video.",
+            "default": "16:9",
+            "type": "string",
+            "title": "Aspect Ratio"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "description": "The text prompt to guide video generation.",
+            "type": "string",
+            "examples": [
+              "Cars race in slow motion."
+            ]
+          },
+          "reverse_video": {
+            "description": "If true, the video will be reversed.",
+            "default": false,
+            "type": "boolean",
+            "title": "Reverse Video"
+          },
+          "loras": {
+            "items": {
+              "$ref": "#/components/schemas/LoraWeight"
+            },
+            "description": "LoRA weights to be used in the inference.",
+            "default": [],
+            "type": "array",
+            "title": "Loras"
+          },
+          "resolution": {
+            "enum": [
+              "480p",
+              "720p"
+            ],
+            "description": "Resolution of the generated video (480p or 720p). 480p is 0.5 billing units, and 720p is 1 billing unit.",
+            "default": "720p",
+            "type": "string",
+            "title": "Resolution"
+          },
+          "image_url": {
+            "title": "Image Url",
+            "description": "URL of the input image. If the input image does not match the chosen aspect ratio, it is resized and center cropped.",
+            "type": "string",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/gallery/car_720p.png"
+            ]
+          },
+          "num_frames": {
+            "description": "Number of frames to generate. Must be between 81 to 100 (inclusive). If the number of frames is greater than 81, the video will be generated with 1.25x more billing units.",
+            "default": 81,
+            "title": "Num Frames",
+            "anyOf": [
+              {
+                "minimum": 81,
+                "maximum": 100,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "turbo_mode": {
+            "description": "If true, the video will be generated faster with no noticeable degradation in the visual quality.",
+            "default": true,
+            "type": "boolean",
+            "title": "Turbo Mode"
+          }
+        },
+        "required": [
+          "prompt",
+          "image_url"
+        ],
+        "x-fal-order-properties": [
+          "prompt",
+          "negative_prompt",
+          "image_url",
+          "num_frames",
+          "frames_per_second",
+          "seed",
+          "resolution",
+          "num_inference_steps",
+          "guide_scale",
+          "shift",
+          "enable_safety_checker",
+          "enable_prompt_expansion",
+          "aspect_ratio",
+          "loras",
+          "reverse_video",
+          "turbo_mode"
+        ],
+        "type": "object",
+        "title": "WanLoRAI2VRequest"
+      },
+      "WanI2vLoraOutput": {
+        "properties": {
+          "video": {
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video file.",
+            "examples": [
+              {
+                "url": "https://storage.googleapis.com/falserverless/gallery/wan-i2v-example.mp4"
+              }
+            ]
+          },
+          "seed": {
+            "description": "The seed used for generation.",
+            "type": "integer",
+            "title": "Seed"
+          }
+        },
+        "required": [
+          "video",
+          "seed"
+        ],
+        "x-fal-order-properties": [
+          "video",
+          "seed"
+        ],
+        "type": "object",
+        "title": "WanI2VResponse"
+      },
+      "LoraWeight": {
+        "properties": {
+          "path": {
+            "description": "URL or the path to the LoRA weights.",
+            "type": "string",
+            "title": "Path"
+          },
+          "scale": {
+            "minimum": 0,
+            "maximum": 4,
+            "description": "\n            The scale of the LoRA weight. This is used to scale the LoRA weight\n            before merging it with the base model.\n        ",
+            "default": 1,
+            "type": "number",
+            "title": "Scale"
+          },
+          "weight_name": {
+            "description": "Name of the LoRA weight. Used only if `path` is a Hugging Face repository, and required only if you have more than 1 safetensors file in the repo.",
+            "title": "Weight Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "x-fal-order-properties": [
+          "path",
+          "weight_name",
+          "scale"
+        ],
+        "type": "object",
+        "title": "LoraWeight"
+      },
+      "File": {
+        "properties": {
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "examples": [
+              4404019
+            ]
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ]
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object",
+        "title": "File"
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/wan-i2v-lora/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/wan-i2v-lora/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/wan-i2v-lora": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WanI2vLoraInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/wan-i2v-lora/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WanI2vLoraOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

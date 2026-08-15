@@ -1,4 +1,5 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { recordToolRegistration } from '../catalog/tool-registry.js';
 
 /** MCP tool handler return type */
 export interface ToolResult {
@@ -12,6 +13,9 @@ export interface ToolResult {
  * Type safety is preserved via explicit param interfaces on each handler.
  * Runtime validation is preserved via Zod schemas passed as the shape argument.
  * The only thing skipped is tsc validating the Zod schema against the SDK's generic constraint.
+ *
+ * Also records the registration with the catalog's tool registry so
+ * `model_catalog` can filter entries against tools that actually shipped.
  */
 export function registerTool<TParams>(
   server: McpServer,
@@ -22,4 +26,5 @@ export function registerTool<TParams>(
 ): void {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (server as any).tool(name, description, schema, handler);
+  recordToolRegistration(name);
 }

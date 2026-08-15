@@ -1,0 +1,471 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/wan-i2v",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/wan-i2v queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/wan-i2v",
+      "category": "image-to-video",
+      "thumbnailUrl": "https://storage.googleapis.com/falserverless/gallery/hunyuan-video-image-to-video.webp",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/wan-i2v",
+      "documentationUrl": "https://fal.ai/models/fal-ai/wan-i2v/api"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "WanI2vInput": {
+        "required": [
+          "prompt",
+          "image_url"
+        ],
+        "properties": {
+          "image_url": {
+            "description": "URL of the input image. If the input image does not match the chosen aspect ratio, it is resized and center cropped.",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/gallery/car_720p.png"
+            ],
+            "type": "string",
+            "title": "Image Url"
+          },
+          "resolution": {
+            "description": "Resolution of the generated video (480p or 720p). 480p is 0.5 billing units, and 720p is 1 billing unit.",
+            "enum": [
+              "480p",
+              "720p"
+            ],
+            "default": "720p",
+            "type": "string",
+            "title": "Resolution"
+          },
+          "enable_safety_checker": {
+            "description": "If set to true, the safety checker will be enabled.",
+            "examples": [
+              true
+            ],
+            "default": false,
+            "type": "boolean",
+            "title": "Enable Safety Checker"
+          },
+          "num_inference_steps": {
+            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
+            "maximum": 40,
+            "default": 30,
+            "minimum": 2,
+            "type": "integer",
+            "title": "Num Inference Steps"
+          },
+          "shift": {
+            "description": "Shift parameter for video generation.",
+            "maximum": 10,
+            "default": 5,
+            "minimum": 1,
+            "type": "number",
+            "title": "Shift"
+          },
+          "frames_per_second": {
+            "description": "Frames per second of the generated video. Must be between 5 to 24.",
+            "default": 16,
+            "anyOf": [
+              {
+                "maximum": 24,
+                "type": "integer",
+                "minimum": 5
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frames Per Second"
+          },
+          "guide_scale": {
+            "description": "Classifier-free guidance scale. Higher values give better adherence to the prompt but may decrease quality.",
+            "maximum": 10,
+            "default": 5,
+            "minimum": 1,
+            "type": "number",
+            "title": "Guide Scale"
+          },
+          "enable_prompt_expansion": {
+            "description": "Whether to enable prompt expansion.",
+            "examples": [
+              false
+            ],
+            "default": false,
+            "type": "boolean",
+            "title": "Enable Prompt Expansion"
+          },
+          "num_frames": {
+            "description": "Number of frames to generate. Must be between 81 to 100 (inclusive). If the number of frames is greater than 81, the video will be generated with 1.25x more billing units.",
+            "default": 81,
+            "anyOf": [
+              {
+                "maximum": 100,
+                "type": "integer",
+                "minimum": 81
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Num Frames"
+          },
+          "prompt": {
+            "description": "The text prompt to guide video generation.",
+            "examples": [
+              "Cars racing in slow motion"
+            ],
+            "type": "string",
+            "title": "Prompt"
+          },
+          "aspect_ratio": {
+            "description": "Aspect ratio of the generated video. If 'auto', the aspect ratio will be determined automatically based on the input image.",
+            "enum": [
+              "auto",
+              "16:9",
+              "9:16",
+              "1:1"
+            ],
+            "default": "auto",
+            "type": "string",
+            "title": "Aspect Ratio"
+          },
+          "acceleration": {
+            "description": "Acceleration level to use. The more acceleration, the faster the generation, but with lower quality. The recommended value is 'regular'.",
+            "enum": [
+              "none",
+              "regular"
+            ],
+            "examples": [
+              "regular"
+            ],
+            "default": "regular",
+            "type": "string",
+            "title": "Acceleration"
+          },
+          "negative_prompt": {
+            "description": "Negative prompt for video generation.",
+            "examples": [
+              "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards"
+            ],
+            "default": "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards",
+            "type": "string",
+            "title": "Negative Prompt"
+          },
+          "seed": {
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          }
+        },
+        "title": "WanI2VRequest",
+        "type": "object",
+        "x-fal-order-properties": [
+          "prompt",
+          "negative_prompt",
+          "image_url",
+          "num_frames",
+          "frames_per_second",
+          "seed",
+          "resolution",
+          "num_inference_steps",
+          "guide_scale",
+          "shift",
+          "enable_safety_checker",
+          "enable_prompt_expansion",
+          "acceleration",
+          "aspect_ratio"
+        ]
+      },
+      "WanI2vOutput": {
+        "required": [
+          "video",
+          "seed"
+        ],
+        "properties": {
+          "video": {
+            "description": "The generated video file.",
+            "examples": [
+              {
+                "url": "https://storage.googleapis.com/falserverless/gallery/wan-i2v-example.mp4"
+              }
+            ],
+            "$ref": "#/components/schemas/File"
+          },
+          "seed": {
+            "description": "The seed used for generation.",
+            "type": "integer",
+            "title": "Seed"
+          }
+        },
+        "title": "WanI2VResponse",
+        "type": "object",
+        "x-fal-order-properties": [
+          "video",
+          "seed"
+        ]
+      },
+      "File": {
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "content_type": {
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size"
+          }
+        },
+        "title": "File",
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/wan-i2v/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/wan-i2v/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/wan-i2v": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WanI2vInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/wan-i2v/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WanI2vOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

@@ -1,0 +1,548 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/lyra-2/zoom",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/lyra-2/zoom queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/lyra-2/zoom",
+      "category": "image-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a97314c/DmYwb8643DIh-Z74dX4Qg_91d43dc1645c42bc8003352cd944bafe.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/lyra-2/zoom",
+      "documentationUrl": "https://fal.ai/models/fal-ai/lyra-2/zoom/api"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "Lyra2ZoomInput": {
+        "properties": {
+          "image_url": {
+            "examples": [
+              "https://v3b.fal.media/files/b/0a972579/6NsCexuhSlD8gcFYlpr1K_00.png"
+            ],
+            "description": "URL of the input image. Lyra-2 hallucinates a video that starts from this image and moves the camera along the requested trajectory.",
+            "type": "string",
+            "title": "Image Url"
+          },
+          "resolution": {
+            "default": "480p",
+            "description": "Output resolution. 480p = 480x832, 720p = 720x1280. Higher resolutions take substantially longer to generate.",
+            "type": "string",
+            "enum": [
+              "480p",
+              "720p"
+            ],
+            "title": "Resolution"
+          },
+          "prompt": {
+            "examples": [
+              "A slow, steady horizontal orbit of the camera around the scene, focusing on the two massive galleons. The scene is a frozen tableau: the turquoise water is glass-like and motionless, the canvas sails are rigid, and the distant clouds are fixed in the golden sky. Every element, from the foreground wooden barrels and coiled ropes to the intricate coastal architecture, remains perfectly still. The warm, late-afternoon sunlight and soft shadows are permanent. As the camera advances, more of the harbor's stone buildings and the ships' wooden hulls are revealed, maintaining identical textures and colors. The entire world is locked in a silent, breathless moment with zero object or environmental movement."
+            ],
+            "description": "Text prompt describing the scene. Best results come from prompts ",
+            "type": "string",
+            "title": "Prompt"
+          },
+          "frames_per_second": {
+            "default": 16,
+            "description": "Frame rate of the output video.",
+            "maximum": 24,
+            "type": "integer",
+            "title": "Frames Per Second",
+            "minimum": 8
+          },
+          "zoom_out_trajectory": {
+            "default": "horizontal_zoom",
+            "description": "Camera-trajectory preset for the zoom-out direction.",
+            "type": "string",
+            "enum": [
+              "horizontal_zoom",
+              "horizontal_zoom_bend",
+              "spiral",
+              "dolly_zoom",
+              "orbit_horizontal",
+              "back"
+            ],
+            "title": "Zoom Out Trajectory"
+          },
+          "zoom_in_strength": {
+            "default": 0.5,
+            "description": "Displacement scale for the zoom-in trajectory (relative to subject depth).",
+            "maximum": 2,
+            "type": "number",
+            "title": "Zoom In Strength",
+            "minimum": 0
+          },
+          "zoom_in_trajectory": {
+            "default": "orbit_horizontal",
+            "description": "Camera-trajectory preset for the zoom-in direction. ``horizontal_zoom`` is a straight translation along the z-axis; ``horizontal_zoom_bend`` adds a slight arc; ``spiral`` produces a spiraling approach.",
+            "type": "string",
+            "enum": [
+              "horizontal_zoom",
+              "horizontal_zoom_bend",
+              "spiral",
+              "dolly_zoom",
+              "orbit_horizontal",
+              "back"
+            ],
+            "title": "Zoom In Trajectory"
+          },
+          "num_inference_steps": {
+            "default": 28,
+            "description": "Number of denoising steps per frame chunk. Ignored when ``use_dmd`` is enabled because the DMD scheduler uses a fixed 4-step schedule.",
+            "maximum": 100,
+            "type": "integer",
+            "title": "Num Inference Steps",
+            "minimum": 1
+          },
+          "zoom_direction": {
+            "default": "in",
+            "description": "Whether to generate a zoom-in video (camera moves toward the subject), a zoom-out video (camera retreats), or a combined out-then-in video.",
+            "type": "string",
+            "enum": [
+              "in",
+              "out",
+              "both"
+            ],
+            "title": "Zoom Direction"
+          },
+          "num_frames": {
+            "default": 81,
+            "description": "Number of frames per direction. Each AR chunk produces 80 frames, and the loop emits an extra anchor frame at the start, so valid values are 81, 161, 241, 321, 401, 481.",
+            "type": "integer",
+            "enum": [
+              81,
+              161,
+              241,
+              321,
+              401,
+              481
+            ],
+            "title": "Num Frames"
+          },
+          "seed": {
+            "description": "Random seed for reproducibility. If not provided, a random seed is chosen.",
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "use_dmd": {
+            "default": true,
+            "description": "Enable the upstream DMD distillation LoRA and 4-step scheduler for much faster generation. Disable for the higher-quality default Lyra-2 sampling path.",
+            "type": "boolean",
+            "title": "Use Dmd"
+          },
+          "guidance_scale": {
+            "default": 5,
+            "description": "Classifier-free guidance scale.",
+            "maximum": 15,
+            "type": "number",
+            "title": "Guidance Scale",
+            "minimum": 1
+          },
+          "zoom_out_strength": {
+            "default": 1.5,
+            "description": "Displacement scale for the zoom-out trajectory.",
+            "maximum": 3,
+            "type": "number",
+            "title": "Zoom Out Strength",
+            "minimum": 0
+          }
+        },
+        "x-fal-order-properties": [
+          "image_url",
+          "prompt",
+          "zoom_direction",
+          "num_frames",
+          "zoom_in_trajectory",
+          "zoom_in_strength",
+          "zoom_out_trajectory",
+          "zoom_out_strength",
+          "resolution",
+          "use_dmd",
+          "guidance_scale",
+          "num_inference_steps",
+          "frames_per_second",
+          "seed"
+        ],
+        "required": [
+          "image_url",
+          "prompt"
+        ],
+        "type": "object",
+        "title": "Lyra2ZoomInput"
+      },
+      "Lyra2ZoomOutput": {
+        "properties": {
+          "video": {
+            "examples": [
+              {
+                "content_type": "video/mp4",
+                "url": "https://v3b.fal.media/files/b/0a972e2c/6ACGX02AxQXhC1t9BED4b_tmpoufr9iug.mp4"
+              }
+            ],
+            "description": "The generated MP4 video.",
+            "$ref": "#/components/schemas/VideoFile"
+          },
+          "seed": {
+            "examples": [
+              478163327
+            ],
+            "description": "The seed used for generation.",
+            "type": "integer",
+            "title": "Seed"
+          },
+          "timings": {
+            "examples": [
+              {
+                "zoom_in_s": 51.5847270488739,
+                "encode_s": 1.475144863128662
+              }
+            ],
+            "description": "Per-stage timing breakdown (seconds).",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Timings"
+          }
+        },
+        "x-fal-order-properties": [
+          "video",
+          "seed",
+          "timings"
+        ],
+        "required": [
+          "video",
+          "seed"
+        ],
+        "type": "object",
+        "title": "Lyra2Output"
+      },
+      "VideoFile": {
+        "properties": {
+          "width": {
+            "description": "The width of the video",
+            "title": "Width",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "height": {
+            "description": "The height of the video",
+            "title": "Height",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "num_frames": {
+            "description": "The number of frames in the video",
+            "title": "Num Frames",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "duration": {
+            "description": "The duration of the video",
+            "title": "Duration",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fps": {
+            "description": "The FPS of the video",
+            "title": "Fps",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height",
+          "fps",
+          "duration",
+          "num_frames"
+        ],
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "title": "VideoFile"
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/lyra-2/zoom/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/lyra-2/zoom/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/lyra-2/zoom": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Lyra2ZoomInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/lyra-2/zoom/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Lyra2ZoomOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}
