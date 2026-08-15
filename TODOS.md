@@ -408,7 +408,19 @@ This is exactly what **TODO #2** (automated drift detection) exists to catch, an
 
 ---
 
-## 19. Research + wire `gemini-omni-flash-preview` (forthcoming Veo successor)
+## 19. Wire `gemini-omni-flash-preview` — DONE 2026-08-15
+
+**Shipped:** `gemini_omni_generate_video` (`src/generation/gemini-omni.ts`), guide `gemini_omni_video_prompt_guide`, catalog route `gemini-omni-flash` under `video.cinematic`. A **separate tool from Veo**, not a model id on it — Omni uses the Interactions API, so the request shape, poll contract, and output shape all differ. Veo is untouched and still not deprecated by Google.
+
+**Required a major SDK upgrade** (`@google/genai` 1.50.1 → 2.17.1, commit `da72868`). 1.50.x had no `video_config` on its interactions `GenerationConfig`. The bump was clean — 0 type errors, no source changes across the eight Google-backed tools — but the suite mocks the SDK, so **live API behavior across the Google tools is unverified**; smoke them before the next release.
+
+**⚠️ The audio finding recorded in the earlier research was WRONG.** That note claimed native audio based on two Google blogs. Google's own video docs state plainly that **Omni Flash generates video without native audio**, and draw the contrast with Veo 3.1 as the model that does. Verified 2026-08-15. Consequence for the music-video pilot: Omni is **silent**, so there is nothing to strip — the "strip/replace the baked audio" step the earlier plan called for is unnecessary.
+
+**Confirmed at build time:** 3–10s clips, 720p, 24fps, 16:9 and 9:16, ~$0.10/s output, stateful editing via `previous_interaction_id`. Every call returns `interaction_id` so callers can chain edits.
+
+**Not covered by tests:** the transport is unit-tested against a mocked interactions client (create/poll/terminal-status/timeout/extraction). **No live call has been made** — no run against the real API, so the exact request shape is inferred from SDK types plus docs and should be smoke-tested on first real use.
+
+## 19b. Original #19 research notes (kept for history)
 
 **What:** `gemini-omni-flash-preview` is a new Google omni/video model that Brian reports is slated to **replace Veo** going forward. Research (a) **capabilities** — video generation, native audio, multimodal in/out (text/image/audio → video), max duration + chaining, resolutions, aspect ratios incl. **9:16** for short-form; (b) **cost/pricing**; (c) **access + implementation** — gemini-language API vs Vertex AI, endpoint + request/poll shape, params. Then plan how it slots into Artificer's video capability as the **successor to the Veo route** (`gemini_generate_video` / `video.cinematic` catalog) — repoint or add alongside.
 

@@ -2,6 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerImagenPromptGuide } from './imagen.js';
 import { registerNanobananaPromptGuide } from './nanobanana.js';
 import { registerVeoPromptGuide } from './veo.js';
+import { registerOmniVideoPromptGuide } from './gemini-omni.js';
 import { registerGeminiTtsPromptGuide } from './gemini-tts.js';
 import { registerLyriaPromptGuide } from './lyria.js';
 import { registerWanPromptGuide } from './wan.js';
@@ -71,6 +72,7 @@ export function registerGuideTools(server: McpServer): void {
 
   // Existing video (Veo, Wan, Kling Avatar, VEED Fabric)
   registerVeoPromptGuide(server);
+  registerOmniVideoPromptGuide(server);
   registerWanPromptGuide(server);
   registerKlingAvatarPromptGuide(server);
   registerVeedFabricPromptGuide(server);
