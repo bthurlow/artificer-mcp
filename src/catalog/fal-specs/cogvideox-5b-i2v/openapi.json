@@ -9,7 +9,8 @@
       "category": "image-to-video",
       "thumbnailUrl": "https://storage.googleapis.com/falserverless/model_tests/cogvideox/panda.gif.gif",
       "playgroundUrl": "https://fal.ai/models/fal-ai/cogvideox-5b/image-to-video",
-      "documentationUrl": "https://fal.ai/models/fal-ai/cogvideox-5b/image-to-video/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/cogvideox-5b/image-to-video/api",
+      "about": "Image to video generation using CogVideoX-5B."
     }
   },
   "components": {
@@ -70,11 +71,6 @@
         ]
       },
       "Cogvideox5bImageToVideoInput": {
-        "title": "ImageToVideoInput",
-        "required": [
-          "prompt",
-          "image_url"
-        ],
         "type": "object",
         "x-fal-order-properties": [
           "prompt",
@@ -88,58 +84,26 @@
           "export_fps",
           "image_url"
         ],
+        "required": [
+          "prompt",
+          "image_url"
+        ],
         "properties": {
-          "loras": {
-            "description": "\n            The LoRAs to use for the image generation. We currently support one lora.\n        ",
-            "title": "Loras",
-            "examples": [],
-            "default": [],
-            "items": {
-              "$ref": "#/components/schemas/LoraWeight"
-            },
-            "type": "array"
-          },
-          "negative_prompt": {
-            "description": "The negative prompt to generate video from",
-            "title": "Negative Prompt",
-            "examples": [
-              "Distorted, discontinuous, Ugly, blurry, low resolution, motionless, static, disfigured, disconnected limbs, Ugly faces, incomplete arms"
-            ],
-            "default": "",
-            "type": "string"
-          },
-          "prompt": {
-            "examples": [
-              "A low angle shot of a man walking down a street, illuminated by the neon signs of the bars around him"
-            ],
-            "title": "Prompt",
-            "description": "The prompt to generate the video from.",
-            "type": "string"
-          },
-          "image_url": {
-            "examples": [
-              "https://d3phaj0sisr2ct.cloudfront.net/research/eugene.jpg"
-            ],
-            "title": "Image URL",
-            "description": "The URL to the image to generate the video from.",
-            "type": "string"
-          },
           "num_inference_steps": {
-            "description": "The number of inference steps to perform.",
-            "title": "Num Inference Steps",
-            "default": 50,
-            "minimum": 1,
+            "maximum": 50,
             "type": "integer",
-            "maximum": 50
+            "default": 50,
+            "title": "Num Inference Steps",
+            "description": "The number of inference steps to perform.",
+            "minimum": 1
           },
           "video_size": {
-            "description": "The size of the generated video.",
-            "title": "Video Size",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
               },
               {
+                "type": "string",
                 "enum": [
                   "square_hd",
                   "square",
@@ -147,32 +111,35 @@
                   "portrait_16_9",
                   "landscape_4_3",
                   "landscape_16_9"
-                ],
-                "type": "string"
+                ]
               }
             ],
             "default": {
-              "width": 720,
-              "height": 480
-            }
+              "height": 480,
+              "width": 720
+            },
+            "title": "Video Size",
+            "description": "The size of the generated video."
           },
-          "use_rife": {
-            "description": "Use RIFE for video interpolation",
-            "title": "Use Rife",
-            "default": true,
-            "type": "boolean"
+          "loras": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LoraWeight"
+            },
+            "default": [],
+            "title": "Loras",
+            "description": "\n            The LoRAs to use for the image generation. We currently support one lora.\n        ",
+            "examples": []
           },
-          "export_fps": {
-            "description": "The target FPS of the video",
-            "title": "Export Fps",
-            "default": 16,
-            "minimum": 4,
-            "type": "integer",
-            "maximum": 32
+          "image_url": {
+            "type": "string",
+            "title": "Image URL",
+            "description": "The URL to the image to generate the video from.",
+            "examples": [
+              "https://d3phaj0sisr2ct.cloudfront.net/research/eugene.jpg"
+            ]
           },
           "seed": {
-            "description": "\n            The same seed and the same prompt given to the same version of the model\n            will output the same video every time.\n        ",
-            "title": "Seed",
             "anyOf": [
               {
                 "type": "integer"
@@ -180,28 +147,61 @@
               {
                 "type": "null"
               }
+            ],
+            "title": "Seed",
+            "description": "\n            The same seed and the same prompt given to the same version of the model\n            will output the same video every time.\n        "
+          },
+          "negative_prompt": {
+            "type": "string",
+            "default": "",
+            "title": "Negative Prompt",
+            "description": "The negative prompt to generate video from",
+            "examples": [
+              "Distorted, discontinuous, Ugly, blurry, low resolution, motionless, static, disfigured, disconnected limbs, Ugly faces, incomplete arms"
             ]
           },
+          "export_fps": {
+            "maximum": 32,
+            "type": "integer",
+            "default": 16,
+            "title": "Export Fps",
+            "description": "The target FPS of the video",
+            "minimum": 4
+          },
+          "use_rife": {
+            "type": "boolean",
+            "default": true,
+            "title": "Use Rife",
+            "description": "Use RIFE for video interpolation"
+          },
           "guidance_scale": {
-            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt when looking for a related video to show you.\n        ",
-            "title": "Guidance scale (CFG)",
-            "default": 7,
-            "minimum": 0,
+            "maximum": 20,
             "type": "number",
-            "maximum": 20
+            "default": 7,
+            "title": "Guidance scale (CFG)",
+            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt when looking for a related video to show you.\n        ",
+            "minimum": 0
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "The prompt to generate the video from.",
+            "examples": [
+              "A low angle shot of a man walking down a street, illuminated by the neon signs of the bars around him"
+            ]
           }
-        }
+        },
+        "title": "ImageToVideoInput"
       },
       "Cogvideox5bImageToVideoOutput": {
-        "title": "Output",
-        "required": [
+        "type": "object",
+        "x-fal-order-properties": [
           "video",
           "timings",
           "seed",
           "prompt"
         ],
-        "type": "object",
-        "x-fal-order-properties": [
+        "required": [
           "video",
           "timings",
           "seed",
@@ -209,85 +209,82 @@
         ],
         "properties": {
           "timings": {
-            "title": "Timings",
             "type": "object",
             "additionalProperties": {
               "type": "number"
-            }
-          },
-          "seed": {
-            "description": "\n            Seed of the generated video. It will be the same value of the one passed in the\n            input or the randomly generated that was used in case none was passed.\n        ",
-            "title": "Seed",
-            "type": "integer"
-          },
-          "prompt": {
-            "description": "The prompt used for generating the video.",
-            "title": "Prompt",
-            "type": "string"
+            },
+            "title": "Timings"
           },
           "video": {
-            "description": "The URL to the generated video",
-            "$ref": "#/components/schemas/File"
+            "$ref": "#/components/schemas/File",
+            "description": "The URL to the generated video"
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed",
+            "description": "\n            Seed of the generated video. It will be the same value of the one passed in the\n            input or the randomly generated that was used in case none was passed.\n        "
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "The prompt used for generating the video."
+          }
+        },
+        "title": "Output"
+      },
+      "ImageSize": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "width",
+          "height"
+        ],
+        "title": "ImageSize",
+        "properties": {
+          "height": {
+            "maximum": 14142,
+            "type": "integer",
+            "default": 512,
+            "title": "Height",
+            "exclusiveMinimum": 0,
+            "description": "The height of the generated image."
+          },
+          "width": {
+            "maximum": 14142,
+            "type": "integer",
+            "default": 512,
+            "title": "Width",
+            "exclusiveMinimum": 0,
+            "description": "The width of the generated image."
           }
         }
       },
       "LoraWeight": {
-        "title": "LoraWeight",
-        "required": [
-          "path"
-        ],
         "type": "object",
         "x-fal-order-properties": [
           "path",
           "scale"
         ],
+        "required": [
+          "path"
+        ],
         "properties": {
           "path": {
-            "description": "URL or the path to the LoRA weights.",
+            "type": "string",
             "title": "Path",
-            "type": "string"
+            "description": "URL or the path to the LoRA weights."
           },
           "scale": {
-            "description": "\n            The scale of the LoRA weight. This is used to scale the LoRA weight\n            before merging it with the base model.\n        ",
-            "title": "Scale",
-            "default": 1,
-            "minimum": 0,
+            "maximum": 4,
             "type": "number",
-            "maximum": 4
+            "default": 1,
+            "title": "Scale",
+            "description": "\n            The scale of the LoRA weight. This is used to scale the LoRA weight\n            before merging it with the base model.\n        ",
+            "minimum": 0
           }
-        }
-      },
-      "ImageSize": {
-        "title": "ImageSize",
-        "x-fal-order-properties": [
-          "width",
-          "height"
-        ],
-        "type": "object",
-        "properties": {
-          "width": {
-            "description": "The width of the generated image.",
-            "exclusiveMinimum": 0,
-            "title": "Width",
-            "default": 512,
-            "type": "integer",
-            "maximum": 14142
-          },
-          "height": {
-            "description": "The height of the generated image.",
-            "exclusiveMinimum": 0,
-            "title": "Height",
-            "default": 512,
-            "type": "integer",
-            "maximum": 14142
-          }
-        }
+        },
+        "title": "LoraWeight"
       },
       "File": {
-        "title": "File",
-        "required": [
-          "url"
-        ],
         "type": "object",
         "x-fal-order-properties": [
           "url",
@@ -295,10 +292,11 @@
           "file_name",
           "file_size"
         ],
+        "required": [
+          "url"
+        ],
         "properties": {
           "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
             "anyOf": [
               {
                 "type": "string"
@@ -307,13 +305,13 @@
                 "type": "null"
               }
             ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
             "examples": [
               "image/png"
             ]
           },
           "file_size": {
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -322,18 +320,18 @@
                 "type": "null"
               }
             ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ]
           },
           "url": {
-            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
             "title": "Url",
-            "type": "string"
+            "description": "The URL where the file can be downloaded from."
           },
           "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -342,11 +340,14 @@
                 "type": "null"
               }
             ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ]
           }
-        }
+        },
+        "title": "File"
       }
     }
   },

@@ -21,9 +21,10 @@ Pricing: $0.10/s 720p, $0.15/s 1080p (Wan 2.7 family).
 ### Wan 2.6
 | Slug | Modality | Best for |
 |------|----------|----------|
-| \`wan-2.6-t2v\` | t2v | Wan 2.6 t2v |
 | \`wan-2.6-i2v\` | i2v | Wan 2.6 i2v |
 | \`wan-2.6-flash-i2v\` | i2v fast | Cheap Wan 2.6 i2v |
+
+Wan 2.6 is **image-to-video only** as of 2026-08-15 — fal removed the \`wan/v2.6/text-to-video\` endpoint (it now 404s) and the \`wan-2.6-t2v\` slug was dropped with it. The i2v routes are unaffected. For 2.6-era text-to-video, use \`wan-2.7-t2v\`.
 
 ### Wan 2.5 preview
 | Slug | Modality | Best for |
@@ -117,7 +118,6 @@ Validated 2026-04-24 against artificer-mcp v0.9.0 in the Q2 talking-head bake-of
 | \`wan-2.7\` | \`fal-ai/wan/v2.7/image-to-video\` (talking-head) |
 | \`wan-2.7-t2v\` | \`fal-ai/wan/v2.7/text-to-video\` |
 | \`wan-2.7-ref-to-video\` | \`fal-ai/wan/v2.7/reference-to-video\` |
-| \`wan-2.6-t2v\` | \`wan/v2.6/text-to-video\` |
 | \`wan-2.6-i2v\` | \`wan/v2.6/image-to-video\` |
 | \`wan-2.6-flash-i2v\` | \`wan/v2.6/image-to-video/flash\` |
 | \`wan-2.5-t2v\` | \`fal-ai/wan-25-preview/text-to-video\` |

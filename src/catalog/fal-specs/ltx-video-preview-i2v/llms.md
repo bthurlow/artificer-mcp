@@ -51,7 +51,7 @@ The API accepts the following input parameters:
 
 - **`image_url`** (`string`, _required_):
   The URL of the image to generate the video from.
-  - Examples: "https://fal.media/files/kangaroo/4OePu2ifG7SKxTM__TQrQ_72929fec9fb74790bb8c8b760450c9b9.jpg"
+  - Examples: "https://v3b.fal.media/files/b/0a9f096b/K1kmKVbB5XDufFrz1n1cP_50DK8jif.png"
 
 
 
@@ -60,7 +60,7 @@ The API accepts the following input parameters:
 ```json
 {
   "prompt": "A lone astronaut in a white spacesuit with gold-tinted visor drifts weightlessly through a sleek, cylindrical corridor of a spaceship. Their movements are slow and graceful as they gently push off the metallic walls with their gloved hands, rotating slightly as they float from right to left across the frame. The corridor features brushed aluminum panels with blue LED strips running along the ceiling, casting a cool glow on the astronaut's suit. Various cables, pipes, and control panels line the walls. The camera follows the astronaut's movement in a handheld style, slightly swaying and adjusting focus, maintaining a medium shot that captures both the astronaut and the corridor's depth. Small particles of dust catch the light as they float in the zero-gravity environment. The scene appears cinematic, with lens flares occasionally reflecting off the metallic surfaces and the astronaut's visor.",
-  "image_url": "https://fal.media/files/kangaroo/4OePu2ifG7SKxTM__TQrQ_72929fec9fb74790bb8c8b760450c9b9.jpg"
+  "image_url": "https://v3b.fal.media/files/b/0a9f096b/K1kmKVbB5XDufFrz1n1cP_50DK8jif.png"
 }
 ```
 
@@ -72,7 +72,7 @@ The API accepts the following input parameters:
   "negative_prompt": "low quality, worst quality, deformed, distorted, disfigured, motion smear, motion artifacts, fused fingers, bad anatomy, weird hand, ugly",
   "num_inference_steps": 30,
   "guidance_scale": 3,
-  "image_url": "https://fal.media/files/kangaroo/4OePu2ifG7SKxTM__TQrQ_72929fec9fb74790bb8c8b760450c9b9.jpg"
+  "image_url": "https://v3b.fal.media/files/b/0a9f096b/K1kmKVbB5XDufFrz1n1cP_50DK8jif.png"
 }
 ```
 
@@ -114,7 +114,7 @@ curl --request POST \
   --header "Content-Type: application/json" \
   --data '{
      "prompt": "A lone astronaut in a white spacesuit with gold-tinted visor drifts weightlessly through a sleek, cylindrical corridor of a spaceship. Their movements are slow and graceful as they gently push off the metallic walls with their gloved hands, rotating slightly as they float from right to left across the frame. The corridor features brushed aluminum panels with blue LED strips running along the ceiling, casting a cool glow on the astronaut's suit. Various cables, pipes, and control panels line the walls. The camera follows the astronaut's movement in a handheld style, slightly swaying and adjusting focus, maintaining a medium shot that captures both the astronaut and the corridor's depth. Small particles of dust catch the light as they float in the zero-gravity environment. The scene appears cinematic, with lens flares occasionally reflecting off the metallic surfaces and the astronaut's visor.",
-     "image_url": "https://fal.media/files/kangaroo/4OePu2ifG7SKxTM__TQrQ_72929fec9fb74790bb8c8b760450c9b9.jpg"
+     "image_url": "https://v3b.fal.media/files/b/0a9f096b/K1kmKVbB5XDufFrz1n1cP_50DK8jif.png"
    }'
 ```
 
@@ -140,7 +140,7 @@ result = fal_client.subscribe(
     "fal-ai/ltx-video/image-to-video",
     arguments={
         "prompt": "A lone astronaut in a white spacesuit with gold-tinted visor drifts weightlessly through a sleek, cylindrical corridor of a spaceship. Their movements are slow and graceful as they gently push off the metallic walls with their gloved hands, rotating slightly as they float from right to left across the frame. The corridor features brushed aluminum panels with blue LED strips running along the ceiling, casting a cool glow on the astronaut's suit. Various cables, pipes, and control panels line the walls. The camera follows the astronaut's movement in a handheld style, slightly swaying and adjusting focus, maintaining a medium shot that captures both the astronaut and the corridor's depth. Small particles of dust catch the light as they float in the zero-gravity environment. The scene appears cinematic, with lens flares occasionally reflecting off the metallic surfaces and the astronaut's visor.",
-        "image_url": "https://fal.media/files/kangaroo/4OePu2ifG7SKxTM__TQrQ_72929fec9fb74790bb8c8b760450c9b9.jpg"
+        "image_url": "https://v3b.fal.media/files/b/0a9f096b/K1kmKVbB5XDufFrz1n1cP_50DK8jif.png"
     },
     with_logs=True,
     on_queue_update=on_queue_update,
@@ -164,7 +164,7 @@ import { fal } from "@fal-ai/client";
 const result = await fal.subscribe("fal-ai/ltx-video/image-to-video", {
   input: {
     prompt: "A lone astronaut in a white spacesuit with gold-tinted visor drifts weightlessly through a sleek, cylindrical corridor of a spaceship. Their movements are slow and graceful as they gently push off the metallic walls with their gloved hands, rotating slightly as they float from right to left across the frame. The corridor features brushed aluminum panels with blue LED strips running along the ceiling, casting a cool glow on the astronaut's suit. Various cables, pipes, and control panels line the walls. The camera follows the astronaut's movement in a handheld style, slightly swaying and adjusting focus, maintaining a medium shot that captures both the astronaut and the corridor's depth. Small particles of dust catch the light as they float in the zero-gravity environment. The scene appears cinematic, with lens flares occasionally reflecting off the metallic surfaces and the astronaut's visor.",
-    image_url: "https://fal.media/files/kangaroo/4OePu2ifG7SKxTM__TQrQ_72929fec9fb74790bb8c8b760450c9b9.jpg"
+    image_url: "https://v3b.fal.media/files/b/0a9f096b/K1kmKVbB5XDufFrz1n1cP_50DK8jif.png"
   },
   logs: true,
   onQueueUpdate: (update) => {
@@ -188,6 +188,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

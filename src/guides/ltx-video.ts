@@ -13,7 +13,7 @@ LTX is the cheapest path to 1080p / 2160p video on fal with native audio support
 | Slug | Variant | Modality | Best for |
 |------|---------|----------|----------|
 | \`ltx-2.3-pro-t2v\` | Pro | t2v | Latest LTX premium t2v |
-| \`ltx-2.3-fast-t2v\` | Fast | t2v | $0.04/s up to 2160p — cheapest 2160p path |
+| \`ltx-2.3-fast-t2v\` | Fast | t2v | $0.06/s at 1080p, $0.24/s at 2160p — still the cheapest 2160p path |
 | \`ltx-2.3-pro-i2v\` | Pro | i2v | Latest premium i2v |
 | \`ltx-2.3-fast-i2v\` | Fast | i2v | Cheap 2160p i2v |
 
@@ -57,16 +57,21 @@ LTX is the cheapest path to 1080p / 2160p video on fal with native audio support
 | \`ltx-video-13b-distilled-i2v\` | 13B distilled | Older 13B distilled i2v |
 | \`ltx-video-13b-dev-t2v\` | 13B dev | LoRA-supporting dev variant |
 | \`ltx-video-13b-dev-i2v\` | 13B dev | LoRA-supporting i2v |
-| \`ltx-video-lora-i2v\` | LoRA | Older LoRA i2v |
 | \`ltx-video-v095-t2v\` | v0.9.5 | Earlier checkpoint |
 | \`ltx-video-preview-i2v\` | preview | Original i2v |
 | \`ltxv-13b-098-distilled-t2v\` | v0.9.8 13B distilled | Long-form variant |
 | \`ltxv-13b-098-distilled-i2v\` | v0.9.8 13B distilled | Long-form i2v |
 
 ## Pricing
-- LTX-2.3 / LTX-2 closed tier: $0.06–0.24/s for Pro, $0.04–0.16/s for Fast (1080p–2160p).
+| Tier | 1080p | 1440p | 2160p |
+|------|-------|-------|-------|
+| LTX-2.3 **Pro** (t2v + i2v) | $0.08/s | $0.16/s | $0.32/s |
+| LTX-2.3 **Fast** (t2v + i2v) | $0.06/s | $0.12/s | $0.24/s |
+
 - LTX-2-19b token-priced: $0.0018/megapixel base, $0.0008/megapixel distilled.
-- Legacy 13B distilled flat-rate ~$0.04/video.
+- Legacy 13B distilled: \`-t2v\` is still flat-rate **$0.04 per video**, but \`-i2v\` now bills **$0.04 per second** (at 24 fps), doubling to **$0.08/s** with the detail pass. The two are no longer priced alike — see the warning below.
+
+⚠️ **Closed-tier rates rose in the 2026-08-15 sync** (Fast $0.04→$0.06/s, Pro i2v $0.06→$0.08/s at 1080p), and \`ltx-video-13b-distilled-i2v\` switched from **per-video to per-second** billing. That last one is the trap: a 10-second clip that used to cost a flat $0.04 now costs $0.40, or $0.80 with the detail pass — a 10–20× jump for callers who budgeted against the old flat rate. The sibling \`-t2v\` route did *not* change, so don't assume the pair behaves the same.
 
 ## Known strengths
 - **Cheapest path to 1080p+ with audio** (LTX-2 family).
@@ -95,10 +100,10 @@ LTX accepts standard scene + camera + style prompts. Open-weights variants respo
 - LTX-2.3 Pro 4K: \`prompt: "Slow-motion close-up of water droplets on a leaf", extra_params: { resolution: "2160p" }\`
 
 ## Access routes
-See per-lineage tables above. Total: 32 routes spanning 5 lineages.
+See per-lineage tables above. Total: 31 routes spanning 5 lineages. (\`ltx-video-lora-i2v\` was dropped on 2026-08-15 — fal removed the endpoint and it now 404s.)
 
 ## Last verified
-2026-04-28 — initial seed of full fal video catalog.
+2026-08-15 — pricing re-synced from fal for the LTX-2.3 closed tier and the legacy 13B distilled routes; \`ltx-video-lora-i2v\` retired. Lineage tables and prompt guidance are unchanged since the 2026-04-28 initial seed and were not re-verified in this pass.
 
 ## Official references
 - https://fal.ai/models/fal-ai/ltx-2/text-to-video
@@ -110,7 +115,7 @@ export function registerLtxVideoPromptGuide(server: McpServer): void {
   registerTool<Record<string, never>>(
     server,
     'ltx_video_prompt_guide',
-    'Reference guide for Lightricks LTX Video — full lineage including LTX-2.3 / LTX-2.3-22b / LTX-2 / LTX-2-19b / LTX legacy. 32 routes spanning closed-tier and open-weights with LoRA support. Cheapest path to 1080p+ with audio. No API call — pure reference.',
+    'Reference guide for Lightricks LTX Video — full lineage including LTX-2.3 / LTX-2.3-22b / LTX-2 / LTX-2-19b / LTX legacy. 31 routes spanning closed-tier and open-weights with LoRA support. Cheapest path to 1080p+ with audio. No API call — pure reference.',
     z.object({}).shape,
     async () => ({ content: [{ type: 'text', text: LTX_GUIDE }] }),
   );

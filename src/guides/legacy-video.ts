@@ -13,8 +13,9 @@ Older / open-weights video models in the fal catalog. These exist for completene
 For new production work, prefer the modern catalog: Veo / Sora / Kling / Wan / Hailuo / LTX-2.x.
 
 ## AnimateDiff lineage
-Older anime/illustrated-style t2v built on top of Stable Diffusion + temporal modules. Stylized aesthetic. Three variants on fal: SparseCtrl LCM, Fast AnimateDiff, AnimateDiff Turbo. Turbo is fastest but lowest quality.
-- Slugs: \`animatediff-sparsectrl-lcm-t2v\`, \`fast-animatediff-t2v\`, \`fast-animatediff-turbo-t2v\`
+Older anime/illustrated-style t2v built on top of Stable Diffusion + temporal modules. Stylized aesthetic. Two variants remain on fal: Fast AnimateDiff and AnimateDiff Turbo. Turbo is fastest but lowest quality.
+- Slugs: \`fast-animatediff-t2v\`, \`fast-animatediff-turbo-t2v\`
+- \`animatediff-sparsectrl-lcm-t2v\` (SparseCtrl LCM) was dropped on 2026-08-15 — fal removed the endpoint and it now 404s. It was the only variant offering SparseCtrl conditioning; the two remaining routes are prompt-only.
 - Example: \`prompt: "anime girl with blue hair waving in a flower field"\`
 
 ## T2V Turbo
@@ -39,7 +40,6 @@ Stability's image-to-clip endpoint. Distinct from the SVD-LCM variant — slower
 ## Access routes (combined)
 | Slug | fal endpoint |
 |------|--------------|
-| \`animatediff-sparsectrl-lcm-t2v\` | \`fal-ai/animatediff-sparsectrl-lcm\` |
 | \`fast-animatediff-t2v\` | \`fal-ai/fast-animatediff/text-to-video\` |
 | \`fast-animatediff-turbo-t2v\` | \`fal-ai/fast-animatediff/turbo/text-to-video\` |
 | \`t2v-turbo-t2v\` | \`fal-ai/t2v-turbo\` |

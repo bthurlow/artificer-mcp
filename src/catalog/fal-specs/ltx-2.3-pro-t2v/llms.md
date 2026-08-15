@@ -88,7 +88,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video file
-  - Examples: {"file_name":"EG257tf7j9UfVc-jHF8lI_0MWboc13.mp4","content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0a90dd3a/EG257tf7j9UfVc-jHF8lI_0MWboc13.mp4"}
+  - Examples: {"file_name":"EG257tf7j9UfVc-jHF8lI_0MWboc13.mp4","url":"https://v3b.fal.media/files/b/0a90dd3a/EG257tf7j9UfVc-jHF8lI_0MWboc13.mp4","content_type":"video/mp4"}
 
 
 
@@ -98,8 +98,8 @@ The API returns the following output format:
 {
   "video": {
     "file_name": "EG257tf7j9UfVc-jHF8lI_0MWboc13.mp4",
-    "content_type": "video/mp4",
-    "url": "https://v3b.fal.media/files/b/0a90dd3a/EG257tf7j9UfVc-jHF8lI_0MWboc13.mp4"
+    "url": "https://v3b.fal.media/files/b/0a90dd3a/EG257tf7j9UfVc-jHF8lI_0MWboc13.mp4",
+    "content_type": "video/mp4"
   }
 }
 ```
@@ -187,6 +187,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

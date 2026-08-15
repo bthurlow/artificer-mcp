@@ -52,9 +52,13 @@ Deferred work with enough context that someone picking it up in 3 months knows w
 - Suggested implementation: GitHub Actions workflow on cron, runs sync, commits changes to a branch, opens PR with changed spec files + diff summary.
 - Naming convention: PRs titled `chore: sync fal-ai specs ({date})`.
 
-**Trigger to pick this up:** After sync script has been running manually for a month or two and the diffs are stable / non-noisy.
+**Trigger to pick this up:** ~~After sync script has been running manually for a month or two and the diffs are stable / non-noisy.~~ **Trigger fired.** The 2026-08-15 sync (#18b) found three silently re-routing models and six 404'd endpoints that had been wrong for months. The diffs are *not* non-noisy — fal churns docs boilerplate constantly — but #18b added the two signals a cron can assert on without drowning in that noise:
+- `extractDeprecation` splits retirement notices out of `cost` into a `deprecated` field, and the script prints a dedicated "N DEPRECATED route(s)" block.
+- The script already exits non-zero on fetch failures, which is exactly the 404-detection a cron needs.
 
-**Depends on / blocked by:** `scripts/sync-fal-specs.mjs` shipping in Phase 1.
+So the cron does not need to diff 500 spec files. It needs to fail on those two conditions and open a PR for the rest. **This is the next item.**
+
+**Depends on / blocked by:** ~~`scripts/sync-fal-specs.mjs` shipping in Phase 1.~~ Shipped. Unblocked.
 
 ---
 
@@ -390,15 +394,49 @@ Source: btmusic memory `artificer_mcp.md`, `instructions/artificer-prompts.md` c
 
 **Still true:** no native chaining (concatenate downstream), native 9:16, no camera-motion params.
 
-## 18b. Fal spec drift — 518 files changed upstream (NEW, filed 2026-08-15)
+## 18b. Fal spec drift — DONE 2026-08-15
 
-Running `scripts/sync-fal-specs.mjs` during the H3 work surfaced **518 changed spec files** and **18 changed `cost` strings** across the existing catalog — deliberately excluded from the H3 PR to keep it reviewable, so this drift is **not yet applied**.
+**Shipped:** full re-sync of all fal specs plus the catalog surgery the drift demanded. 519 spec files updated, 9 `cost` strings corrected, 3 routes flagged deprecated, 6 dead routes retired.
 
-Two classes:
-- **Boilerplate churn** — fal moved their docs links and added an "Other agent-readable surfaces" block to every `llms.txt`. Noise.
-- **Real, caller-affecting changes** — at least **3 routes now report "This model has been deprecated, and further requests are being re-routed to Seedance 1.0 Pro Fast"**, and several video routes changed pricing (e.g. a 720p rate rising to $0.3034/s with new 1080p/4K tiers documented).
+### The mechanism change: `deprecated` is now a first-class field
 
-This is exactly what **TODO #2** (automated drift detection) exists to catch, and it confirms the trigger condition is well past due — the catalog has been quietly wrong for months. Next step is a dedicated sync PR: run the script, review the 18 cost diffs and the deprecations, retire or repoint the deprecated routes, then land #2's cron so it never accumulates this far again.
+The original filing called the deprecations a data problem. They were a **schema** problem. fal does not publish retirements in a section of their own — they replace the body of `## Pricing` with a one-line notice, so `extractPricing` returned it and the script wrote *"This model has been deprecated…"* straight into `cost`. That destroyed the last known price and left prose that isn't a price in the field callers read as one.
+
+Fixed at three levels:
+- **`scripts/sync-fal-specs.mjs`** — new `extractDeprecation()` routes the notice to `route.deprecated` and leaves `cost` alone. It also clears a stale flag if a route recovers, and prints a dedicated "N DEPRECATED route(s)" block so retirements aren't buried under several hundred lines of "wrote" chatter.
+- **`src/catalog/catalog.ts`** — `deprecated?: string` on `AccessRoute`. A deprecated route is **not `available`** and is hidden from `model_catalog` by default; `include_unavailable: true` shows it with the notice attached.
+- **`tests/unit/catalog/integrity.test.ts`** — a guard that fails the build if a deprecation notice ever appears in a `cost` field again. Verified to bite by re-poisoning the catalog.
+
+**Why hide rather than merely label:** a deprecated fal route still returns **200**. It just serves a different model than the slug named. That is precisely the hidden routing this server exists to avoid, so the catalog must not offer it as a normal choice. `cost` on a deprecated route is retained as the last observed price and is explicitly **not authoritative** — billing follows whatever model fal redirects to.
+
+### Deprecated (still answer, serve something else)
+| Slug | Actually serves |
+|------|-----------------|
+| `seedance-1-lite-t2v` | Seedance 1.0 Pro Fast |
+| `seedance-1-lite-i2v` | Seedance 1.0 Pro Fast |
+| `seedance-1-lite-ref` | **Grok Imagine Video** — a different vendor entirely |
+
+The `-ref` redirect is the nasty one: it leaves the Seedance family, so multi-reference and audio behavior are Grok's, not what `seedance_prompt_guide` documented. Guide now carries a migration table pointing at `seedance-1-pro-fast-*` and `seedance-2-*-ref`.
+
+### Retired (404 on both openapi and llms.txt — verified, no renamed successor)
+`wan-2.6-t2v` · `ltx-video-lora-i2v` · `hunyuan-video-img2vid-lora-i2v` · `transpixar-t2v` · `animatediff-sparsectrl-lcm-t2v` · `qwen-3-guard`
+
+Entries and their spec dirs deleted; every referencing guide updated. **Two of these cost real capability, not just a route:**
+- **TransPixar was the catalog's only alpha-channel video model.** There is now *no* route producing video with a real alpha channel. The fallback (generate on flat color → `background_remove` color-key → `composite`) is materially worse on soft edges, motion blur, and particles/smoke — which is exactly what the model was for. Recorded in `specialized_video_prompt_guide`.
+- **`qwen-3-guard` was the only `safety` entry, so the whole capability is now empty.** fal's model index returns nothing for guard/moderation/safety, so there is no replacement to point at. `fal_classify_text` still works but now *requires* an explicit `model` — the existing "exactly one non-stub entry" auto-default rule already handles zero by throwing an actionable error, so no code change was needed, only honest tool descriptions.
+
+Also lost: SparseCtrl conditioning (only AnimateDiff variant offering it) and LoRA-capable Hunyuan **i2v** (t2v LoRA survives).
+
+### Price changes worth knowing
+- **`ltx-video-13b-distilled-i2v` switched from per-video to per-second billing** — $0.04/video → $0.04/s, or $0.08/s with the detail pass. A 10s clip went from a flat $0.04 to $0.40–$0.80, a **10–20× jump** for anyone budgeting against the old flat rate. Its sibling `-t2v` did *not* change, so the pair no longer behaves alike. Flagged loudly in `ltx_video_prompt_guide`.
+- LTX-2.3 closed tier rose: Fast $0.04→$0.06/s, Pro i2v $0.06→$0.08/s at 1080p. Pro and Fast have each converged to one rate across t2v and i2v.
+- Seedance 2.x pricing now documents 1080p at $0.682/s and a cheaper $0.008/1k-token 4k rate; the 720p rate ticked $0.3024→$0.3034.
+
+**Guides re-verified:** `seedance`, `ltx-video`, `wan`, `hunyuan-video`, `legacy-video`, `specialized-video`. Each got an honest "Last verified" note distinguishing what was actually re-checked in this pass from what still dates to the 2026-04-28 seed.
+
+**Not verified:** no generation call was made against any re-priced or re-pointed route. Pricing and deprecation status are read from fal's published specs, not observed on an invoice.
+
+**Follow-on filed:** the empty `safety` capability. If a fal-hosted classifier reappears, re-seed `safety.text`; until then `fal_classify_text` needs an explicit model id and nothing in the catalog advertises one.
 
 ## 18c. Original #18 scope (kept for history)
 

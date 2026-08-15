@@ -34,7 +34,7 @@ The API accepts the following input parameters:
 
 - **`video_size`** (`ImageSize | Enum`, _optional_):
   The size of the generated video.
-  - Default: `{"width":720,"height":480}`
+  - Default: `{"height":480,"width":720}`
   - One of: ImageSize | Enum
 
 - **`negative_prompt`** (`string`, _optional_):
@@ -87,8 +87,8 @@ The API accepts the following input parameters:
 {
   "prompt": "A garden comes to life as a kaleidoscope of butterflies flutters amidst the blossoms, their delicate wings casting shadows on the petals below. In the background, a grand fountain cascades water with a gentle splendor, its rhythmic sound providing a soothing backdrop. Beneath the cool shade of a mature tree, a solitary wooden chair invites solitude and reflection, its smooth surface worn by the touch of countless visitors seeking a moment of tranquility in nature's embrace.",
   "video_size": {
-    "width": 720,
-    "height": 480
+    "height": 480,
+    "width": 720
   },
   "negative_prompt": "Distorted, discontinuous, Ugly, blurry, low resolution, motionless, static, disfigured, disconnected limbs, Ugly faces, incomplete arms",
   "num_inference_steps": 50,
@@ -215,6 +215,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

@@ -9,7 +9,8 @@
       "category": "text-to-video",
       "thumbnailUrl": "https://v3b.fal.media/files/b/0a8c9162/vH4Zl7noFCQBFqWM-eu9I_802e7d65387f44f0ae3eb0587b38422f.jpg",
       "playgroundUrl": "https://fal.ai/models/fal-ai/vidu/q3/text-to-video",
-      "documentationUrl": "https://fal.ai/models/fal-ai/vidu/q3/text-to-video/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/vidu/q3/text-to-video/api",
+      "about": "Vidu Q3 Text to Video API: Generate a video from text using the Q3 model."
     }
   },
   "components": {
@@ -70,18 +71,37 @@
         ]
       },
       "ViduQ3TextToVideoInput": {
-        "title": "Q3TextToVideoRequest",
+        "x-fal-order-properties": [
+          "prompt",
+          "duration",
+          "seed",
+          "aspect_ratio",
+          "resolution",
+          "audio"
+        ],
+        "required": [
+          "prompt"
+        ],
         "properties": {
-          "resolution": {
-            "description": "Output video resolution",
-            "enum": [
-              "360p",
-              "540p",
-              "720p",
-              "1080p"
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
             ],
-            "default": "720p",
-            "title": "Resolution",
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "title": "Seed"
+          },
+          "prompt": {
+            "maxLength": 2000,
+            "description": "Text prompt for video generation, max 2000 characters",
+            "examples": [
+              "In an ultra-realistic fashion photography style featuring light blue and pale amber tones, an astronaut in a spacesuit walks through the fog."
+            ],
+            "title": "Prompt",
             "type": "string"
           },
           "aspect_ratio": {
@@ -97,140 +117,121 @@
             "title": "Aspect Ratio",
             "type": "string"
           },
+          "duration": {
+            "description": "Duration of the video in seconds",
+            "maximum": 16,
+            "minimum": 1,
+            "default": 5,
+            "title": "Duration",
+            "type": "integer"
+          },
           "audio": {
             "description": "Whether to use direct audio-video generation. When true, outputs video with sound.",
             "default": true,
             "title": "Audio",
             "type": "boolean"
           },
-          "prompt": {
-            "description": "Text prompt for video generation, max 2000 characters",
-            "examples": [
-              "In an ultra-realistic fashion photography style featuring light blue and pale amber tones, an astronaut in a spacesuit walks through the fog."
+          "resolution": {
+            "description": "Output video resolution",
+            "enum": [
+              "360p",
+              "540p",
+              "720p",
+              "1080p"
             ],
-            "maxLength": 2000,
-            "title": "Prompt",
+            "default": "720p",
+            "title": "Resolution",
             "type": "string"
-          },
-          "seed": {
-            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Seed"
-          },
-          "duration": {
-            "description": "Duration of the video in seconds",
-            "type": "integer",
-            "default": 5,
-            "minimum": 1,
-            "title": "Duration",
-            "maximum": 16
           }
         },
-        "type": "object",
-        "required": [
-          "prompt"
-        ],
-        "x-fal-order-properties": [
-          "prompt",
-          "duration",
-          "seed",
-          "aspect_ratio",
-          "resolution",
-          "audio"
-        ]
+        "title": "Q3TextToVideoRequest",
+        "type": "object"
       },
       "ViduQ3TextToVideoOutput": {
-        "title": "Q3TextToVideoOutput",
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "required": [
+          "video"
+        ],
         "properties": {
           "video": {
+            "description": "The generated video from text using the Q3 model",
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v3b.fal.media/files/b/0a8c915a/8dtkty-vyhotySs--cTKS_output.mp4"
               }
-            ],
-            "description": "The generated video from text using the Q3 model",
-            "$ref": "#/components/schemas/File"
+            ]
           }
         },
-        "type": "object",
-        "required": [
-          "video"
-        ],
-        "x-fal-order-properties": [
-          "video"
-        ]
+        "title": "Q3TextToVideoOutput",
+        "type": "object"
       },
       "File": {
-        "title": "File",
-        "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type"
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name"
-          },
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          }
-        },
-        "type": "object",
-        "required": [
-          "url"
-        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
-        ]
+        ],
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "examples": [
+              4404019
+            ]
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ]
+          }
+        },
+        "title": "File",
+        "type": "object"
       }
     }
   },

@@ -9,7 +9,8 @@
       "category": "text-to-video",
       "thumbnailUrl": "https://storage.googleapis.com/fal_cdn/fal/Sound-2.jpg",
       "playgroundUrl": "https://fal.ai/models/fal-ai/wan/v2.2-5b/text-to-video",
-      "documentationUrl": "https://fal.ai/models/fal-ai/wan/v2.2-5b/text-to-video/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/wan/v2.2-5b/text-to-video/api",
+      "about": "Endpoint for generating a video from text using the 5B model."
     }
   },
   "components": {
@@ -71,9 +72,6 @@
       },
       "WanV225bTextToVideoInput": {
         "type": "object",
-        "required": [
-          "prompt"
-        ],
         "x-fal-order-properties": [
           "prompt",
           "negative_prompt",
@@ -94,18 +92,15 @@
           "video_quality",
           "video_write_mode"
         ],
-        "title": "WanSmallT2VRequest",
         "properties": {
-          "shift": {
-            "type": "number",
-            "maximum": 10,
-            "title": "Shift",
+          "enable_output_safety_checker": {
+            "type": "boolean",
+            "description": "If set to true, output video will be checked for safety after generation.",
+            "title": "Enable Output Safety Checker",
             "examples": [
-              5
+              false
             ],
-            "description": "Shift value for the video. Must be between 1.0 and 10.0.",
-            "minimum": 1,
-            "default": 5
+            "default": false
           },
           "video_write_mode": {
             "type": "string",
@@ -114,42 +109,25 @@
               "balanced",
               "small"
             ],
+            "description": "The write mode of the output video. Faster write mode means faster results but larger file size, balanced write mode is a good compromise between speed and quality, and small write mode is the slowest but produces the smallest file size.",
             "title": "Video Write Mode",
             "examples": [
               "balanced"
             ],
-            "description": "The write mode of the output video. Faster write mode means faster results but larger file size, balanced write mode is a good compromise between speed and quality, and small write mode is the slowest but produces the smallest file size.",
             "default": "balanced"
           },
-          "enable_prompt_expansion": {
-            "type": "boolean",
-            "title": "Enable Prompt Expansion",
-            "examples": [
-              false
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "580p",
+              "720p"
             ],
-            "description": "Whether to enable prompt expansion. This will use a large language model to expand the prompt with additional details while maintaining the original meaning.",
-            "default": false
-          },
-          "seed": {
-            "title": "Seed",
-            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "adjust_fps_for_interpolation": {
-            "type": "boolean",
-            "title": "Adjust FPS for Interpolation",
+            "description": "Resolution of the generated video (580p or 720p).",
+            "title": "Resolution",
             "examples": [
-              true
+              "720p"
             ],
-            "description": "If true, the number of frames per second will be multiplied by the number of interpolated frames plus one. For example, if the generated frames per second is 16 and the number of interpolated frames is 1, the final frames per second will be 32. If false, the passed frames per second will be used as-is.",
-            "default": true
+            "default": "720p"
           },
           "interpolator_model": {
             "type": "string",
@@ -158,90 +136,20 @@
               "film",
               "rife"
             ],
+            "description": "The model to use for frame interpolation. If None, no interpolation is applied.",
             "title": "Interpolator Model",
             "examples": [
               "film"
             ],
-            "description": "The model to use for frame interpolation. If None, no interpolation is applied.",
             "default": "film"
           },
-          "num_frames": {
-            "maximum": 161,
-            "minimum": 17,
-            "description": "Number of frames to generate. Must be between 17 to 161 (inclusive).",
-            "default": 81,
-            "type": "integer",
-            "title": "Number of Frames",
-            "examples": [
-              81
-            ]
-          },
-          "negative_prompt": {
-            "type": "string",
-            "title": "Negative Prompt",
-            "description": "Negative prompt for video generation.",
-            "default": ""
-          },
-          "num_interpolated_frames": {
-            "type": "integer",
-            "maximum": 4,
-            "title": "Number of Interpolated Frames",
-            "examples": [
-              0
-            ],
-            "description": "Number of frames to interpolate between each pair of generated frames. Must be between 0 and 4.",
-            "minimum": 0,
-            "default": 0
-          },
-          "frames_per_second": {
-            "title": "Frames per Second",
-            "examples": [
-              24
-            ],
-            "description": "Frames per second of the generated video. Must be between 4 to 60. When using interpolation and `adjust_fps_for_interpolation` is set to true (default true,) the final FPS will be multiplied by the number of interpolated frames plus one. For example, if the generated frames per second is 16 and the number of interpolated frames is 1, the final frames per second will be 32. If `adjust_fps_for_interpolation` is set to false, this value will be used as-is.",
-            "default": 24,
-            "anyOf": [
-              {
-                "type": "integer",
-                "maximum": 60,
-                "minimum": 4
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "resolution": {
-            "type": "string",
-            "enum": [
-              "580p",
-              "720p"
-            ],
-            "title": "Resolution",
-            "examples": [
-              "720p"
-            ],
-            "description": "Resolution of the generated video (580p or 720p).",
-            "default": "720p"
-          },
-          "guidance_scale": {
-            "type": "number",
-            "maximum": 10,
-            "title": "Guidance Scale",
-            "examples": [
-              3.5
-            ],
-            "description": "Classifier-free guidance scale. Higher values give better adherence to the prompt but may decrease quality.",
-            "minimum": 1,
-            "default": 3.5
-          },
-          "enable_safety_checker": {
+          "enable_prompt_expansion": {
             "type": "boolean",
-            "title": "Enable Safety Checker",
+            "description": "Whether to enable prompt expansion. This will use a large language model to expand the prompt with additional details while maintaining the original meaning.",
+            "title": "Enable Prompt Expansion",
             "examples": [
-              true
+              false
             ],
-            "description": "If set to true, input data will be checked for safety before processing.",
             "default": false
           },
           "video_quality": {
@@ -252,12 +160,65 @@
               "high",
               "maximum"
             ],
+            "description": "The quality of the output video. Higher quality means better visual quality but larger file size.",
             "title": "Video Quality",
             "examples": [
               "high"
             ],
-            "description": "The quality of the output video. Higher quality means better visual quality but larger file size.",
             "default": "high"
+          },
+          "num_frames": {
+            "maximum": 161,
+            "minimum": 17,
+            "title": "Number of Frames",
+            "default": 81,
+            "type": "integer",
+            "description": "Number of frames to generate. Must be between 17 to 161 (inclusive).",
+            "examples": [
+              81
+            ]
+          },
+          "adjust_fps_for_interpolation": {
+            "type": "boolean",
+            "description": "If true, the number of frames per second will be multiplied by the number of interpolated frames plus one. For example, if the generated frames per second is 16 and the number of interpolated frames is 1, the final frames per second will be 32. If false, the passed frames per second will be used as-is.",
+            "title": "Adjust FPS for Interpolation",
+            "examples": [
+              true
+            ],
+            "default": true
+          },
+          "negative_prompt": {
+            "type": "string",
+            "description": "Negative prompt for video generation.",
+            "title": "Negative Prompt",
+            "default": ""
+          },
+          "frames_per_second": {
+            "description": "Frames per second of the generated video. Must be between 4 to 60. When using interpolation and `adjust_fps_for_interpolation` is set to true (default true,) the final FPS will be multiplied by the number of interpolated frames plus one. For example, if the generated frames per second is 16 and the number of interpolated frames is 1, the final frames per second will be 32. If `adjust_fps_for_interpolation` is set to false, this value will be used as-is.",
+            "anyOf": [
+              {
+                "maximum": 60,
+                "type": "integer",
+                "minimum": 4
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frames per Second",
+            "examples": [
+              24
+            ],
+            "default": 24
+          },
+          "enable_safety_checker": {
+            "type": "boolean",
+            "description": "If set to true, input data will be checked for safety before processing. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "title": "Enable Safety Checker",
+            "examples": [
+              true
+            ],
+            "default": false
           },
           "aspect_ratio": {
             "type": "string",
@@ -266,121 +227,138 @@
               "9:16",
               "1:1"
             ],
+            "description": "Aspect ratio of the generated video (16:9 or 9:16).",
             "title": "Aspect Ratio",
             "examples": [
               "16:9",
               "9:16",
               "1:1"
             ],
-            "description": "Aspect ratio of the generated video (16:9 or 9:16).",
             "default": "16:9"
           },
-          "enable_output_safety_checker": {
-            "type": "boolean",
-            "title": "Enable Output Safety Checker",
+          "num_interpolated_frames": {
+            "maximum": 4,
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of frames to interpolate between each pair of generated frames. Must be between 0 and 4.",
+            "title": "Number of Interpolated Frames",
             "examples": [
-              false
+              0
             ],
-            "description": "If set to true, output video will be checked for safety after generation.",
-            "default": false
+            "default": 0
+          },
+          "seed": {
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "guidance_scale": {
+            "maximum": 10,
+            "type": "number",
+            "minimum": 1,
+            "description": "Classifier-free guidance scale. Higher values give better adherence to the prompt but may decrease quality.",
+            "title": "Guidance Scale",
+            "examples": [
+              3.5
+            ],
+            "default": 3.5
+          },
+          "shift": {
+            "maximum": 10,
+            "type": "number",
+            "minimum": 1,
+            "description": "Shift value for the video. Must be between 1.0 and 10.0.",
+            "title": "Shift",
+            "examples": [
+              5
+            ],
+            "default": 5
           },
           "num_inference_steps": {
-            "type": "integer",
             "maximum": 50,
+            "type": "integer",
+            "minimum": 2,
+            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
             "title": "Number of Inference Steps",
             "examples": [
               40
             ],
-            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
-            "minimum": 2,
             "default": 40
           },
           "prompt": {
             "type": "string",
+            "description": "The text prompt to guide video generation.",
             "title": "Prompt",
             "examples": [
               "A medium shot establishes a modern, minimalist office setting: clean lines, muted grey walls, and polished wood surfaces. The focus shifts to a close-up on a woman in sharp, navy blue business attire. Her crisp white blouse contrasts with the deep blue of her tailored suit jacket. The subtle texture of the fabric is visible—a fine weave with a slight sheen. Her expression is serious, yet engaging, as she speaks to someone unseen just beyond the frame. Close-up on her eyes, showing the intensity of her gaze and the fine lines around them that hint at experience and focus. Her lips are slightly parted, as if mid-sentence. The light catches the subtle highlights in her auburn hair, meticulously styled. Note the slight catch of light on the silver band of her watch. High resolution 4k"
-            ],
-            "description": "The text prompt to guide video generation."
+            ]
           }
-        }
+        },
+        "required": [
+          "prompt"
+        ],
+        "title": "WanSmallT2VRequest"
       },
       "WanV225bTextToVideoOutput": {
         "type": "object",
-        "required": [
-          "video",
-          "seed"
-        ],
         "x-fal-order-properties": [
           "video",
           "prompt",
           "seed"
         ],
-        "title": "WanSmallT2VResponse",
         "properties": {
           "seed": {
             "type": "integer",
-            "title": "Seed",
-            "description": "The seed used for generation."
+            "description": "The seed used for generation.",
+            "title": "Seed"
           },
           "video": {
-            "$ref": "#/components/schemas/File",
+            "description": "The generated video file.",
             "examples": [
               {
                 "url": "https://storage.googleapis.com/falserverless/model_tests/wan/v2.2-small-output.mp4"
               }
             ],
-            "description": "The generated video file."
+            "$ref": "#/components/schemas/File"
           },
           "prompt": {
             "type": "string",
+            "description": "The text prompt used for video generation.",
             "title": "Prompt",
             "examples": [
               "A medium shot establishes a modern, minimalist office setting: clean lines, muted grey walls, and polished wood surfaces. The focus shifts to a close-up on a woman in sharp, navy blue business attire. Her crisp white blouse contrasts with the deep blue of her tailored suit jacket. The subtle texture of the fabric is visible—a fine weave with a slight sheen. Her expression is serious, yet engaging, as she speaks to someone unseen just beyond the frame. Close-up on her eyes, showing the intensity of her gaze and the fine lines around them that hint at experience and focus. Her lips are slightly parted, as if mid-sentence. The light catches the subtle highlights in her auburn hair, meticulously styled. Note the slight catch of light on the silver band of her watch. High resolution 4k"
             ],
-            "description": "The text prompt used for video generation.",
             "default": ""
           }
-        }
+        },
+        "required": [
+          "video",
+          "seed"
+        ],
+        "title": "WanSmallT2VResponse"
       },
       "File": {
         "type": "object",
-        "required": [
-          "url"
-        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "title": "File",
         "properties": {
           "url": {
             "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "content_type": {
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
           },
           "file_size": {
-            "title": "File Size",
-            "examples": [
-              4404019
-            ],
             "description": "The size of the file in bytes.",
             "anyOf": [
               {
@@ -389,13 +367,28 @@
               {
                 "type": "null"
               }
+            ],
+            "title": "File Size",
+            "examples": [
+              4404019
+            ]
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
             ]
           },
           "file_name": {
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
             "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
@@ -404,9 +397,17 @@
               {
                 "type": "null"
               }
+            ],
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
             ]
           }
-        }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "File"
       }
     }
   },

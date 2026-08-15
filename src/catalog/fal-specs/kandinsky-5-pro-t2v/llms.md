@@ -58,6 +58,10 @@ The API accepts the following input parameters:
   - Default: `"regular"`
   - Options: `"none"`, `"regular"`
 
+- **`seed`** (`integer`, _optional_):
+  The seed to use for generation. If not provided, a random seed will be used.
+  - Examples: 42
+
 
 
 **Required Parameters Example**:
@@ -77,7 +81,8 @@ The API accepts the following input parameters:
   "aspect_ratio": "3:2",
   "duration": "5s",
   "num_inference_steps": 28,
-  "acceleration": "regular"
+  "acceleration": "regular",
+  "seed": 42
 }
 ```
 
@@ -88,7 +93,10 @@ The API returns the following output format:
 
 - **`video`** (`File`, _optional_):
   The generated video file.
-  - Examples: {"file_name":"output.mp4","file_size":14530500,"content_type":"application/octet-stream","url":"https://v3b.fal.media/files/b/0a87754e/o5FWdz83KTXzq0FB7aG5Q_output.mp4"}
+  - Examples: {"file_size":14530500,"file_name":"output.mp4","url":"https://v3b.fal.media/files/b/0a87754e/o5FWdz83KTXzq0FB7aG5Q_output.mp4","content_type":"application/octet-stream"}
+
+- **`seed`** (`integer`, _required_):
+  The seed used for generation.
 
 
 
@@ -97,10 +105,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_name": "output.mp4",
     "file_size": 14530500,
-    "content_type": "application/octet-stream",
-    "url": "https://v3b.fal.media/files/b/0a87754e/o5FWdz83KTXzq0FB7aG5Q_output.mp4"
+    "file_name": "output.mp4",
+    "url": "https://v3b.fal.media/files/b/0a87754e/o5FWdz83KTXzq0FB7aG5Q_output.mp4",
+    "content_type": "application/octet-stream"
   }
 }
 ```
@@ -188,6 +196,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

@@ -15,7 +15,7 @@
 
 ## Pricing
 
-For every second of 720p video you generated, you will be charged **$0.3034/second**. Your request will cost $0.014 per 1000 tokens. The number of tokens is given by (height of output video * width of output video * duration * 24) / 1024. 
+For every second of 720p video you generated, you will be charged **$0.3034/second** and for 1080p you will be charged **$0.682/second**. Your request will cost **$0.014** per 1000 tokens for **480p, 720p and 1080p**. Your request will cost **$0.008** per 1000 tokens for **4k** . The number of tokens is given by (height of output video * width of output video * duration * 24) / 1024. 
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -35,9 +35,9 @@ The API accepts the following input parameters:
   - Examples: "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea."
 
 - **`resolution`** (`ResolutionEnum`, _optional_):
-  Video resolution - 480p for faster generation, 720p for balance, 1080p for highest quality. Default value: `"720p"`
+  Video resolution - 480p for faster generation, 720p for balance, 1080p for high quality, 4k for highest quality. Default value: `"720p"`
   - Default: `"720p"`
-  - Options: `"480p"`, `"720p"`, `"1080p"`
+  - Options: `"480p"`, `"720p"`, `"1080p"`, `"4k"`
 
 - **`duration`** (`DurationEnum`, _optional_):
   Duration of the video in seconds. Supports 4 to 15 seconds, or auto to let the model decide based on the prompt. Default value: `"auto"`
@@ -53,8 +53,11 @@ The API accepts the following input parameters:
   Whether to generate synchronized audio for the video, including sound effects, ambient sounds, and lip-synced speech. The cost of video generation is the same regardless of whether audio is generated or not. Default value: `true`
   - Default: `true`
 
-- **`seed`** (`integer`, _optional_):
-  Random seed for reproducibility. Note that results may still vary slightly even with the same seed.
+- **`bitrate_mode`** (`BitrateModeEnum`, _optional_):
+  Output bitrate mode. 'high' requests a higher-quality, larger-file encode from the model; 'standard' uses the default bitrate. Default value: `"standard"`
+  - Default: `"standard"`
+  - Options: `"standard"`, `"high"`
+  - Examples: "standard"
 
 - **`end_user_id`** (`string`, _optional_):
   The unique user ID of the end user.
@@ -77,7 +80,8 @@ The API accepts the following input parameters:
   "resolution": "720p",
   "duration": "auto",
   "aspect_ratio": "auto",
-  "generate_audio": true
+  "generate_audio": true,
+  "bitrate_mode": "standard"
 }
 ```
 
@@ -190,6 +194,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

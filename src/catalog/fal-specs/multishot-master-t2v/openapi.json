@@ -9,7 +9,8 @@
       "category": "text-to-video",
       "thumbnailUrl": "https://v3b.fal.media/files/b/0a8fcff7/QhDSLUuNs_tNXH-EmoI9Q_5a919a68470d429cb098f2bdace1ae1b.jpg",
       "playgroundUrl": "https://fal.ai/models/fal-ai/multishot-master",
-      "documentationUrl": "https://fal.ai/models/fal-ai/multishot-master/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/multishot-master/api",
+      "about": "Generate"
     }
   },
   "components": {
@@ -70,28 +71,37 @@
         ]
       },
       "MultishotMasterInput": {
-        "title": "MultiShotInput",
         "properties": {
-          "aspect_ratio": {
-            "description": "Aspect ratio of the generated video.",
+          "num_inference_steps": {
+            "default": 50,
+            "minimum": 1,
+            "maximum": 50,
+            "title": "Num Inference Steps",
+            "description": "Number of denoising steps. Higher values produce better quality but take longer.",
+            "type": "integer"
+          },
+          "resolution": {
+            "default": "480p",
             "enum": [
-              "16:9",
-              "9:16"
+              "480p",
+              "720p"
             ],
-            "default": "16:9",
-            "type": "string",
-            "title": "Aspect Ratio"
+            "title": "Resolution",
+            "description": "Resolution of the generated video.",
+            "type": "string"
           },
           "enable_safety_checker": {
-            "description": "Enable safety checker for input/output content.",
             "default": true,
-            "type": "boolean",
-            "title": "Enable Safety Checker"
+            "title": "Enable Safety Checker",
+            "description": "Enable safety checker for input/output content.",
+            "type": "boolean"
           },
           "shots": {
+            "minItems": 1,
             "items": {
               "$ref": "#/components/schemas/Shot"
             },
+            "description": "List of shots to generate. Each shot has its own caption and frame count. Maximum 5 shots with a combined maximum of 308 frames.",
             "examples": [
               [
                 {
@@ -108,43 +118,53 @@
                 }
               ]
             ],
-            "description": "List of shots to generate. Each shot has its own caption and frame count. Maximum 5 shots with a combined maximum of 308 frames.",
+            "title": "Shots",
             "maxItems": 5,
-            "minItems": 1,
-            "type": "array",
-            "title": "Shots"
+            "type": "array"
+          },
+          "negative_prompt": {
+            "default": "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards",
+            "title": "Negative Prompt",
+            "description": "Negative prompt describing undesired content in the generated video.",
+            "type": "string"
           },
           "guidance_scale": {
+            "default": 5,
+            "minimum": 0,
+            "maximum": 20,
             "title": "Guidance Scale",
             "description": "Classifier-free guidance scale.",
-            "maximum": 20,
-            "default": 5,
-            "type": "number",
-            "minimum": 0
-          },
-          "resolution": {
-            "description": "Resolution of the generated video.",
-            "enum": [
-              "480p",
-              "720p"
-            ],
-            "default": "480p",
-            "type": "string",
-            "title": "Resolution"
+            "type": "number"
           },
           "prompt": {
-            "type": "string",
+            "minLength": 1,
             "examples": [
               "Subject 1: A man wearing a grey t-shirt, dark vest. Subject 2: A woman with long brown hair, wearing a soft pink floral sundress. The whole scene takes place indoors in a spacious, well-decorated room. The visual style is modern television production, featuring clear imagery and naturalistic representation."
             ],
             "maxLength": 2500,
+            "title": "Prompt",
             "description": "Global story caption describing the overall scene, subjects, setting, and visual style. This provides inter-shot consistency.",
-            "minLength": 1,
-            "title": "Prompt"
+            "type": "string"
+          },
+          "frames_per_second": {
+            "default": 16,
+            "minimum": 5,
+            "maximum": 30,
+            "title": "Frames Per Second",
+            "description": "Frames per second of the output video.",
+            "type": "integer"
+          },
+          "aspect_ratio": {
+            "default": "16:9",
+            "enum": [
+              "16:9",
+              "9:16"
+            ],
+            "title": "Aspect Ratio",
+            "description": "Aspect ratio of the generated video.",
+            "type": "string"
           },
           "seed": {
-            "title": "Seed",
-            "description": "Random seed for reproducibility.",
             "anyOf": [
               {
                 "type": "integer"
@@ -152,36 +172,11 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "num_inference_steps": {
-            "title": "Num Inference Steps",
-            "description": "Number of denoising steps. Higher values produce better quality but take longer.",
-            "maximum": 50,
-            "default": 50,
-            "type": "integer",
-            "minimum": 1
-          },
-          "negative_prompt": {
-            "description": "Negative prompt describing undesired content in the generated video.",
-            "default": "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards",
-            "type": "string",
-            "title": "Negative Prompt"
-          },
-          "frames_per_second": {
-            "title": "Frames Per Second",
-            "description": "Frames per second of the output video.",
-            "maximum": 30,
-            "default": 16,
-            "type": "integer",
-            "minimum": 5
+            ],
+            "title": "Seed",
+            "description": "Random seed for reproducibility."
           }
         },
-        "required": [
-          "prompt",
-          "shots"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "shots",
@@ -193,97 +188,92 @@
           "seed",
           "frames_per_second",
           "enable_safety_checker"
-        ]
+        ],
+        "required": [
+          "prompt",
+          "shots"
+        ],
+        "title": "MultiShotInput",
+        "type": "object"
       },
       "MultishotMasterOutput": {
-        "title": "MultiShotOutput",
         "properties": {
           "video": {
+            "$ref": "#/components/schemas/File",
+            "description": "The generated multi-shot narrative video.",
             "examples": [
               {
-                "url": "https://v3b.fal.media/files/b/0a8fb858/x6xEQNBP9m61inmR6p_WH_output.mp4",
-                "content_type": "video/mp4",
                 "file_name": "output.mp4",
-                "file_size": 837114
+                "url": "https://v3b.fal.media/files/b/0a8fb858/x6xEQNBP9m61inmR6p_WH_output.mp4",
+                "file_size": 837114,
+                "content_type": "video/mp4"
               }
-            ],
-            "$ref": "#/components/schemas/File",
-            "description": "The generated multi-shot narrative video."
-          },
-          "seed": {
-            "description": "The seed used for generation.",
-            "examples": [
-              680491931
-            ],
-            "type": "integer",
-            "title": "Seed"
+            ]
           },
           "timings": {
-            "type": "object",
-            "description": "Performance timing information.",
             "additionalProperties": {
               "type": "number"
             },
-            "title": "Timings"
+            "title": "Timings",
+            "description": "Performance timing information.",
+            "type": "object"
+          },
+          "seed": {
+            "examples": [
+              680491931
+            ],
+            "title": "Seed",
+            "description": "The seed used for generation.",
+            "type": "integer"
           }
         },
+        "x-fal-order-properties": [
+          "video",
+          "seed",
+          "timings"
+        ],
         "required": [
           "video",
           "seed",
           "timings"
         ],
-        "type": "object",
-        "x-fal-order-properties": [
-          "video",
-          "seed",
-          "timings"
-        ]
+        "title": "MultiShotOutput",
+        "type": "object"
       },
       "Shot": {
-        "title": "Shot",
         "properties": {
           "prompt": {
-            "type": "string",
+            "minLength": 1,
             "examples": [
               "Subject 1 is smiling and gesturing with his right hand while facing the camera. Subject 2 is seen from behind, facing Subject 1. The scene is indoors in a well-decorated room, with a dark door and ornate glass visible in the background. The camera is static, providing a medium close-up shot of Subject 1."
             ],
             "maxLength": 2500,
+            "title": "Prompt",
             "description": "Caption describing what happens in this shot, including subject actions, camera angles, and scene details.",
-            "minLength": 1,
-            "title": "Prompt"
+            "type": "string"
           },
           "num_frames": {
+            "default": 65,
+            "minimum": 17,
+            "maximum": 100,
             "title": "Num Frames",
             "description": "Number of frames for this shot. Each shot must have between 17 and 100 frames.",
-            "maximum": 100,
-            "default": 65,
-            "type": "integer",
-            "minimum": 17
+            "type": "integer"
           }
         },
-        "required": [
-          "prompt"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "num_frames"
-        ]
+        ],
+        "required": [
+          "prompt"
+        ],
+        "title": "Shot",
+        "type": "object"
       },
       "File": {
-        "title": "File",
         "properties": {
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
-          },
-          "content_type": {
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
+          "file_name": {
             "anyOf": [
               {
                 "type": "string"
@@ -291,29 +281,19 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "file_name": {
+            ],
             "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
             ]
           },
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
           "file_size": {
-            "title": "File Size",
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -321,19 +301,40 @@
               {
                 "type": "null"
               }
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ]
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
             ]
           }
         },
-        "required": [
-          "url"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
-        ]
+        ],
+        "required": [
+          "url"
+        ],
+        "title": "File",
+        "type": "object"
       }
     }
   },

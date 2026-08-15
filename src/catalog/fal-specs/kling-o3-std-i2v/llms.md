@@ -57,9 +57,10 @@ The API accepts the following input parameters:
   - Array of KlingV3MultiPromptElement
   - Examples: null
 
-- **`shot_type`** (`string`, _optional_):
-  The type of multi-shot video generation. Default value: `"customize"`
+- **`shot_type`** (`ShotTypeEnum`, _optional_):
+  The type of multi-shot video generation. 'intelligent' lets the model automatically determine shot structure. Default value: `"customize"`
   - Default: `"customize"`
+  - Options: `"customize"`, `"intelligent"`
 
 
 
@@ -91,7 +92,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video.
-  - Examples: {"content_type":"video/mp4","file_size":12037975,"url":"https://v3b.fal.media/files/b/0a8d0278/pgIO9yOXTFCTetKBsqDwX_output.mp4","file_name":"output.mp4"}
+  - Examples: {"url":"https://v3b.fal.media/files/b/0a8d0278/pgIO9yOXTFCTetKBsqDwX_output.mp4","file_name":"output.mp4","content_type":"video/mp4","file_size":12037975}
 
 
 
@@ -100,10 +101,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "video/mp4",
-    "file_size": 12037975,
     "url": "https://v3b.fal.media/files/b/0a8d0278/pgIO9yOXTFCTetKBsqDwX_output.mp4",
-    "file_name": "output.mp4"
+    "file_name": "output.mp4",
+    "content_type": "video/mp4",
+    "file_size": 12037975
   }
 }
 ```
@@ -191,6 +192,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

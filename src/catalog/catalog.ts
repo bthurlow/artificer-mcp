@@ -16,6 +16,22 @@ interface AccessRoute {
   cost: string;
   key_env_var: string;
   stub: boolean;
+  /**
+   * Upstream retirement notice, verbatim, when the provider has deprecated
+   * this endpoint. Its presence — not its text — is the signal.
+   *
+   * The dangerous case is not a route that 404s; that fails loudly. It is a
+   * route that still returns 200 while silently serving a *different* model
+   * than the one the catalog named. Advertising that route as a normal
+   * choice would make the catalog complicit in exactly the hidden routing
+   * this server exists to avoid, so deprecated routes are treated as
+   * unavailable and hidden unless the caller asks for everything.
+   *
+   * `cost` on a deprecated route is the last price observed before
+   * retirement and is no longer authoritative — billing follows whatever
+   * model the provider redirects to.
+   */
+  deprecated?: string;
 }
 
 /**
@@ -98,7 +114,8 @@ type CatalogResponse = FilteredCatalog;
  *
  * Rules:
  *  - A route is `available` iff its `key_env_var` is set in env AND its
- *    `tool` is present in the tool registry AND `stub` is false.
+ *    `tool` is present in the tool registry AND `stub` is false AND it
+ *    carries no `deprecated` notice.
  *  - By default (include_unavailable=false), routes that fail any check
  *    are dropped from the response AND entries with zero remaining
  *    routes are dropped with them.
@@ -136,7 +153,7 @@ export function filterCatalog(
           const keyValue = env[route.key_env_var];
           const hasKey = typeof keyValue === 'string' && keyValue.length > 0;
           const toolExists = isRegistered(route.tool);
-          const available = hasKey && toolExists && !route.stub;
+          const available = hasKey && toolExists && !route.stub && !route.deprecated;
           if (!toolExists && !route.stub) {
             warnings.push(
               `Catalog entry ${entry.slug} route points at unregistered tool "${route.tool}" ` +
@@ -184,7 +201,7 @@ const catalogSchema = z.object({
     .boolean()
     .default(false)
     .describe(
-      'If true, include routes whose API keys are not configured, whose transport tool is not yet registered (Phase 4+ image, Phase 5+ music/speech, Phase 3 safety), or that are marked stub. Each route carries an `available` boolean so callers can see what is missing. Default false.',
+      'If true, include routes whose API keys are not configured, whose transport tool is not yet registered (Phase 4+ image, Phase 5+ music/speech, Phase 3 safety), that are marked stub, or that the provider has deprecated. Each route carries an `available` boolean so callers can see what is missing, and deprecated routes carry a `deprecated` notice explaining what they now redirect to. Default false.',
     ),
 });
 
@@ -197,7 +214,7 @@ export function registerCatalogTools(server: McpServer): void {
   registerTool<ModelCatalogParams>(
     server,
     'model_catalog',
-    'List available media-generation models grouped by capability and sub-class. Returns logical model slugs, prompt guide tool names, and access routes (provider + transport tool + wire-level model id + cost). Music entries also carry `vocals` ("vocal_capable" or "instrumental_only") — the sub-class says what a model is for, `vocals` says whether it can sing. Call this first when you need to pick a model for a task; then call the relevant prompt_guide, then the access route\'s transport tool. Use `include_unavailable: true` to see models whose API keys aren\'t configured.',
+    'List available media-generation models grouped by capability and sub-class. Returns logical model slugs, prompt guide tool names, and access routes (provider + transport tool + wire-level model id + cost). Music entries also carry `vocals` ("vocal_capable" or "instrumental_only") — the sub-class says what a model is for, `vocals` says whether it can sing. Call this first when you need to pick a model for a task; then call the relevant prompt_guide, then the access route\'s transport tool. Routes the provider has deprecated — which still answer but silently serve a different model — are excluded. Use `include_unavailable: true` to see those plus models whose API keys aren\'t configured.',
     catalogSchema.shape,
     async ({ capability, include_unavailable }) => {
       const load = await loadCatalog();

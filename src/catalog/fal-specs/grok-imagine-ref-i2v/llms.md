@@ -44,15 +44,15 @@ The API accepts the following input parameters:
   - Default: `8`
   - Range: `1` to `10`
 
-- **`aspect_ratio`** (`AspectRatioEnum`, _optional_):
-  Aspect ratio of the generated video. Default value: `"16:9"`
-  - Default: `"16:9"`
-  - Options: `"16:9"`, `"4:3"`, `"3:2"`, `"1:1"`, `"2:3"`, `"3:4"`, `"9:16"`
-
 - **`resolution`** (`ResolutionEnum`, _optional_):
   Resolution of the output video. Default value: `"480p"`
   - Default: `"480p"`
   - Options: `"480p"`, `"720p"`
+
+- **`aspect_ratio`** (`AspectRatioEnum`, _optional_):
+  Aspect ratio of the generated video. Default value: `"16:9"`
+  - Default: `"16:9"`
+  - Options: `"16:9"`, `"4:3"`, `"3:2"`, `"1:1"`, `"2:3"`, `"3:4"`, `"9:16"`
 
 
 
@@ -76,8 +76,8 @@ The API accepts the following input parameters:
     "https://v3b.fal.media/files/b/0a8b90e0/BFLE9VDlZqsryU-UA3BoD_image_004.png"
   ],
   "duration": 8,
-  "aspect_ratio": "16:9",
-  "resolution": "480p"
+  "resolution": "480p",
+  "aspect_ratio": "16:9"
 }
 ```
 
@@ -88,7 +88,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video.
-  - Examples: {"height":720,"content_type":"video/mp4","width":1280,"url":"https://v3b.fal.media/files/b/0a8b90e4/r2v_output.mp4","fps":24,"num_frames":192,"duration":8,"file_name":"r2v_output.mp4"}
+  - Examples: {"fps":24,"width":1280,"file_name":"r2v_output.mp4","url":"https://v3b.fal.media/files/b/0a8b90e4/r2v_output.mp4","duration":8,"num_frames":192,"content_type":"video/mp4","height":720}
 
 
 
@@ -97,14 +97,14 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "height": 720,
-    "content_type": "video/mp4",
-    "width": 1280,
-    "url": "https://v3b.fal.media/files/b/0a8b90e4/r2v_output.mp4",
     "fps": 24,
-    "num_frames": 192,
+    "width": 1280,
+    "file_name": "r2v_output.mp4",
+    "url": "https://v3b.fal.media/files/b/0a8b90e4/r2v_output.mp4",
     "duration": 8,
-    "file_name": "r2v_output.mp4"
+    "num_frames": 192,
+    "content_type": "video/mp4",
+    "height": 720
   }
 }
 ```
@@ -197,6 +197,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

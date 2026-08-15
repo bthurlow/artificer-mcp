@@ -35,7 +35,7 @@ The API accepts the following input parameters:
 
 - **`image_url`** (`string`, _required_):
   URL of the image to use as the first frame
-  - Examples: "https://fal.media/files/elephant/8kkhB12hEZI2kkbU8pZPA_test.jpeg"
+  - Examples: "https://storage.googleapis.com/falserverless/model_tests/wan/dragon-warrior.jpg"
 
 - **`prompt_optimizer`** (`boolean`, _optional_):
   Whether to use the model's prompt optimizer Default value: `true`
@@ -48,7 +48,7 @@ The API accepts the following input parameters:
 ```json
 {
   "prompt": "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage.",
-  "image_url": "https://fal.media/files/elephant/8kkhB12hEZI2kkbU8pZPA_test.jpeg"
+  "image_url": "https://storage.googleapis.com/falserverless/model_tests/wan/dragon-warrior.jpg"
 }
 ```
 
@@ -57,7 +57,7 @@ The API accepts the following input parameters:
 ```json
 {
   "prompt": "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage.",
-  "image_url": "https://fal.media/files/elephant/8kkhB12hEZI2kkbU8pZPA_test.jpeg",
+  "image_url": "https://storage.googleapis.com/falserverless/model_tests/wan/dragon-warrior.jpg",
   "prompt_optimizer": true
 }
 ```
@@ -95,7 +95,7 @@ curl --request POST \
   --header "Content-Type: application/json" \
   --data '{
      "prompt": "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage.",
-     "image_url": "https://fal.media/files/elephant/8kkhB12hEZI2kkbU8pZPA_test.jpeg"
+     "image_url": "https://storage.googleapis.com/falserverless/model_tests/wan/dragon-warrior.jpg"
    }'
 ```
 
@@ -121,7 +121,7 @@ result = fal_client.subscribe(
     "fal-ai/minimax/video-01-live/image-to-video",
     arguments={
         "prompt": "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage.",
-        "image_url": "https://fal.media/files/elephant/8kkhB12hEZI2kkbU8pZPA_test.jpeg"
+        "image_url": "https://storage.googleapis.com/falserverless/model_tests/wan/dragon-warrior.jpg"
     },
     with_logs=True,
     on_queue_update=on_queue_update,
@@ -145,7 +145,7 @@ import { fal } from "@fal-ai/client";
 const result = await fal.subscribe("fal-ai/minimax/video-01-live/image-to-video", {
   input: {
     prompt: "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage.",
-    image_url: "https://fal.media/files/elephant/8kkhB12hEZI2kkbU8pZPA_test.jpeg"
+    image_url: "https://storage.googleapis.com/falserverless/model_tests/wan/dragon-warrior.jpg"
   },
   logs: true,
   onQueueUpdate: (update) => {
@@ -169,6 +169,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

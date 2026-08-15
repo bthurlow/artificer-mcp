@@ -7,9 +7,10 @@
     "x-fal-metadata": {
       "endpointId": "bytedance/seedance-2.0/fast/reference-to-video",
       "category": "image-to-video",
-      "thumbnailUrl": "https://v3b.fal.media/files/b/0a9460b6/VCevn6m8ZHXjzngj0GP01_3ef8a526ee82468c9b2154bc6d10764e.jpg",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a9c2f0f/CksSmhus-kf2wceFqGv6u_28b605ee7aca4793871852ab3ecd70b6.jpg",
       "playgroundUrl": "https://fal.ai/models/bytedance/seedance-2.0/fast/reference-to-video",
-      "documentationUrl": "https://fal.ai/models/bytedance/seedance-2.0/fast/reference-to-video/api"
+      "documentationUrl": "https://fal.ai/models/bytedance/seedance-2.0/fast/reference-to-video/api",
+      "about": "Fast Reference To Video"
     }
   },
   "components": {
@@ -70,6 +71,7 @@
         ]
       },
       "Seedance20FastReferenceToVideoInput": {
+        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "image_urls",
@@ -79,20 +81,50 @@
           "duration",
           "aspect_ratio",
           "generate_audio",
-          "seed",
+          "bitrate_mode",
           "end_user_id"
         ],
-        "required": [
-          "prompt"
-        ],
-        "title": "Seedance2R2VFastInput",
-        "type": "object",
         "properties": {
-          "aspect_ratio": {
-            "description": "The aspect ratio of the generated video. Use 16:9 for landscape, 9:16 for portrait/vertical, 1:1 for square, 21:9 for ultrawide cinematic, or auto to let the model decide.",
-            "title": "Aspect Ratio",
-            "default": "auto",
+          "generate_audio": {
+            "type": "boolean",
+            "description": "Whether to generate synchronized audio for the video, including sound effects, ambient sounds, and lip-synced speech. The cost of video generation is the same regardless of whether audio is generated or not.",
+            "title": "Generate Audio",
+            "default": true
+          },
+          "prompt": {
             "type": "string",
+            "description": "The text prompt used to generate the video.",
+            "title": "Prompt",
+            "examples": [
+              "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea."
+            ]
+          },
+          "resolution": {
+            "type": "string",
+            "description": "Video resolution - 480p for faster generation, 720p for balance.",
+            "enum": [
+              "480p",
+              "720p"
+            ],
+            "title": "Resolution",
+            "default": "720p"
+          },
+          "bitrate_mode": {
+            "type": "string",
+            "description": "Output bitrate mode. 'high' requests a higher-quality, larger-file encode from the model; 'standard' uses the default bitrate.",
+            "enum": [
+              "standard",
+              "high"
+            ],
+            "title": "Bitrate Mode",
+            "examples": [
+              "standard"
+            ],
+            "default": "standard"
+          },
+          "aspect_ratio": {
+            "type": "string",
+            "description": "The aspect ratio of the generated video. Use 16:9 for landscape, 9:16 for portrait/vertical, 1:1 for square, 21:9 for ultrawide cinematic, or auto to let the model decide.",
             "enum": [
               "auto",
               "21:9",
@@ -101,71 +133,39 @@
               "1:1",
               "3:4",
               "9:16"
-            ]
-          },
-          "image_urls": {
-            "description": "Reference images to guide video generation. Refer to them in the prompt as @Image1, @Image2, etc. Supported formats: JPEG, PNG, WebP. Max 30 MB per image. Up to 9 images. Total files across all modalities must not exceed 12.",
-            "title": "Image Urls",
-            "type": "array",
-            "examples": [
-              [
-                "https://v3b.fal.media/files/b/0a8eba37/Cqg-4Uwzyz4DELfceT1CF_a17e588773ec45b1a9e6f100a787b80b.jpg"
-              ]
             ],
-            "items": {
-              "type": "string"
-            }
+            "title": "Aspect Ratio",
+            "default": "auto"
           },
-          "resolution": {
-            "description": "Video resolution - 480p for faster generation, 720p for balance.",
-            "title": "Resolution",
-            "default": "720p",
-            "type": "string",
-            "enum": [
-              "480p",
-              "720p"
-            ]
-          },
-          "audio_urls": {
-            "description": "Reference audio to guide video generation. Refer to them in the prompt as @Audio1, @Audio2, etc. Supported formats: MP3, WAV. Up to 3 files, combined duration must not exceed 15 seconds. Max 15 MB per file.If audio is provided, at least one reference image or video is required.",
-            "title": "Audio Urls",
-            "type": "array",
-            "items": {
-              "type": "string",
-              "_fal_ui_field": "audio"
-            }
-          },
-          "generate_audio": {
-            "description": "Whether to generate synchronized audio for the video, including sound effects, ambient sounds, and lip-synced speech. The cost of video generation is the same regardless of whether audio is generated or not.",
-            "title": "Generate Audio",
-            "default": true,
-            "type": "boolean"
-          },
-          "seed": {
+          "end_user_id": {
+            "description": "The unique user ID of the end user.",
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Random seed for reproducibility. Note that results may still vary slightly even with the same seed.",
-            "title": "Seed"
+            "title": "End User Id"
           },
-          "prompt": {
-            "description": "The text prompt used to generate the video.",
-            "title": "Prompt",
-            "type": "string",
+          "image_urls": {
+            "type": "array",
+            "maxItems": 9,
+            "description": "Reference images to guide video generation. Refer to them in the prompt as @Image1, @Image2, etc. Supported formats: JPEG, PNG, WebP. Max 30 MB per image. Up to 9 images. Total files across all modalities must not exceed 12.",
             "examples": [
-              "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea."
-            ]
+              [
+                "https://v3b.fal.media/files/b/0a8eba37/Cqg-4Uwzyz4DELfceT1CF_a17e588773ec45b1a9e6f100a787b80b.jpg"
+              ]
+            ],
+            "title": "Image Urls",
+            "items": {
+              "type": "string"
+            }
           },
           "duration": {
-            "description": "Duration of the video in seconds. Supports 4 to 15 seconds, or auto to let the model decide based on the prompt.",
-            "title": "Duration",
-            "default": "auto",
             "type": "string",
+            "description": "Duration of the video in seconds. Supports 4 to 15 seconds, or auto to let the model decide based on the prompt.",
             "enum": [
               "auto",
               "4",
@@ -180,43 +180,51 @@
               "13",
               "14",
               "15"
-            ]
+            ],
+            "title": "Duration",
+            "default": "auto"
           },
           "video_urls": {
+            "type": "array",
+            "maxItems": 3,
             "description": "Reference videos to guide video generation. Refer to them in the prompt as @Video1, @Video2, etc. Supported formats: MP4, MOV. Up to 3 videos, combined duration must be between 2 and 15 seconds, total size under 50 MB. Each video must be between ~480p (640x640) and ~720p (834x1112) in resolution.",
             "title": "Video Urls",
-            "type": "array",
             "items": {
               "type": "string",
               "_fal_ui_field": "video"
             }
           },
-          "end_user_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The unique user ID of the end user.",
-            "title": "End User Id"
+          "audio_urls": {
+            "type": "array",
+            "maxItems": 3,
+            "description": "Reference audio to guide video generation. Refer to them in the prompt as @Audio1, @Audio2, etc. Supported formats: MP3, WAV. Up to 3 files, combined duration must not exceed 15 seconds. Max 15 MB per file.If audio is provided, at least one reference image or video is required.",
+            "title": "Audio Urls",
+            "items": {
+              "type": "string",
+              "_fal_ui_field": "audio"
+            }
           }
-        }
+        },
+        "required": [
+          "prompt"
+        ],
+        "title": "Seedance2R2VFastInput"
       },
       "Seedance20FastReferenceToVideoOutput": {
+        "type": "object",
         "x-fal-order-properties": [
           "video",
           "seed"
         ],
-        "required": [
-          "video",
-          "seed"
-        ],
-        "title": "Seedance2VideoOutput",
-        "type": "object",
         "properties": {
+          "seed": {
+            "type": "integer",
+            "description": "The seed used for generation.",
+            "title": "Seed",
+            "examples": [
+              42
+            ]
+          },
           "video": {
             "description": "The generated video file.",
             "$ref": "#/components/schemas/File",
@@ -225,66 +233,30 @@
                 "url": "https://storage.googleapis.com/falserverless/example_outputs/bytedance/seedance_2/output.mp4"
               }
             ]
-          },
-          "seed": {
-            "description": "The seed used for generation.",
-            "title": "Seed",
-            "type": "integer",
-            "examples": [
-              42
-            ]
           }
-        }
+        },
+        "required": [
+          "video",
+          "seed"
+        ],
+        "title": "Seedance2VideoOutput"
       },
       "File": {
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "required": [
-          "url"
-        ],
-        "title": "File",
-        "type": "object",
         "properties": {
           "url": {
+            "type": "string",
             "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ]
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
+            "title": "Url"
           },
           "file_size": {
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -293,13 +265,46 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
             "title": "File Size",
             "examples": [
               4404019
             ]
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
           }
-        }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "File"
       }
     }
   },

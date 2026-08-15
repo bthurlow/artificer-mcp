@@ -60,6 +60,28 @@ export function extractPricing(llmsText) {
 }
 
 /**
+ * Detect fal's retirement notice, which they publish *in place of* the
+ * Pricing block rather than as its own section:
+ *
+ *   "This model has been deprecated, and further requests are being
+ *    re-routed to Seedance 1.0 Pro Fast."
+ *
+ * Without this check the notice lands in `cost`, which is doubly wrong:
+ * it destroys the last known real price and it puts prose that isn't a
+ * price into a field callers read as one. Route it to `deprecated`
+ * instead and leave `cost` alone.
+ *
+ * Exported for unit testing.
+ *
+ * @param {string | null} pricing output of extractPricing
+ * @returns {string | null} the notice, or null if this isn't one
+ */
+export function extractDeprecation(pricing) {
+  if (!pricing) return null;
+  return /\bhas been deprecated\b/i.test(pricing) ? pricing : null;
+}
+
+/**
  * Collect every fal-provider access route from a loaded models.json, keyed by
  * logical model slug. Surfaces the `model` string (wire-level endpoint id) and
  * back-pointer to the route object so we can mutate `cost` in place.
@@ -138,17 +160,43 @@ async function syncOne({ slug, endpointId, route }, { dryRun }) {
   });
 
   const pricing = extractPricing(llmsText);
+  const deprecation = extractDeprecation(pricing);
+
+  if (deprecation) {
+    // Keep the last known price: a deprecated route still bills, just not
+    // necessarily at this rate any more. The `deprecated` string says so.
+    let changed = false;
+    if (route.deprecated !== deprecation) {
+      console.warn(`  DEPRECATED ${deprecation}`);
+      route.deprecated = deprecation;
+      changed = true;
+    } else {
+      console.warn(`  DEPRECATED (already flagged)`);
+    }
+    return changed;
+  }
+
+  // Recovered upstream — drop a stale flag rather than leaving a route
+  // permanently marked dead.
+  let changed = false;
+  if (route.deprecated) {
+    console.log(`  un-deprecated (upstream publishes pricing again)`);
+    delete route.deprecated;
+    changed = true;
+  }
+
   if (pricing) {
     if (route.cost !== pricing) {
       console.log(`  cost       ${route.cost ?? '(unset)'} → ${pricing}`);
       route.cost = pricing;
-      return true;
+      changed = true;
+    } else {
+      console.log(`  cost       unchanged`);
     }
-    console.log(`  cost       unchanged`);
   } else {
     console.warn(`  cost       WARNING: no Pricing section found in llms.txt`);
   }
-  return false;
+  return changed;
 }
 
 function parseArgs(argv) {
@@ -207,12 +255,28 @@ async function main() {
     const nextCatalog = JSON.stringify(catalog, null, 2) + '\n';
     if (nextCatalog !== catalogText) {
       if (dryRun) {
-        console.log('\nwould update src/catalog/models.json (cost fields)');
+        console.log('\nwould update src/catalog/models.json (cost / deprecated fields)');
       } else {
         await writeFile(MODELS_JSON, nextCatalog);
-        console.log('\nupdated src/catalog/models.json (cost fields)');
+        console.log('\nupdated src/catalog/models.json (cost / deprecated fields)');
       }
     }
+  }
+
+  // Surface retirements as their own block. These are the changes that
+  // actually alter what a caller gets back, so they must not be buried in
+  // several hundred lines of per-file "wrote" chatter.
+  const deprecated = routes.filter((r) => r.route.deprecated);
+  if (deprecated.length > 0) {
+    console.log(`\n${deprecated.length} DEPRECATED route(s) — review before shipping:`);
+    for (const d of deprecated) {
+      console.log(`  ${d.slug} (${d.endpointId})`);
+      console.log(`    ${d.route.deprecated}`);
+    }
+    console.log(
+      '\nDeprecated routes are hidden from model_catalog by default. Repoint callers at the ' +
+        'successor model, or drop the entry once nothing references it.',
+    );
   }
 
   if (failures.length > 0) {

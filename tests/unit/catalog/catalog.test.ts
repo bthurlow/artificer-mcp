@@ -228,3 +228,105 @@ describe('filterCatalog — runtime-tool-registration filter', () => {
     ).toBe(false);
   });
 });
+
+// A route the provider has retired: it still answers, but serves a
+// different model than the slug names. The catalog must not offer it as
+// a normal choice — that would be exactly the silent redirect this
+// server exists to avoid.
+const DEPRECATED_FIXTURE = {
+  $schema_version: '0.1.0',
+  video: {
+    general: [
+      {
+        slug: 'seedance-1-lite-t2v',
+        prompt_guide: 'seedance_prompt_guide',
+        access_routes: [
+          {
+            provider: 'fal',
+            tool: 'fal_generate_video',
+            model: 'fal-ai/bytedance/seedance/v1/lite/text-to-video',
+            cost: 'Each 720p 5 second video costs **$0.18**.',
+            key_env_var: 'FAL_KEY',
+            stub: false,
+            deprecated:
+              'This model has been deprecated, and further requests are being re-routed to Seedance 1.0 Pro Fast.',
+          },
+        ],
+      },
+      {
+        slug: 'seedance-2-t2v',
+        prompt_guide: 'seedance_prompt_guide',
+        access_routes: [
+          {
+            provider: 'fal',
+            tool: 'fal_generate_video',
+            model: 'bytedance/seedance-2.0/text-to-video',
+            cost: '$0.3034/sec',
+            key_env_var: 'FAL_KEY',
+            stub: false,
+          },
+        ],
+      },
+    ],
+  },
+};
+
+describe('filterCatalog — deprecated routes', () => {
+  const opts = {
+    isToolRegisteredFn: BOTH_REGISTERED,
+    env: { FAL_KEY: 'x' },
+  };
+
+  it('hides a deprecated route by default even when key and tool are present', () => {
+    const { catalog } = filterCatalog(DEPRECATED_FIXTURE, {
+      ...opts,
+      includeUnavailable: false,
+    });
+
+    // The deprecated entry loses its only route, so the entry goes too.
+    const slugs = catalog.video?.general.map((e) => e.slug) ?? [];
+    expect(slugs).toEqual(['seedance-2-t2v']);
+  });
+
+  it('surfaces the deprecated route and its notice under include_unavailable', () => {
+    const { catalog } = filterCatalog(DEPRECATED_FIXTURE, {
+      ...opts,
+      includeUnavailable: true,
+    });
+
+    const entry = catalog.video?.general.find(
+      (e) => e.slug === 'seedance-1-lite-t2v',
+    );
+    expect(entry).toBeDefined();
+    const route = entry!.access_routes[0];
+    expect(route.available).toBe(false);
+    // The notice must survive filtering — it is the only thing telling a
+    // caller why the route vanished and what it now redirects to.
+    expect(route.deprecated).toContain('Seedance 1.0 Pro Fast');
+  });
+
+  it('keeps the last known cost rather than overwriting it with the notice', () => {
+    const { catalog } = filterCatalog(DEPRECATED_FIXTURE, {
+      ...opts,
+      includeUnavailable: true,
+    });
+
+    const route = catalog.video?.general.find(
+      (e) => e.slug === 'seedance-1-lite-t2v',
+    )!.access_routes[0];
+    expect(route.cost).toContain('$0.18');
+    expect(route.cost).not.toContain('deprecated');
+  });
+
+  it('does not mark a healthy sibling route unavailable', () => {
+    const { catalog } = filterCatalog(DEPRECATED_FIXTURE, {
+      ...opts,
+      includeUnavailable: true,
+    });
+
+    const route = catalog.video?.general.find((e) => e.slug === 'seedance-2-t2v')!
+      .access_routes[0];
+    expect(route.available).toBe(true);
+    expect(route.deprecated).toBeUndefined();
+  });
+});

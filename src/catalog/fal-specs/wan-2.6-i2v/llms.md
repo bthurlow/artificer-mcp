@@ -31,7 +31,7 @@ The API accepts the following input parameters:
 
 
 - **`prompt`** (`string`, _required_):
-  The text prompt describing the desired video motion. Max 800 characters.
+  The text prompt describing the desired video motion. Max 1500 characters.
   - Examples: "A comedic cinematic demo where typed prompts physically transform reality. Photoreal, strong match cuts, coherent main character, no subtitles.\n\nShot 1 [0-4s] Continue from first frame. The creator presses \"PRINT\". The machine clunks like a spaceship. Creator whispers: \"Okay… I'm pressing enter.\"\nShot 2 [4-8s] Smash cut: the printed paper flies into the air and unfolds into a full desert canyon scene around the desk, like reality is being unrolled. Creator says: \"Wait—my prompt has physics?\"\nShot 3 [8-12s] Hard cut: the paper tears and reveals a tropical jungle behind it, perfectly lit, cinematic sun. Creator laughs: \"This is exactly why we do AI.\"\nShot 4 [12-15s] Hard cut back to studio. The printer prints a final line (not shown clearly). Creator looks to camera: \"Multi-scene. Single prompt.\""
 
 - **`image_url`** (`string`, _required_):
@@ -77,7 +77,7 @@ The API accepts the following input parameters:
   Random seed for reproducibility. If None, a random seed is chosen.
 
 - **`enable_safety_checker`** (`boolean`, _optional_):
-  If set to true, the safety checker will be enabled. Default value: `true`
+  If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked. Default value: `true`
   - Default: `true`
   - Examples: true
 
@@ -234,6 +234,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

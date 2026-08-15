@@ -19,7 +19,7 @@ export const falClassifyTextSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Fal safety model id (e.g. "fal-ai/qwen-3-guard"). Optional when exactly one non-stub safety.text entry is in the catalog — that entry auto-defaults. Required when multiple are available. Call `model_catalog` with capability:"safety" to see options.',
+      'Fal safety model id. Optional when exactly one non-stub safety.text entry is in the catalog — that entry auto-defaults. Required otherwise, which is the situation today: fal retired Qwen 3 Guard on 2026-08-15 and currently hosts no safety classifier, so the catalog has no safety entry and this argument must be supplied. Call `model_catalog` with capability:"safety" to check whether one has returned.',
     ),
 });
 
@@ -88,7 +88,7 @@ export function registerFalSafetyTools(server: McpServer): void {
   registerTool<FalClassifyTextParams>(
     server,
     'fal_classify_text',
-    'Classify text for safety via fal-hosted safety models (e.g. Qwen 3 Guard). Returns {safe, label, categories, raw}. When exactly one non-stub safety.text entry exists in the catalog, `model` auto-defaults to it — otherwise `model` is required. Uses FAL_KEY env var.',
+    'Classify text for safety via a fal-hosted safety model. Returns {safe, label, categories, raw}. When exactly one non-stub safety.text entry exists in the catalog, `model` auto-defaults to it — otherwise `model` is required, which is the case today (fal retired Qwen 3 Guard on 2026-08-15 and hosts no replacement classifier). Uses FAL_KEY env var.',
     falClassifyTextSchema.shape,
     async ({ text, model }) => {
       const client = getFalClient();

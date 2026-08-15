@@ -9,7 +9,8 @@
       "category": "text-to-video",
       "thumbnailUrl": "https://storage.googleapis.com/fal_cdn/fal/Sound-2.jpg",
       "playgroundUrl": "https://fal.ai/models/fal-ai/bytedance/seedance/v1/lite/text-to-video",
-      "documentationUrl": "https://fal.ai/models/fal-ai/bytedance/seedance/v1/lite/text-to-video/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/bytedance/seedance/v1/lite/text-to-video/api",
+      "about": "This model has been deprecated, and for the sake of compatibility, we are redirecting requests to seedance 1.0 pro fast.\nPricing will change accordingly."
     }
   },
   "components": {
@@ -70,6 +71,7 @@
         ]
       },
       "BytedanceSeedanceV1LiteTextToVideoInput": {
+        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "aspect_ratio",
@@ -80,54 +82,13 @@
           "enable_safety_checker",
           "num_frames"
         ],
-        "type": "object",
         "required": [
           "prompt"
         ],
         "properties": {
-          "aspect_ratio": {
-            "description": "The aspect ratio of the generated video",
-            "enum": [
-              "21:9",
-              "16:9",
-              "4:3",
-              "1:1",
-              "3:4",
-              "9:16",
-              "9:21"
-            ],
-            "default": "16:9",
-            "type": "string",
-            "title": "Aspect Ratio"
-          },
-          "camera_fixed": {
-            "description": "Whether to fix the camera position",
-            "default": false,
-            "type": "boolean",
-            "title": "Camera Fixed"
-          },
-          "enable_safety_checker": {
-            "description": "If set to true, the safety checker will be enabled.",
-            "examples": [
-              true
-            ],
-            "default": true,
-            "type": "boolean",
-            "title": "Enable Safety Checker"
-          },
-          "resolution": {
-            "description": "Video resolution - 480p for faster generation, 720p for higher quality",
-            "enum": [
-              "480p",
-              "720p",
-              "1080p"
-            ],
-            "default": "720p",
-            "type": "string",
-            "title": "Resolution"
-          },
           "duration": {
-            "description": "Duration of the video in seconds",
+            "type": "string",
+            "default": "5",
             "enum": [
               "2",
               "3",
@@ -141,9 +102,41 @@
               "11",
               "12"
             ],
-            "default": "5",
+            "title": "Duration",
+            "description": "Duration of the video in seconds"
+          },
+          "num_frames": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 29,
+                "maximum": 289
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Num Frames",
+            "description": "The number of frames to generate. If provided, will override duration."
+          },
+          "resolution": {
             "type": "string",
-            "title": "Duration"
+            "default": "720p",
+            "enum": [
+              "480p",
+              "720p",
+              "1080p"
+            ],
+            "title": "Resolution",
+            "description": "Video resolution - 480p for faster generation, 720p for higher quality"
+          },
+          "prompt": {
+            "type": "string",
+            "examples": [
+              "A little dog is running in the sunshine. The camera follows the dog as it plays in a garden."
+            ],
+            "title": "Prompt",
+            "description": "The text prompt used to generate the video"
           },
           "seed": {
             "anyOf": [
@@ -154,82 +147,85 @@
                 "type": "null"
               }
             ],
-            "description": "Random seed to control video generation. Use -1 for random.",
-            "title": "Seed"
+            "title": "Seed",
+            "description": "Random seed to control video generation. Use -1 for random."
           },
-          "num_frames": {
-            "anyOf": [
-              {
-                "maximum": 289,
-                "type": "integer",
-                "minimum": 29
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The number of frames to generate. If provided, will override duration.",
-            "title": "Num Frames"
-          },
-          "prompt": {
-            "description": "The text prompt used to generate the video",
-            "examples": [
-              "A little dog is running in the sunshine. The camera follows the dog as it plays in a garden."
-            ],
+          "aspect_ratio": {
             "type": "string",
-            "title": "Prompt"
+            "default": "16:9",
+            "enum": [
+              "21:9",
+              "16:9",
+              "4:3",
+              "1:1",
+              "3:4",
+              "9:16",
+              "9:21"
+            ],
+            "title": "Aspect Ratio",
+            "description": "The aspect ratio of the generated video"
+          },
+          "camera_fixed": {
+            "type": "boolean",
+            "default": false,
+            "title": "Camera Fixed",
+            "description": "Whether to fix the camera position"
+          },
+          "enable_safety_checker": {
+            "type": "boolean",
+            "examples": [
+              true
+            ],
+            "default": true,
+            "title": "Enable Safety Checker",
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked."
           }
         },
         "title": "SeedanceTextToVideoInput"
       },
       "BytedanceSeedanceV1LiteTextToVideoOutput": {
+        "type": "object",
         "x-fal-order-properties": [
           "video",
           "seed"
         ],
-        "type": "object",
         "required": [
           "video",
           "seed"
         ],
         "properties": {
           "video": {
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v3.fal.media/files/penguin/qmLZSvOIzTKs6bDFXiEtH_video.mp4"
               }
             ],
-            "$ref": "#/components/schemas/File",
             "description": "Generated video file"
           },
           "seed": {
-            "description": "Seed used for generation",
+            "type": "integer",
             "examples": [
               42
             ],
-            "type": "integer",
-            "title": "Seed"
+            "title": "Seed",
+            "description": "Seed used for generation"
           }
         },
         "title": "SeedanceVideoOutput"
       },
       "File": {
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "type": "object",
         "required": [
           "url"
         ],
         "properties": {
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
-          },
           "content_type": {
             "anyOf": [
               {
@@ -242,8 +238,8 @@
             "examples": [
               "image/png"
             ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
+            "title": "Content Type",
+            "description": "The mime type of the file."
           },
           "file_name": {
             "anyOf": [
@@ -257,8 +253,13 @@
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
           },
           "file_size": {
             "anyOf": [
@@ -272,8 +273,8 @@
             "examples": [
               4404019
             ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
+            "title": "File Size",
+            "description": "The size of the file in bytes."
           }
         },
         "title": "File"

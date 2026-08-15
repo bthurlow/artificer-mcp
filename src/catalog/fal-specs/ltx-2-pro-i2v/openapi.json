@@ -9,7 +9,8 @@
       "category": "image-to-video",
       "thumbnailUrl": "https://v3b.fal.media/files/b/tiger/wwf0gbfywaeym-Zh4SMcg_5d51eb236a484230afff239319c70234.jpg",
       "playgroundUrl": "https://fal.ai/models/fal-ai/ltx-2/image-to-video",
-      "documentationUrl": "https://fal.ai/models/fal-ai/ltx-2/image-to-video/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/ltx-2/image-to-video/api",
+      "about": "Generate a video from an image."
     }
   },
   "components": {
@@ -70,6 +71,7 @@
         ]
       },
       "Ltx2ImageToVideoInput": {
+        "title": "LTXV20ImageToVideoRequest",
         "type": "object",
         "x-fal-order-properties": [
           "image_url",
@@ -79,39 +81,43 @@
           "fps",
           "generate_audio"
         ],
-        "title": "LTXV20ImageToVideoRequest",
         "properties": {
-          "fps": {
+          "duration": {
+            "title": "Duration",
             "type": "integer",
-            "description": "The frames per second of the generated video",
+            "default": 6,
+            "description": "The duration of the generated video in seconds",
+            "enum": [
+              6,
+              8,
+              10
+            ]
+          },
+          "fps": {
             "title": "Frames per Second",
+            "type": "integer",
             "default": 25,
+            "description": "The frames per second of the generated video",
             "enum": [
               25,
               50
             ]
           },
-          "generate_audio": {
-            "type": "boolean",
-            "description": "Whether to generate audio for the generated video",
-            "title": "Generate Audio",
-            "default": true
-          },
           "prompt": {
-            "type": "string",
-            "description": "The prompt to generate the video from",
             "title": "Prompt",
+            "type": "string",
+            "minLength": 1,
             "examples": [
               "A woman stands still amid a busy neon-lit street at night. The camera slowly dollies in toward her face as people blur past, their motion emphasizing her calm presence. City lights flicker and reflections shift across her denim jacket."
             ],
-            "minLength": 1,
-            "maxLength": 5000
+            "maxLength": 5000,
+            "description": "The prompt to generate the video from"
           },
           "resolution": {
-            "type": "string",
-            "description": "The resolution of the generated video",
             "title": "Resolution",
+            "type": "string",
             "default": "1080p",
+            "description": "The resolution of the generated video",
             "enum": [
               "1080p",
               "1440p",
@@ -119,23 +125,18 @@
             ]
           },
           "image_url": {
-            "type": "string",
-            "description": "URL of the image to generate the video from. Must be publicly accessible or base64 data URI. Supports PNG, JPEG, WebP, AVIF, and HEIF formats.",
             "title": "Image URL",
+            "type": "string",
             "examples": [
               "https://storage.googleapis.com/falserverless/example_inputs/ltxv-2-i2v-input.jpg"
-            ]
+            ],
+            "description": "URL of the image to generate the video from. Must be publicly accessible or base64 data URI. Supports PNG, JPEG, WebP, AVIF, and HEIF formats."
           },
-          "duration": {
-            "type": "integer",
-            "description": "The duration of the generated video in seconds",
-            "title": "Duration",
-            "default": 6,
-            "enum": [
-              6,
-              8,
-              10
-            ]
+          "generate_audio": {
+            "title": "Generate Audio",
+            "type": "boolean",
+            "description": "Whether to generate audio for the generated video",
+            "default": true
           }
         },
         "required": [
@@ -144,22 +145,22 @@
         ]
       },
       "Ltx2ImageToVideoOutput": {
+        "title": "LTXVImageToVideoResponse",
         "type": "object",
         "x-fal-order-properties": [
           "video"
         ],
-        "title": "LTXVImageToVideoResponse",
         "properties": {
           "video": {
             "$ref": "#/components/schemas/VideoFile",
-            "description": "The generated video file",
             "examples": [
               {
-                "content_type": "video/mp4",
+                "file_name": "ltxv-2-i2v-output.mp4",
                 "url": "https://storage.googleapis.com/falserverless/example_outputs/ltxv-2-i2v-output.mp4",
-                "file_name": "ltxv-2-i2v-output.mp4"
+                "content_type": "video/mp4"
               }
-            ]
+            ],
+            "description": "The generated video file"
           }
         },
         "required": [
@@ -167,6 +168,7 @@
         ]
       },
       "VideoFile": {
+        "title": "VideoFile",
         "type": "object",
         "x-fal-order-properties": [
           "url",
@@ -179,10 +181,32 @@
           "duration",
           "num_frames"
         ],
-        "title": "VideoFile",
         "properties": {
+          "duration": {
+            "title": "Duration",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The duration of the video"
+          },
+          "width": {
+            "title": "Width",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The width of the video"
+          },
           "height": {
-            "description": "The height of the video",
             "title": "Height",
             "anyOf": [
               {
@@ -191,25 +215,10 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "examples": [
-              4404019
             ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "description": "The height of the video"
           },
           "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
@@ -221,39 +230,10 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "duration": {
-            "description": "The duration of the video",
-            "title": "Duration",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
-          },
-          "width": {
-            "description": "The width of the video",
-            "title": "Width",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
           },
           "fps": {
-            "description": "The FPS of the video",
             "title": "Fps",
             "anyOf": [
               {
@@ -262,22 +242,10 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "num_frames": {
-            "description": "The number of frames in the video",
-            "title": "Num Frames",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            ],
+            "description": "The FPS of the video"
           },
           "content_type": {
-            "description": "The mime type of the file.",
             "title": "Content Type",
             "examples": [
               "image/png"
@@ -289,7 +257,40 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The mime type of the file."
+          },
+          "num_frames": {
+            "title": "Num Frames",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The number of frames in the video"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "file_size": {
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes."
           }
         },
         "required": [

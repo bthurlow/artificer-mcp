@@ -60,7 +60,7 @@ The API accepts the following input parameters:
   - Default: `false`
 
 - **`enable_safety_checker`** (`boolean`, _optional_):
-  Whether to enable safety checker. Default value: `true`
+  Whether to enable safety checker. Disabling it requires account authorization; unauthorized requests are always checked. Default value: `true`
   - Default: `true`
 
 - **`video_output_type`** (`VideoOutputTypeEnum`, _optional_):
@@ -123,7 +123,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video file.
-  - Examples: {"content_type":"video/mp4","url":"https://v3b.fal.media/files/b/zebra/lXFrGA-egaUXWFGSp8GqT_BxoDEqUZ.mp4"}
+  - Examples: {"url":"https://v3b.fal.media/files/b/zebra/lXFrGA-egaUXWFGSp8GqT_BxoDEqUZ.mp4","content_type":"video/mp4"}
 
 
 
@@ -134,8 +134,8 @@ The API returns the following output format:
   "prompt": "realistic filming style, a person wearing a dark helmet, a deep-colored jacket, blue jeans, and bright yellow shoes rides a skateboard along a winding mountain road. The skateboarder starts in a standing position, then gradually lowers into a crouch, extending one hand to touch the road surface while maintaining a low center of gravity to navigate a sharp curve. After completing the turn, the skateboarder rises back to a standing position and continues gliding forward. The background features lush green hills flanking both sides of the road, with distant snow-capped mountain peaks rising against a clear, bright blue sky. The camera follows closely from behind, smoothly tracking the skateboarder’s movements and capturing the dynamic scenery along the route. The scene is shot in natural daylight, highlighting the vivid outdoor environment and the skateboarder’s fluid actions.",
   "seed": 424911732,
   "video": {
-    "content_type": "video/mp4",
-    "url": "https://v3b.fal.media/files/b/zebra/lXFrGA-egaUXWFGSp8GqT_BxoDEqUZ.mp4"
+    "url": "https://v3b.fal.media/files/b/zebra/lXFrGA-egaUXWFGSp8GqT_BxoDEqUZ.mp4",
+    "content_type": "video/mp4"
   }
 }
 ```
@@ -223,6 +223,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

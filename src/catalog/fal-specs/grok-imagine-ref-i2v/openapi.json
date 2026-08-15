@@ -9,7 +9,8 @@
       "category": "image-to-video",
       "thumbnailUrl": "https://v3b.fal.media/files/b/0a937ab6/vW4pJVZGWgLX9tSTMZPiz_314f49c562014442a5a64eed32ab69ae.jpg",
       "playgroundUrl": "https://fal.ai/models/xai/grok-imagine-video/reference-to-video",
-      "documentationUrl": "https://fal.ai/models/xai/grok-imagine-video/reference-to-video/api"
+      "documentationUrl": "https://fal.ai/models/xai/grok-imagine-video/reference-to-video/api",
+      "about": "Generate a video guided by reference images using Grok Imagine."
     }
   },
   "components": {
@@ -70,25 +71,32 @@
         ]
       },
       "GrokImagineVideoReferenceToVideoInput": {
+        "type": "object",
+        "title": "XAIReferenceToVideoInput",
+        "x-fal-order-properties": [
+          "prompt",
+          "reference_image_urls",
+          "duration",
+          "resolution",
+          "aspect_ratio"
+        ],
         "required": [
           "prompt",
           "reference_image_urls"
         ],
-        "type": "object",
         "properties": {
-          "resolution": {
-            "default": "480p",
-            "type": "string",
-            "enum": [
-              "480p",
-              "720p"
-            ],
-            "title": "Resolution",
-            "description": "Resolution of the output video."
+          "duration": {
+            "type": "integer",
+            "description": "Video duration in seconds.",
+            "title": "Duration",
+            "maximum": 10,
+            "minimum": 1,
+            "default": 8
           },
           "aspect_ratio": {
-            "default": "16:9",
+            "description": "Aspect ratio of the generated video.",
             "type": "string",
+            "title": "Aspect Ratio",
             "enum": [
               "16:9",
               "4:3",
@@ -98,196 +106,74 @@
               "3:4",
               "9:16"
             ],
-            "title": "Aspect Ratio",
-            "description": "Aspect ratio of the generated video."
-          },
-          "duration": {
-            "default": 8,
-            "maximum": 10,
-            "type": "integer",
-            "title": "Duration",
-            "minimum": 1,
-            "description": "Video duration in seconds."
+            "default": "16:9"
           },
           "reference_image_urls": {
+            "description": "One or more reference image URLs to guide the video generation as style and content references. Reference in prompt as @Image1, @Image2, etc. Maximum 7 images.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Reference Image URLs",
+            "minItems": 1,
             "examples": [
               [
                 "https://v3b.fal.media/files/b/0a8b90e0/BFLE9VDlZqsryU-UA3BoD_image_004.png"
               ]
             ],
-            "minItems": 1,
-            "items": {
-              "type": "string"
-            },
-            "maxItems": 7,
-            "title": "Reference Image URLs",
-            "description": "One or more reference image URLs to guide the video generation as style and content references. Reference in prompt as @Image1, @Image2, etc. Maximum 7 images.",
-            "type": "array"
+            "type": "array",
+            "maxItems": 7
           },
           "prompt": {
             "description": "Text prompt describing the video to generate. Use @Image1, @Image2, etc. to reference specific images from reference_image_urls in order.",
             "type": "string",
             "title": "Prompt",
-            "maxLength": 4096,
             "examples": [
               "A @Image1 running through a sunlit meadow, cinematic slow motion"
-            ]
+            ],
+            "maxLength": 4096
+          },
+          "resolution": {
+            "description": "Resolution of the output video.",
+            "type": "string",
+            "title": "Resolution",
+            "enum": [
+              "480p",
+              "720p"
+            ],
+            "default": "480p"
           }
-        },
-        "title": "XAIReferenceToVideoInput",
-        "x-fal-order-properties": [
-          "prompt",
-          "reference_image_urls",
-          "duration",
-          "aspect_ratio",
-          "resolution"
-        ]
+        }
       },
       "GrokImagineVideoReferenceToVideoOutput": {
+        "type": "object",
+        "title": "XAIReferenceToVideoOutput",
+        "x-fal-order-properties": [
+          "video"
+        ],
         "required": [
           "video"
         ],
-        "type": "object",
         "properties": {
           "video": {
             "examples": [
               {
-                "height": 720,
-                "content_type": "video/mp4",
-                "width": 1280,
-                "url": "https://v3b.fal.media/files/b/0a8b90e4/r2v_output.mp4",
                 "fps": 24,
-                "num_frames": 192,
+                "width": 1280,
+                "file_name": "r2v_output.mp4",
+                "url": "https://v3b.fal.media/files/b/0a8b90e4/r2v_output.mp4",
                 "duration": 8,
-                "file_name": "r2v_output.mp4"
+                "num_frames": 192,
+                "content_type": "video/mp4",
+                "height": 720
               }
             ],
             "description": "The generated video.",
             "$ref": "#/components/schemas/VideoFile"
           }
-        },
-        "title": "XAIReferenceToVideoOutput",
-        "x-fal-order-properties": [
-          "video"
-        ]
+        }
       },
       "VideoFile": {
-        "required": [
-          "url"
-        ],
         "type": "object",
-        "properties": {
-          "height": {
-            "title": "Height",
-            "description": "The height of the video",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type",
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "width": {
-            "title": "Width",
-            "description": "The width of the video",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "fps": {
-            "title": "Fps",
-            "description": "The FPS of the video",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "num_frames": {
-            "title": "Num Frames",
-            "description": "The number of frames in the video",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "duration": {
-            "title": "Duration",
-            "description": "The duration of the video",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
         "title": "VideoFile",
         "x-fal-order-properties": [
           "url",
@@ -299,7 +185,122 @@
           "fps",
           "duration",
           "num_frames"
-        ]
+        ],
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "fps": {
+            "description": "The FPS of the video",
+            "title": "Fps",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "width": {
+            "description": "The width of the video",
+            "title": "Width",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duration": {
+            "description": "The duration of the video",
+            "title": "Duration",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "num_frames": {
+            "description": "The number of frames in the video",
+            "title": "Num Frames",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "height": {
+            "description": "The height of the video",
+            "title": "Height",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
       }
     }
   },

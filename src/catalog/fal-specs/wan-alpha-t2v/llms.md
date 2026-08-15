@@ -165,14 +165,14 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _optional_):
   The generated video file.
-  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/wan-alpha-rgba-output.webm","file_name":"wan-alpha-rgba-output.webm","height":720,"width":1280,"content_type":"video/webm"}
+  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/wan-alpha-rgba-output.webm","content_type":"video/webm","file_name":"wan-alpha-rgba-output.webm","width":1280,"height":720}
 
 - **`image`** (`VideoFile`, _optional_):
   The generated image file.
 
 - **`mask`** (`VideoFile`, _optional_):
   The generated mask file.
-  - Examples: {"height":720,"duration":5.0625,"fps":16,"file_name":"wan-alpha-mask-output.webm","url":"https://storage.googleapis.com/falserverless/example_outputs/wan-alpha-mask-output.webm","width":1280,"num_frames":81,"content_type":"video/webm"}
+  - Examples: {"duration":5.0625,"fps":16,"num_frames":81,"content_type":"video/webm","file_name":"wan-alpha-mask-output.webm","height":720,"width":1280,"url":"https://storage.googleapis.com/falserverless/example_outputs/wan-alpha-mask-output.webm"}
 
 
 
@@ -184,20 +184,20 @@ The API returns the following output format:
   "seed": 424911732,
   "video": {
     "url": "https://storage.googleapis.com/falserverless/example_outputs/wan-alpha-rgba-output.webm",
+    "content_type": "video/webm",
     "file_name": "wan-alpha-rgba-output.webm",
-    "height": 720,
     "width": 1280,
-    "content_type": "video/webm"
+    "height": 720
   },
   "mask": {
-    "height": 720,
     "duration": 5.0625,
     "fps": 16,
-    "file_name": "wan-alpha-mask-output.webm",
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/wan-alpha-mask-output.webm",
-    "width": 1280,
     "num_frames": 81,
-    "content_type": "video/webm"
+    "content_type": "video/webm",
+    "file_name": "wan-alpha-mask-output.webm",
+    "height": 720,
+    "width": 1280,
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/wan-alpha-mask-output.webm"
   }
 }
 ```
@@ -285,6 +285,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

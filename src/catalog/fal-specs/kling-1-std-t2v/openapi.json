@@ -7,9 +7,10 @@
     "x-fal-metadata": {
       "endpointId": "fal-ai/kling-video/v1/standard/text-to-video",
       "category": "text-to-video",
-      "thumbnailUrl": "https://fal.media/files/monkey/GoSnDOnX0Tea08N7iI7oM.jpeg",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a9f921f/WDNkZmrJ4Moo9N-ftGI0L_OCVWcwr8.png",
       "playgroundUrl": "https://fal.ai/models/fal-ai/kling-video/v1/standard/text-to-video",
-      "documentationUrl": "https://fal.ai/models/fal-ai/kling-video/v1/standard/text-to-video/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/kling-video/v1/standard/text-to-video/api",
+      "about": "Kling 1.0 Text to Video API."
     }
   },
   "components": {
@@ -70,28 +71,38 @@
         ]
       },
       "KlingVideoV1StandardTextToVideoInput": {
-        "type": "object",
-        "title": "V1TextToVideoRequest",
-        "x-fal-order-properties": [
-          "prompt",
-          "duration",
-          "aspect_ratio",
-          "negative_prompt",
-          "cfg_scale",
-          "camera_control",
-          "advanced_camera_control"
-        ],
         "properties": {
-          "aspect_ratio": {
-            "default": "16:9",
+          "duration": {
+            "default": "5",
+            "title": "Duration",
+            "description": "The duration of the generated video in seconds",
+            "type": "string",
             "enum": [
-              "16:9",
-              "9:16",
-              "1:1"
+              "5",
+              "10"
+            ]
+          },
+          "cfg_scale": {
+            "default": 0.5,
+            "title": "Cfg Scale",
+            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
+            "type": "number",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "negative_prompt": {
+            "default": "blur, distort, and low quality",
+            "title": "Negative Prompt",
+            "type": "string",
+            "maxLength": 2500
+          },
+          "prompt": {
+            "examples": [
+              "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage. She wears a black leather jacket, a long red dress, and black boots, and carries a black purse."
             ],
-            "title": "Aspect Ratio",
-            "description": "The aspect ratio of the generated video frame",
-            "type": "string"
+            "title": "Prompt",
+            "type": "string",
+            "maxLength": 2500
           },
           "advanced_camera_control": {
             "description": "Advanced Camera control parameters",
@@ -104,91 +115,81 @@
               }
             ]
           },
-          "negative_prompt": {
-            "default": "blur, distort, and low quality",
-            "maxLength": 2500,
-            "type": "string",
-            "title": "Negative Prompt"
-          },
-          "duration": {
-            "default": "5",
-            "enum": [
-              "5",
-              "10"
-            ],
-            "title": "Duration",
-            "description": "The duration of the generated video in seconds",
-            "type": "string"
-          },
-          "cfg_scale": {
-            "default": 0.5,
-            "maximum": 1,
-            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
-            "title": "Cfg Scale",
-            "type": "number",
-            "minimum": 0
-          },
-          "prompt": {
-            "maxLength": 2500,
-            "type": "string",
-            "title": "Prompt",
-            "examples": [
-              "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage. She wears a black leather jacket, a long red dress, and black boots, and carries a black purse."
-            ]
-          },
           "camera_control": {
             "description": "Camera control parameters",
-            "title": "Camera Control",
             "anyOf": [
               {
+                "type": "string",
                 "enum": [
                   "down_back",
                   "forward_up",
                   "right_turn_forward",
                   "left_turn_forward"
-                ],
-                "type": "string"
+                ]
               },
               {
                 "type": "null"
               }
+            ],
+            "title": "Camera Control"
+          },
+          "aspect_ratio": {
+            "default": "16:9",
+            "title": "Aspect Ratio",
+            "description": "The aspect ratio of the generated video frame",
+            "type": "string",
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1"
             ]
           }
         },
+        "title": "V1TextToVideoRequest",
         "required": [
           "prompt"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
+          "prompt",
+          "duration",
+          "aspect_ratio",
+          "negative_prompt",
+          "cfg_scale",
+          "camera_control",
+          "advanced_camera_control"
         ]
       },
       "KlingVideoV1StandardTextToVideoOutput": {
-        "type": "object",
-        "title": "T2VOutput",
-        "x-fal-order-properties": [
-          "video"
-        ],
         "properties": {
           "video": {
-            "description": "The generated video",
-            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v2.fal.media/files/fb33a862b94d4d7195e610e4cbc5d392_output.mp4"
               }
-            ]
+            ],
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video"
           }
         },
+        "title": "T2VOutput",
         "required": [
+          "video"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
           "video"
         ]
       },
       "CameraControl": {
-        "type": "object",
-        "title": "CameraControl",
-        "x-fal-order-properties": [
-          "movement_type",
-          "movement_value"
-        ],
         "properties": {
           "movement_type": {
+            "examples": [
+              "horizontal"
+            ],
+            "title": "Movement Type",
+            "description": "The type of camera movement",
+            "type": "string",
             "enum": [
               "horizontal",
               "vertical",
@@ -196,43 +197,42 @@
               "tilt",
               "roll",
               "zoom"
-            ],
-            "title": "Movement Type",
-            "description": "The type of camera movement",
-            "examples": [
-              "horizontal"
-            ],
-            "type": "string"
+            ]
           },
           "movement_value": {
-            "maximum": 10,
-            "description": "The value of the camera movement",
-            "title": "Movement Value",
-            "type": "integer",
             "examples": [
               10
             ],
+            "title": "Movement Value",
+            "description": "The value of the camera movement",
+            "type": "integer",
+            "maximum": 10,
             "minimum": -10
           }
         },
+        "title": "CameraControl",
         "required": [
+          "movement_type",
+          "movement_value"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
           "movement_type",
           "movement_value"
         ]
       },
       "File": {
-        "type": "object",
-        "title": "File",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
         "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -241,13 +241,28 @@
                 "type": "null"
               }
             ],
+            "title": "File Name"
+          },
+          "content_type": {
             "examples": [
               "image/png"
-            ]
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
           },
           "file_size": {
+            "examples": [
+              4404019
+            ],
             "description": "The size of the file in bytes.",
-            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -256,33 +271,19 @@
                 "type": "null"
               }
             ],
-            "examples": [
-              4404019
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
+            "title": "File Size"
           }
         },
+        "title": "File",
         "required": [
           "url"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
         ]
       }
     }

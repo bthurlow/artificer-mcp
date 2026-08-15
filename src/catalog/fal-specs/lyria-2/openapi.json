@@ -9,7 +9,8 @@
       "category": "text-to-audio",
       "thumbnailUrl": "https://storage.googleapis.com/fal_cdn/fal/Sound-4.jpg",
       "playgroundUrl": "https://fal.ai/models/fal-ai/lyria2",
-      "documentationUrl": "https://fal.ai/models/fal-ai/lyria2/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/lyria2/api",
+      "about": "Generate music using Google's Lyria 2 text-to-music model.\n\nFor best results, prompts should be descriptive and clear. Include:\n- Genre/Style: Specify the musical genre (e.g., \"classical\", \"electronic\", \"rock\", \"jazz\", \"hip hop\")\n- Mood/Emotion: Describe the desired feeling or atmosphere (e.g., \"happy\", \"melancholy\", \"energetic\")\n- Instrumentation: List the instruments you want to hear (e.g., \"piano\", \"synthesizer\", \"acoustic guitar\")\n- Tempo/Rhythm: Indicate the speed and feel (e.g., \"fast tempo\", \"slow ballad\", \"driving beat\")\n- Soundscapes/Effects: For non-musical audio, describe the environment or specific sound effects\n- Arrangement/Structure: Briefly describe the progression or layering of sounds if important\n- Production Quality: Terms like \"high-quality production,\" \"clean mix,\" or \"vintage recording\"\n\nThe model supports:\n- 48kHz WAV audio output\n- 30 second duration\n- Negative prompting to exclude unwanted elements\n- Seed-based reproducibility\n\nSafety filters prevent generation of inappropriate content."
     }
   },
   "components": {
@@ -72,6 +73,11 @@
       "Lyria2Input": {
         "title": "TextToMusicInput",
         "type": "object",
+        "x-fal-order-properties": [
+          "prompt",
+          "negative_prompt",
+          "seed"
+        ],
         "properties": {
           "seed": {
             "title": "Seed",
@@ -86,14 +92,14 @@
             "description": "A seed for deterministic generation. If provided, the model will attempt to produce the same audio given the same prompt and other parameters."
           },
           "prompt": {
+            "maxLength": 2000,
+            "minLength": 1,
             "title": "Prompt",
-            "type": "string",
             "examples": [
               "A lush, ambient soundscape featuring the serene sounds of a flowing river, complemented by the distant chirping of birds, and a gentle, melancholic piano melody that slowly unfolds."
             ],
-            "description": "The text prompt describing the music you want to generate",
-            "minLength": 1,
-            "maxLength": 2000
+            "type": "string",
+            "description": "The text prompt describing the music you want to generate"
           },
           "negative_prompt": {
             "title": "Negative Prompt",
@@ -106,11 +112,6 @@
             "default": "low quality"
           }
         },
-        "x-fal-order-properties": [
-          "prompt",
-          "negative_prompt",
-          "seed"
-        ],
         "required": [
           "prompt"
         ]
@@ -118,20 +119,20 @@
       "Lyria2Output": {
         "title": "TextToMusicOutput",
         "type": "object",
+        "x-fal-order-properties": [
+          "audio"
+        ],
         "properties": {
           "audio": {
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v3.fal.media/files/koala/9V6ADhxcZrZr2FcaiNA7H_output.wav"
               }
             ],
-            "description": "The generated music",
-            "$ref": "#/components/schemas/File"
+            "description": "The generated music"
           }
         },
-        "x-fal-order-properties": [
-          "audio"
-        ],
         "required": [
           "audio"
         ]
@@ -139,9 +140,18 @@
       "File": {
         "title": "File",
         "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
         "properties": {
           "file_name": {
             "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
             "anyOf": [
               {
                 "type": "string"
@@ -150,13 +160,18 @@
                 "type": "null"
               }
             ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
             "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
           },
           "file_size": {
             "title": "File Size",
+            "examples": [
+              4404019
+            ],
             "anyOf": [
               {
                 "type": "integer"
@@ -165,13 +180,13 @@
                 "type": "null"
               }
             ],
-            "examples": [
-              4404019
-            ],
             "description": "The size of the file in bytes."
           },
           "content_type": {
             "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
             "anyOf": [
               {
                 "type": "string"
@@ -180,23 +195,9 @@
                 "type": "null"
               }
             ],
-            "examples": [
-              "image/png"
-            ],
             "description": "The mime type of the file."
-          },
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
           }
         },
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
         "required": [
           "url"
         ]

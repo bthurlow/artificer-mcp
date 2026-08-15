@@ -172,7 +172,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video.
-  - Examples: {"fps":25,"height":704,"content_type":"video/mp4","duration":10.28,"width":1248,"num_frames":257,"url":"https://v3b.fal.media/files/b/0a88289e/CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4","file_name":"CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4"}
+  - Examples: {"url":"https://v3b.fal.media/files/b/0a88289e/CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4","num_frames":257,"content_type":"video/mp4","height":704,"duration":10.28,"file_name":"CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4","fps":25,"width":1248}
 
 - **`seed`** (`integer`, _required_):
   The seed used for the random number generator.
@@ -189,14 +189,14 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "fps": 25,
-    "height": 704,
-    "content_type": "video/mp4",
-    "duration": 10.28,
-    "width": 1248,
-    "num_frames": 257,
     "url": "https://v3b.fal.media/files/b/0a88289e/CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
-    "file_name": "CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4"
+    "num_frames": 257,
+    "content_type": "video/mp4",
+    "height": 704,
+    "duration": 10.28,
+    "file_name": "CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
+    "fps": 25,
+    "width": 1248
   },
   "seed": 866232447,
   "prompt": "Continue the scene naturally, maintaining the same style and motion."
@@ -289,6 +289,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

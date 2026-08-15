@@ -9,7 +9,8 @@
       "category": "image-to-video",
       "thumbnailUrl": "https://v3b.fal.media/files/b/0a90ded1/KHsHxOVl1jWRMKZRuGWOz_391501da7abf4cbda1dd04894882d967.jpg",
       "playgroundUrl": "https://fal.ai/models/fal-ai/ltx-2.3/image-to-video",
-      "documentationUrl": "https://fal.ai/models/fal-ai/ltx-2.3/image-to-video/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/ltx-2.3/image-to-video/api",
+      "about": "Generate a video from an image."
     }
   },
   "components": {
@@ -70,50 +71,20 @@
         ]
       },
       "Ltx23ImageToVideoInput": {
-        "title": "LTXV23ImageToVideoRequest",
         "properties": {
-          "image_url": {
-            "title": "Start Image URL",
-            "type": "string",
-            "examples": [
-              "https://v3b.fal.media/files/b/0a90dd31/uJG2pMMJMcnVeC4PmwnAF_image_004.png"
-            ],
-            "description": "The URL of the start image to use for the generated video."
-          },
-          "aspect_ratio": {
-            "title": "Aspect Ratio",
+          "resolution": {
+            "description": "The resolution of the generated video",
             "type": "string",
             "enum": [
-              "auto",
-              "16:9",
-              "9:16"
+              "1080p",
+              "1440p",
+              "2160p"
             ],
-            "description": "The aspect ratio of the generated video. If 'auto', the aspect ratio will be determined automatically based on the input image.",
-            "default": "auto"
-          },
-          "prompt": {
-            "title": "Prompt",
-            "type": "string",
-            "maxLength": 5000,
-            "description": "The prompt to use for the generated video",
-            "examples": [
-              "Periscope-level shot from behind tall grass of two Maasai warriors mid-leap during an adumu jumping dance, bodies fully airborne against a golden savanna sunset, red shuka robes frozen in motion, dust kicked up from the earth catching backlight, 85mm f/1.4 isolating the pair from a blurred circle of onlookers, Steve McCurry meets Emmanuel Lubezki"
-            ],
-            "minLength": 1
-          },
-          "duration": {
-            "title": "Duration",
-            "type": "integer",
-            "enum": [
-              6,
-              8,
-              10
-            ],
-            "description": "The duration of the generated video in seconds",
-            "default": 6
+            "default": "1080p",
+            "title": "Resolution"
           },
           "end_image_url": {
-            "title": "End Image URL",
+            "description": "The URL of the end image to use for the generated video. When provided, generates a transition video between start and end frames.",
             "anyOf": [
               {
                 "type": "string"
@@ -122,10 +93,21 @@
                 "type": "null"
               }
             ],
-            "description": "The URL of the end image to use for the generated video. When provided, generates a transition video between start and end frames."
+            "title": "End Image URL"
+          },
+          "aspect_ratio": {
+            "description": "The aspect ratio of the generated video. If 'auto', the aspect ratio will be determined automatically based on the input image.",
+            "type": "string",
+            "enum": [
+              "auto",
+              "16:9",
+              "9:16"
+            ],
+            "default": "auto",
+            "title": "Aspect Ratio"
           },
           "fps": {
-            "title": "Frames per Second",
+            "description": "The frames per second of the generated video",
             "type": "integer",
             "enum": [
               24,
@@ -133,27 +115,50 @@
               48,
               50
             ],
-            "description": "The frames per second of the generated video",
-            "default": 25
+            "default": 25,
+            "title": "Frames per Second"
           },
           "generate_audio": {
-            "title": "Generate Audio",
-            "type": "boolean",
             "description": "Whether to generate audio for the generated video",
-            "default": true
+            "type": "boolean",
+            "default": true,
+            "title": "Generate Audio"
           },
-          "resolution": {
-            "title": "Resolution",
-            "type": "string",
-            "enum": [
-              "1080p",
-              "1440p",
-              "2160p"
+          "prompt": {
+            "examples": [
+              "Periscope-level shot from behind tall grass of two Maasai warriors mid-leap during an adumu jumping dance, bodies fully airborne against a golden savanna sunset, red shuka robes frozen in motion, dust kicked up from the earth catching backlight, 85mm f/1.4 isolating the pair from a blurred circle of onlookers, Steve McCurry meets Emmanuel Lubezki"
             ],
-            "description": "The resolution of the generated video",
-            "default": "1080p"
+            "title": "Prompt",
+            "minLength": 1,
+            "description": "The prompt to use for the generated video",
+            "type": "string",
+            "maxLength": 5000
+          },
+          "image_url": {
+            "examples": [
+              "https://v3b.fal.media/files/b/0a90dd31/uJG2pMMJMcnVeC4PmwnAF_image_004.png"
+            ],
+            "description": "The URL of the start image to use for the generated video.",
+            "type": "string",
+            "title": "Start Image URL"
+          },
+          "duration": {
+            "description": "The duration of the generated video in seconds",
+            "type": "integer",
+            "enum": [
+              6,
+              8,
+              10
+            ],
+            "default": 6,
+            "title": "Duration"
           }
         },
+        "required": [
+          "prompt",
+          "image_url"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "image_url",
           "end_image_url",
@@ -164,99 +169,50 @@
           "fps",
           "generate_audio"
         ],
-        "type": "object",
-        "required": [
-          "prompt",
-          "image_url"
-        ]
+        "title": "LTXV23ImageToVideoRequest"
       },
       "Ltx23ImageToVideoOutput": {
-        "title": "LTXV23ImageToVideoResponse",
         "properties": {
           "video": {
+            "$ref": "#/components/schemas/VideoFile",
             "examples": [
               {
                 "file_name": "VUCTD0YYJIp_K4qQkkneL_wMVDWNRn.mp4",
-                "content_type": "video/mp4",
-                "url": "https://v3b.fal.media/files/b/0a90dd31/VUCTD0YYJIp_K4qQkkneL_wMVDWNRn.mp4"
+                "url": "https://v3b.fal.media/files/b/0a90dd31/VUCTD0YYJIp_K4qQkkneL_wMVDWNRn.mp4",
+                "content_type": "video/mp4"
               }
             ],
-            "description": "The generated video file",
-            "$ref": "#/components/schemas/VideoFile"
+            "description": "The generated video file"
           }
         },
-        "x-fal-order-properties": [
+        "required": [
           "video"
         ],
         "type": "object",
-        "required": [
+        "x-fal-order-properties": [
           "video"
-        ]
+        ],
+        "title": "LTXV23ImageToVideoResponse"
       },
       "VideoFile": {
-        "title": "VideoFile",
         "properties": {
-          "content_type": {
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file."
-          },
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "duration": {
-            "title": "Duration",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The duration of the video"
-          },
-          "height": {
-            "title": "Height",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The height of the video"
-          },
           "file_name": {
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name"
           },
-          "file_size": {
-            "title": "File Size",
+          "height": {
+            "description": "The height of the video",
             "anyOf": [
               {
                 "type": "integer"
@@ -265,25 +221,10 @@
                 "type": "null"
               }
             ],
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes."
-          },
-          "width": {
-            "title": "Width",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The width of the video"
+            "title": "Height"
           },
           "fps": {
-            "title": "Fps",
+            "description": "The FPS of the video",
             "anyOf": [
               {
                 "type": "number"
@@ -292,10 +233,28 @@
                 "type": "null"
               }
             ],
-            "description": "The FPS of the video"
+            "title": "Fps"
           },
-          "num_frames": {
-            "title": "Num Frames",
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -304,9 +263,54 @@
                 "type": "null"
               }
             ],
-            "description": "The number of frames in the video"
+            "title": "File Size"
+          },
+          "duration": {
+            "description": "The duration of the video",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "num_frames": {
+            "description": "The number of frames in the video",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Num Frames"
+          },
+          "width": {
+            "description": "The width of the video",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width"
           }
         },
+        "required": [
+          "url"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -318,10 +322,7 @@
           "duration",
           "num_frames"
         ],
-        "type": "object",
-        "required": [
-          "url"
-        ]
+        "title": "VideoFile"
       }
     }
   },
