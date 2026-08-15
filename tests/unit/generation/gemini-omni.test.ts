@@ -77,7 +77,13 @@ describe('gemini_omni_generate_video', () => {
     expect(payload.video.uri).toBe('/tmp/clip.mp4');
     // Callers need the id to chain a conversational edit.
     expect(payload.interaction_id).toBe('int_1');
-    expect(payload.audio).toContain('none');
+    // Omni bakes in a soundtrack with no way to disable it. A caller laying
+    // their own music underneath has to strip it, so the payload must say
+    // so — an earlier revision claimed the opposite and would have sent
+    // fixed-master pipelines into a collision.
+    expect(payload.audio).toContain('native');
+    expect(payload.audio).toContain('strip');
+    expect(payload.audio).not.toContain('does not');
   });
 
   it('polls until the interaction reaches a terminal status', async () => {

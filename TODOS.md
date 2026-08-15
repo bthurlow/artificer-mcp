@@ -553,7 +553,23 @@ Also lost: SparseCtrl conditioning (only AnimateDiff variant offering it) and Lo
 
 **Required a major SDK upgrade** (`@google/genai` 1.50.1 → 2.17.1, commit `da72868`). 1.50.x had no `video_config` on its interactions `GenerationConfig`. The bump was clean — 0 type errors, no source changes across the eight Google-backed tools — but the suite mocks the SDK, so **live API behavior across the Google tools is unverified**; smoke them before the next release.
 
-**⚠️ The audio finding recorded in the earlier research was WRONG.** That note claimed native audio based on two Google blogs. Google's own video docs state plainly that **Omni Flash generates video without native audio**, and draw the contrast with Veo 3.1 as the model that does. Verified 2026-08-15. Consequence for the music-video pilot: Omni is **silent**, so there is nothing to strip — the "strip/replace the baked audio" step the earlier plan called for is unnecessary.
+**⚠️ AUDIO — corrected 2026-08-15 (second pass). Omni Flash DOES generate native audio.**
+
+The original research said native audio, based on two Google blogs. A later pass in this same session "corrected" that to silent — **and the correction was itself wrong.** It came from reading `ai.google.dev/gemini-api/docs/video`, which is the **Veo** page, rather than `/docs/omni`, which is the page for this model. Brian caught it against the Vertex model card.
+
+Authoritative now:
+- `ai.google.dev/gemini-api/docs/omni`: *"The model generates a video with audio based on your text description"* and *"By default the model will try to generate an appropriate audio track for a video."*
+- Vertex model card: *Capabilities → Sound generation: Speech, music, sound effects — **Supported***.
+
+**The model card looks self-contradictory and is not.** Its *Modalities* row says *Audio: Not supported* — that governs the **message interface** (no audio input, no audio-only response). *Sound generation* governs the track **inside the generated video**. The technical-specs row confirms it by listing *"Maximum video length (with audio)"* separately from *"(without audio)"*. The one real consequence of the Modalities row: **no audio reference conditioning** — you cannot condition a generation on a supplied audio clip.
+
+**There is no way to disable the audio.** No `generate_audio` flag, no silent mode. Levers are prompt-steering (describe the audio; `"No dialogue"` suppresses speech) or stripping downstream.
+
+**Consequence for the music-video pilot — reverses the earlier note.** Every Omni clip arrives with a synthetic soundtrack that **must be stripped** before the Cathode Saint master goes under it, so the "strip/replace the baked audio" step the *original* plan called for is back. That makes **MiniMax H3 the lower-friction pick** for fixed-master B-roll: fal returns a bare video file with no audio track and no strip step. Omni's advantages remain conversational editing and native audio where you actually want diegetic sound.
+
+**Process note worth keeping:** the failure was overriding a correct finding with a worse source and stating it confidently across the guide, tool description, catalog, and PR text. When a doc page contradicts prior research, check that it is the page for the model in question before treating it as authoritative.
+
+**Also captured from the Vertex model card** (not previously recorded): system instructions, structured output, context caching, function calling, grounding, code execution, tuning, and batch inference are all **unsupported**; thinking and token counting are supported; up to 10 input images at 720p; SynthID plus Content Credentials (C2PA).
 
 **Confirmed at build time:** 3–10s clips, 720p, 24fps, 16:9 and 9:16, ~$0.10/s output, stateful editing via `previous_interaction_id`. Every call returns `interaction_id` so callers can chain edits.
 
