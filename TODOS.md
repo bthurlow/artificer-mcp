@@ -371,7 +371,36 @@ Source: btmusic `instructions/artificer-prompts.md` 2026-06-05.
 
 Source: btmusic memory `artificer_mcp.md`, `instructions/artificer-prompts.md` catalog caveat.
 
-## 18. MiniMax video generation v2 (MiniMax-H3) support
+## 18. MiniMax video generation v2 (MiniMax-H3) support — DONE 2026-08-15
+
+**Shipped as catalog + guide only — no new transport.** fal began hosting H3 on 2026-08-01, so `fal_generate_video` already reaches it. The direct MiniMax v2 API (task-create + poll against `platform.minimax.io`) was **not** needed and was not built.
+
+**Three routes seeded** in `video.general`, specs synced to `src/catalog/fal-specs/minimax-h3-*`:
+- `minimax-h3-t2v` → `minimax/h3/text-to-video`
+- `minimax-h3-i2v` → `minimax/h3/image-to-video` — **supports first-to-last keyframe** via `end_image_url` (Brian, 2026-08-15)
+- `minimax-h3-r2v` → `minimax/h3/reference-to-video` — up to 12 reference files across image/video/audio lists
+
+**Endpoint ids carry no `fal-ai/` prefix** — they are `minimax/h3/...`. A `fal-ai/minimax/hailuo-03/...` alias also resolves but exposes a reduced schema (no `seed`, no `enable_prompt_expansion`); the catalog uses the `minimax/h3/` form.
+
+**Corrections to the original filing**, all verified against the synced specs:
+- Duration is **5–15s**, not 4–15s.
+- Resolutions are **480P / 768P / 2K / 4K**, not just 768P/2K. Only 480P and 768P are native — **2K and 4K upscale a 768P base**, so they cost more without adding real detail.
+- Pricing is **$0.05 / $0.08 / $0.13 / $0.16 per second** by tier — not the $0.26/s at 2K that secondary sources reported.
+- **Output is silent on fal.** MiniMax marketing describes native stereo audio; fal's output schema returns a bare `video` File. Good for a fixed-master music video — nothing to strip.
+
+**Still true:** no native chaining (concatenate downstream), native 9:16, no camera-motion params.
+
+## 18b. Fal spec drift — 518 files changed upstream (NEW, filed 2026-08-15)
+
+Running `scripts/sync-fal-specs.mjs` during the H3 work surfaced **518 changed spec files** and **18 changed `cost` strings** across the existing catalog — deliberately excluded from the H3 PR to keep it reviewable, so this drift is **not yet applied**.
+
+Two classes:
+- **Boilerplate churn** — fal moved their docs links and added an "Other agent-readable surfaces" block to every `llms.txt`. Noise.
+- **Real, caller-affecting changes** — at least **3 routes now report "This model has been deprecated, and further requests are being re-routed to Seedance 1.0 Pro Fast"**, and several video routes changed pricing (e.g. a 720p rate rising to $0.3034/s with new 1080p/4K tiers documented).
+
+This is exactly what **TODO #2** (automated drift detection) exists to catch, and it confirms the trigger condition is well past due — the catalog has been quietly wrong for months. Next step is a dedicated sync PR: run the script, review the 18 cost diffs and the deprecations, retire or repoint the deprecated routes, then land #2's cron so it never accumulates this far again.
+
+## 18c. Original #18 scope (kept for history)
 
 **What:** Add / update MiniMax video-gen support to the **v2** API (`https://platform.minimax.io/docs/api-reference/video-generation-v2-create`). Model **MiniMax-H3**. Modes: text-to-video, image-to-video (first frame), first/last-frame, and reference-to-video (subject/style consistency; accepts reference images/video/audio). Constraints to encode in the guide: **4-15s per clip, no native chaining**; resolutions 768P / 2K; aspect ratios incl. **9:16 native** + 16:9 / 21:9 / 4:3 / 1:1 / 3:4 / adaptive; **silent output** (audio only as a style reference); **no camera-motion params**; async task-create + poll; pay-as-you-go. Verify whether Artificer's existing `minimax_video` guide/route is on an older version and bump it.
 **Why:** Brian flagged it 2026-08-15 as a candidate engine for the Cathode Saint cinematic-music-video pilot (btmusic task #177), to A/B against Veo. Pay-per-gen + native 9:16 + FLF + reference-consistency make it attractive vs subscription-gated Google Flow. Source: MiniMax docs (URL above); btmusic #177.
