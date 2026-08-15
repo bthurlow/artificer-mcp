@@ -93,7 +93,7 @@ The API returns the following output format:
 - **`words`** (`list<TranscriptionWord>`, _required_):
   Word-level transcription details
   - Array of TranscriptionWord
-  - Examples: {"type":"word","speaker_id":"speaker_0","text":"Hey,","end":0.539,"start":0.079}, {"type":"spacing","speaker_id":"speaker_0","text":" ","end":0.599,"start":0.539}, {"type":"word","speaker_id":"speaker_0","text":"this","end":0.679,"start":0.599}, {"type":"spacing","speaker_id":"speaker_0","text":" ","end":0.739,"start":0.679}, {"type":"word","speaker_id":"speaker_0","text":"is","end":0.799,"start":0.739}, {"type":"spacing","speaker_id":"speaker_0","text":" ","end":0.939,"start":0.799}, {"type":"word","speaker_id":"speaker_0","text":"a","end":0.939,"start":0.939}, {"type":"spacing","speaker_id":"speaker_0","text":" ","end":0.959,"start":0.939}, {"type":"word","speaker_id":"speaker_0","text":"test","end":1.179,"start":0.959}, {"type":"spacing","speaker_id":"speaker_0","text":" ","end":1.219,"start":1.179}, {"type":"word","speaker_id":"speaker_0","text":"recording","end":1.719,"start":1.22}, {"type":"spacing","speaker_id":"speaker_0","text":" ","end":1.719,"start":1.719}, {"type":"word","speaker_id":"speaker_0","text":"for","end":1.86,"start":1.719}, {"type":"spacing","speaker_id":"speaker_0","text":" ","end":1.879,"start":1.86}, {"type":"word","speaker_id":"speaker_0","text":"Scribe","end":2.24,"start":1.879}, {"type":"spacing","speaker_id":"speaker_0","text":" ","end":2.319,"start":2.24}, {"type":"word","speaker_id":"speaker_0","text":"version","end":2.759,"start":2.319}, {"type":"spacing","speaker_id":"speaker_0","text":" ","end":2.779,"start":2.759}, {"type":"word","speaker_id":"speaker_0","text":"two,","end":3.379,"start":2.779}, {"type":"spacing","speaker_id":"speaker_0","text":" ","end":3.399,"start":3.379}, {"type":"word","speaker_id":"speaker_0","text":"which","end":3.519,"start":3.399}, {"type":"spacing","speaker_id":"speaker_0","text":" ","end":3.539,"start":3.519}, {"type":"word","speaker_id":"speaker_0","text":"is","end":3.659,"start":3.539}, {"type":"spacing","speaker_id":"speaker_0","text":" ","end":3.699,"start":3.659}, {"type":"word","speaker_id":"speaker_0","text":"now","end":3.839,"start":3.699}, {"type":"spacing","speaker_id":"speaker_0","text":" ","end":3.839,"start":3.839}, {"type":"word","speaker_id":"speaker_0","text":"available","end":4.319,"start":3.839}, {"type":"spacing","speaker_id":"speaker_0","text":" ","end":4.339,"start":4.319}, {"type":"word","speaker_id":"speaker_0","text":"on","end":4.579,"start":4.339}, {"type":"spacing","speaker_id":"speaker_0","text":" ","end":4.599,"start":4.579}, {"type":"word","speaker_id":"speaker_0","text":"fal.ai.","end":5.699,"start":4.599}
+  - Examples: {"type":"word","end":0.539,"speaker_id":"speaker_0","text":"Hey,","start":0.079}, {"type":"spacing","end":0.599,"speaker_id":"speaker_0","text":" ","start":0.539}, {"type":"word","end":0.679,"speaker_id":"speaker_0","text":"this","start":0.599}, {"type":"spacing","end":0.739,"speaker_id":"speaker_0","text":" ","start":0.679}, {"type":"word","end":0.799,"speaker_id":"speaker_0","text":"is","start":0.739}, {"type":"spacing","end":0.939,"speaker_id":"speaker_0","text":" ","start":0.799}, {"type":"word","end":0.939,"speaker_id":"speaker_0","text":"a","start":0.939}, {"type":"spacing","end":0.959,"speaker_id":"speaker_0","text":" ","start":0.939}, {"type":"word","end":1.179,"speaker_id":"speaker_0","text":"test","start":0.959}, {"type":"spacing","end":1.219,"speaker_id":"speaker_0","text":" ","start":1.179}, {"type":"word","end":1.719,"speaker_id":"speaker_0","text":"recording","start":1.22}, {"type":"spacing","end":1.719,"speaker_id":"speaker_0","text":" ","start":1.719}, {"type":"word","end":1.86,"speaker_id":"speaker_0","text":"for","start":1.719}, {"type":"spacing","end":1.879,"speaker_id":"speaker_0","text":" ","start":1.86}, {"type":"word","end":2.24,"speaker_id":"speaker_0","text":"Scribe","start":1.879}, {"type":"spacing","end":2.319,"speaker_id":"speaker_0","text":" ","start":2.24}, {"type":"word","end":2.759,"speaker_id":"speaker_0","text":"version","start":2.319}, {"type":"spacing","end":2.779,"speaker_id":"speaker_0","text":" ","start":2.759}, {"type":"word","end":3.379,"speaker_id":"speaker_0","text":"two,","start":2.779}, {"type":"spacing","end":3.399,"speaker_id":"speaker_0","text":" ","start":3.379}, {"type":"word","end":3.519,"speaker_id":"speaker_0","text":"which","start":3.399}, {"type":"spacing","end":3.539,"speaker_id":"speaker_0","text":" ","start":3.519}, {"type":"word","end":3.659,"speaker_id":"speaker_0","text":"is","start":3.539}, {"type":"spacing","end":3.699,"speaker_id":"speaker_0","text":" ","start":3.659}, {"type":"word","end":3.839,"speaker_id":"speaker_0","text":"now","start":3.699}, {"type":"spacing","end":3.839,"speaker_id":"speaker_0","text":" ","start":3.839}, {"type":"word","end":4.319,"speaker_id":"speaker_0","text":"available","start":3.839}, {"type":"spacing","end":4.339,"speaker_id":"speaker_0","text":" ","start":4.319}, {"type":"word","end":4.579,"speaker_id":"speaker_0","text":"on","start":4.339}, {"type":"spacing","end":4.599,"speaker_id":"speaker_0","text":" ","start":4.579}, {"type":"word","end":5.699,"speaker_id":"speaker_0","text":"fal.ai.","start":4.599}
 
 
 
@@ -106,9 +106,9 @@ The API returns the following output format:
   "language_probability": 1,
   "words": {
     "type": "word",
+    "end": 0.539,
     "speaker_id": "speaker_0",
     "text": "Hey,",
-    "end": 0.539,
     "start": 0.079
   }
 }
@@ -197,6 +197,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

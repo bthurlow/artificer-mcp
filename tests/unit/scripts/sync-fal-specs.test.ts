@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 // @ts-expect-error — scripts/*.mjs is outside tsconfig rootDir; we import
 // it only for parser testing. Vitest handles the ESM resolution at runtime.
-import { extractPricing } from '../../../scripts/sync-fal-specs.mjs';
+import { extractPricing, extractDeprecation } from '../../../scripts/sync-fal-specs.mjs';
 
 describe('extractPricing', () => {
   it('extracts a simple Price bullet (Kling shape)', () => {
@@ -100,5 +100,49 @@ describe('extractPricing', () => {
   it('handles Pricing as the final section (no trailing heading)', () => {
     const llms = ['## Pricing', '', '$1 per call'].join('\n');
     expect(extractPricing(llms)).toBe('$1 per call');
+  });
+});
+
+describe('extractDeprecation', () => {
+  // fal does not publish retirements in a section of their own. They
+  // replace the body of `## Pricing` with a one-line notice, so the
+  // pricing parser happily returns it and — before this check existed —
+  // it landed in the route's `cost` field.
+  const NOTICE =
+    'This model has been deprecated, and further requests are being re-routed to Seedance 1.0 Pro Fast.';
+
+  it('recognises the notice fal publishes in place of a price', () => {
+    const llms = [
+      '## Pricing',
+      '',
+      NOTICE,
+      '',
+      'For more details, see [fal.ai pricing](https://fal.ai/pricing).',
+      '',
+      '## API Information',
+    ].join('\n');
+
+    const pricing = extractPricing(llms);
+    expect(pricing).toBe(NOTICE);
+    expect(extractDeprecation(pricing)).toBe(NOTICE);
+  });
+
+  it('recognises a redirect to a different vendor', () => {
+    const notice =
+      'This model has been deprecated, and further requests are being re-routed to Grok Imagine Video.';
+    expect(extractDeprecation(notice)).toBe(notice);
+  });
+
+  it('returns null for a real price so cost keeps flowing through', () => {
+    expect(extractDeprecation('- **Price**: $0.115 per seconds')).toBeNull();
+    expect(
+      extractDeprecation(
+        'Your request will cost $0.06 per second for 1080p, $0.12 per second for 1440p.',
+      ),
+    ).toBeNull();
+  });
+
+  it('returns null when there was no Pricing section at all', () => {
+    expect(extractDeprecation(null)).toBeNull();
   });
 });

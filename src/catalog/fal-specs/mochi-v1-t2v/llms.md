@@ -44,6 +44,11 @@ The API accepts the following input parameters:
   Whether to enable prompt expansion. Default value: `true`
   - Default: `true`
 
+- **`num_frames`** (`integer`, _optional_):
+  The number of frames to generate at 30 fps. Must be one more than a multiple of 6 and at least 43 (43, 55, 67, ..., 163). Default value: `163`
+  - Default: `163`
+  - Range: `43` to `163`
+
 
 
 **Required Parameters Example**:
@@ -60,7 +65,8 @@ The API accepts the following input parameters:
 {
   "prompt": "A dog running in a field.",
   "negative_prompt": "Blurry, shaky footage",
-  "enable_prompt_expansion": true
+  "enable_prompt_expansion": true,
+  "num_frames": 163
 }
 ```
 
@@ -168,6 +174,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

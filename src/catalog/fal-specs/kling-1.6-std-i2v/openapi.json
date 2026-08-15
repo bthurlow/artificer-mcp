@@ -7,9 +7,10 @@
     "x-fal-metadata": {
       "endpointId": "fal-ai/kling-video/v1.6/standard/image-to-video",
       "category": "image-to-video",
-      "thumbnailUrl": "https://fal.media/files/elephant/28-vTrv3W2BT-u8_cy7mt.png",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a9f91ac/TE1jDriwZqy03ekC_hvcA_0KFRPl9z.png",
       "playgroundUrl": "https://fal.ai/models/fal-ai/kling-video/v1.6/standard/image-to-video",
-      "documentationUrl": "https://fal.ai/models/fal-ai/kling-video/v1.6/standard/image-to-video/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/kling-video/v1.6/standard/image-to-video/api",
+      "about": "Kling 1.6 (std) Image to Video API."
     }
   },
   "components": {
@@ -70,95 +71,94 @@
         ]
       },
       "KlingVideoV16StandardImageToVideoInput": {
-        "type": "object",
+        "properties": {
+          "image_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/kling/kling_input.jpeg"
+            ],
+            "title": "Image Url",
+            "type": "string"
+          },
+          "cfg_scale": {
+            "default": 0.5,
+            "title": "Cfg Scale",
+            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
+            "type": "number",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "negative_prompt": {
+            "default": "blur, distort, and low quality",
+            "title": "Negative Prompt",
+            "type": "string",
+            "maxLength": 2500
+          },
+          "prompt": {
+            "examples": [
+              "Snowflakes fall as a car moves forward along the road."
+            ],
+            "title": "Prompt",
+            "type": "string",
+            "maxLength": 2500
+          },
+          "duration": {
+            "default": "5",
+            "title": "Duration",
+            "description": "The duration of the generated video in seconds",
+            "type": "string",
+            "enum": [
+              "5",
+              "10"
+            ]
+          }
+        },
         "title": "ImageToVideoRequest",
+        "required": [
+          "prompt",
+          "image_url"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "image_url",
           "duration",
           "negative_prompt",
           "cfg_scale"
-        ],
-        "properties": {
-          "negative_prompt": {
-            "default": "blur, distort, and low quality",
-            "maxLength": 2500,
-            "type": "string",
-            "title": "Negative Prompt"
-          },
-          "cfg_scale": {
-            "default": 0.5,
-            "maximum": 1,
-            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
-            "title": "Cfg Scale",
-            "type": "number",
-            "minimum": 0
-          },
-          "duration": {
-            "default": "5",
-            "enum": [
-              "5",
-              "10"
-            ],
-            "title": "Duration",
-            "description": "The duration of the generated video in seconds",
-            "type": "string"
-          },
-          "image_url": {
-            "type": "string",
-            "title": "Image Url",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/kling/kling_input.jpeg"
-            ]
-          },
-          "prompt": {
-            "maxLength": 2500,
-            "type": "string",
-            "title": "Prompt",
-            "examples": [
-              "Snowflakes fall as a car moves forward along the road."
-            ]
-          }
-        },
-        "required": [
-          "prompt",
-          "image_url"
         ]
       },
       "KlingVideoV16StandardImageToVideoOutput": {
-        "type": "object",
-        "title": "I2VOutput",
-        "x-fal-order-properties": [
-          "video"
-        ],
         "properties": {
           "video": {
-            "description": "The generated video",
-            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://storage.googleapis.com/falserverless/kling/kling_i2v_output.mp4"
               }
-            ]
+            ],
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video"
           }
         },
+        "title": "I2VOutput",
         "required": [
+          "video"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
           "video"
         ]
       },
       "File": {
-        "type": "object",
-        "title": "File",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
         "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -167,13 +167,28 @@
                 "type": "null"
               }
             ],
+            "title": "File Name"
+          },
+          "content_type": {
             "examples": [
               "image/png"
-            ]
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
           },
           "file_size": {
+            "examples": [
+              4404019
+            ],
             "description": "The size of the file in bytes.",
-            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -182,33 +197,19 @@
                 "type": "null"
               }
             ],
-            "examples": [
-              4404019
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
+            "title": "File Size"
           }
         },
+        "title": "File",
         "required": [
           "url"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
         ]
       }
     }

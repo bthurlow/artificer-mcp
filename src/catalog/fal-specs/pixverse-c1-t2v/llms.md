@@ -1,4 +1,4 @@
-# PixVerse C1 Text to Video
+# PixVerse C1 Text To Video
 
 > Generate film-grade videos from text prompts with native audio, up to 1080p and 15 seconds, using PixVerse C1.
 
@@ -30,7 +30,8 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
-- **`prompt`** (`string`, _required_)
+- **`prompt`** (`string`, _required_):
+  Text prompt for the video generation. Limited to 2048 UTF-8 encoded bytes. Because the limit counts bytes rather than characters, emoji and non-Latin or accented characters (which use multiple bytes each) can push a visually short prompt over the cap.
   - Examples: "Epic low-cut camera capture of a girl clad in ultraviolet threads, luminous diamond skin glistening under a vast moon's radiance, hyper-detailed"
 
 - **`aspect_ratio`** (`AspectRatioEnum`, _optional_):
@@ -183,6 +184,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

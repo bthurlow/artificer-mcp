@@ -15,17 +15,18 @@ Tencent's open-weights video lineage. Best for research workflows, fine-tuning e
 | \`hunyuan-video-t2v\` | t2v | v1 | Older Hunyuan |
 | \`hunyuan-video-i2v\` | i2v | v1 | Older i2v |
 | \`hunyuan-video-lora-t2v\` | t2v + LoRA | v1 | Custom-style t2v with caller-supplied LoRA |
-| \`hunyuan-video-img2vid-lora-i2v\` | i2v + LoRA | v1 | Custom-style i2v with LoRA |
 | \`hunyuan-custom-i2v\` | i2v | identity | Identity-preserving (similar use to Lynx) |
+
+**LoRA support is text-to-video only.** \`hunyuan-video-img2vid-lora-i2v\` was dropped on 2026-08-15 — fal removed \`fal-ai/hunyuan-video-img2vid-lora\` and it now 404s. There is no LoRA-capable Hunyuan i2v route any more; for custom-style image-conditioned work, look at the LTX-2.3-22b LoRA i2v variants (\`ltx_video_prompt_guide\`).
 
 ## Known strengths
 - Open weights — replicable locally.
-- LoRA endpoints allow caller-supplied custom-style fine-tunes.
+- The t2v LoRA endpoint allows caller-supplied custom-style fine-tunes.
 - Hunyuan Custom does identity preservation for portrait-driven i2v.
 
 ## Known weaknesses
 - Quality trails Veo / Sora / Kling Pro.
-- LoRA endpoints add input complexity (caller must supply LoRA URL/path).
+- The LoRA endpoint adds input complexity (caller must supply LoRA URL/path).
 - No native audio.
 
 ## Input requirements
@@ -50,11 +51,10 @@ Standard t2v / i2v phrasing. LoRA variants: prompt should describe the scene; Lo
 | \`hunyuan-video-1.5-i2v\` | \`fal-ai/hunyuan-video-v1.5/image-to-video\` |
 | \`hunyuan-video-i2v\` | \`fal-ai/hunyuan-video-image-to-video\` |
 | \`hunyuan-video-lora-t2v\` | \`fal-ai/hunyuan-video-lora\` |
-| \`hunyuan-video-img2vid-lora-i2v\` | \`fal-ai/hunyuan-video-img2vid-lora\` |
 | \`hunyuan-custom-i2v\` | \`fal-ai/hunyuan-custom\` |
 
 ## Last verified
-2026-04-28 — initial seed of full fal video catalog.
+2026-08-15 — route list re-synced against fal; \`hunyuan-video-img2vid-lora-i2v\` retired (endpoint 404s). Capability notes and prompt guidance are unchanged since the 2026-04-28 initial seed and were not re-verified.
 
 ## Official references
 - https://fal.ai/models/fal-ai/hunyuan-video-v1.5/text-to-video

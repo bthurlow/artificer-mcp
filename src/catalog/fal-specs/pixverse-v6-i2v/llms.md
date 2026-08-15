@@ -1,4 +1,4 @@
-# PixVerse
+# PixVerse V6 Image To Video
 
 > Pixverse's latest V6 Model
 
@@ -30,7 +30,8 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
-- **`prompt`** (`string`, _required_)
+- **`prompt`** (`string`, _required_):
+  Text prompt for the video generation. Limited to 2048 UTF-8 encoded bytes. Because the limit counts bytes rather than characters, emoji and non-Latin or accented characters (which use multiple bytes each) can push a visually short prompt over the cap.
   - Examples: "A woman warrior with her hammer walking with his glacier wolf."
 
 - **`resolution`** (`ResolutionEnum`, _optional_):
@@ -44,7 +45,7 @@ The API accepts the following input parameters:
   - Range: `1` to `15`
 
 - **`negative_prompt`** (`string`, _optional_):
-  Negative prompt to be used for the generation Default value: `""`
+  Negative prompt to be used for the generation. Limited to 2048 UTF-8 encoded bytes. Because the limit counts bytes rather than characters, emoji and non-Latin or accented characters (which use multiple bytes each) can push a visually short prompt over the cap. Default value: `""`
   - Default: `""`
   - Examples: "blurry, low quality, low resolution, pixelated, noisy, grainy, out of focus, poorly lit, poorly exposed, poorly composed, poorly framed, poorly cropped, poorly color corrected, poorly color graded"
 
@@ -102,7 +103,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"file_name":"output.mp4","url":"https://storage.googleapis.com/falserverless/model_tests/video_models/output-3.mp4","file_size":6420765,"content_type":"video/mp4"}
+  - Examples: {"file_size":6420765,"file_name":"output.mp4","url":"https://storage.googleapis.com/falserverless/model_tests/video_models/output-3.mp4","content_type":"video/mp4"}
 
 
 
@@ -111,9 +112,9 @@ The API returns the following output format:
 ```json
 {
   "video": {
+    "file_size": 6420765,
     "file_name": "output.mp4",
     "url": "https://storage.googleapis.com/falserverless/model_tests/video_models/output-3.mp4",
-    "file_size": 6420765,
     "content_type": "video/mp4"
   }
 }
@@ -205,6 +206,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

@@ -9,7 +9,8 @@
       "category": "text-to-video",
       "thumbnailUrl": "https://v3.fal.media/files/panda/6YaK9lV7ySsUA9I3dUp5r_8a807b0c8e2641db9e345107ab8a809e.jpg",
       "playgroundUrl": "https://fal.ai/models/fal-ai/kling-video/v2.5-turbo/pro/text-to-video",
-      "documentationUrl": "https://fal.ai/models/fal-ai/kling-video/v2.5-turbo/pro/text-to-video/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/kling-video/v2.5-turbo/pro/text-to-video/api",
+      "about": "Kling 2.5 (pro) Text to Video API."
     }
   },
   "components": {
@@ -70,98 +71,97 @@
         ]
       },
       "KlingVideoV25TurboProTextToVideoInput": {
-        "type": "object",
+        "properties": {
+          "duration": {
+            "default": "5",
+            "title": "Duration",
+            "description": "The duration of the generated video in seconds",
+            "type": "string",
+            "enum": [
+              "5",
+              "10"
+            ]
+          },
+          "cfg_scale": {
+            "default": 0.5,
+            "title": "Cfg Scale",
+            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
+            "type": "number",
+            "maximum": 1,
+            "minimum": 0
+          },
+          "negative_prompt": {
+            "default": "blur, distort, and low quality",
+            "title": "Negative Prompt",
+            "type": "string",
+            "maxLength": 2500
+          },
+          "prompt": {
+            "examples": [
+              "A noble lord walks among his people, his presence a comforting reassurance. He greets them with a gentle smile, embodying their hopes and earning their respect through simple interactions. The atmosphere is intimate and sincere, highlighting the bond between the leader and community."
+            ],
+            "title": "Prompt",
+            "type": "string",
+            "maxLength": 2500
+          },
+          "aspect_ratio": {
+            "default": "16:9",
+            "title": "Aspect Ratio",
+            "description": "The aspect ratio of the generated video frame",
+            "type": "string",
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1"
+            ]
+          }
+        },
         "title": "TextToVideoV25ProRequest",
+        "required": [
+          "prompt"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "duration",
           "aspect_ratio",
           "negative_prompt",
           "cfg_scale"
-        ],
-        "properties": {
-          "aspect_ratio": {
-            "default": "16:9",
-            "enum": [
-              "16:9",
-              "9:16",
-              "1:1"
-            ],
-            "title": "Aspect Ratio",
-            "description": "The aspect ratio of the generated video frame",
-            "type": "string"
-          },
-          "negative_prompt": {
-            "default": "blur, distort, and low quality",
-            "maxLength": 2500,
-            "type": "string",
-            "title": "Negative Prompt"
-          },
-          "duration": {
-            "default": "5",
-            "enum": [
-              "5",
-              "10"
-            ],
-            "title": "Duration",
-            "description": "The duration of the generated video in seconds",
-            "type": "string"
-          },
-          "cfg_scale": {
-            "default": 0.5,
-            "maximum": 1,
-            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
-            "title": "Cfg Scale",
-            "type": "number",
-            "minimum": 0
-          },
-          "prompt": {
-            "maxLength": 2500,
-            "type": "string",
-            "title": "Prompt",
-            "examples": [
-              "A noble lord walks among his people, his presence a comforting reassurance. He greets them with a gentle smile, embodying their hopes and earning their respect through simple interactions. The atmosphere is intimate and sincere, highlighting the bond between the leader and community."
-            ]
-          }
-        },
-        "required": [
-          "prompt"
         ]
       },
       "KlingVideoV25TurboProTextToVideoOutput": {
-        "type": "object",
-        "title": "TextToVideoV25ProOutput",
-        "x-fal-order-properties": [
-          "video"
-        ],
         "properties": {
           "video": {
-            "description": "The generated video",
-            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://storage.googleapis.com/falserverless/model_tests/kling/kling-v2.5-turbo-pro-text-to-video-output.mp4"
               }
-            ]
+            ],
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video"
           }
         },
+        "title": "TextToVideoV25ProOutput",
         "required": [
+          "video"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
           "video"
         ]
       },
       "File": {
-        "type": "object",
-        "title": "File",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
         "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -170,13 +170,28 @@
                 "type": "null"
               }
             ],
+            "title": "File Name"
+          },
+          "content_type": {
             "examples": [
               "image/png"
-            ]
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
           },
           "file_size": {
+            "examples": [
+              4404019
+            ],
             "description": "The size of the file in bytes.",
-            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -185,33 +200,19 @@
                 "type": "null"
               }
             ],
-            "examples": [
-              4404019
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
+            "title": "File Size"
           }
         },
+        "title": "File",
         "required": [
           "url"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
         ]
       }
     }

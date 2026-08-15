@@ -9,7 +9,8 @@
       "category": "speech-to-text",
       "thumbnailUrl": "https://storage.googleapis.com/falserverless/gallery/wizper.webp",
       "playgroundUrl": "https://fal.ai/models/fal-ai/wizper",
-      "documentationUrl": "https://fal.ai/models/fal-ai/wizper/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/wizper/api",
+      "about": "Transcribe an audio file using the Whisper model."
     }
   },
   "components": {
@@ -70,48 +71,47 @@
         ]
       },
       "WizperInput": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "audio_url",
+          "task",
+          "language",
+          "chunk_level",
+          "max_segment_len",
+          "merge_chunks",
+          "version"
+        ],
+        "required": [
+          "audio_url"
+        ],
         "properties": {
-          "chunk_level": {
-            "const": "segment",
-            "description": "Level of the chunks to return.",
-            "default": "segment",
+          "max_segment_len": {
+            "maximum": 29,
+            "type": "integer",
+            "title": "Max Segment Len",
+            "default": 29,
+            "description": "Maximum speech segment duration in seconds before splitting.",
+            "minimum": 10
+          },
+          "version": {
             "type": "string",
-            "title": "Chunk Level"
+            "title": "Version",
+            "default": "3",
+            "description": "Version of the model to use. All of the models are the Whisper large variant.",
+            "const": "3"
           },
           "audio_url": {
             "type": "string",
+            "title": "Audio Url",
+            "description": "URL of the audio file to transcribe. Supported formats: mp3, mp4, mpeg, mpga, m4a, wav or webm.",
             "examples": [
               "https://ihlhivqvotguuqycfcvj.supabase.co/storage/v1/object/public/public-text-to-speech/scratch-testing/earth-history-19mins.mp3"
-            ],
-            "description": "URL of the audio file to transcribe. Supported formats: mp3, mp4, mpeg, mpga, m4a, wav or webm.",
-            "title": "Audio Url"
-          },
-          "task": {
-            "type": "string",
-            "enum": [
-              "transcribe",
-              "translate"
-            ],
-            "default": "transcribe",
-            "description": "Task to perform on the audio file. Either transcribe or translate.",
-            "title": "Task"
-          },
-          "version": {
-            "const": "3",
-            "description": "Version of the model to use. All of the models are the Whisper large variant.",
-            "default": "3",
-            "type": "string",
-            "title": "Version"
-          },
-          "merge_chunks": {
-            "description": "Whether to merge consecutive chunks. When enabled, chunks are merged if their combined duration does not exceed max_segment_len.",
-            "default": true,
-            "type": "boolean",
-            "title": "Merge Chunks"
+            ]
           },
           "language": {
             "anyOf": [
               {
+                "type": "string",
                 "enum": [
                   "af",
                   "am",
@@ -212,57 +212,62 @@
                   "yi",
                   "yo",
                   "zh"
-                ],
-                "type": "string"
+                ]
               },
               {
                 "type": "null"
               }
             ],
-            "examples": [
-              null
-            ],
+            "title": "Language",
             "default": "en",
             "description": "\n        Language of the audio file.\n        If translate is selected as the task, the audio will be translated to\n        English, regardless of the language selected. If `None` is passed,\n        the language will be automatically detected. This will also increase\n        the inference time.\n        ",
-            "title": "Language"
+            "examples": [
+              null
+            ]
           },
-          "max_segment_len": {
-            "description": "Maximum speech segment duration in seconds before splitting.",
-            "title": "Max Segment Len",
-            "maximum": 29,
-            "default": 29,
-            "type": "integer",
-            "minimum": 10
+          "merge_chunks": {
+            "type": "boolean",
+            "title": "Merge Chunks",
+            "default": true,
+            "description": "Whether to merge consecutive chunks. When enabled, chunks are merged if their combined duration does not exceed max_segment_len."
+          },
+          "chunk_level": {
+            "type": "string",
+            "title": "Chunk Level",
+            "default": "segment",
+            "description": "Level of the chunks to return.",
+            "const": "segment"
+          },
+          "task": {
+            "type": "string",
+            "title": "Task",
+            "default": "transcribe",
+            "enum": [
+              "transcribe",
+              "translate"
+            ],
+            "description": "Task to perform on the audio file. Either transcribe or translate."
           }
         },
-        "title": "WhisperInput",
-        "required": [
-          "audio_url"
-        ],
-        "type": "object",
-        "x-fal-order-properties": [
-          "audio_url",
-          "task",
-          "language",
-          "chunk_level",
-          "max_segment_len",
-          "merge_chunks",
-          "version"
-        ]
+        "title": "WhisperInput"
       },
       "WizperOutput": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "text",
+          "chunks",
+          "languages"
+        ],
+        "required": [
+          "text",
+          "chunks",
+          "languages"
+        ],
         "properties": {
-          "chunks": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/WhisperChunk"
-            },
-            "description": "Timestamp chunks of the audio file",
-            "title": "Chunks"
-          },
           "languages": {
             "type": "array",
             "items": {
+              "type": "string",
               "enum": [
                 "af",
                 "am",
@@ -363,39 +368,42 @@
                 "yi",
                 "yo",
                 "zh"
-              ],
-              "type": "string"
+              ]
             },
-            "description": "List of languages that the audio file is inferred to be. Defaults to null.",
-            "title": "Languages"
+            "title": "Languages",
+            "description": "List of languages that the audio file is inferred to be. Defaults to null."
           },
           "text": {
             "type": "string",
-            "description": "Transcription of the audio file",
-            "title": "Text"
+            "title": "Text",
+            "description": "Transcription of the audio file"
+          },
+          "chunks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WhisperChunk"
+            },
+            "title": "Chunks",
+            "description": "Timestamp chunks of the audio file"
           }
         },
-        "title": "WhisperOutput",
-        "required": [
-          "text",
-          "chunks",
-          "languages"
-        ],
-        "type": "object",
-        "x-fal-order-properties": [
-          "text",
-          "chunks",
-          "languages"
-        ]
+        "title": "WhisperOutput"
       },
       "WhisperChunk": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "timestamp",
+          "text"
+        ],
+        "required": [
+          "timestamp",
+          "text"
+        ],
         "properties": {
-          "text": {
-            "type": "string",
-            "description": "Transcription of the chunk",
-            "title": "Text"
-          },
           "timestamp": {
+            "type": "array",
+            "maxItems": 2,
+            "title": "Timestamp",
             "prefixItems": [
               {
                 "anyOf": [
@@ -418,23 +426,16 @@
                 ]
               }
             ],
-            "type": "array",
-            "maxItems": 2,
-            "minItems": 2,
             "description": "Start and end timestamp of the chunk",
-            "title": "Timestamp"
+            "minItems": 2
+          },
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Transcription of the chunk"
           }
         },
-        "title": "WhisperChunk",
-        "required": [
-          "timestamp",
-          "text"
-        ],
-        "type": "object",
-        "x-fal-order-properties": [
-          "timestamp",
-          "text"
-        ]
+        "title": "WhisperChunk"
       }
     }
   },

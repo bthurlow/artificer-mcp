@@ -41,6 +41,7 @@ interface AccessRoute {
   cost: string;
   key_env_var: string;
   stub: boolean;
+  deprecated?: string;
 }
 
 interface CatalogEntry {
@@ -169,6 +170,32 @@ describe('catalog integrity', () => {
               route.cost.length,
               `${cap}/${subClass}/${entry.slug}: empty cost string`,
             ).toBeGreaterThan(0);
+          }
+        }
+      }
+    }
+  });
+
+  it('no route smuggles a deprecation notice into its cost field', () => {
+    // sync-fal-specs used to read fal's retirement notice out of the
+    // `## Pricing` block — where fal publishes it, in place of a price —
+    // and write it straight into `cost`. That destroyed the last known
+    // price and left prose that isn't a price in a field callers read as
+    // one. Retirements belong in `deprecated`, which also hides the route
+    // from the default catalog listing.
+    for (const cap of CAPABILITIES) {
+      const capData = data[cap];
+      if (!capData || typeof capData !== 'object') continue;
+      for (const [subClass, entries] of Object.entries(
+        capData as Record<string, CatalogEntry[]>,
+      )) {
+        for (const entry of entries) {
+          for (const route of entry.access_routes) {
+            expect(
+              /has been deprecated/i.test(route.cost),
+              `${cap}/${subClass}/${entry.slug}: deprecation notice found in cost — ` +
+                `it belongs in the route's "deprecated" field`,
+            ).toBe(false);
           }
         }
       }

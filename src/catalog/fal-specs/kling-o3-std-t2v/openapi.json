@@ -9,7 +9,8 @@
       "category": "text-to-video",
       "thumbnailUrl": "https://v3b.fal.media/files/b/0a8cfce0/-uK5wEuvOst_sCRKg3PqO_0e1bf50a5a624877b395523e43c3fcc0.jpg",
       "playgroundUrl": "https://fal.ai/models/fal-ai/kling-video/o3/standard/text-to-video",
-      "documentationUrl": "https://fal.ai/models/fal-ai/kling-video/o3/standard/text-to-video/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/kling-video/o3/standard/text-to-video/api",
+      "about": "Generate a video from text prompt using O3 model (standard mode).\n\nO3 supports extended duration (3-15s) and native audio generation."
     }
   },
   "components": {
@@ -70,63 +71,12 @@
         ]
       },
       "KlingVideoO3StandardTextToVideoInput": {
-        "type": "object",
-        "title": "O3StandardTextToVideoInput",
-        "x-fal-order-properties": [
-          "prompt",
-          "duration",
-          "aspect_ratio",
-          "generate_audio",
-          "multi_prompt",
-          "shot_type"
-        ],
         "properties": {
-          "generate_audio": {
-            "default": false,
-            "type": "boolean",
-            "title": "Generate Audio",
-            "description": "Whether to generate native audio for the video."
-          },
-          "aspect_ratio": {
-            "default": "16:9",
-            "enum": [
-              "16:9",
-              "9:16",
-              "1:1"
-            ],
-            "title": "Aspect Ratio",
-            "description": "Aspect ratio of the generated video.",
-            "type": "string"
-          },
-          "multi_prompt": {
-            "description": "List of prompts for multi-shot video generation.",
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/KlingV3MultiPromptElement"
-                }
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Multi Prompt",
-            "examples": [
-              null
-            ]
-          },
-          "shot_type": {
-            "default": "customize",
-            "description": "The type of multi-shot video generation.",
-            "title": "Shot Type",
-            "type": "string",
-            "const": "customize"
-          },
           "duration": {
             "default": "5",
-            "type": "string",
             "title": "Duration",
+            "description": "Video duration in seconds (3-15s).",
+            "type": "string",
             "enum": [
               "3",
               "4",
@@ -141,62 +91,113 @@
               "13",
               "14",
               "15"
-            ],
-            "description": "Video duration in seconds (3-15s)."
+            ]
           },
           "prompt": {
-            "description": "Text prompt for video generation. Required unless multi_prompt is provided.",
+            "examples": [
+              "A mecha lands on the ground to save the city, and says \"I'm here\", in anime style"
+            ],
+            "title": "Prompt",
             "anyOf": [
               {
-                "maxLength": 2500,
-                "type": "string"
+                "type": "string",
+                "maxLength": 2500
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Prompt",
-            "examples": [
-              "A mecha lands on the ground to save the city, and says \"I'm here\", in anime style"
+            "description": "Text prompt for video generation. Required unless multi_prompt is provided."
+          },
+          "generate_audio": {
+            "default": false,
+            "title": "Generate Audio",
+            "description": "Whether to generate native audio for the video.",
+            "type": "boolean"
+          },
+          "shot_type": {
+            "default": "customize",
+            "title": "Shot Type",
+            "description": "The type of multi-shot video generation. 'intelligent' lets the model automatically determine shot structure.",
+            "type": "string",
+            "enum": [
+              "customize",
+              "intelligent"
             ]
+          },
+          "aspect_ratio": {
+            "default": "16:9",
+            "title": "Aspect Ratio",
+            "description": "Aspect ratio of the generated video.",
+            "type": "string",
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1"
+            ]
+          },
+          "multi_prompt": {
+            "examples": [
+              null
+            ],
+            "title": "Multi Prompt",
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/KlingV3MultiPromptElement"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "List of prompts for multi-shot video generation."
           }
-        }
+        },
+        "title": "O3StandardTextToVideoInput",
+        "type": "object",
+        "x-fal-order-properties": [
+          "prompt",
+          "duration",
+          "aspect_ratio",
+          "generate_audio",
+          "multi_prompt",
+          "shot_type"
+        ]
       },
       "KlingVideoO3StandardTextToVideoOutput": {
-        "description": "Output for O3 video generation endpoints.",
+        "properties": {
+          "video": {
+            "examples": [
+              {
+                "url": "https://v3b.fal.media/files/b/0a8d04e2/idOb9V-Q9ujlggPSKqsfS_output.mp4",
+                "file_name": "output.mp4",
+                "content_type": "video/mp4",
+                "file_size": 13096952
+              }
+            ],
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video."
+          }
+        },
         "title": "O3StandardTextToVideoOutput",
-        "x-fal-order-properties": [
+        "required": [
           "video"
         ],
         "type": "object",
-        "properties": {
-          "video": {
-            "description": "The generated video.",
-            "$ref": "#/components/schemas/File",
-            "examples": [
-              {
-                "content_type": "video/mp4",
-                "file_size": 13096952,
-                "url": "https://v3b.fal.media/files/b/0a8d04e2/idOb9V-Q9ujlggPSKqsfS_output.mp4",
-                "file_name": "output.mp4"
-              }
-            ]
-          }
-        },
-        "required": [
+        "description": "Output for O3 video generation endpoints.",
+        "x-fal-order-properties": [
           "video"
         ]
       },
       "KlingV3MultiPromptElement": {
-        "type": "object",
-        "title": "KlingV3MultiPromptElement",
-        "x-fal-order-properties": [
-          "prompt",
-          "duration"
-        ],
         "properties": {
           "duration": {
             "default": "5",
+            "title": "Duration",
+            "description": "The duration of this shot in seconds",
+            "type": "string",
             "enum": [
               "1",
               "2",
@@ -213,34 +214,36 @@
               "13",
               "14",
               "15"
-            ],
-            "title": "Duration",
-            "description": "The duration of this shot in seconds",
-            "type": "string"
+            ]
           },
           "prompt": {
-            "description": "The prompt for this shot.",
             "title": "Prompt",
+            "description": "The prompt for this shot.",
             "type": "string"
           }
         },
+        "title": "KlingV3MultiPromptElement",
         "required": [
           "prompt"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
+          "prompt",
+          "duration"
         ]
       },
       "File": {
-        "type": "object",
-        "title": "File",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
         "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -249,13 +252,28 @@
                 "type": "null"
               }
             ],
+            "title": "File Name"
+          },
+          "content_type": {
             "examples": [
               "image/png"
-            ]
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
           },
           "file_size": {
+            "examples": [
+              4404019
+            ],
             "description": "The size of the file in bytes.",
-            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -264,33 +282,19 @@
                 "type": "null"
               }
             ],
-            "examples": [
-              4404019
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
+            "title": "File Size"
           }
         },
+        "title": "File",
         "required": [
           "url"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
         ]
       }
     }

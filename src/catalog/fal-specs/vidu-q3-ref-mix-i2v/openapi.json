@@ -9,7 +9,8 @@
       "category": "image-to-video",
       "thumbnailUrl": "https://v3b.fal.media/files/b/0a957345/pZ89MiBhy31s0LcoTlN0N_895614a220bb4020a3e1410421a18b26.png",
       "playgroundUrl": "https://fal.ai/models/fal-ai/vidu/q3/reference-to-video/mix",
-      "documentationUrl": "https://fal.ai/models/fal-ai/vidu/q3/reference-to-video/mix/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/vidu/q3/reference-to-video/mix/api",
+      "about": "Vidu Q3 Mix Reference to Video API: Generate a video from 1 to 4 reference images using the Q3 Mix model."
     }
   },
   "components": {
@@ -70,25 +71,21 @@
         ]
       },
       "ViduQ3ReferenceToVideoMixInput": {
-        "title": "Q3ReferenceToVideoRequest",
+        "x-fal-order-properties": [
+          "prompt",
+          "reference_image_urls",
+          "duration",
+          "seed",
+          "aspect_ratio",
+          "resolution",
+          "audio"
+        ],
+        "required": [
+          "prompt",
+          "reference_image_urls"
+        ],
         "properties": {
-          "resolution": {
-            "description": "Output video resolution",
-            "enum": [
-              "360p",
-              "540p",
-              "720p",
-              "1080p"
-            ],
-            "default": "720p",
-            "title": "Resolution",
-            "type": "string"
-          },
           "reference_image_urls": {
-            "description": "URLs of 1 to 4 reference images used to keep subjects or scenes consistent",
-            "items": {
-              "type": "string"
-            },
             "examples": [
               [
                 "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference1.png",
@@ -96,14 +93,33 @@
                 "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference3.png"
               ]
             ],
+            "description": "URLs of 1 to 4 reference images used to keep subjects or scenes consistent",
+            "items": {
+              "type": "string"
+            },
             "title": "Reference Image Urls",
             "type": "array"
           },
-          "audio": {
-            "description": "Whether to use direct audio-video generation. When true, outputs video with sound.",
-            "default": true,
-            "title": "Audio",
-            "type": "boolean"
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "title": "Seed"
+          },
+          "prompt": {
+            "maxLength": 2000,
+            "description": "Text prompt for video generation, max 2000 characters",
+            "examples": [
+              "A character walking through a beach catching an apple."
+            ],
+            "title": "Prompt",
+            "type": "string"
           },
           "aspect_ratio": {
             "description": "The aspect ratio of the output video",
@@ -118,136 +134,121 @@
             "title": "Aspect Ratio",
             "type": "string"
           },
-          "prompt": {
-            "description": "Text prompt for video generation, max 2000 characters",
-            "examples": [
-              "A character walking through a beach catching an apple."
-            ],
-            "maxLength": 2000,
-            "title": "Prompt",
-            "type": "string"
-          },
-          "seed": {
-            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Seed"
-          },
           "duration": {
             "description": "Duration of the video in seconds (1-16 for Q3 models)",
-            "type": "integer",
-            "default": 5,
+            "maximum": 16,
             "minimum": 1,
+            "default": 5,
             "title": "Duration",
-            "maximum": 16
+            "type": "integer"
+          },
+          "audio": {
+            "description": "Whether to use direct audio-video generation. When true, outputs video with sound.",
+            "default": true,
+            "title": "Audio",
+            "type": "boolean"
+          },
+          "resolution": {
+            "description": "Output video resolution",
+            "enum": [
+              "360p",
+              "540p",
+              "720p",
+              "1080p"
+            ],
+            "default": "720p",
+            "title": "Resolution",
+            "type": "string"
           }
         },
-        "type": "object",
-        "required": [
-          "prompt",
-          "reference_image_urls"
-        ],
-        "x-fal-order-properties": [
-          "prompt",
-          "reference_image_urls",
-          "duration",
-          "seed",
-          "aspect_ratio",
-          "resolution",
-          "audio"
-        ]
+        "title": "Q3ReferenceToVideoRequest",
+        "type": "object"
       },
       "ViduQ3ReferenceToVideoMixOutput": {
-        "title": "Q3ReferenceToVideoOutput",
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "required": [
+          "video"
+        ],
         "properties": {
           "video": {
+            "description": "The generated video from reference images using the Q3 model",
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v3b.fal.media/files/b/0a8c9189/n9z3uUDPqmU2msAtqr25-_output.mp4"
               }
-            ],
-            "description": "The generated video from reference images using the Q3 model",
-            "$ref": "#/components/schemas/File"
+            ]
           }
         },
-        "type": "object",
-        "required": [
-          "video"
-        ],
-        "x-fal-order-properties": [
-          "video"
-        ]
+        "title": "Q3ReferenceToVideoOutput",
+        "type": "object"
       },
       "File": {
-        "title": "File",
-        "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type"
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name"
-          },
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          }
-        },
-        "type": "object",
-        "required": [
-          "url"
-        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
-        ]
+        ],
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "examples": [
+              4404019
+            ]
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ]
+          }
+        },
+        "title": "File",
+        "type": "object"
       }
     }
   },

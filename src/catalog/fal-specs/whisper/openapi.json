@@ -9,7 +9,8 @@
       "category": "speech-to-text",
       "thumbnailUrl": "https://storage.googleapis.com/falserverless/gallery/whisper.jpg",
       "playgroundUrl": "https://fal.ai/models/fal-ai/whisper",
-      "documentationUrl": "https://fal.ai/models/fal-ai/whisper/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/whisper/api",
+      "about": "Generate"
     }
   },
   "components": {
@@ -70,29 +71,45 @@
         ]
       },
       "WhisperInput": {
-        "title": "WhisperInput",
         "type": "object",
+        "required": [
+          "audio_url"
+        ],
+        "title": "WhisperInput",
+        "x-fal-order-properties": [
+          "audio_url",
+          "task",
+          "language",
+          "diarize",
+          "chunk_level",
+          "batch_size",
+          "prompt",
+          "num_speakers"
+        ],
         "properties": {
-          "task": {
-            "title": "Task",
+          "prompt": {
             "type": "string",
-            "enum": [
-              "transcribe",
-              "translate"
-            ],
-            "description": "Task to perform on the audio file. Either transcribe or translate.",
-            "default": "transcribe"
+            "title": "Prompt",
+            "description": "Prompt to use for generation. Defaults to an empty string.",
+            "default": ""
           },
-          "audio_url": {
-            "title": "Audio Url",
-            "type": "string",
+          "batch_size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 64,
             "examples": [
-              "https://storage.googleapis.com/falserverless/model_tests/whisper/dinner_conversation.mp3"
+              64
             ],
-            "description": "URL of the audio file to transcribe. Supported formats: mp3, mp4, mpeg, mpga, m4a, wav or webm."
+            "title": "Batch Size",
+            "default": 64
+          },
+          "diarize": {
+            "type": "boolean",
+            "title": "Diarize",
+            "description": "Whether to diarize the audio file. Defaults to false. Setting to true will add costs proportional to diarization inference time.",
+            "default": false
           },
           "language": {
-            "title": "Language",
             "anyOf": [
               {
                 "type": "string",
@@ -202,27 +219,26 @@
                 "type": "null"
               }
             ],
-            "nullable": true,
+            "title": "Language",
             "description": "\n        Language of the audio file. If set to null, the language will be\n        automatically detected. Defaults to null.\n\n        If translate is selected as the task, the audio will be translated to\n        English, regardless of the language selected.\n        "
           },
-          "prompt": {
-            "title": "Prompt",
+          "chunk_level": {
             "type": "string",
-            "description": "Prompt to use for generation. Defaults to an empty string.",
-            "default": ""
-          },
-          "batch_size": {
-            "title": "Batch Size",
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 64,
-            "examples": [
-              64
+            "enum": [
+              "none",
+              "segment",
+              "word"
             ],
-            "default": 64
+            "title": "Chunk Level",
+            "description": "Level of the chunks to return. Either none, segment or word. `none` would imply that all of the audio will be transcribed without the timestamp tokens, we suggest to switch to `none` if you are not satisfied with the transcription quality, since it will usually improve the quality of the results. Switching to `none` will also provide minor speed ups in the transcription due to less amount of generated tokens. Notice that setting to none will produce **a single chunk with the whole transcription**.",
+            "default": "segment"
           },
           "num_speakers": {
+            "examples": [
+              null
+            ],
             "title": "Num Speakers",
+            "description": "\n            Number of speakers in the audio file. Defaults to null.\n            If not provided, the number of speakers will be automatically\n            detected.\n        ",
             "anyOf": [
               {
                 "type": "integer",
@@ -231,59 +247,75 @@
               {
                 "type": "null"
               }
-            ],
-            "nullable": true,
+            ]
+          },
+          "audio_url": {
+            "type": "string",
             "examples": [
-              null
+              "https://storage.googleapis.com/falserverless/model_tests/whisper/dinner_conversation.mp3"
             ],
-            "description": "\n            Number of speakers in the audio file. Defaults to null.\n            If not provided, the number of speakers will be automatically\n            detected.\n        "
+            "title": "Audio Url",
+            "description": "URL of the audio file to transcribe. Supported formats: mp3, mp4, mpeg, mpga, m4a, wav or webm."
           },
-          "diarize": {
-            "title": "Diarize",
-            "type": "boolean",
-            "description": "Whether to diarize the audio file. Defaults to false. Setting to true will add costs proportional to diarization inference time.",
-            "default": false
-          },
-          "chunk_level": {
-            "title": "Chunk Level",
+          "task": {
             "type": "string",
             "enum": [
-              "none",
-              "segment",
-              "word"
+              "transcribe",
+              "translate"
             ],
-            "description": "Level of the chunks to return. Either none, segment or word. `none` would imply that all of the audio will be transcribed without the timestamp tokens, we suggest to switch to `none` if you are not satisfied with the transcription quality, since it will usually improve the quality of the results. Switching to `none` will also provide minor speed ups in the transcription due to less amount of generated tokens. Notice that setting to none will produce **a single chunk with the whole transcription**.",
-            "default": "segment"
+            "title": "Task",
+            "description": "Task to perform on the audio file. Either transcribe or translate.",
+            "default": "transcribe"
           }
-        },
-        "x-fal-order-properties": [
-          "audio_url",
-          "task",
-          "language",
-          "diarize",
-          "chunk_level",
-          "batch_size",
-          "prompt",
-          "num_speakers"
-        ],
-        "required": [
-          "audio_url"
-        ]
+        }
       },
       "WhisperOutput": {
-        "title": "WhisperOutput",
         "type": "object",
+        "required": [
+          "text",
+          "inferred_languages",
+          "diarization_segments"
+        ],
+        "title": "WhisperOutput",
+        "x-fal-order-properties": [
+          "text",
+          "chunks",
+          "inferred_languages",
+          "diarization_segments"
+        ],
         "properties": {
+          "text": {
+            "type": "string",
+            "examples": [
+              "María, ¿qué cenamos hoy? No sé, ¿qué cenamos? ¿Cenamos pollo frito o pollo asado o algo? Mejor a la plancha, quiero una salada. A la plancha, vale. Y hacemos una ensalada con tomate y esas cosas. Vale. Pues eso lo hacemos, ¿vale? Venga, vale."
+            ],
+            "title": "Text",
+            "description": "Transcription of the audio file"
+          },
+          "chunks": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/WhisperChunk"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chunks",
+            "description": "Timestamp chunks of the audio file"
+          },
           "diarization_segments": {
-            "title": "Diarization Segments",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/DiarizationSegment"
             },
+            "title": "Diarization Segments",
             "description": "Speaker diarization segments of the audio file. Only present if diarization is enabled."
           },
           "inferred_languages": {
-            "title": "Inferred Languages",
             "type": "array",
             "items": {
               "type": "string",
@@ -389,118 +421,30 @@
                 "zh"
               ]
             },
+            "title": "Inferred Languages",
             "description": "List of languages that the audio file is inferred to be. Defaults to null."
-          },
-          "chunks": {
-            "title": "Chunks",
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/WhisperChunk"
-                }
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Timestamp chunks of the audio file"
-          },
-          "text": {
-            "title": "Text",
-            "type": "string",
-            "examples": [
-              "María, ¿qué cenamos hoy? No sé, ¿qué cenamos? ¿Cenamos pollo frito o pollo asado o algo? Mejor a la plancha, quiero una salada. A la plancha, vale. Y hacemos una ensalada con tomate y esas cosas. Vale. Pues eso lo hacemos, ¿vale? Venga, vale."
-            ],
-            "description": "Transcription of the audio file"
           }
-        },
-        "x-fal-order-properties": [
-          "text",
-          "chunks",
-          "inferred_languages",
-          "diarization_segments"
-        ],
-        "required": [
-          "text",
-          "inferred_languages",
-          "diarization_segments"
-        ]
-      },
-      "DiarizationSegment": {
-        "title": "DiarizationSegment",
-        "type": "object",
-        "properties": {
-          "timestamp": {
-            "title": "Timestamp",
-            "type": "array",
-            "maxItems": 2,
-            "description": "Start and end timestamp of the segment",
-            "prefixItems": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "number"
-              }
-            ],
-            "minItems": 2
-          },
-          "speaker": {
-            "title": "Speaker",
-            "type": "string",
-            "description": "Speaker ID of the segment"
-          }
-        },
-        "x-fal-order-properties": [
-          "timestamp",
-          "speaker"
-        ],
-        "required": [
-          "timestamp",
-          "speaker"
-        ]
+        }
       },
       "WhisperChunk": {
-        "title": "WhisperChunk",
         "type": "object",
+        "required": [
+          "timestamp",
+          "text"
+        ],
+        "title": "WhisperChunk",
+        "x-fal-order-properties": [
+          "timestamp",
+          "text",
+          "speaker"
+        ],
         "properties": {
-          "timestamp": {
-            "title": "Timestamp",
-            "type": "array",
-            "maxItems": 2,
-            "description": "Start and end timestamp of the chunk",
-            "prefixItems": [
-              {
-                "anyOf": [
-                  {
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              {
-                "anyOf": [
-                  {
-                    "type": "number"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            ],
-            "minItems": 2
-          },
           "text": {
-            "title": "Text",
             "type": "string",
+            "title": "Text",
             "description": "Transcription of the chunk"
           },
           "speaker": {
-            "title": "Speaker",
             "anyOf": [
               {
                 "type": "string"
@@ -509,18 +453,73 @@
                 "type": "null"
               }
             ],
+            "title": "Speaker",
             "description": "Speaker ID of the chunk. Only present if diarization is enabled."
+          },
+          "timestamp": {
+            "maxItems": 2,
+            "prefixItems": [
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            ],
+            "type": "array",
+            "title": "Timestamp",
+            "description": "Start and end timestamp of the chunk",
+            "minItems": 2
           }
-        },
-        "x-fal-order-properties": [
-          "timestamp",
-          "text",
-          "speaker"
-        ],
+        }
+      },
+      "DiarizationSegment": {
+        "type": "object",
         "required": [
           "timestamp",
-          "text"
-        ]
+          "speaker"
+        ],
+        "title": "DiarizationSegment",
+        "x-fal-order-properties": [
+          "timestamp",
+          "speaker"
+        ],
+        "properties": {
+          "speaker": {
+            "type": "string",
+            "title": "Speaker",
+            "description": "Speaker ID of the segment"
+          },
+          "timestamp": {
+            "maxItems": 2,
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array",
+            "title": "Timestamp",
+            "description": "Start and end timestamp of the segment",
+            "minItems": 2
+          }
+        }
       }
     }
   },

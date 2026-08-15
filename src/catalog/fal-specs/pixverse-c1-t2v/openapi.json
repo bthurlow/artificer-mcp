@@ -9,7 +9,8 @@
       "category": "text-to-video",
       "thumbnailUrl": "https://v3b.fal.media/files/b/0a957a29/F9h26mxs4zndIlypwPTV5_c4d0e69c4b514f5cb70075b8a5a6987c.jpg",
       "playgroundUrl": "https://fal.ai/models/fal-ai/pixverse/c1/text-to-video",
-      "documentationUrl": "https://fal.ai/models/fal-ai/pixverse/c1/text-to-video/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/pixverse/c1/text-to-video/api",
+      "about": "Text To Video C1"
     }
   },
   "components": {
@@ -70,15 +71,18 @@
         ]
       },
       "PixverseC1TextToVideoInput": {
+        "x-fal-order-properties": [
+          "prompt",
+          "aspect_ratio",
+          "resolution",
+          "duration",
+          "seed",
+          "generate_audio_switch"
+        ],
+        "required": [
+          "prompt"
+        ],
         "properties": {
-          "duration": {
-            "description": "The duration of the generated video in seconds (1-15)",
-            "minimum": 1,
-            "default": 5,
-            "maximum": 15,
-            "title": "Duration",
-            "type": "integer"
-          },
           "seed": {
             "anyOf": [
               {
@@ -88,23 +92,20 @@
                 "type": "null"
               }
             ],
-            "title": "Seed",
-            "description": "\n            The same seed and the same prompt given to the same version of the model\n            will output the same video every time.\n        "
+            "description": "\n            The same seed and the same prompt given to the same version of the model\n            will output the same video every time.\n        ",
+            "title": "Seed"
           },
-          "resolution": {
-            "description": "The resolution of the generated video",
-            "enum": [
-              "360p",
-              "540p",
-              "720p",
-              "1080p"
+          "prompt": {
+            "examples": [
+              "Epic low-cut camera capture of a girl clad in ultraviolet threads, luminous diamond skin glistening under a vast moon's radiance, hyper-detailed"
             ],
-            "default": "720p",
-            "title": "Resolution",
+            "description": "Text prompt for the video generation. Limited to 2048 UTF-8 encoded bytes. Because the limit counts bytes rather than characters, emoji and non-Latin or accented characters (which use multiple bytes each) can push a visually short prompt over the cap.",
+            "title": "Prompt",
             "type": "string"
           },
           "aspect_ratio": {
             "description": "The aspect ratio of the generated video",
+            "default": "16:9",
             "enum": [
               "16:9",
               "4:3",
@@ -115,9 +116,16 @@
               "3:2",
               "21:9"
             ],
-            "default": "16:9",
             "title": "Aspect Ratio",
             "type": "string"
+          },
+          "duration": {
+            "description": "The duration of the generated video in seconds (1-15)",
+            "maximum": 15,
+            "minimum": 1,
+            "default": 5,
+            "title": "Duration",
+            "type": "integer"
           },
           "generate_audio_switch": {
             "description": "Enable audio generation (BGM, SFX, dialogue)",
@@ -125,66 +133,49 @@
             "title": "Generate Audio Switch",
             "type": "boolean"
           },
-          "prompt": {
-            "examples": [
-              "Epic low-cut camera capture of a girl clad in ultraviolet threads, luminous diamond skin glistening under a vast moon's radiance, hyper-detailed"
+          "resolution": {
+            "description": "The resolution of the generated video",
+            "default": "720p",
+            "enum": [
+              "360p",
+              "540p",
+              "720p",
+              "1080p"
             ],
-            "title": "Prompt",
+            "title": "Resolution",
             "type": "string"
           }
         },
-        "required": [
-          "prompt"
-        ],
-        "x-fal-order-properties": [
-          "prompt",
-          "aspect_ratio",
-          "resolution",
-          "duration",
-          "seed",
-          "generate_audio_switch"
-        ],
         "title": "TextToVideoRequestC1",
         "type": "object"
       },
       "PixverseC1TextToVideoOutput": {
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "required": [
+          "video"
+        ],
         "properties": {
           "video": {
             "description": "The generated video file.",
             "$ref": "#/components/schemas/File"
           }
         },
-        "required": [
-          "video"
-        ],
-        "x-fal-order-properties": [
-          "video"
-        ],
         "title": "VideoOutputC1",
         "type": "object"
       },
       "File": {
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "required": [
+          "url"
+        ],
         "properties": {
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
           "file_size": {
             "anyOf": [
               {
@@ -194,11 +185,31 @@
                 "type": "null"
               }
             ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "examples": [
               4404019
+            ]
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
             ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
           },
           "content_type": {
             "anyOf": [
@@ -209,22 +220,13 @@
                 "type": "null"
               }
             ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
             "examples": [
               "image/png"
-            ],
-            "title": "Content Type",
-            "description": "The mime type of the file."
+            ]
           }
         },
-        "required": [
-          "url"
-        ],
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
         "title": "File",
         "type": "object"
       }

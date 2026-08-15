@@ -226,7 +226,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video.
-  - Examples: {"duration":6.44,"file_name":"sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4","fps":25,"content_type":"video/mp4","height":704,"url":"https://v3b.fal.media/files/b/0a8824b1/sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4","num_frames":161,"width":1248}
+  - Examples: {"width":1248,"url":"https://v3b.fal.media/files/b/0a8824b1/sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4","duration":6.44,"file_name":"sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4","content_type":"video/mp4","height":704,"num_frames":161,"fps":25}
 
 - **`seed`** (`integer`, _required_):
   The seed used for the random number generator.
@@ -243,14 +243,14 @@ The API returns the following output format:
 ```json
 {
   "video": {
+    "width": 1248,
+    "url": "https://v3b.fal.media/files/b/0a8824b1/sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4",
     "duration": 6.44,
     "file_name": "sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4",
-    "fps": 25,
     "content_type": "video/mp4",
     "height": 704,
-    "url": "https://v3b.fal.media/files/b/0a8824b1/sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4",
     "num_frames": 161,
-    "width": 1248
+    "fps": 25
   },
   "seed": 149063119,
   "prompt": "A cowboy walking through a dusty town at high noon, camera following from behind, cinematic depth, realistic lighting, western mood, 4K film grain."
@@ -340,6 +340,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

@@ -39,11 +39,6 @@ The API accepts the following input parameters:
   - Default: `6`
   - Range: `1` to `15`
 
-- **`aspect_ratio`** (`Enum`, _optional_):
-  Aspect ratio of the generated video. Default value: `auto`
-  - Default: `"auto"`
-  - Options: `"auto"`, `"16:9"`, `"4:3"`, `"3:2"`, `"1:1"`, `"2:3"`, `"3:4"`, `"9:16"`
-
 - **`resolution`** (`ResolutionEnum`, _optional_):
   Resolution of the output video. Default value: `"720p"`
   - Default: `"720p"`
@@ -52,6 +47,11 @@ The API accepts the following input parameters:
 - **`image_url`** (`string`, _required_):
   URL of the input image for video generation.
   - Examples: "https://v3b.fal.media/files/b/0a8b90e0/BFLE9VDlZqsryU-UA3BoD_image_004.png"
+
+- **`aspect_ratio`** (`Enum`, _optional_):
+  Aspect ratio of the generated video. Default value: `auto`
+  - Default: `"auto"`
+  - Options: `"auto"`, `"16:9"`, `"4:3"`, `"3:2"`, `"1:1"`, `"2:3"`, `"3:4"`, `"9:16"`
 
 
 
@@ -70,9 +70,9 @@ The API accepts the following input parameters:
 {
   "prompt": "Medieval knight in ornate armor walking through a mystical forest, bioluminescent plants pulsing with light, ancient stone ruins overgrown with glowing vines, over-the-shoulder camera, dark fantasy aesthetic, volumetric fog and Lumen lighting",
   "duration": 6,
-  "aspect_ratio": "auto",
   "resolution": "720p",
-  "image_url": "https://v3b.fal.media/files/b/0a8b90e0/BFLE9VDlZqsryU-UA3BoD_image_004.png"
+  "image_url": "https://v3b.fal.media/files/b/0a8b90e0/BFLE9VDlZqsryU-UA3BoD_image_004.png",
+  "aspect_ratio": "auto"
 }
 ```
 
@@ -83,7 +83,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video.
-  - Examples: {"height":720,"content_type":"video/mp4","width":1280,"url":"https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","fps":24,"num_frames":145,"duration":6.041667,"file_name":"0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4"}
+  - Examples: {"fps":24,"width":1280,"file_name":"0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","url":"https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","duration":6.041667,"num_frames":145,"content_type":"video/mp4","height":720}
 
 
 
@@ -92,14 +92,14 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "height": 720,
-    "content_type": "video/mp4",
-    "width": 1280,
-    "url": "https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4",
     "fps": 24,
-    "num_frames": 145,
+    "width": 1280,
+    "file_name": "0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4",
+    "url": "https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4",
     "duration": 6.041667,
-    "file_name": "0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4"
+    "num_frames": 145,
+    "content_type": "video/mp4",
+    "height": 720
   }
 }
 ```
@@ -190,6 +190,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

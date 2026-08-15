@@ -9,7 +9,8 @@
       "category": "image-to-video",
       "thumbnailUrl": "https://v3b.fal.media/files/b/0a94048a/7oM_ro6v_fh2pGHvBbpyc_9db05a8e25034dcbb16db5192560d4af.jpg",
       "playgroundUrl": "https://fal.ai/models/fal-ai/wan/v2.7/image-to-video",
-      "documentationUrl": "https://fal.ai/models/fal-ai/wan/v2.7/image-to-video/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/wan/v2.7/image-to-video/api",
+      "about": "Generate video from image or video input using WAN 2.7 I2V model.\n\nScenarios:\n- First-frame-to-video: provide image_url\n- First+last-frame-to-video: provide image_url + end_image_url\n- Video continuation: provide video_url\n- Any scenario can include driving audio via audio_url"
     }
   },
   "components": {
@@ -70,88 +71,113 @@
         ]
       },
       "WanV27ImageToVideoInput": {
+        "description": "Input for Wan 2.7 image-to-video generation.\n\nThe wan2.7-i2v model is a unified endpoint supporting:\n- First-frame-to-video (provide image_url)\n- First-and-last-frame-to-video (provide image_url + end_image_url)\n- Video continuation (provide video_url instead of image_url)",
+        "type": "object",
+        "title": "Wan27ImageToVideoInput",
+        "x-fal-order-properties": [
+          "prompt",
+          "image_url",
+          "end_image_url",
+          "video_url",
+          "audio_url",
+          "resolution",
+          "duration",
+          "negative_prompt",
+          "enable_prompt_expansion",
+          "seed",
+          "enable_safety_checker"
+        ],
         "properties": {
-          "enable_prompt_expansion": {
-            "description": "Enable intelligent prompt rewriting.",
-            "default": true,
-            "type": "boolean",
-            "title": "Enable Prompt Expansion"
-          },
-          "audio_url": {
+          "seed": {
+            "description": "Random seed for reproducibility (0-2147483647).",
+            "title": "Seed",
             "anyOf": [
               {
-                "ui": {
-                  "field": "audio"
-                },
-                "type": "string"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
-            ],
-            "description": "URL of driving audio. Supports WAV and MP3. Duration: 2-30s. Max 15 MB.",
-            "title": "Audio Url"
+            ]
           },
-          "end_image_url": {
+          "image_url": {
+            "description": "URL of the first frame image. Formats: JPEG, JPG, PNG, BMP, WEBP. Max 20 MB.",
+            "examples": [
+              "https://v3b.fal.media/files/b/0a9413bb/qH6QY4JRzWxHOFKtCe70S_uPDJyzKZ.png"
+            ],
+            "title": "Image Url",
             "anyOf": [
               {
+                "type": "string",
                 "ui": {
                   "field": "image"
-                },
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "audio_url": {
+            "description": "URL of driving audio. Supports WAV and MP3. Duration: 2-30s. Max 15 MB.",
+            "title": "Audio Url",
+            "anyOf": [
+              {
+                "type": "string",
+                "ui": {
+                  "field": "audio"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "prompt": {
+            "description": "Text prompt describing the desired video. Max 5000 characters.",
+            "examples": [
+              "The massive humpback whale glides slowly through the deep blue water. It turns gracefully, its huge pectoral fin sweeping through the water like a wing. Sunbeams penetrate from above, illuminating the whale's textured skin. Small fish scatter. Awe-inspiring scale and grace."
+            ],
+            "title": "Prompt",
+            "anyOf": [
+              {
                 "type": "string"
               },
               {
                 "type": "null"
               }
-            ],
+            ]
+          },
+          "end_image_url": {
             "description": "URL of the last frame image for first-and-last-frame-to-video. Same constraints as image_url.",
-            "title": "End Image Url"
-          },
-          "enable_safety_checker": {
-            "description": "Enable content moderation for input and output.",
-            "default": true,
-            "type": "boolean",
-            "title": "Enable Safety Checker"
-          },
-          "video_url": {
+            "title": "End Image Url",
             "anyOf": [
               {
-                "ui": {
-                  "field": "video"
-                },
-                "x-fal": {
-                  "max_file_size": 104857600,
-                  "timeout": 30,
-                  "max_duration": 10,
-                  "min_duration": 2
-                },
                 "type": "string",
-                "limit_description": "Max file size: 100.0MB, Min duration: 2s, Max duration: 10s, Timeout: 30.0s"
+                "ui": {
+                  "field": "image"
+                }
               },
               {
                 "type": "null"
               }
-            ],
-            "description": "URL of a video clip to continue from. Format: MP4, MOV. Duration: 2-10s. Max 100 MB. Cannot be combined with image_url.",
-            "title": "Video Url"
+            ]
           },
-          "resolution": {
-            "description": "Output video resolution tier.",
-            "enum": [
-              "720p",
-              "1080p"
-            ],
-            "default": "1080p",
-            "type": "string",
-            "title": "Resolution"
+          "enable_safety_checker": {
+            "description": "Enable content moderation for input and output. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "type": "boolean",
+            "title": "Enable Safety Checker",
+            "default": true
           },
           "duration": {
-            "description": "Output video duration in seconds (2-15).",
             "examples": [
               5,
               10,
               15
             ],
+            "description": "Output video duration in seconds (2-15).",
+            "title": "Duration",
+            "type": "integer",
             "enum": [
               2,
               3,
@@ -168,238 +194,105 @@
               14,
               15
             ],
-            "default": 5,
-            "type": "integer",
-            "title": "Duration"
+            "default": 5
           },
-          "prompt": {
-            "examples": [
-              "The massive humpback whale glides slowly through the deep blue water. It turns gracefully, its huge pectoral fin sweeping through the water like a wing. Sunbeams penetrate from above, illuminating the whale's textured skin. Small fish scatter. Awe-inspiring scale and grace."
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Text prompt describing the desired video. Max 5000 characters.",
-            "title": "Prompt"
-          },
-          "image_url": {
-            "examples": [
-              "https://v3b.fal.media/files/b/0a9413bb/qH6QY4JRzWxHOFKtCe70S_uPDJyzKZ.png"
-            ],
-            "anyOf": [
-              {
-                "ui": {
-                  "field": "image"
-                },
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "URL of the first frame image. Formats: JPEG, JPG, PNG, BMP, WEBP. Max 20 MB.",
-            "title": "Image Url"
-          },
-          "seed": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Random seed for reproducibility (0-2147483647).",
-            "title": "Seed"
+          "enable_prompt_expansion": {
+            "description": "Enable intelligent prompt rewriting.",
+            "type": "boolean",
+            "title": "Enable Prompt Expansion",
+            "default": true
           },
           "negative_prompt": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
             "examples": [
               "low resolution, errors, worst quality, low quality, incomplete, extra fingers, bad proportions, blurry, distorted"
             ],
             "description": "Content to avoid in the video. Max 500 characters.",
-            "title": "Negative Prompt"
+            "title": "Negative Prompt",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resolution": {
+            "description": "Output video resolution tier.",
+            "type": "string",
+            "title": "Resolution",
+            "enum": [
+              "720p",
+              "1080p"
+            ],
+            "default": "1080p"
+          },
+          "video_url": {
+            "description": "URL of a video clip to continue from. Format: MP4, MOV. Duration: 2-10s. Max 100 MB. Cannot be combined with image_url.",
+            "title": "Video Url",
+            "anyOf": [
+              {
+                "type": "string",
+                "x-fal": {
+                  "min_duration": 2,
+                  "max_file_size": 104857600,
+                  "timeout": 30,
+                  "max_duration": 10
+                },
+                "limit_description": "Max file size: 100.0MB, Min duration: 2s, Max duration: 10s, Timeout: 30.0s",
+                "ui": {
+                  "field": "video"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
-        },
-        "x-fal-order-properties": [
-          "prompt",
-          "image_url",
-          "end_image_url",
-          "video_url",
-          "audio_url",
-          "resolution",
-          "duration",
-          "negative_prompt",
-          "enable_prompt_expansion",
-          "seed",
-          "enable_safety_checker"
-        ],
-        "description": "Input for Wan 2.7 image-to-video generation.\n\nThe wan2.7-i2v model is a unified endpoint supporting:\n- First-frame-to-video (provide image_url)\n- First-and-last-frame-to-video (provide image_url + end_image_url)\n- Video continuation (provide video_url instead of image_url)",
-        "type": "object",
-        "title": "Wan27ImageToVideoInput"
+        }
       },
       "WanV27ImageToVideoOutput": {
+        "description": "Output for Wan 2.7 image-to-video generation.",
+        "type": "object",
+        "required": [
+          "video",
+          "seed"
+        ],
+        "x-fal-order-properties": [
+          "video",
+          "seed",
+          "actual_prompt"
+        ],
+        "title": "Wan27ImageToVideoOutput",
         "properties": {
+          "actual_prompt": {
+            "description": "The actual prompt used if prompt rewriting was enabled.",
+            "title": "Actual Prompt",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "seed": {
             "description": "The seed used for generation.",
             "type": "integer",
             "title": "Seed"
           },
           "video": {
-            "$ref": "#/components/schemas/VideoFile",
-            "description": "The generated video file."
-          },
-          "actual_prompt": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The actual prompt used if prompt rewriting was enabled.",
-            "title": "Actual Prompt"
+            "description": "The generated video file.",
+            "$ref": "#/components/schemas/VideoFile"
           }
-        },
-        "x-fal-order-properties": [
-          "video",
-          "seed",
-          "actual_prompt"
-        ],
-        "description": "Output for Wan 2.7 image-to-video generation.",
-        "required": [
-          "video",
-          "seed"
-        ],
-        "type": "object",
-        "title": "Wan27ImageToVideoOutput"
+        }
       },
       "VideoFile": {
-        "properties": {
-          "fps": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The FPS of the video",
-            "title": "Fps"
-          },
-          "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The height of the video",
-            "title": "Height"
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
-          },
-          "duration": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The duration of the video",
-            "title": "Duration"
-          },
-          "file_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
-          },
-          "width": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The width of the video",
-            "title": "Width"
-          },
-          "num_frames": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The number of frames in the video",
-            "title": "Num Frames"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
-          }
-        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -411,11 +304,119 @@
           "duration",
           "num_frames"
         ],
-        "required": [
-          "url"
-        ],
-        "type": "object",
-        "title": "VideoFile"
+        "title": "VideoFile",
+        "properties": {
+          "fps": {
+            "description": "The FPS of the video",
+            "title": "Fps",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "width": {
+            "description": "The width of the video",
+            "title": "Width",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duration": {
+            "description": "The duration of the video",
+            "title": "Duration",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "num_frames": {
+            "description": "The number of frames in the video",
+            "title": "Num Frames",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "height": {
+            "description": "The height of the video",
+            "title": "Height",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
       }
     }
   },

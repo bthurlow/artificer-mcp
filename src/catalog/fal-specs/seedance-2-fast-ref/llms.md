@@ -66,8 +66,11 @@ The API accepts the following input parameters:
   Whether to generate synchronized audio for the video, including sound effects, ambient sounds, and lip-synced speech. The cost of video generation is the same regardless of whether audio is generated or not. Default value: `true`
   - Default: `true`
 
-- **`seed`** (`integer`, _optional_):
-  Random seed for reproducibility. Note that results may still vary slightly even with the same seed.
+- **`bitrate_mode`** (`BitrateModeEnum`, _optional_):
+  Output bitrate mode. 'high' requests a higher-quality, larger-file encode from the model; 'standard' uses the default bitrate. Default value: `"standard"`
+  - Default: `"standard"`
+  - Options: `"standard"`, `"high"`
+  - Examples: "standard"
 
 - **`end_user_id`** (`string`, _optional_):
   The unique user ID of the end user.
@@ -93,7 +96,8 @@ The API accepts the following input parameters:
   "resolution": "720p",
   "duration": "auto",
   "aspect_ratio": "auto",
-  "generate_audio": true
+  "generate_audio": true,
+  "bitrate_mode": "standard"
 }
 ```
 
@@ -206,6 +210,15 @@ console.log(result.requestId);
 
 ### fal.ai Platform
 
-- [Platform Documentation](https://docs.fal.ai)
-- [Python Client](https://docs.fal.ai/clients/python)
-- [JavaScript Client](https://docs.fal.ai/clients/javascript)
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

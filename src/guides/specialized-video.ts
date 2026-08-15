@@ -5,7 +5,7 @@ import { z } from 'zod';
 const SPECIALIZED_VIDEO_GUIDE = `# Specialized Video Models — Prompt Guide
 
 ## What's in this guide
-Niche / research-grade fal video models, each solving a specific problem mainstream models don't. Read this when a standard t2v / i2v model can't do what you need (alpha channel, joint audio, specific subject focus, etc.).
+Niche / research-grade fal video models, each solving a specific problem mainstream models don't. Read this when a standard t2v / i2v model can't do what you need (joint audio, specific subject focus, etc.), or to find out that the niche you need is no longer covered — TransPixar's alpha-channel route was retired and has no replacement.
 
 ## MultiShot Master
 Narrative multi-shot t2v — generates a sequence of shots forming a short narrative arc rather than a single continuous take. Useful for storyboard-style output, animatics, or short-form content where shot variety matters more than per-shot polish.
@@ -13,11 +13,10 @@ Narrative multi-shot t2v — generates a sequence of shots forming a short narra
 - Prompt structure: describe the narrative beats. The model splits across shots automatically.
 - Example: \`prompt: "A barista preparing coffee: pulling espresso, steaming milk, latte art, handing the cup to a customer"\`
 
-## TransPixar
-**RGB + alpha-channel output.** The unique model in fal's catalog that produces video with a real alpha channel — usable directly for compositing without green-screen / chroma-key removal. Best for motion graphics, overlay assets, branded animations that need to drop onto other footage.
-- Slug: \`transpixar-t2v\` → \`fal-ai/transpixar\`
-- Output: video with alpha (typically WebM with alpha or animated PNG sequence).
-- Example: \`prompt: "Animated logo reveal, golden particles dispersing, transparent background"\`
+## TransPixar — RETIRED 2026-08-15
+TransPixar produced **RGB + a real alpha channel**, and was the only model in fal's catalog that did. fal removed \`fal-ai/transpixar\` — the endpoint now 404s — and the \`transpixar-t2v\` slug was dropped with it.
+
+**There is no longer any alpha-channel video route in this catalog.** If you need overlay assets with transparency, the fallback is to generate on a flat, saturated background and key it out afterwards with \`background_remove\` (color-key mode) plus \`composite\` — noticeably worse than a true alpha channel on soft edges, motion blur, and semi-transparent elements like particles or smoke, which is exactly what this model was good at. Plan for hard-edged subjects, or source the asset outside this pipeline.
 
 ## SkyReels V1
 Human-centric video foundation model. Trained heavily on people-and-action footage; better than generic models at human movement, gesture, and posture preservation. Use for any clip where the subject is a person in motion.
@@ -49,7 +48,6 @@ None of these models share a uniform schema — read each model's \`fal-specs/{s
 | Slug | fal endpoint |
 |------|--------------|
 | \`multishot-master-t2v\` | \`fal-ai/multishot-master\` |
-| \`transpixar-t2v\` | \`fal-ai/transpixar\` |
 | \`skyreels-i2v\` | \`fal-ai/skyreels-i2v\` |
 | \`lyra-2-zoom-i2v\` | \`fal-ai/lyra-2/zoom\` |
 | \`ovi-t2v\` | \`fal-ai/ovi\` |
@@ -67,7 +65,7 @@ export function registerSpecializedVideoPromptGuide(server: McpServer): void {
   registerTool<Record<string, never>>(
     server,
     'specialized_video_prompt_guide',
-    'Reference guide for specialized fal video models — MultiShot Master (narrative arcs), TransPixar (alpha channel), SkyReels (human-centric), Lyra-2 Zoom (pseudo-3D), Ovi (joint audio+video), Infinity Star (autoregressive). One model per niche. No API call — pure reference.',
+    "Reference guide for specialized fal video models — MultiShot Master (narrative arcs), SkyReels (human-centric), Lyra-2 Zoom (pseudo-3D), Ovi (joint audio+video), Infinity Star (autoregressive). One model per niche. Also records that TransPixar, the catalog's only alpha-channel route, was retired with no replacement. No API call — pure reference.",
     z.object({}).shape,
     async () => ({ content: [{ type: 'text', text: SPECIALIZED_VIDEO_GUIDE }] }),
   );

@@ -9,7 +9,8 @@
       "category": "text-to-video",
       "thumbnailUrl": "https://v3b.fal.media/files/b/0a94047b/ktfxD5Hs3lGJdXwk7FurU_856b1abaad064b23bb2ae7dee66cf2f3.jpg",
       "playgroundUrl": "https://fal.ai/models/fal-ai/wan/v2.7/text-to-video",
-      "documentationUrl": "https://fal.ai/models/fal-ai/wan/v2.7/text-to-video/api"
+      "documentationUrl": "https://fal.ai/models/fal-ai/wan/v2.7/text-to-video/api",
+      "about": "Generate a video from text using WAN 2.7 text-to-video model.\n\nFeatures:\n- Improved visual quality and motion coherence over 2.6\n- Multi-shot video generation (controlled via natural language in prompt)\n- Resolution: 720p and 1080p\n- Duration: 2-15 seconds\n- Multiple aspect ratios: 16:9, 9:16, 1:1, 4:3, 3:4\n- Audio generation support"
     }
   },
   "components": {
@@ -70,9 +71,8 @@
         ]
       },
       "WanV27TextToVideoInput": {
-        "required": [
-          "prompt"
-        ],
+        "title": "Wan27TextToVideoInput",
+        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "audio_url",
@@ -84,15 +84,18 @@
           "seed",
           "enable_safety_checker"
         ],
-        "description": "Input for Wan 2.7 text-to-video generation.",
-        "type": "object",
-        "title": "Wan27TextToVideoInput",
         "properties": {
+          "enable_prompt_expansion": {
+            "title": "Enable Prompt Expansion",
+            "type": "boolean",
+            "description": "Enable intelligent prompt rewriting.",
+            "default": true
+          },
           "aspect_ratio": {
+            "title": "Aspect Ratio",
+            "type": "string",
             "default": "16:9",
             "description": "Aspect ratio of the generated video.",
-            "type": "string",
-            "title": "Aspect Ratio",
             "enum": [
               "16:9",
               "9:16",
@@ -101,74 +104,24 @@
               "3:4"
             ]
           },
-          "negative_prompt": {
-            "examples": [
-              "low resolution, errors, worst quality, low quality"
-            ],
-            "description": "Content to avoid in the video. Max 500 characters.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Negative Prompt"
-          },
-          "resolution": {
-            "default": "1080p",
-            "description": "Output video resolution tier.",
-            "type": "string",
-            "title": "Resolution",
-            "enum": [
-              "720p",
-              "1080p"
-            ]
-          },
           "prompt": {
+            "title": "Prompt",
             "minLength": 1,
+            "type": "string",
             "examples": [
               "A kitten running in a meadow, cinematic lighting, smooth camera movement."
             ],
-            "description": "Text prompt describing the desired video. Max 5000 characters.",
-            "type": "string",
-            "title": "Prompt"
-          },
-          "audio_url": {
-            "description": "URL of driving audio. Supports WAV and MP3. Duration: 3-30s. Max 15 MB. If not provided, the model auto-generates matching background music.",
-            "anyOf": [
-              {
-                "ui": {
-                  "field": "audio"
-                },
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Audio Url"
-          },
-          "seed": {
-            "description": "Random seed for reproducibility (0-2147483647).",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Seed"
+            "description": "Text prompt describing the desired video. Max 5000 characters."
           },
           "enable_safety_checker": {
-            "default": true,
-            "description": "Enable content moderation for input and output.",
+            "title": "Enable Safety Checker",
             "type": "boolean",
-            "title": "Enable Safety Checker"
+            "description": "Enable content moderation for input and output. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "default": true
           },
           "duration": {
+            "title": "Duration",
+            "type": "integer",
             "default": 5,
             "examples": [
               5,
@@ -176,8 +129,6 @@
               15
             ],
             "description": "Output video duration in seconds (2-15).",
-            "type": "integer",
-            "title": "Duration",
             "enum": [
               2,
               3,
@@ -195,34 +146,75 @@
               15
             ]
           },
-          "enable_prompt_expansion": {
-            "default": true,
-            "description": "Enable intelligent prompt rewriting.",
-            "type": "boolean",
-            "title": "Enable Prompt Expansion"
+          "resolution": {
+            "title": "Resolution",
+            "type": "string",
+            "default": "1080p",
+            "description": "Output video resolution tier.",
+            "enum": [
+              "720p",
+              "1080p"
+            ]
+          },
+          "seed": {
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Random seed for reproducibility (0-2147483647)."
+          },
+          "audio_url": {
+            "title": "Audio Url",
+            "anyOf": [
+              {
+                "ui": {
+                  "field": "audio"
+                },
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL of driving audio. Supports WAV and MP3. Duration: 3-30s. Max 15 MB. If not provided, the model auto-generates matching background music."
+          },
+          "negative_prompt": {
+            "title": "Negative Prompt",
+            "examples": [
+              "low resolution, errors, worst quality, low quality"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Content to avoid in the video. Max 500 characters."
           }
-        }
+        },
+        "required": [
+          "prompt"
+        ],
+        "description": "Input for Wan 2.7 text-to-video generation."
       },
       "WanV27TextToVideoOutput": {
-        "required": [
-          "video",
-          "seed"
-        ],
+        "title": "Wan27TextToVideoOutput",
+        "type": "object",
         "x-fal-order-properties": [
           "video",
           "seed",
           "actual_prompt"
         ],
-        "description": "Output for Wan 2.7 text-to-video generation.",
-        "type": "object",
-        "title": "Wan27TextToVideoOutput",
         "properties": {
-          "video": {
-            "description": "The generated video file.",
-            "$ref": "#/components/schemas/VideoFile"
-          },
           "actual_prompt": {
-            "description": "The actual prompt used if prompt rewriting was enabled.",
+            "title": "Actual Prompt",
             "anyOf": [
               {
                 "type": "string"
@@ -231,128 +223,29 @@
                 "type": "null"
               }
             ],
-            "title": "Actual Prompt"
+            "description": "The actual prompt used if prompt rewriting was enabled."
           },
           "seed": {
-            "description": "The seed used for generation.",
+            "title": "Seed",
             "type": "integer",
-            "title": "Seed"
-          }
-        }
-      },
-      "VideoFile": {
-        "properties": {
-          "fps": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The FPS of the video",
-            "title": "Fps"
+            "description": "The seed used for generation."
           },
-          "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The height of the video",
-            "title": "Height"
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
-          },
-          "duration": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The duration of the video",
-            "title": "Duration"
-          },
-          "file_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
-          },
-          "width": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The width of the video",
-            "title": "Width"
-          },
-          "num_frames": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The number of frames in the video",
-            "title": "Num Frames"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
+          "video": {
+            "$ref": "#/components/schemas/VideoFile",
+            "description": "The generated video file."
           }
         },
+        "required": [
+          "video",
+          "seed"
+        ],
+        "description": "Output for Wan 2.7 text-to-video generation."
+      },
+      "VideoFile": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -364,11 +257,119 @@
           "duration",
           "num_frames"
         ],
-        "required": [
-          "url"
-        ],
-        "type": "object",
-        "title": "VideoFile"
+        "title": "VideoFile",
+        "properties": {
+          "fps": {
+            "description": "The FPS of the video",
+            "title": "Fps",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "width": {
+            "description": "The width of the video",
+            "title": "Width",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duration": {
+            "description": "The duration of the video",
+            "title": "Duration",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "num_frames": {
+            "description": "The number of frames in the video",
+            "title": "Num Frames",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "height": {
+            "description": "The height of the video",
+            "title": "Height",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
       }
     }
   },

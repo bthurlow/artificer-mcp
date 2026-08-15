@@ -22,9 +22,22 @@ ByteDance's Seedance is a premium-tier video model with multi-reference inputs, 
 | \`seedance-1-pro-i2v\` | 1.0 Pro | i2v | yes | $0.62/5s @ 1080p | Older premium i2v |
 | \`seedance-1-pro-fast-t2v\` | 1.0 Pro fast | t2v | yes | cheaper | Faster 1.0 Pro |
 | \`seedance-1-pro-fast-i2v\` | 1.0 Pro fast | i2v | yes | cheaper | Faster 1.0 Pro i2v |
-| \`seedance-1-lite-t2v\` | 1.0 Lite | t2v | yes | $0.18/5s | Cheap 1.0 t2v |
-| \`seedance-1-lite-i2v\` | 1.0 Lite | i2v | yes | cheaper | Cheap 1.0 i2v |
-| \`seedance-1-lite-ref\` | 1.0 Lite | multi-ref | yes | cheaper | 1–4 refs |
+| \`seedance-1-lite-t2v\` | 1.0 Lite | t2v | yes | — | ⚠️ **DEPRECATED** |
+| \`seedance-1-lite-i2v\` | 1.0 Lite | i2v | yes | — | ⚠️ **DEPRECATED** |
+| \`seedance-1-lite-ref\` | 1.0 Lite | multi-ref | yes | — | ⚠️ **DEPRECATED** |
+
+## ⚠️ The 1.0 Lite tier is deprecated — and fails silently
+As of the 2026-08-15 sync, fal has deprecated all three \`seedance-1-lite-*\` routes. They still **return 200**; they just serve a different model than the one you asked for:
+
+| Slug | Actually serves |
+|------|-----------------|
+| \`seedance-1-lite-t2v\` | Seedance 1.0 Pro Fast |
+| \`seedance-1-lite-i2v\` | Seedance 1.0 Pro Fast |
+| \`seedance-1-lite-ref\` | **Grok Imagine Video** — a different vendor's model entirely |
+
+This is the dangerous failure mode: no error, no warning, and **billing follows the model you actually got**, not Lite's old $0.18/5s. The \`-ref\` redirect is the one to watch — it leaves the Seedance family altogether, so multi-reference behavior and audio support are whatever Grok does, not what this guide documents.
+
+\`model_catalog\` hides these routes by default (pass \`include_unavailable: true\` to see them with their notice). **Migrate to \`seedance-1-pro-fast-t2v\` / \`-i2v\` explicitly** so you are choosing the model rather than inheriting a redirect. For multi-reference work, move up to \`seedance-2-ref-to-video\` or \`seedance-2-fast-ref\`.
 
 ## Known strengths
 - **Multi-reference fusion** — up to 9 image refs, 3 video refs, 3 audio refs in one call (Seedance 2.0). Unique on fal.
@@ -73,7 +86,7 @@ Seedance handles directorial vocabulary well — shot types, camera moves, light
 | \`seedance-1-lite-ref\` | \`fal-ai/bytedance/seedance/v1/lite/reference-to-video\` |
 
 ## Last verified
-2026-04-28 — initial seed of full fal video catalog.
+2026-08-15 — 1.0 Lite tier confirmed deprecated (all three routes re-route silently); Seedance 2.0 pricing re-synced and now documents 1080p at $0.682/s plus a cheaper 4k token rate. Prompt guidance and the 2.0 / 1.5 / 1.0 Pro capability notes are unchanged since the 2026-04-28 initial seed and were not re-verified.
 
 ## Official references
 - https://fal.ai/models/bytedance/seedance-2.0/text-to-video
