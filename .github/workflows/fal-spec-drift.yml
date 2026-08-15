@@ -62,11 +62,17 @@ jobs:
           fi
 
       - name: Verify the synced catalog still passes its own guards
-        # GITHUB_TOKEN-created PRs do NOT trigger other workflows, so the
-        # drift PR would otherwise sit with no CI at all. Run the checks
-        # that matter for a catalog change here instead: the integrity
-        # suite is what catches a deprecation notice landing in `cost`, a
-        # route pointing at an unregistered tool, or a duplicate slug.
+        # CI on the drift PR does trigger, but the run is bot-initiated and
+        # lands at `action_required` — GitHub's approval gate — so it sits
+        # there publishing no check contexts until a human approves it.
+        # (An earlier comment here said the workflow never triggers at all;
+        # that was wrong, though the practical effect is the same.)
+        #
+        # Running the checks that matter for a catalog change *here* means
+        # the result is in the PR body whether or not anyone approves that
+        # other run. The integrity suite is what catches a deprecation
+        # notice landing in `cost`, a route pointing at an unregistered
+        # tool, or a duplicate slug.
         id: verify
         run: |
           set +e
