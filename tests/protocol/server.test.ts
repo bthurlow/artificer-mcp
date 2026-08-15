@@ -11,7 +11,7 @@ import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { createTestServerClient } from '../helpers/server.js';
 
 /**
- * All 164 tool names registered by the artificer-mcp server, grouped by category.
+ * All 165 tool names registered by the artificer-mcp server, grouped by category.
  */
 const EXPECTED_TOOLS = {
   core: [
@@ -32,6 +32,7 @@ const EXPECTED_TOOLS = {
     'watermark',
     'gradient-overlay',
     'background-remove',
+    'extend-canvas',
     'drop-shadow',
     'border',
     'rounded-corners',
@@ -47,13 +48,7 @@ const EXPECTED_TOOLS = {
     'normalize',
     'vignette',
   ],
-  content: [
-    'thumbnail',
-    'collage',
-    'before-after',
-    'gif-from-frames',
-    'sticker-cutout',
-  ],
+  content: ['thumbnail', 'collage', 'before-after', 'gif-from-frames', 'sticker-cutout'],
   social: ['social-card', 'carousel-set', 'quote-card', 'email-header'],
   ads: [
     'banner-set',
@@ -182,9 +177,7 @@ const EXPECTED_TOOLS = {
     'bytedance_lynx_prompt_guide',
     'brand_spec_get',
   ],
-  catalog: [
-    'model_catalog',
-  ],
+  catalog: ['model_catalog'],
   workflows: [
     'workflow_brand_asset_pack',
     'workflow_social_carousel',
@@ -233,15 +226,15 @@ describe('MCP Protocol — artificer-mcp Server', () => {
   // ── 2. Tool discovery ─────────────────────────────────────────────────────
 
   describe('tool discovery', () => {
-    it('should return exactly 164 tools', () => {
-      expect(tools).toHaveLength(164);
+    it('should return exactly 165 tools', () => {
+      expect(tools).toHaveLength(165);
     });
   });
 
   // ── 3. Tool names ─────────────────────────────────────────────────────────
 
   describe('tool names', () => {
-    it('should contain all 163 expected tool names', () => {
+    it('should contain all 164 expected tool names', () => {
       const registeredNames = tools.map((t) => t.name).sort();
       const expectedNames = [...ALL_TOOL_NAMES].sort();
 
@@ -272,10 +265,7 @@ describe('MCP Protocol — artificer-mcp Server', () => {
       for (const tool of tools) {
         expect(tool.inputSchema, `tool "${tool.name}" missing inputSchema`).toBeDefined();
         expect(tool.inputSchema.type, `tool "${tool.name}" schema type`).toBe('object');
-        expect(
-          tool.inputSchema.properties,
-          `tool "${tool.name}" missing properties`,
-        ).toBeDefined();
+        expect(tool.inputSchema.properties, `tool "${tool.name}" missing properties`).toBeDefined();
         expect(typeof tool.inputSchema.properties).toBe('object');
       }
     });

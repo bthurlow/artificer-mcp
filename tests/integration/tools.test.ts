@@ -180,6 +180,321 @@ describe('Integration: Compositing', () => {
     const text = (result.content as { type: string; text: string }[])[0].text;
     expect(text).toContain('Border added');
   });
+
+  /**
+   * Regression: a colored layer composited onto a grayscale base used to come
+   * back gray — a gold overlay on black rendered silver, on every blend mode.
+   * ImageMagick adopts the FIRST image's colorspace, and a solid dark
+   * background is routinely stored as a grayscale PNG.
+   *
+   * These assert real pixel color, not the generated argv, so they fail if the
+   * colorspace promotion is ever dropped.
+   */
+  describe('colored layer on a grayscale base preserves color', () => {
+    const GOLD = '#D4AF37';
+    /** Read a single pixel as an `srgb(r,g,b)` / `gray(v)` string. */
+    async function pixelAt(file: string, x: number, y: number): Promise<string> {
+      const { stdout } = await execFileAsync('magick', [
+        file,
+        '-format',
+        `%[pixel:p{${x},${y}}]`,
+        'info:',
+      ]);
+      return stdout.trim();
+    }
+
+    /** Build a solid black base. ImageMagick stores this as grayscale. */
+    async function grayscaleBlackBase(name: string): Promise<string> {
+      const path = join(testDir, name);
+      await execFileAsync('magick', ['-size', '200x200', 'xc:#0A0A0A', path]);
+      // Guard the premise: if this ever stops being grayscale, these tests
+      // would pass for the wrong reason.
+      const { stdout } = await execFileAsync('magick', [
+        'identify',
+        '-format',
+        '%[colorspace]',
+        path,
+      ]);
+      expect(stdout.trim()).toBe('Gray');
+      return path;
+    }
+
+    it.skipIf(!hasImageMagick)('composite keeps the overlay gold (Over)', async () => {
+      const base = await grayscaleBlackBase('c-base-over.png');
+      const overlay = join(testDir, 'c-gold.png');
+      const output = join(testDir, 'c-out-over.png');
+      await execFileAsync('magick', ['-size', '80x80', `xc:${GOLD}`, overlay]);
+
+      await client.callTool({
+        name: 'composite',
+        arguments: { base, overlay, output, blend: 'Over' },
+      });
+
+      expect(await pixelAt(output, 100, 100)).toBe('srgb(212,175,55)');
+      // Base region must be untouched — the promotion is not allowed to
+      // shift tone.
+      expect(await pixelAt(output, 5, 5)).toBe('srgb(10,10,10)');
+    });
+
+    it.skipIf(!hasImageMagick)('composite keeps the overlay gold (Lighten)', async () => {
+      const base = await grayscaleBlackBase('c-base-lighten.png');
+      const overlay = join(testDir, 'c-gold2.png');
+      const output = join(testDir, 'c-out-lighten.png');
+      await execFileAsync('magick', ['-size', '80x80', `xc:${GOLD}`, overlay]);
+
+      await client.callTool({
+        name: 'composite',
+        arguments: { base, overlay, output, blend: 'Lighten' },
+      });
+
+      expect(await pixelAt(output, 100, 100)).toBe('srgb(212,175,55)');
+    });
+
+    it.skipIf(!hasImageMagick)('watermark keeps its color', async () => {
+      const base = await grayscaleBlackBase('w-base.png');
+      const mark = join(testDir, 'w-gold.png');
+      const output = join(testDir, 'w-out.png');
+      await execFileAsync('magick', ['-size', '80x80', `xc:${GOLD}`, mark]);
+
+      await client.callTool({
+        name: 'watermark',
+        arguments: {
+          input: base,
+          watermark: mark,
+          output,
+          mode: 'position',
+          gravity: 'Center',
+          opacity: 100,
+        },
+      });
+
+      expect(await pixelAt(output, 100, 100)).toBe('srgb(212,175,55)');
+    });
+
+    it.skipIf(!hasImageMagick)('gradient-overlay stays colored', async () => {
+      const base = await grayscaleBlackBase('g-base.png');
+      const output = join(testDir, 'g-out.png');
+
+      await client.callTool({
+        name: 'gradient-overlay',
+        arguments: {
+          input: base,
+          output,
+          type: 'linear',
+          direction: 'top-bottom',
+          color_start: GOLD,
+          color_end: '#8B0000',
+        },
+      });
+
+      // Not asserting exact stops — only that the result carries chroma at all.
+      const top = await pixelAt(output, 100, 3);
+      expect(top).toMatch(/^srgb\(/);
+      const [r, , b] = top
+        .replace(/[^\d,]/g, '')
+        .split(',')
+        .map(Number);
+      expect(r).toBeGreaterThan(b + 20);
+    });
+
+    it.skipIf(!hasImageMagick)('an all-grayscale composite still writes grayscale', async () => {
+      const base = await grayscaleBlackBase('n-base.png');
+      const overlay = join(testDir, 'n-gray.png');
+      const output = join(testDir, 'n-out.png');
+      await execFileAsync('magick', ['-size', '80x80', 'xc:gray(180)', overlay]);
+
+      await client.callTool({ name: 'composite', arguments: { base, overlay, output } });
+
+      // Promotion must not bloat genuinely colorless output to full RGB.
+      const { stdout } = await execFileAsync('magick', [
+        'identify',
+        '-format',
+        '%[colorspace]',
+        output,
+      ]);
+      expect(stdout.trim()).toBe('Gray');
+      expect(await pixelAt(output, 100, 100)).toBe('gray(180)');
+    });
+  });
+
+  describe('extend-canvas', () => {
+    /** Read a pixel as an `srgb(...)` / `gray(...)` string. */
+    async function px(file: string, x: number, y: number): Promise<string> {
+      const { stdout } = await execFileAsync('magick', [
+        file,
+        '-format',
+        `%[pixel:p{${x},${y}}]`,
+        'info:',
+      ]);
+      return stdout.trim();
+    }
+    async function size(file: string): Promise<string> {
+      const { stdout } = await execFileAsync('magick', ['identify', '-format', '%wx%h', file]);
+      return stdout.trim();
+    }
+    /** 200x200 gold square — stands in for a logo. */
+    async function goldLogo(name: string): Promise<string> {
+      const path = join(testDir, name);
+      await execFileAsync('magick', ['-size', '200x200', 'xc:#D4AF37', path]);
+      return path;
+    }
+
+    it.skipIf(!hasImageMagick)('canvas mode centers a logo on a banner', async () => {
+      const input = await goldLogo('ec-logo.png');
+      const output = join(testDir, 'ec-banner.png');
+
+      await client.callTool({
+        name: 'extend-canvas',
+        arguments: { input, output, width: 1200, height: 400, background: '#0A0A0A' },
+      });
+
+      expect(await size(output)).toBe('1200x400');
+      // Logo intact at center, background filling the sides — not stretched.
+      expect(await px(output, 600, 200)).toBe('srgb(212,175,55)');
+      expect(await px(output, 20, 200)).toBe('srgb(10,10,10)');
+    });
+
+    it.skipIf(!hasImageMagick)('padding mode adds asymmetric padding', async () => {
+      const input = await goldLogo('ec-pad-src.png');
+      const output = join(testDir, 'ec-pad.png');
+
+      await client.callTool({
+        name: 'extend-canvas',
+        arguments: {
+          input,
+          output,
+          left: 50,
+          top: 10,
+          right: 150,
+          bottom: 90,
+          background: '#0A0A0A',
+        },
+      });
+
+      // 200+50+150 x 200+10+90
+      expect(await size(output)).toBe('400x300');
+      // Image origin lands at (left, top), proving the sides differ.
+      expect(await px(output, 55, 15)).toBe('srgb(212,175,55)');
+      expect(await px(output, 5, 150)).toBe('srgb(10,10,10)');
+      expect(await px(output, 395, 150)).toBe('srgb(10,10,10)');
+    });
+
+    it.skipIf(!hasImageMagick)('defaults to a transparent fill', async () => {
+      const input = await goldLogo('ec-clear-src.png');
+      const output = join(testDir, 'ec-clear.png');
+
+      await client.callTool({
+        name: 'extend-canvas',
+        arguments: { input, output, width: 600, height: 300 },
+      });
+
+      expect(await px(output, 5, 5)).toBe('srgba(0,0,0,0)');
+    });
+
+    it.skipIf(!hasImageMagick)('rejects ambiguous and empty requests', async () => {
+      const input = await goldLogo('ec-bad.png');
+
+      const both = await client.callTool({
+        name: 'extend-canvas',
+        arguments: {
+          input,
+          output: join(testDir, 'ec-both.png'),
+          width: 400,
+          height: 400,
+          top: 10,
+        },
+      });
+      expect(both.isError).toBe(true);
+
+      const neither = await client.callTool({
+        name: 'extend-canvas',
+        arguments: { input, output: join(testDir, 'ec-none.png') },
+      });
+      expect(neither.isError).toBe(true);
+    });
+  });
+
+  describe('background-remove flood-fill', () => {
+    /**
+     * White ring on a white background, with a WHITE INTERIOR. Color-keying
+     * punches the interior out along with the background — the "swiss cheese"
+     * failure. Flood-fill should reach only the background.
+     */
+    async function ringOnWhite(name: string): Promise<string> {
+      const path = join(testDir, name);
+      await execFileAsync('magick', [
+        '-size',
+        '200x200',
+        'xc:white',
+        '-fill',
+        'black',
+        '-draw',
+        'circle 100,100 100,40',
+        '-fill',
+        'white',
+        '-draw',
+        'circle 100,100 100,70',
+        path,
+      ]);
+      return path;
+    }
+    /** True when the pixel is fully transparent. */
+    async function isClear(file: string, x: number, y: number): Promise<boolean> {
+      const { stdout } = await execFileAsync('magick', [
+        file,
+        '-format',
+        `%[pixel:p{${x},${y}}]`,
+        'info:',
+      ]);
+      return /,0\)$/.test(stdout.trim());
+    }
+
+    it.skipIf(!hasImageMagick)('color-key punches out interior matches', async () => {
+      const input = await ringOnWhite('bg-key-src.png');
+      const output = join(testDir, 'bg-key.png');
+
+      await client.callTool({
+        name: 'background-remove',
+        arguments: { input, output, mode: 'color-key', target_color: 'white', fuzz: 10 },
+      });
+
+      // Documents the existing behavior that flood-fill exists to avoid.
+      expect(await isClear(output, 2, 2)).toBe(true);
+      expect(await isClear(output, 100, 100)).toBe(true);
+    });
+
+    it.skipIf(!hasImageMagick)('flood-fill preserves the interior', async () => {
+      const input = await ringOnWhite('bg-flood-src.png');
+      const output = join(testDir, 'bg-flood.png');
+
+      await client.callTool({
+        name: 'background-remove',
+        arguments: { input, output, mode: 'flood-fill', fuzz: 10 },
+      });
+
+      expect(await isClear(output, 2, 2)).toBe(true);
+      // The whole point: same color, but enclosed by the subject.
+      expect(await isClear(output, 100, 100)).toBe(false);
+    });
+
+    it.skipIf(!hasImageMagick)('flood-fill honors replace_color', async () => {
+      const input = await ringOnWhite('bg-replace-src.png');
+      const output = join(testDir, 'bg-replace.png');
+
+      await client.callTool({
+        name: 'background-remove',
+        arguments: { input, output, mode: 'flood-fill', fuzz: 10, replace_color: '#FF0000' },
+      });
+
+      const { stdout } = await execFileAsync('magick', [
+        output,
+        '-format',
+        '%[pixel:p{2,2}]',
+        'info:',
+      ]);
+      expect(stdout.trim()).toBe('srgb(255,0,0)');
+    });
+  });
 });
 
 describe('Integration: Color', () => {

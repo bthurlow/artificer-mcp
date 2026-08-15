@@ -7,6 +7,7 @@ import {
   type WatermarkParams,
   type GradientOverlayParams,
   type BackgroundRemoveParams,
+  type ExtendCanvasParams,
   type DropShadowParams,
   type BorderParams,
   type RoundedCornersParams,
@@ -15,11 +16,32 @@ import {
   watermarkSchema,
   gradientOverlaySchema,
   backgroundRemoveSchema,
+  extendCanvasSchema,
   dropShadowSchema,
   borderSchema,
   roundedCornersSchema,
   maskApplySchema,
 } from './types.js';
+
+/**
+ * Promote the base image to sRGB before a colored layer is composited onto it.
+ *
+ * ImageMagick adopts the FIRST image's colorspace for a composite operation.
+ * A solid dark background is routinely stored as a grayscale PNG — ImageMagick
+ * itself writes one that way when an image has no color — so compositing a
+ * colored overlay onto it silently converts the overlay to gray. A gold
+ * overlay on black comes back silver, on every blend mode.
+ *
+ * Gray -> sRGB is value-preserving (verified across the tonal range: 0, 10,
+ * 64, 128, 192, 255 all round-trip exactly), so this introduces no brightness
+ * shift. And ImageMagick still writes a genuinely colorless result back out as
+ * grayscale, so it costs nothing when both layers really are gray.
+ *
+ * Only needed where a COLORED layer lands on a caller-supplied base. Mask
+ * operations (`rounded_corners`, `mask_apply`) composite a grayscale mask onto
+ * a color base, so the base's colorspace already wins and color is preserved.
+ */
+const FORCE_SRGB = ['-colorspace', 'sRGB'];
 
 /**
  * Register compositing and layer tools with the MCP server.
@@ -37,7 +59,7 @@ export function registerCompositingTools(server: McpServer): void {
       try {
         await ensureOutputDir(io.outputLocal);
 
-        const args = [io.inputLocal];
+        const args = [io.inputLocal, ...FORCE_SRGB];
         if (opacity < 100) {
           args.push(
             '(',
@@ -102,6 +124,7 @@ export function registerCompositingTools(server: McpServer): void {
         if (mode === 'tile') {
           await magick([
             io.inputLocal,
+            ...FORCE_SRGB,
             '(',
             wmR.localPath,
             '-alpha',
@@ -128,6 +151,7 @@ export function registerCompositingTools(server: McpServer): void {
         } else {
           await magick([
             io.inputLocal,
+            ...FORCE_SRGB,
             '(',
             wmR.localPath,
             '-alpha',
@@ -204,6 +228,7 @@ export function registerCompositingTools(server: McpServer): void {
 
         await magick([
           io.inputLocal,
+          ...FORCE_SRGB,
           '(',
           '-size',
           dimensions,
@@ -236,15 +261,42 @@ export function registerCompositingTools(server: McpServer): void {
   registerTool<BackgroundRemoveParams>(
     server,
     'background-remove',
-    'Remove or replace image backgrounds using color keying or flood fill',
+    'Remove or replace image backgrounds. mode="color-key" (default) removes every pixel matching target_color anywhere in the image; mode="flood-fill" removes only background-connected pixels seeded from the corners, so colors that also appear inside the subject are preserved.',
     backgroundRemoveSchema.shape,
     async (params: BackgroundRemoveParams) => {
-      const { input, output, target_color, fuzz, replace_color, format } = params;
+      const { input, output, mode, target_color, fuzz, replace_color, format } = params;
       const io = await resolveIO({ input, output, suffix: '_nobg', format: format ?? 'png' });
       try {
         await ensureOutputDir(io.outputLocal);
 
-        const args = [io.inputLocal, '-fuzz', `${fuzz}%`, '-transparent', target_color];
+        const args = [io.inputLocal];
+
+        if (mode === 'flood-fill') {
+          // Seed from all four corners: a subject touching one edge, or a
+          // background split by the subject, leaves regions a single seed
+          // can't reach. Each -draw samples the color already at that point,
+          // so target_color is not consulted here.
+          const info = await magick(['identify', '-format', '%wx%h', io.inputLocal]);
+          const [w, h] = info.trim().split('x').map(Number);
+          if (!Number.isFinite(w) || !Number.isFinite(h)) {
+            throw new Error(`background-remove: could not read image dimensions (got "${info}")`);
+          }
+          const maxX = w - 1;
+          const maxY = h - 1;
+
+          args.push('-alpha', 'set', '-fuzz', `${fuzz}%`, '-fill', 'none');
+          for (const [x, y] of [
+            [0, 0],
+            [maxX, 0],
+            [0, maxY],
+            [maxX, maxY],
+          ]) {
+            args.push('-draw', `color ${x},${y} floodfill`);
+          }
+        } else {
+          args.push('-fuzz', `${fuzz}%`, '-transparent', target_color);
+        }
+
         if (replace_color !== 'none') {
           args.push('-background', replace_color, '-flatten');
         }
@@ -256,7 +308,94 @@ export function registerCompositingTools(server: McpServer): void {
           content: [
             {
               type: 'text' as const,
-              text: `Background removed (fuzz ${fuzz}%): ${io.outputUri}`,
+              text: `Background removed (${mode}, fuzz ${fuzz}%): ${io.outputUri}`,
+            },
+          ],
+        };
+      } catch (err) {
+        /* v8 ignore start */
+        await io.cleanup();
+        throw err;
+        /* v8 ignore stop */
+      }
+    },
+  );
+
+  registerTool<ExtendCanvasParams>(
+    server,
+    'extend-canvas',
+    'Grow the canvas around an image without scaling it — asymmetric padding or placement on a larger canvas. Two modes: pass `width` + `height` to center (or gravity-position) the image on a canvas of exactly that size, e.g. a logo on a wide banner; or pass any of `top`/`right`/`bottom`/`left` to add padding per side. Use this instead of chaining resize + border, which stretches the image or pads symmetrically.',
+    extendCanvasSchema.shape,
+    async (params: ExtendCanvasParams) => {
+      const {
+        input,
+        output,
+        width,
+        height,
+        top,
+        right,
+        bottom,
+        left,
+        gravity,
+        background,
+        format,
+      } = params;
+
+      const canvasMode = width !== undefined || height !== undefined;
+      const padMode = top > 0 || right > 0 || bottom > 0 || left > 0;
+
+      // Fail loudly rather than silently no-op'ing or half-applying. Both
+      // modes at once is ambiguous; neither is a caller mistake.
+      if (canvasMode && padMode) {
+        throw new Error(
+          'extend-canvas: pass EITHER width/height (canvas mode) OR top/right/bottom/left ' +
+            '(padding mode), not both. Canvas mode positions the image on a fixed-size canvas; ' +
+            'padding mode grows the canvas by a given amount per side.',
+        );
+      }
+      if (canvasMode && (width === undefined || height === undefined)) {
+        throw new Error('extend-canvas: canvas mode needs both `width` and `height`.');
+      }
+      if (!canvasMode && !padMode) {
+        throw new Error(
+          'extend-canvas: nothing to do — pass width/height for canvas mode, or at least one ' +
+            'of top/right/bottom/left for padding mode.',
+        );
+      }
+
+      const io = await resolveIO({
+        input,
+        output,
+        suffix: '_extended',
+        // Transparent fill needs a format that carries alpha.
+        format: format ?? (background === 'none' ? 'png' : undefined),
+      });
+      try {
+        await ensureOutputDir(io.outputLocal);
+
+        const args = [io.inputLocal, '-background', background];
+        if (canvasMode) {
+          args.push('-gravity', gravity, '-extent', `${width}x${height}`);
+        } else {
+          // Two splices: NorthWest adds the left/top edges, SouthEast the
+          // right/bottom. Doing it in one pass would pad symmetrically.
+          args.push('-gravity', 'NorthWest', '-splice', `${left}x${top}`);
+          args.push('-gravity', 'SouthEast', '-splice', `${right}x${bottom}`);
+        }
+        // Drop the virtual canvas offset so downstream tools see clean geometry.
+        args.push('+repage', io.outputLocal);
+
+        await magick(args);
+        await io.finalize();
+
+        const described = canvasMode
+          ? `canvas ${width}x${height}, ${gravity}`
+          : `padding T${top} R${right} B${bottom} L${left}`;
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: `Canvas extended (${described}, background ${background}): ${io.outputUri}`,
             },
           ],
         };
