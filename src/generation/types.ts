@@ -393,3 +393,77 @@ export const generateVideoSchema = z.object({
     .default(300)
     .describe('Maximum time to wait for video generation (seconds). Default 5 minutes.'),
 });
+
+// ── gemini_omni_generate_video ─────────────────────────────────────────────
+
+export interface OmniGenerateVideoParams {
+  model: string;
+  prompt: string;
+  output: string;
+  image?: string;
+  reference_images?: string[];
+  task?: string;
+  aspect_ratio?: string;
+  duration_seconds?: number;
+  previous_interaction_id?: string;
+  seed?: number;
+  poll_interval_seconds: number;
+  poll_timeout_seconds: number;
+}
+
+export const omniGenerateVideoSchema = z.object({
+  model: z
+    .string()
+    .default(envDefault('ARTIFICER_OMNI_VIDEO_MODEL', 'gemini-omni-flash-preview'))
+    .describe(
+      'Gemini Omni video model ID. Default: gemini-omni-flash-preview (override via ARTIFICER_OMNI_VIDEO_MODEL env var).',
+    ),
+  prompt: z.string().describe('Text prompt describing the video, or the edit to apply.'),
+  output: z.string().describe('Output path for the generated video (e.g. "./clip.mp4").'),
+  image: z
+    .string()
+    .optional()
+    .describe('Optional source image for image-to-video. Local path or URL.'),
+  reference_images: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Optional reference images for reference-to-video (subject / style consistency). Local paths or URLs.',
+    ),
+  task: z
+    .enum(['text_to_video', 'image_to_video', 'reference_to_video', 'edit'])
+    .optional()
+    .describe(
+      'Explicit task mode. Omit to let the model infer it from the prompt and attached media. Use "edit" together with previous_interaction_id for conversational editing.',
+    ),
+  aspect_ratio: z
+    .string()
+    .optional()
+    .describe('Aspect ratio — "16:9" or "9:16". Omit for the model default.'),
+  duration_seconds: z
+    .number()
+    .int()
+    .min(3)
+    .max(10)
+    .optional()
+    .describe(
+      'Clip length in seconds (3-10). Omni has no native extend — concatenate clips with video_concatenate for longer pieces.',
+    ),
+  previous_interaction_id: z
+    .string()
+    .optional()
+    .describe(
+      'Interaction id returned by a prior call. Supplying it makes this a stateful follow-up edit of that result ("swap the character", "relight the scene") instead of a fresh generation.',
+    ),
+  seed: z.number().int().optional().describe('Random seed for reproducibility.'),
+  poll_interval_seconds: z
+    .number()
+    .positive()
+    .default(5)
+    .describe('How often to poll the interaction for completion (seconds).'),
+  poll_timeout_seconds: z
+    .number()
+    .positive()
+    .default(300)
+    .describe('Maximum time to wait for generation (seconds). Default 5 minutes.'),
+});

@@ -11,7 +11,7 @@ import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { createTestServerClient } from '../helpers/server.js';
 
 /**
- * All 165 tool names registered by the artificer-mcp server, grouped by category.
+ * All 167 tool names registered by the artificer-mcp server, grouped by category.
  */
 const EXPECTED_TOOLS = {
   core: [
@@ -117,6 +117,7 @@ const EXPECTED_TOOLS = {
     'gemini_edit_image',
     'gemini_upscale_image',
     'gemini_generate_video',
+    'gemini_omni_generate_video',
     'gemini_nanobanana_generate_image',
     'gemini_generate_speech',
     'gemini_generate_music',
@@ -132,6 +133,7 @@ const EXPECTED_TOOLS = {
     'gemini_image_prompt_guide',
     'gemini_nanobanana_prompt_guide',
     'veo_video_prompt_guide',
+    'gemini_omni_video_prompt_guide',
     'gemini_tts_prompt_guide',
     'gemini_lyria_prompt_guide',
     'wan_video_prompt_guide',
@@ -226,15 +228,15 @@ describe('MCP Protocol — artificer-mcp Server', () => {
   // ── 2. Tool discovery ─────────────────────────────────────────────────────
 
   describe('tool discovery', () => {
-    it('should return exactly 165 tools', () => {
-      expect(tools).toHaveLength(165);
+    it('should return exactly 167 tools', () => {
+      expect(tools).toHaveLength(167);
     });
   });
 
   // ── 3. Tool names ─────────────────────────────────────────────────────────
 
   describe('tool names', () => {
-    it('should contain all 164 expected tool names', () => {
+    it('should contain all 166 expected tool names', () => {
       const registeredNames = tools.map((t) => t.name).sort();
       const expectedNames = [...ALL_TOOL_NAMES].sort();
 

@@ -1,0 +1,412 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for minimax/h3/reference-to-video",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the minimax/h3/reference-to-video queue.",
+    "x-fal-metadata": {
+      "endpointId": "minimax/h3/reference-to-video",
+      "category": "image-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aa42dcf/3VDKabd7ifjCezrQpdfEI.jpg",
+      "playgroundUrl": "https://fal.ai/models/minimax/h3/reference-to-video",
+      "documentationUrl": "https://fal.ai/models/minimax/h3/reference-to-video/api",
+      "about": "Reference To Video Hailuo 03"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "H3ReferenceToVideoInput": {
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "maxLength": 50000,
+            "minLength": 1,
+            "examples": [
+              "Image 1 is the female protagonist. Image 2 is her small dog. Keep the woman and dog consistent with their respective reference images while they walk together through a sunlit garden."
+            ],
+            "title": "Prompt",
+            "description": "Text prompt for video generation. Refer to reference assets by their modality and order in the reference lists: Image 1, Image 2, Video 1, Audio 1, and so on."
+          },
+          "enable_prompt_expansion": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to expand the prompt with a vision language model before generation.",
+            "title": "Enable Prompt Expansion"
+          },
+          "reference_audio_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3,
+            "title": "Reference Audio URLs",
+            "description": "URLs of reference audio clips (2-15 seconds each, combined duration at most 15 seconds), referenced in the prompt as Audio 1, Audio 2, and so on. Audio cannot be the only reference input; provide at least one reference image or video with it. Reference images, videos, and audio clips must add up to at most 12 files."
+          },
+          "aspect_ratio": {
+            "type": "string",
+            "enum": [
+              "adaptive",
+              "21:9",
+              "16:9",
+              "4:3",
+              "1:1",
+              "3:4",
+              "9:16"
+            ],
+            "default": "adaptive",
+            "description": "The aspect ratio of the generated video.",
+            "title": "Aspect Ratio"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "Random seed. A random seed is selected when omitted."
+          },
+          "duration": {
+            "type": "integer",
+            "maximum": 15,
+            "minimum": 5,
+            "default": 5,
+            "description": "The duration of the video in seconds.",
+            "title": "Duration"
+          },
+          "reference_image_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 9,
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg"
+              ]
+            ],
+            "title": "Reference Image URLs",
+            "description": "URLs of subject/style reference images, referenced in the prompt as Image 1, Image 2, and so on. Reference images, videos, and audio clips must add up to at most 12 files."
+          },
+          "reference_video_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3,
+            "title": "Reference Video URLs",
+            "description": "URLs of motion/reference video clips (2-15 seconds each, combined duration at most 15 seconds), referenced in the prompt as Video 1, Video 2, and so on. Reference images, videos, and audio clips must add up to at most 12 files."
+          },
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "480P",
+              "768P",
+              "2K",
+              "4K"
+            ],
+            "default": "2K",
+            "description": "The resolution of the generated video. 480P and 768P are native generation modes; 2K and 4K upscale a 768P base result.",
+            "title": "Resolution"
+          },
+          "enable_safety_checker": {
+            "type": "boolean",
+            "default": true,
+            "description": "If set to true, the safety checker will be enabled.",
+            "title": "Enable Safety Checker"
+          }
+        },
+        "x-fal-order-properties": [
+          "prompt",
+          "duration",
+          "resolution",
+          "seed",
+          "enable_prompt_expansion",
+          "enable_safety_checker",
+          "aspect_ratio",
+          "reference_image_urls",
+          "reference_video_urls",
+          "reference_audio_urls"
+        ],
+        "title": "ReferenceToVideoHailuo03Input"
+      },
+      "H3ReferenceToVideoOutput": {
+        "type": "object",
+        "required": [
+          "video"
+        ],
+        "properties": {
+          "video": {
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video"
+          }
+        },
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "title": "ReferenceToVideoHailuo03Output"
+      },
+      "File": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ]
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "title": "File"
+      }
+    }
+  },
+  "paths": {
+    "/minimax/h3/reference-to-video/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/minimax/h3/reference-to-video/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/minimax/h3/reference-to-video": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/H3ReferenceToVideoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/minimax/h3/reference-to-video/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/H3ReferenceToVideoOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}
