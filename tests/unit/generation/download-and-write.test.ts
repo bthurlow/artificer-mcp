@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { downloadAndWrite } from '../../../src/generation/utils/download-and-write.js';
+import {
+  downloadAndWrite,
+  geminiDownloadHeaders,
+} from '../../../src/generation/utils/download-and-write.js';
 import * as registry from '../../../src/storage/providers/registry.js';
 
 type MockProvider = { write: ReturnType<typeof vi.fn> };
@@ -148,5 +151,92 @@ describe('downloadAndWrite', () => {
     await expect(
       downloadAndWrite('https://example.com/x', 'out.mp4'),
     ).rejects.toThrow(/disk full/);
+  });
+});
+
+describe('geminiDownloadHeaders', () => {
+  const KEY = 'GOOGLE_API_KEY';
+  let saved: string | undefined;
+
+  beforeEach(() => {
+    saved = process.env[KEY];
+  });
+
+  afterEach(() => {
+    if (saved === undefined) delete process.env[KEY];
+    else process.env[KEY] = saved;
+  });
+
+  it('attaches the API key for Gemini Files API URIs', () => {
+    process.env[KEY] = 'test-key';
+    expect(
+      geminiDownloadHeaders('https://generativelanguage.googleapis.com/v1beta/files/abc:download'),
+    ).toEqual({ 'x-goog-api-key': 'test-key' });
+  });
+
+  it('returns undefined for non-Google hosts', () => {
+    process.env[KEY] = 'test-key';
+    // Sending an API key to a fal CDN URL or a signed GCS URL is at best
+    // pointless and at worst breaks a signature that covers headers.
+    expect(geminiDownloadHeaders('https://v3.fal.media/files/x/y.mp4')).toBeUndefined();
+    expect(geminiDownloadHeaders('https://storage.googleapis.com/bucket/o?X-Goog-Signature=z')).toBeUndefined();
+  });
+
+  it('returns undefined when no API key is configured', () => {
+    delete process.env[KEY];
+    expect(
+      geminiDownloadHeaders('https://generativelanguage.googleapis.com/v1beta/files/abc'),
+    ).toBeUndefined();
+  });
+});
+
+describe('downloadAndWrite — 403 diagnosis', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it('explains an unauthenticated 403 from the Gemini Files API', async () => {
+    // The failure that shipped: gemini_omni_generate_video called this
+    // without headers and got a bare "403 Forbidden", which reads as a
+    // dead URL rather than a missing credential.
+    vi.spyOn(registry, 'getProvider').mockReturnValue(
+      mockProvider() as unknown as ReturnType<typeof registry.getProvider>,
+    );
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        fakeResponse({ ok: false, status: 403, statusText: 'Forbidden' }),
+      ),
+    );
+
+    await expect(
+      downloadAndWrite(
+        'https://generativelanguage.googleapis.com/v1beta/files/abc:download',
+        '/tmp/out.mp4',
+      ),
+    ).rejects.toThrow(/x-goog-api-key/);
+  });
+
+  it('does not add the auth hint when the header WAS sent', async () => {
+    // Then the 403 means something else — expired file, wrong key, quota —
+    // and pointing at the header would send the reader down a dead end.
+    vi.spyOn(registry, 'getProvider').mockReturnValue(
+      mockProvider() as unknown as ReturnType<typeof registry.getProvider>,
+    );
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        fakeResponse({ ok: false, status: 403, statusText: 'Forbidden' }),
+      ),
+    );
+
+    await expect(
+      downloadAndWrite(
+        'https://generativelanguage.googleapis.com/v1beta/files/abc:download',
+        '/tmp/out.mp4',
+        { headers: { 'x-goog-api-key': 'k' } },
+      ),
+    ).rejects.toThrow(/403 Forbidden$/);
   });
 });

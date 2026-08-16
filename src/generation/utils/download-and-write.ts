@@ -16,6 +16,31 @@ export interface DownloadAndWriteOptions {
 }
 
 /**
+ * Auth headers required to download a Google-hosted media URI.
+ *
+ * Google's Files API (`generativelanguage.googleapis.com`) serves
+ * generated media behind the API key — an unauthenticated GET returns
+ * **403**, not a redirect or an error body, so the failure looks like a
+ * broken URL rather than a missing credential.
+ *
+ * This lives here, shared, because it is a property of *where the bytes
+ * are* rather than of any one tool. It was originally inlined in the Veo
+ * transport; `gemini_omni_generate_video` then shipped without it and
+ * 403'd on every download. Any future Google-backed transport gets it by
+ * calling this instead of remembering the rule.
+ *
+ * Returns `undefined` for non-Google hosts (fal CDN, GCS signed URLs)
+ * where an API key is unnecessary and, on a signed URL, potentially
+ * harmful.
+ */
+export function geminiDownloadHeaders(uri: string): Record<string, string> | undefined {
+  if (!uri.includes('generativelanguage.googleapis.com')) return undefined;
+  const key = process.env['GOOGLE_API_KEY'];
+  if (!key) return undefined;
+  return { 'x-goog-api-key': key };
+}
+
+/**
  * Download `url` and write the bytes to `output` via the registered
  * storage provider for the output URI's scheme.
  *
@@ -44,7 +69,22 @@ export async function downloadAndWrite(
 
   const response = await fetch(url, headers ? { headers } : undefined);
   if (!response.ok) {
-    throw new Error(`Failed to download from ${url}: ${response.status} ${response.statusText}`);
+    // A bare 403 from a Google media host almost always means the request
+    // went out without `x-goog-api-key`, which reads as a dead URL rather
+    // than a missing credential. Say so — this exact failure cost a live
+    // debugging round on gemini_omni_generate_video.
+    const looksLikeMissingAuth =
+      response.status === 403 &&
+      url.includes('generativelanguage.googleapis.com') &&
+      !headers?.['x-goog-api-key'];
+    const hint = looksLikeMissingAuth
+      ? ' — this URL is on the Gemini Files API, which requires the `x-goog-api-key` header. ' +
+        'The request was sent without it. Pass `geminiDownloadHeaders(uri)` as `headers`, ' +
+        'and check GOOGLE_API_KEY is set.'
+      : '';
+    throw new Error(
+      `Failed to download from ${url}: ${response.status} ${response.statusText}${hint}`,
+    );
   }
 
   const contentType = response.headers.get('content-type') ?? '';

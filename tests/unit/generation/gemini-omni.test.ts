@@ -13,9 +13,16 @@ vi.mock('../../../src/generation/client.js', () => ({
   getGenAIClientForVertex: () => ({ interactions: { create: mockCreate, get: mockGet } }),
 }));
 
-vi.mock('../../../src/generation/utils/download-and-write.js', () => ({
-  downloadAndWrite: mockDownloadAndWrite,
-}));
+// Only `downloadAndWrite` is stubbed — `geminiDownloadHeaders` stays REAL.
+// Mocking it too would mean asserting on our own stub instead of on the
+// header logic the tool actually depends on, which is precisely the gap
+// that let the 403 ship.
+vi.mock('../../../src/generation/utils/download-and-write.js', async () => {
+  const actual = await vi.importActual<
+    typeof import('../../../src/generation/utils/download-and-write.js')
+  >('../../../src/generation/utils/download-and-write.js');
+  return { ...actual, downloadAndWrite: mockDownloadAndWrite };
+});
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
@@ -49,8 +56,12 @@ describe('gemini_omni_generate_video', () => {
     };
   });
 
+  const savedApiKey = process.env['GOOGLE_API_KEY'];
+
   afterAll(async () => {
     await cleanup();
+    if (savedApiKey === undefined) delete process.env['GOOGLE_API_KEY'];
+    else process.env['GOOGLE_API_KEY'] = savedApiKey;
   });
 
   beforeEach(() => {
@@ -84,6 +95,38 @@ describe('gemini_omni_generate_video', () => {
     expect(payload.audio).toContain('native');
     expect(payload.audio).toContain('strip');
     expect(payload.audio).not.toContain('does not');
+  });
+
+  it('sends the Gemini Files API key when downloading the result', async () => {
+    // This is the bug that reached a live run: the tool called
+    // downloadAndWrite with only defaultMime, so a Files API URI came back
+    // 403. The mock hid it — asserting on the ARGUMENTS is what makes the
+    // mock able to catch a missing header at all.
+    process.env['GOOGLE_API_KEY'] = 'test-key';
+    mockCreate.mockResolvedValue(
+      completed('int_dl', 'https://generativelanguage.googleapis.com/v1beta/files/abc:download'),
+    );
+
+    await client.callTool({
+      name: 'gemini_omni_generate_video',
+      arguments: { prompt: 'x', output: '/tmp/dl.mp4' },
+    });
+
+    const [, , opts] = mockDownloadAndWrite.mock.calls[0];
+    expect(opts.headers).toEqual({ 'x-goog-api-key': 'test-key' });
+  });
+
+  it('omits the key for a non-Google delivery host', async () => {
+    process.env['GOOGLE_API_KEY'] = 'test-key';
+    mockCreate.mockResolvedValue(completed('int_cdn', 'https://cdn.example.test/v.mp4'));
+
+    await client.callTool({
+      name: 'gemini_omni_generate_video',
+      arguments: { prompt: 'x', output: '/tmp/cdn.mp4' },
+    });
+
+    const [, , opts] = mockDownloadAndWrite.mock.calls[0];
+    expect(opts.headers).toBeUndefined();
   });
 
   it('polls until the interaction reaches a terminal status', async () => {
