@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.10.0](https://github.com/bthurlow/artificer-mcp/compare/v0.9.1...v0.10.0) (2026-08-15)
+
+
+### Features
+
+* fal multi-provider implementation, model catalog, and model freshness pass ([#26](https://github.com/bthurlow/artificer-mcp/issues/26)) ([32740fe](https://github.com/bthurlow/artificer-mcp/commit/32740fefbee703a4a6ece517cc81c597c5182d67))
+* **fal:** warn when extra_params keys the model does not accept ([#34](https://github.com/bthurlow/artificer-mcp/issues/34)) ([f9a3198](https://github.com/bthurlow/artificer-mcp/commit/f9a3198ba1e204a77b32bb31eac766702037d709))
+* MiniMax H3 + Gemini Omni Flash video routes (unblocks the music-video pilot) ([#29](https://github.com/bthurlow/artificer-mcp/issues/29)) ([5c9ce54](https://github.com/bthurlow/artificer-mcp/commit/5c9ce54d2ca7832f8cf9a0b69ff85676830c2148))
+
+
+### Bug Fixes
+
+* **brand:** broaden nested brand spec and seal it, with actionable errors ([#33](https://github.com/bthurlow/artificer-mcp/issues/33)) ([c01c416](https://github.com/bthurlow/artificer-mcp/commit/c01c41636a7b3415e656e87345a34c02dc24a729))
+* **compositing:** composite desaturation, plus extend-canvas and flood-fill background removal ([#28](https://github.com/bthurlow/artificer-mcp/issues/28)) ([4d610a0](https://github.com/bthurlow/artificer-mcp/commit/4d610a0acf02f3d93c477b48fc94c08a41583de6))
+* **omni:** Gemini Omni Flash DOES generate native audio ([#37](https://github.com/bthurlow/artificer-mcp/issues/37)) ([44c04dc](https://github.com/bthurlow/artificer-mcp/commit/44c04dc4f4796d54f5d8c62f8b0f017133d281a6))
+
 ## [0.9.1](https://github.com/bthurlow/artificer-mcp/compare/v0.9.0...v0.9.1) (2026-04-22)
 
 
