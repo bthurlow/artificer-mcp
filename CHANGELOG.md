@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/bthurlow/artificer-mcp/compare/v0.10.0...v0.10.1) (2026-08-16)
+
+
+### Bug Fixes
+
+* **omni:** send the Gemini Files API key when downloading the result ([#39](https://github.com/bthurlow/artificer-mcp/issues/39)) ([bd29bba](https://github.com/bthurlow/artificer-mcp/commit/bd29bba9842578b3392318e2c014fbae6c9d8bdc))
+
 ## [0.10.0](https://github.com/bthurlow/artificer-mcp/compare/v0.9.1...v0.10.0) (2026-08-15)
 
 
