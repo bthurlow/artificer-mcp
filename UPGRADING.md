@@ -178,6 +178,16 @@ so the pair no longer bills alike.
 - **New tools:** `audio_info`, `extend-canvas`, `gemini_omni_generate_video`,
   plus prompt guides. `background-remove` gained a flood-fill mode for
   interior-safe removal.
+- **`gemini_omni_generate_video` bakes in a soundtrack, and there is no way to
+  turn it off.** Omni Flash writes picture and audio (speech, music, sound
+  effects) in the same pass — no `generate_audio` flag, no silent mode. If you
+  are laying your own music under the clip, you **must strip the track first**
+  (`audio_extract_from_video` / `video_set_audio`), or you will end up with two
+  audio beds in the master. Steer it in the prompt where you do want sound;
+  `"No dialogue"` suppresses speech specifically. For silent B-roll under a
+  fixed master, MiniMax H3 on fal returns a bare video file and needs no strip
+  step. Omni also accepts **no audio input**, so audio reference conditioning is
+  unavailable. See `gemini_omni_video_prompt_guide`.
 - **Fixed:** `composite`, `watermark`, and `gradient-overlay` no longer
   desaturate color output when the base image is grayscale. If you were working
   around that, you can stop.
@@ -190,7 +200,11 @@ Stated plainly so nobody assumes more coverage than exists:
 
 - `gemini_omni_generate_video` is **unit-tested against a mocked client only**.
   No live call has been made; its request shape is inferred from SDK types plus
-  documentation. Treat first real use as a smoke test.
+  documentation. Treat first real use as a smoke test — and note this tool's
+  documented audio behavior was **wrong until late in this release** (it claimed
+  silent output; corrected in #37 after being caught against Google's model
+  card, not by any test). Inference from docs has already failed once here, so
+  weight the first live call accordingly.
 - The `@google/genai` **1.50 → 2.17 major upgrade** is verified for types and
   build. The test suite mocks that SDK, so live API behavior across all eight
   Google-backed tools is unverified.
