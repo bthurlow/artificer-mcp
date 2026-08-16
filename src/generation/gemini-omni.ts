@@ -4,7 +4,7 @@ import { extname } from 'node:path';
 import { registerTool } from '../utils/register.js';
 import { getGenAIClient } from './client.js';
 import { resolveInput } from '../utils/resource.js';
-import { downloadAndWrite } from './utils/download-and-write.js';
+import { downloadAndWrite, geminiDownloadHeaders } from './utils/download-and-write.js';
 import { type OmniGenerateVideoParams, omniGenerateVideoSchema } from './types.js';
 
 /** Sleep for the given number of milliseconds. */
@@ -182,7 +182,11 @@ export function registerOmniVideoTools(server: McpServer): void {
         let bytes: number;
         let mime: string;
         if (video.uri) {
+          // Omni returns `delivery: "uri"` results on the Gemini Files API,
+          // which serves them behind the API key — without this header the
+          // download 403s.
           const written = await downloadAndWrite(video.uri, output, {
+            headers: geminiDownloadHeaders(video.uri),
             defaultMime: video.mimeType,
           });
           bytes = written.bytes;

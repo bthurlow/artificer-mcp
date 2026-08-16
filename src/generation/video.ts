@@ -5,7 +5,7 @@ import { registerTool } from '../utils/register.js';
 import { getGenAIClient } from './client.js';
 import { getProvider } from '../storage/providers/registry.js';
 import { resolveInput } from '../utils/resource.js';
-import { downloadAndWrite } from './utils/download-and-write.js';
+import { downloadAndWrite, geminiDownloadHeaders } from './utils/download-and-write.js';
 import { type GenerateVideoParams, generateVideoSchema } from './types.js';
 import type { Image } from '@google/genai';
 
@@ -125,15 +125,11 @@ export function registerVideoGenTools(server: McpServer): void {
             content: [{ type: 'text', text: `Video generated and saved to ${output}` }],
           };
         } else if (video?.uri) {
-          // Video returned as a URI (GCS or HTTP) — download it.
-          // Gemini Files API URIs require the API key as x-goog-api-key header.
-          const isGeminiFilesApi = video.uri.includes('generativelanguage.googleapis.com');
-          const headers: Record<string, string> = {};
-          if (isGeminiFilesApi && process.env.GOOGLE_API_KEY) {
-            headers['x-goog-api-key'] = process.env.GOOGLE_API_KEY;
-          }
+          // Video returned as a URI (GCS or HTTP) — download it. Gemini
+          // Files API URIs need the API key; `geminiDownloadHeaders`
+          // decides, so this rule lives in exactly one place.
           await downloadAndWrite(video.uri, output, {
-            headers: Object.keys(headers).length > 0 ? headers : undefined,
+            headers: geminiDownloadHeaders(video.uri),
             defaultMime: mime,
           });
           return {
