@@ -72,44 +72,16 @@
       },
       "H3TextToVideoInput": {
         "type": "object",
-        "required": [
-          "prompt"
+        "x-fal-order-properties": [
+          "prompt",
+          "duration",
+          "resolution",
+          "seed",
+          "enable_prompt_expansion",
+          "enable_safety_checker",
+          "aspect_ratio"
         ],
         "properties": {
-          "enable_safety_checker": {
-            "type": "boolean",
-            "default": true,
-            "description": "If set to true, the safety checker will be enabled.",
-            "title": "Enable Safety Checker"
-          },
-          "prompt": {
-            "type": "string",
-            "maxLength": 50000,
-            "minLength": 1,
-            "examples": [
-              "A white kitten chases a butterfly across a sunlit garden. Gentle camera tracking, natural movement, soft afternoon light filtering through the leaves."
-            ],
-            "title": "Prompt",
-            "description": "Text prompt for video generation"
-          },
-          "enable_prompt_expansion": {
-            "type": "boolean",
-            "default": true,
-            "description": "Whether to expand the prompt with a vision language model before generation.",
-            "title": "Enable Prompt Expansion"
-          },
-          "resolution": {
-            "type": "string",
-            "enum": [
-              "480P",
-              "768P",
-              "2K",
-              "4K"
-            ],
-            "default": "2K",
-            "description": "The resolution of the generated video. 480P and 768P are native generation modes; 2K and 4K upscale a 768P base result.",
-            "title": "Resolution"
-          },
           "seed": {
             "anyOf": [
               {
@@ -122,8 +94,17 @@
             "title": "Seed",
             "description": "Random seed. A random seed is selected when omitted."
           },
+          "duration": {
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 15,
+            "default": 5,
+            "title": "Duration",
+            "description": "The duration of the video in seconds."
+          },
           "aspect_ratio": {
             "type": "string",
+            "default": "16:9",
             "enum": [
               "21:9",
               "16:9",
@@ -132,33 +113,52 @@
               "3:4",
               "9:16"
             ],
-            "default": "16:9",
-            "description": "The aspect ratio of the generated video.",
-            "title": "Aspect Ratio"
+            "title": "Aspect Ratio",
+            "description": "The aspect ratio of the generated video."
           },
-          "duration": {
-            "type": "integer",
-            "maximum": 15,
-            "minimum": 5,
-            "default": 5,
-            "description": "The duration of the video in seconds.",
-            "title": "Duration"
+          "resolution": {
+            "type": "string",
+            "default": "2K",
+            "enum": [
+              "480P",
+              "768P",
+              "2K",
+              "4K"
+            ],
+            "title": "Resolution",
+            "description": "The resolution of the generated video. 480P and 768P are native generation modes; 2K and 4K upscale a 768P base result."
+          },
+          "prompt": {
+            "type": "string",
+            "maxLength": 50000,
+            "minLength": 1,
+            "examples": [
+              "A white kitten chases a butterfly across a sunlit garden. Gentle camera tracking, natural movement, soft afternoon light filtering through the leaves."
+            ],
+            "title": "Prompt",
+            "description": "Text prompt for video generation"
+          },
+          "enable_safety_checker": {
+            "type": "boolean",
+            "default": true,
+            "title": "Enable Safety Checker",
+            "description": "If set to true, the safety checker will be enabled."
+          },
+          "enable_prompt_expansion": {
+            "type": "boolean",
+            "default": true,
+            "title": "Enable Prompt Expansion",
+            "description": "Whether to expand the prompt with a vision language model before generation."
           }
         },
-        "x-fal-order-properties": [
-          "prompt",
-          "duration",
-          "resolution",
-          "seed",
-          "enable_prompt_expansion",
-          "enable_safety_checker",
-          "aspect_ratio"
+        "required": [
+          "prompt"
         ],
         "title": "TextToVideoHailuo03Input"
       },
       "H3TextToVideoOutput": {
         "type": "object",
-        "required": [
+        "x-fal-order-properties": [
           "video"
         ],
         "properties": {
@@ -166,26 +166,44 @@
             "$ref": "#/components/schemas/File",
             "examples": [
               {
+                "content_type": "video/mp4",
                 "file_name": "--prs89fkHtWW406fmEs__NRhTqNku.mp4",
                 "url": "https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4",
-                "file_size": 6463396,
-                "content_type": "video/mp4"
+                "file_size": 6463396
               }
             ],
             "description": "The generated video"
           }
         },
-        "x-fal-order-properties": [
+        "required": [
           "video"
         ],
         "title": "TextToVideoHailuo03Output"
       },
       "File": {
         "type": "object",
-        "required": [
-          "url"
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
         ],
         "properties": {
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file."
+          },
           "file_name": {
             "anyOf": [
               {
@@ -195,11 +213,11 @@
                 "type": "null"
               }
             ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
-            ]
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
           },
           "url": {
             "type": "string",
@@ -215,33 +233,15 @@
                 "type": "null"
               }
             ],
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
             "examples": [
               4404019
-            ]
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
             ],
-            "title": "Content Type",
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ]
+            "title": "File Size",
+            "description": "The size of the file in bytes."
           }
         },
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
+        "required": [
+          "url"
         ],
         "title": "File"
       }

@@ -127,7 +127,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video file
-  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/lynx/example_out.mp4","content_type":"video/mp4"}
+  - Examples: {"content_type":"video/mp4","url":"https://storage.googleapis.com/falserverless/example_outputs/lynx/example_out.mp4"}
 
 - **`seed`** (`integer`, _required_):
   The seed used for generation
@@ -139,8 +139,8 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/lynx/example_out.mp4",
-    "content_type": "video/mp4"
+    "content_type": "video/mp4",
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/lynx/example_out.mp4"
   }
 }
 ```

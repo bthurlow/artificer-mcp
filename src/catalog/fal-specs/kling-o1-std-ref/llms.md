@@ -98,7 +98,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video.
-  - Examples: {"url":"https://v3b.fal.media/files/b/panda/oVdiICFXY03Vbam-08Aj8_output.mp4","file_name":"output.mp4","content_type":"video/mp4","file_size":47359974}
+  - Examples: {"content_type":"video/mp4","file_size":47359974,"file_name":"output.mp4","url":"https://v3b.fal.media/files/b/panda/oVdiICFXY03Vbam-08Aj8_output.mp4"}
 
 
 
@@ -107,10 +107,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "url": "https://v3b.fal.media/files/b/panda/oVdiICFXY03Vbam-08Aj8_output.mp4",
-    "file_name": "output.mp4",
     "content_type": "video/mp4",
-    "file_size": 47359974
+    "file_size": 47359974,
+    "file_name": "output.mp4",
+    "url": "https://v3b.fal.media/files/b/panda/oVdiICFXY03Vbam-08Aj8_output.mp4"
   }
 }
 ```
