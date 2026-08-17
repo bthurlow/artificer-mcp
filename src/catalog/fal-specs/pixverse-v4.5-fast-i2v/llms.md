@@ -89,7 +89,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"file_size":6420765,"file_name":"output.mp4","url":"https://fal.media/files/koala/HEWK7BBwqWrz7F5nAZzp7_output.mp4","content_type":"video/mp4"}
+  - Examples: {"content_type":"video/mp4","file_size":6420765,"url":"https://fal.media/files/koala/HEWK7BBwqWrz7F5nAZzp7_output.mp4","file_name":"output.mp4"}
 
 
 
@@ -98,10 +98,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
+    "content_type": "video/mp4",
     "file_size": 6420765,
-    "file_name": "output.mp4",
     "url": "https://fal.media/files/koala/HEWK7BBwqWrz7F5nAZzp7_output.mp4",
-    "content_type": "video/mp4"
+    "file_name": "output.mp4"
   }
 }
 ```

@@ -72,6 +72,9 @@
       },
       "Sora2TextToVideoProInput": {
         "type": "object",
+        "required": [
+          "prompt"
+        ],
         "x-fal-order-properties": [
           "prompt",
           "resolution",
@@ -82,38 +85,43 @@
           "character_ids"
         ],
         "title": "ProTextToVideoInput",
-        "required": [
-          "prompt"
-        ],
         "properties": {
-          "prompt": {
-            "type": "string",
-            "minLength": 1,
-            "description": "The text prompt describing the video you want to generate",
-            "title": "Prompt",
-            "examples": [
-              "A dramatic Hollywood breakup scene at dusk on a quiet suburban street. A man and a woman in their 30s face each other, speaking softly but emotionally, lips syncing to breakup dialogue. Cinematic lighting, warm sunset tones, shallow depth of field, gentle breeze moving autumn leaves, realistic natural sound, no background music"
-            ],
-            "maxLength": 5000
+          "detect_and_block_ip": {
+            "type": "boolean",
+            "description": "If enabled, the prompt (and image for image-to-video) will be checked for known intellectual property references and the request will be blocked if any are detected.",
+            "title": "Detect And Block Ip",
+            "default": false
           },
           "character_ids": {
             "description": "Up to two character IDs (from create-character) to use in the video. Refer to characters by name in the prompt. When set, only the OpenAI provider is used.",
+            "title": "Character IDs",
             "anyOf": [
               {
                 "type": "array",
-                "maxItems": 2,
                 "items": {
                   "type": "string"
-                }
+                },
+                "maxItems": 2
               },
               {
                 "type": "null"
               }
+            ]
+          },
+          "aspect_ratio": {
+            "type": "string",
+            "description": "The aspect ratio of the generated video",
+            "title": "Aspect Ratio",
+            "enum": [
+              "9:16",
+              "16:9"
             ],
-            "title": "Character IDs"
+            "default": "16:9"
           },
           "duration": {
             "type": "integer",
+            "description": "Duration of the generated video in seconds",
+            "title": "Duration",
             "enum": [
               4,
               8,
@@ -121,20 +129,7 @@
               16,
               20
             ],
-            "description": "Duration of the generated video in seconds",
-            "title": "Duration",
             "default": 4
-          },
-          "resolution": {
-            "type": "string",
-            "enum": [
-              "720p",
-              "1080p",
-              "true_1080p"
-            ],
-            "description": "The resolution of the generated video",
-            "title": "Resolution",
-            "default": "1080p"
           },
           "delete_video": {
             "type": "boolean",
@@ -142,26 +137,35 @@
             "title": "Delete Video",
             "default": true
           },
-          "aspect_ratio": {
+          "prompt": {
             "type": "string",
-            "enum": [
-              "9:16",
-              "16:9"
+            "examples": [
+              "A dramatic Hollywood breakup scene at dusk on a quiet suburban street. A man and a woman in their 30s face each other, speaking softly but emotionally, lips syncing to breakup dialogue. Cinematic lighting, warm sunset tones, shallow depth of field, gentle breeze moving autumn leaves, realistic natural sound, no background music"
             ],
-            "description": "The aspect ratio of the generated video",
-            "title": "Aspect Ratio",
-            "default": "16:9"
+            "title": "Prompt",
+            "description": "The text prompt describing the video you want to generate",
+            "maxLength": 5000,
+            "minLength": 1
           },
-          "detect_and_block_ip": {
-            "type": "boolean",
-            "description": "If enabled, the prompt (and image for image-to-video) will be checked for known intellectual property references and the request will be blocked if any are detected.",
-            "title": "Detect And Block Ip",
-            "default": false
+          "resolution": {
+            "type": "string",
+            "description": "The resolution of the generated video",
+            "title": "Resolution",
+            "enum": [
+              "720p",
+              "1080p",
+              "true_1080p"
+            ],
+            "default": "1080p"
           }
         }
       },
       "Sora2TextToVideoProOutput": {
         "type": "object",
+        "required": [
+          "video",
+          "video_id"
+        ],
         "x-fal-order-properties": [
           "video",
           "video_id",
@@ -169,29 +173,14 @@
           "spritesheet"
         ],
         "title": "ProTextToVideoOutput",
-        "required": [
-          "video",
-          "video_id"
-        ],
         "properties": {
-          "spritesheet": {
-            "description": "Spritesheet image for the video",
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ImageFile"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "video_id": {
             "type": "string",
-            "description": "The ID of the generated video",
-            "title": "Video ID",
             "examples": [
               "video_123"
-            ]
+            ],
+            "title": "Video ID",
+            "description": "The ID of the generated video"
           },
           "thumbnail": {
             "description": "Thumbnail image for the video",
@@ -204,20 +193,34 @@
               }
             ]
           },
+          "spritesheet": {
+            "description": "Spritesheet image for the video",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageFile"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "video": {
-            "description": "The generated video",
             "examples": [
               {
-                "url": "https://storage.googleapis.com/falserverless/example_outputs/sora-2-pro-t2v-output.mp4",
-                "content_type": "video/mp4"
+                "content_type": "video/mp4",
+                "url": "https://storage.googleapis.com/falserverless/example_outputs/sora-2-pro-t2v-output.mp4"
               }
             ],
+            "description": "The generated video",
             "$ref": "#/components/schemas/VideoFile"
           }
         }
       },
       "ImageFile": {
         "type": "object",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -227,12 +230,10 @@
           "height"
         ],
         "title": "ImageFile",
-        "required": [
-          "url"
-        ],
         "properties": {
           "width": {
             "description": "The width of the image",
+            "title": "Width",
             "anyOf": [
               {
                 "type": "integer"
@@ -240,31 +241,61 @@
               {
                 "type": "null"
               }
+            ]
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
             ],
-            "title": "Width"
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "url": {
             "type": "string",
             "description": "The URL where the file can be downloaded from.",
             "title": "Url"
           },
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size",
-            "examples": [
-              4404019
-            ]
-          },
           "height": {
             "description": "The height of the image",
+            "title": "Height",
             "anyOf": [
               {
                 "type": "integer"
@@ -272,43 +303,15 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Height"
-          },
-          "content_type": {
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ]
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
             ]
           }
         }
       },
       "VideoFile": {
         "type": "object",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -321,32 +324,54 @@
           "num_frames"
         ],
         "title": "VideoFile",
-        "required": [
-          "url"
-        ],
         "properties": {
+          "fps": {
+            "description": "The FPS of the video",
+            "title": "Fps",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "width": {
+            "description": "The width of the video",
+            "title": "Width",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "url": {
             "type": "string",
             "description": "The URL where the file can be downloaded from.",
             "title": "Url"
           },
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size",
-            "examples": [
-              4404019
-            ]
-          },
-          "fps": {
-            "description": "The FPS of the video",
+          "duration": {
+            "description": "The duration of the video",
+            "title": "Duration",
             "anyOf": [
               {
                 "type": "number"
@@ -354,50 +379,11 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Fps"
-          },
-          "height": {
-            "description": "The height of the video",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Height"
-          },
-          "content_type": {
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type",
-            "examples": [
-              "image/png"
             ]
-          },
-          "width": {
-            "description": "The width of the video",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Width"
           },
           "num_frames": {
             "description": "The number of frames in the video",
+            "title": "Num Frames",
             "anyOf": [
               {
                 "type": "integer"
@@ -405,23 +391,14 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Num Frames"
+            ]
           },
-          "duration": {
-            "description": "The duration of the video",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
+          "content_type": {
+            "examples": [
+              "image/png"
             ],
-            "title": "Duration"
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
+            "description": "The mime type of the file.",
+            "title": "Content Type",
             "anyOf": [
               {
                 "type": "string"
@@ -429,10 +406,33 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Name",
+            ]
+          },
+          "file_size": {
             "examples": [
-              "z9RV14K95DvU.png"
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "height": {
+            "description": "The height of the video",
+            "title": "Height",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
             ]
           }
         }

@@ -72,6 +72,10 @@
       },
       "LynxInput": {
         "type": "object",
+        "required": [
+          "image_url",
+          "prompt"
+        ],
         "x-fal-order-properties": [
           "image_url",
           "prompt",
@@ -88,28 +92,10 @@
           "num_frames"
         ],
         "title": "LynxInput",
-        "required": [
-          "image_url",
-          "prompt"
-        ],
         "properties": {
-          "ip_scale": {
-            "type": "number",
-            "default": 1,
-            "maximum": 2,
-            "minimum": 0,
-            "description": "Identity preservation scale. Controls how closely the generated video preserves the subject's identity from the reference image.",
-            "title": "Ip Scale"
-          },
-          "frames_per_second": {
-            "type": "integer",
-            "default": 16,
-            "maximum": 30,
-            "minimum": 5,
-            "description": "Frames per second of the generated video. Must be between 5 to 30.",
-            "title": "Frames Per Second"
-          },
           "seed": {
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "title": "Seed",
             "anyOf": [
               {
                 "type": "integer"
@@ -117,127 +103,144 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Seed",
-            "description": "Random seed for reproducibility. If None, a random seed is chosen."
-          },
-          "prompt": {
-            "type": "string",
-            "examples": [
-              "A person carves a pumpkin on a porch in the evening. The camera captures their upper body as they draw a face with a marker, carefully cut along the lines, then lift the lid with both hands. Their face lights up with excitement as they peek inside"
-            ],
-            "title": "Prompt",
-            "description": "Text prompt to guide video generation"
-          },
-          "image_url": {
-            "type": "string",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/lynx/example_in.png"
-            ],
-            "title": "Image Url",
-            "description": "The URL of the subject image to be used for video generation"
-          },
-          "num_frames": {
-            "type": "integer",
-            "default": 81,
-            "maximum": 81,
-            "minimum": 9,
-            "description": "Number of frames in the generated video. Must be between 9 to 100.",
-            "title": "Num Frames"
-          },
-          "guidance_scale_2": {
-            "type": "number",
-            "default": 2,
-            "maximum": 10,
-            "minimum": 0,
-            "description": "Image guidance scale. Controls how closely the generated video follows the reference image. Higher values increase adherence to the reference image but may decrease quality.",
-            "title": "Guidance Scale 2"
-          },
-          "negative_prompt": {
-            "type": "string",
-            "default": "Bright tones, overexposed, blurred background, static, subtitles, style, works, paintings, images, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, misshapen limbs, fused fingers, still picture, messy background, three legs, many people in the background, walking backwards",
-            "title": "Negative Prompt",
-            "description": "Negative prompt to guide what should not appear in the generated video"
-          },
-          "resolution": {
-            "type": "string",
-            "enum": [
-              "480p",
-              "580p",
-              "720p"
-            ],
-            "default": "720p",
-            "title": "Resolution",
-            "description": "Resolution of the generated video (480p, 580p, or 720p)"
+            ]
           },
           "num_inference_steps": {
             "type": "integer",
-            "default": 50,
-            "maximum": 75,
-            "minimum": 1,
             "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
-            "title": "Num Inference Steps"
+            "title": "Num Inference Steps",
+            "maximum": 75,
+            "default": 50,
+            "minimum": 1
           },
           "aspect_ratio": {
             "type": "string",
+            "description": "Aspect ratio of the generated video (16:9, 9:16, or 1:1)",
+            "title": "Aspect Ratio",
             "enum": [
               "16:9",
               "9:16",
               "1:1"
             ],
-            "default": "16:9",
-            "title": "Aspect Ratio",
-            "description": "Aspect ratio of the generated video (16:9, 9:16, or 1:1)"
+            "default": "16:9"
           },
-          "guidance_scale": {
-            "type": "number",
-            "default": 5,
-            "maximum": 20,
-            "minimum": 1,
-            "description": "Classifier-free guidance scale. Higher values give better adherence to the prompt but may decrease quality.",
-            "title": "Guidance Scale"
+          "frames_per_second": {
+            "type": "integer",
+            "description": "Frames per second of the generated video. Must be between 5 to 30.",
+            "title": "Frames Per Second",
+            "maximum": 30,
+            "default": 16,
+            "minimum": 5
           },
           "strength": {
             "type": "number",
-            "default": 1,
-            "maximum": 2,
-            "minimum": 0,
             "description": "Reference image scale. Controls the influence of the reference image on the generated video.",
-            "title": "Strength"
+            "title": "Strength",
+            "maximum": 2,
+            "default": 1,
+            "minimum": 0
+          },
+          "image_url": {
+            "description": "The URL of the subject image to be used for video generation",
+            "type": "string",
+            "title": "Image Url",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/lynx/example_in.png"
+            ]
+          },
+          "negative_prompt": {
+            "type": "string",
+            "description": "Negative prompt to guide what should not appear in the generated video",
+            "title": "Negative Prompt",
+            "default": "Bright tones, overexposed, blurred background, static, subtitles, style, works, paintings, images, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, misshapen limbs, fused fingers, still picture, messy background, three legs, many people in the background, walking backwards"
+          },
+          "ip_scale": {
+            "type": "number",
+            "description": "Identity preservation scale. Controls how closely the generated video preserves the subject's identity from the reference image.",
+            "title": "Ip Scale",
+            "maximum": 2,
+            "default": 1,
+            "minimum": 0
+          },
+          "prompt": {
+            "description": "Text prompt to guide video generation",
+            "type": "string",
+            "title": "Prompt",
+            "examples": [
+              "A person carves a pumpkin on a porch in the evening. The camera captures their upper body as they draw a face with a marker, carefully cut along the lines, then lift the lid with both hands. Their face lights up with excitement as they peek inside"
+            ]
+          },
+          "guidance_scale_2": {
+            "type": "number",
+            "description": "Image guidance scale. Controls how closely the generated video follows the reference image. Higher values increase adherence to the reference image but may decrease quality.",
+            "title": "Guidance Scale 2",
+            "maximum": 10,
+            "default": 2,
+            "minimum": 0
+          },
+          "num_frames": {
+            "type": "integer",
+            "description": "Number of frames in the generated video. Must be between 9 to 100.",
+            "title": "Num Frames",
+            "maximum": 81,
+            "default": 81,
+            "minimum": 9
+          },
+          "resolution": {
+            "type": "string",
+            "description": "Resolution of the generated video (480p, 580p, or 720p)",
+            "title": "Resolution",
+            "enum": [
+              "480p",
+              "580p",
+              "720p"
+            ],
+            "default": "720p"
+          },
+          "guidance_scale": {
+            "type": "number",
+            "description": "Classifier-free guidance scale. Higher values give better adherence to the prompt but may decrease quality.",
+            "title": "Guidance Scale",
+            "maximum": 20,
+            "default": 5,
+            "minimum": 1
           }
         }
       },
       "LynxOutput": {
         "type": "object",
+        "required": [
+          "video",
+          "seed"
+        ],
         "x-fal-order-properties": [
           "video",
           "seed"
         ],
         "title": "LynxOutput",
-        "required": [
-          "video",
-          "seed"
-        ],
         "properties": {
+          "seed": {
+            "description": "The seed used for generation",
+            "type": "integer",
+            "title": "Seed"
+          },
           "video": {
+            "description": "The generated video file",
             "examples": [
               {
-                "url": "https://storage.googleapis.com/falserverless/example_outputs/lynx/example_out.mp4",
-                "content_type": "video/mp4"
+                "content_type": "video/mp4",
+                "url": "https://storage.googleapis.com/falserverless/example_outputs/lynx/example_out.mp4"
               }
             ],
-            "description": "The generated video file",
             "$ref": "#/components/schemas/VideoFile"
-          },
-          "seed": {
-            "type": "integer",
-            "title": "Seed",
-            "description": "The seed used for generation"
           }
         }
       },
       "VideoFile": {
         "type": "object",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -250,55 +253,10 @@
           "num_frames"
         ],
         "title": "VideoFile",
-        "required": [
-          "url"
-        ],
         "properties": {
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "num_frames": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Num Frames",
-            "description": "The number of frames in the video"
-          },
-          "width": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Width",
-            "description": "The width of the video"
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type",
-            "description": "The mime type of the file."
-          },
-          "duration": {
+          "fps": {
+            "description": "The FPS of the video",
+            "title": "Fps",
             "anyOf": [
               {
                 "type": "number"
@@ -306,14 +264,26 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Duration",
-            "description": "The duration of the video"
+            ]
+          },
+          "width": {
+            "description": "The width of the video",
+            "title": "Width",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -321,11 +291,31 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
+            ]
           },
-          "fps": {
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duration": {
+            "description": "The duration of the video",
+            "title": "Duration",
             "anyOf": [
               {
                 "type": "number"
@@ -333,14 +323,26 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Fps",
-            "description": "The FPS of the video"
+            ]
           },
-          "file_size": {
+          "content_type": {
+            "description": "The mime type of the file.",
             "examples": [
-              4404019
+              "image/png"
             ],
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "num_frames": {
+            "description": "The number of frames in the video",
+            "title": "Num Frames",
             "anyOf": [
               {
                 "type": "integer"
@@ -348,11 +350,11 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
+            ]
           },
           "height": {
+            "description": "The height of the video",
+            "title": "Height",
             "anyOf": [
               {
                 "type": "integer"
@@ -360,9 +362,7 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Height",
-            "description": "The height of the video"
+            ]
           }
         }
       }

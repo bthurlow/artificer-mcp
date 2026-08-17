@@ -90,7 +90,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video
-  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/sora-2-pro-t2v-output.mp4","content_type":"video/mp4"}
+  - Examples: {"content_type":"video/mp4","url":"https://storage.googleapis.com/falserverless/example_outputs/sora-2-pro-t2v-output.mp4"}
 
 - **`video_id`** (`string`, _required_):
   The ID of the generated video
@@ -109,8 +109,8 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/sora-2-pro-t2v-output.mp4",
-    "content_type": "video/mp4"
+    "content_type": "video/mp4",
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/sora-2-pro-t2v-output.mp4"
   },
   "video_id": "video_123"
 }
