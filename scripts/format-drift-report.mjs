@@ -97,6 +97,31 @@ export function formatDriftReport(report, opts = {}) {
     }
   }
 
+  const schema = report.schemaChanges;
+  const schemaTouched = schema
+    ? schema.changed.length + schema.modelsAdded.length + schema.modelsRemoved.length
+    : 0;
+  if (schemaTouched > 0) {
+    out.push(
+      `## ${schemaTouched} input-schema change(s)`,
+      '',
+      'A **removed** key means callers passing it now have it silently dropped by fal (`fal_generate_*` will warn on stderr, but the request still goes out without it). An **added** key is a new capability the prompt guide probably does not mention yet. Key *reordering* is not reported — only real additions and removals.',
+      '',
+    );
+    for (const m of schema.modelsAdded) out.push(`- **new model** \`${m}\``);
+    for (const m of schema.modelsRemoved) out.push(`- **model gone** \`${m}\``);
+    for (const c of schema.changed) {
+      out.push(`- \`${c.model}\``);
+      const line = (label, keys) =>
+        keys.length > 0 ? out.push(`  - ${label}: ${keys.map((k) => `\`${k}\``).join(', ')}`) : 0;
+      line('**added**', c.addedTop);
+      line('**REMOVED**', c.removedTop);
+      line('added (nested)', c.addedNested);
+      line('**REMOVED** (nested)', c.removedNested);
+    }
+    out.push('');
+  }
+
   if (undeprecated.length > 0) {
     out.push(
       `## ${undeprecated.length} route(s) recovered`,
@@ -112,9 +137,13 @@ export function formatDriftReport(report, opts = {}) {
     failures.length === 0 &&
     deprecated.length === 0 &&
     costChanges.length === 0 &&
-    undeprecated.length === 0
+    undeprecated.length === 0 &&
+    schemaTouched === 0
   ) {
-    out.push('_No deprecations, fetch failures, or price changes. Spec-text churn only._', '');
+    out.push(
+      '_No deprecations, fetch failures, price changes, or input-schema changes. Spec-text churn only._',
+      '',
+    );
   }
 
   if (opts.verifyFailed) {
