@@ -194,19 +194,29 @@ so the pair no longer bills alike.
 
 ---
 
-## Verification status for 0.10.0
+## Verification status
 
-Stated plainly so nobody assumes more coverage than exists:
+Stated plainly so nobody assumes more coverage than exists.
 
-- `gemini_omni_generate_video` is **unit-tested against a mocked client only**.
-  No live call has been made; its request shape is inferred from SDK types plus
-  documentation. Treat first real use as a smoke test — and note this tool's
-  documented audio behavior was **wrong until late in this release** (it claimed
-  silent output; corrected in #37 after being caught against Google's model
-  card, not by any test). Inference from docs has already failed once here, so
-  weight the first live call accordingly.
-- The `@google/genai` **1.50 → 2.17 major upgrade** is verified for types and
-  build. The test suite mocks that SDK, so live API behavior across all eight
-  Google-backed tools is unverified.
+- **`gemini_omni_generate_video` is verified live as of 2026-08-17, on 0.10.1 or
+  newer.** A real generation completed and downloaded successfully.
+
+  **On 0.10.0 this tool did not work end to end.** Its download hit a bare
+  **403**: Omni returns results on `generativelanguage.googleapis.com`, which
+  serves them behind the API key, and the transport sent no `x-goog-api-key`
+  header. Fixed in 0.10.1. If you are on 0.10.0 and Omni fails at the download
+  step, upgrade — nothing you configure will work around it.
+
+  Two bugs shipped in 0.10.0 here, and **neither was catchable by the test
+  suite**: the audio claim was wrong (documentation, corrected in 0.10.0 itself
+  after being caught against Google's model card) and the download auth was
+  missing (hidden behind a mocked `downloadAndWrite`). Both surfaced only on
+  contact with the real API. Treat a green unit suite on any generation
+  transport as "the argument shapes are plausible", not "it works".
+
+- The `@google/genai` **1.50 → 2.17 major upgrade** is now exercised live on the
+  **Interactions path** (that is what the Omni call uses). The other
+  Google-backed tools — Veo `generateVideos`, TTS, Lyria, image generation —
+  remain verified for types and build only, because the suite mocks that SDK.
 - fal pricing and deprecation status are read from fal's published specs, not
   observed on an invoice.
