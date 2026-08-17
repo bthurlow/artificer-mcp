@@ -577,7 +577,15 @@ Authoritative now:
 
 **Confirmed at build time:** 3–10s clips, 720p, 24fps, 16:9 and 9:16, ~$0.10/s output, stateful editing via `previous_interaction_id`. Every call returns `interaction_id` so callers can chain edits.
 
-**Not covered by tests:** the transport is unit-tested against a mocked interactions client (create/poll/terminal-status/timeout/extraction). **No live call has been made** — no run against the real API, so the exact request shape is inferred from SDK types plus docs and should be smoke-tested on first real use.
+**VERIFIED LIVE 2026-08-17 (Brian).** A real generation completed and downloaded on 0.10.1. The request shape built from SDK types plus docs was correct; the Interactions API create/poll contract works as implemented.
+
+**It took two bugs to get there, and the test suite caught neither:**
+1. The audio claim was wrong — documentation error, corrected in #37 after Brian checked the Vertex model card. No test can verify a prose claim.
+2. The download 403'd on the very first real call — Omni serves results from `generativelanguage.googleapis.com` behind the API key and the transport sent no `x-goog-api-key`. Invisible because the tests mocked `downloadAndWrite` wholesale and never inspected its arguments. Fixed in #39 / 0.10.1, with the rule extracted to a shared `geminiDownloadHeaders()` so Veo and Omni cannot diverge again.
+
+**The durable lesson** (also in memory as `project-live-api-verification`): a green unit suite on a generation transport means "the argument shapes are plausible", not "it works". Assert on the arguments passed to a mocked boundary, keep shared helpers real via `importActual`, and get one live call before calling a transport done. Both of 0.10.0's Omni bugs were structurally outside what mocks can see.
+
+**Still unverified:** the `@google/genai` 2.17 upgrade is now exercised live on the **Interactions path only**. Veo `generateVideos`, TTS, Lyria, and image generation have never been called against the live API on 2.17 — the suite mocks the SDK. Worth one call each before relying on them.
 
 ## 19b. Original #19 research notes (kept for history)
 
