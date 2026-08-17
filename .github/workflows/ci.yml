@@ -200,10 +200,33 @@ jobs:
       - name: Install FFmpeg (static binary)
         # BtbN GPL build — unlike johnvansickle's, this includes --enable-libfreetype
         # and --enable-libfontconfig, so the drawtext filter is available.
-        # Pinned to the n7.1 line (matches the prior 7.0.2 baseline, minor bump only).
+        #
+        # Pinned to the n8.1 line. Was n7.1 until 2026-08-17, when BtbN
+        # dropped that line from their rolling `latest` release and the asset
+        # started 404ing (wget exit 8 — a server error, NOT the exit 4 a
+        # network blip gives, so the retries above cannot help). Their
+        # `latest` release only ever carries the two or three newest lines,
+        # so this URL will rot again the same way when 8.1 ages out.
+        #
+        # NOTE: the repo's documented FFmpeg baseline is 6+ (hard floor 4.3
+        # for xfade). CI now tests on 8.1, which is further from that
+        # baseline than before — it cannot catch accidental use of an
+        # 8.x-only feature that would break a user on 6.x. BtbN no longer
+        # publishes 6.x or 7.x here, so fixing that needs a different source.
         run: |
-          wget -q --tries=3 --timeout=30 --retry-connrefused \
-            -O /tmp/ffmpeg.tar.xz https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n7.1-latest-linux64-gpl-7.1.tar.xz
+          ASSET="ffmpeg-n8.1-latest-linux64-gpl-8.1.tar.xz"
+          if ! wget -q --tries=3 --timeout=30 --retry-connrefused \
+            -O /tmp/ffmpeg.tar.xz \
+            "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/$ASSET"; then
+            # Self-diagnosing: when BtbN retires a line, the only thing you
+            # need is the list of assets they DO publish. Print it rather
+            # than making the next person go find the release page.
+            echo "::error::Could not fetch $ASSET — BtbN has likely retired this line. Available linux64-gpl assets:"
+            curl -sf https://api.github.com/repos/BtbN/FFmpeg-Builds/releases/tags/latest \
+              | grep -o '"name": *"ffmpeg-[^"]*linux64-gpl[^"]*"' | sed 's/.*: *"/  /;s/"$//' || true
+            echo "::error::Pick a current asset above and update ASSET in .github/workflows/ci.yml."
+            exit 1
+          fi
           mkdir -p /tmp/ffmpeg-extract
           tar -xf /tmp/ffmpeg.tar.xz -C /tmp/ffmpeg-extract --strip-components=2 --wildcards '*/bin/*'
           sudo mv /tmp/ffmpeg-extract/ffmpeg /usr/local/bin/ffmpeg
