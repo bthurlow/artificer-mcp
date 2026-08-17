@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.2](https://github.com/bthurlow/artificer-mcp/compare/v0.10.1...v0.10.2) (2026-08-17)
+
+
+### Bug Fixes
+
+* **catalog:** stable input-key order, and report schema drift the cron missed ([#42](https://github.com/bthurlow/artificer-mcp/issues/42)) ([9cc520f](https://github.com/bthurlow/artificer-mcp/commit/9cc520faad0b1a78642daee518428737fbc7c510))
+
 ## [0.10.1](https://github.com/bthurlow/artificer-mcp/compare/v0.10.0...v0.10.1) (2026-08-16)
 
 
