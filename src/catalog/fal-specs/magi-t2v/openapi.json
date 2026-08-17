@@ -81,7 +81,66 @@
           "enable_safety_checker",
           "aspect_ratio"
         ],
+        "title": "MagiTextToVideoRequest",
         "properties": {
+          "aspect_ratio": {
+            "type": "string",
+            "title": "Aspect Ratio",
+            "default": "auto",
+            "description": "Aspect ratio of the generated video. If 'auto', the aspect ratio will be determined automatically based on the input image.",
+            "enum": [
+              "auto",
+              "16:9",
+              "9:16",
+              "1:1"
+            ]
+          },
+          "num_inference_steps": {
+            "type": "integer",
+            "title": "Num Inference Steps",
+            "default": 16,
+            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
+            "enum": [
+              4,
+              8,
+              16,
+              32,
+              64
+            ]
+          },
+          "num_frames": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 192,
+                "minimum": 96
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Num Frames",
+            "default": 96,
+            "description": "Number of frames to generate. Must be between 96 and 192 (inclusive). Each additional 24 frames beyond 96 incurs an additional billing unit."
+          },
+          "resolution": {
+            "type": "string",
+            "title": "Resolution",
+            "default": "720p",
+            "description": "Resolution of the generated video (480p or 720p). 480p is 0.5 billing units, and 720p is 1 billing unit.",
+            "enum": [
+              "480p",
+              "720p"
+            ]
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "The text prompt to guide video generation.",
+            "examples": [
+              "Close-up shot: the old sea captain stares intently, pipe in mouth, wisps of smoke curling around his weathered face. The camera begins a slow clockwise orbit, pulling back. Finally, the camera rises high above, revealing the entire wooden sailing ship cutting through the waves, the captain unmoved, gazing toward the distant horizon."
+            ]
+          },
           "seed": {
             "anyOf": [
               {
@@ -94,78 +153,19 @@
             "title": "Seed",
             "description": "Random seed for reproducibility. If None, a random seed is chosen."
           },
-          "num_frames": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": 96,
-                "maximum": 192
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": 96,
-            "title": "Num Frames",
-            "description": "Number of frames to generate. Must be between 96 and 192 (inclusive). Each additional 24 frames beyond 96 incurs an additional billing unit."
-          },
-          "aspect_ratio": {
-            "type": "string",
-            "enum": [
-              "auto",
-              "16:9",
-              "9:16",
-              "1:1"
-            ],
-            "default": "auto",
-            "title": "Aspect Ratio",
-            "description": "Aspect ratio of the generated video. If 'auto', the aspect ratio will be determined automatically based on the input image."
-          },
-          "resolution": {
-            "type": "string",
-            "enum": [
-              "480p",
-              "720p"
-            ],
-            "default": "720p",
-            "title": "Resolution",
-            "description": "Resolution of the generated video (480p or 720p). 480p is 0.5 billing units, and 720p is 1 billing unit."
-          },
-          "prompt": {
-            "type": "string",
-            "examples": [
-              "Close-up shot: the old sea captain stares intently, pipe in mouth, wisps of smoke curling around his weathered face. The camera begins a slow clockwise orbit, pulling back. Finally, the camera rises high above, revealing the entire wooden sailing ship cutting through the waves, the captain unmoved, gazing toward the distant horizon."
-            ],
-            "title": "Prompt",
-            "description": "The text prompt to guide video generation."
-          },
           "enable_safety_checker": {
             "type": "boolean",
+            "title": "Enable Safety Checker",
+            "default": true,
+            "description": "If set to true, the safety checker will be enabled.",
             "examples": [
               true
-            ],
-            "default": true,
-            "title": "Enable Safety Checker",
-            "description": "If set to true, the safety checker will be enabled."
-          },
-          "num_inference_steps": {
-            "type": "integer",
-            "enum": [
-              4,
-              8,
-              16,
-              32,
-              64
-            ],
-            "default": 16,
-            "title": "Num Inference Steps",
-            "description": "Number of inference steps for sampling. Higher values give better quality but take longer."
+            ]
           }
         },
         "required": [
           "prompt"
-        ],
-        "title": "MagiTextToVideoRequest"
+        ]
       },
       "MagiOutput": {
         "type": "object",
@@ -173,15 +173,16 @@
           "video",
           "seed"
         ],
+        "title": "MagiResponse",
         "properties": {
           "video": {
             "$ref": "#/components/schemas/File",
+            "description": "The generated video file.",
             "examples": [
               {
                 "url": "https://v3.fal.media/files/elephant/Foq1oFk7e5_dzujsITYfl_f7c4f24d-a68d-4b8b-8199-320002a99ac8.mp4"
               }
-            ],
-            "description": "The generated video file."
+            ]
           },
           "seed": {
             "type": "integer",
@@ -192,8 +193,7 @@
         "required": [
           "video",
           "seed"
-        ],
-        "title": "MagiResponse"
+        ]
       },
       "File": {
         "type": "object",
@@ -203,6 +203,7 @@
           "file_name",
           "file_size"
         ],
+        "title": "File",
         "properties": {
           "content_type": {
             "anyOf": [
@@ -213,31 +214,11 @@
                 "type": "null"
               }
             ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
             "examples": [
               "image/png"
-            ],
-            "title": "Content Type",
-            "description": "The mime type of the file."
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
+            ]
           },
           "file_size": {
             "anyOf": [
@@ -248,17 +229,36 @@
                 "type": "null"
               }
             ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "examples": [
               4404019
+            ]
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
             ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
           }
         },
         "required": [
           "url"
-        ],
-        "title": "File"
+        ]
       }
     }
   },

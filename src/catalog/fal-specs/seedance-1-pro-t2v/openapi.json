@@ -71,23 +71,60 @@
         ]
       },
       "BytedanceSeedanceV1ProTextToVideoInput": {
-        "type": "object",
-        "x-fal-order-properties": [
-          "prompt",
-          "aspect_ratio",
-          "resolution",
-          "duration",
-          "camera_fixed",
-          "seed",
-          "enable_safety_checker",
-          "num_frames"
-        ],
-        "required": [
-          "prompt"
-        ],
         "properties": {
-          "duration": {
+          "resolution": {
+            "description": "Video resolution - 480p for faster generation, 720p for balance, 1080p for higher quality",
+            "default": "1080p",
+            "enum": [
+              "480p",
+              "720p",
+              "1080p"
+            ],
             "type": "string",
+            "title": "Resolution"
+          },
+          "aspect_ratio": {
+            "description": "The aspect ratio of the generated video",
+            "default": "16:9",
+            "enum": [
+              "21:9",
+              "16:9",
+              "4:3",
+              "1:1",
+              "3:4",
+              "9:16"
+            ],
+            "type": "string",
+            "title": "Aspect Ratio"
+          },
+          "seed": {
+            "description": "Random seed to control video generation. Use -1 for random.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "prompt": {
+            "description": "The text prompt used to generate the video",
+            "examples": [
+              "A bright blue race car speeds along a snowy racetrack. [Low-angle shot] Captures several cars speeding along the racetrack through a harsh snowstorm. [Overhead shot] The camera gradually pulls upward, revealing the full race scene illuminated by storm lights"
+            ],
+            "type": "string",
+            "title": "Prompt"
+          },
+          "camera_fixed": {
+            "description": "Whether to fix the camera position",
+            "default": false,
+            "type": "boolean",
+            "title": "Camera Fixed"
+          },
+          "duration": {
+            "description": "Duration of the video in seconds",
             "default": "5",
             "enum": [
               "2",
@@ -102,43 +139,87 @@
               "11",
               "12"
             ],
-            "title": "Duration",
-            "description": "Duration of the video in seconds"
+            "type": "string",
+            "title": "Duration"
           },
           "num_frames": {
+            "description": "The number of frames to generate. If provided, will override duration.",
             "anyOf": [
               {
+                "maximum": 289,
                 "type": "integer",
-                "minimum": 29,
-                "maximum": 289
+                "minimum": 29
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Num Frames",
-            "description": "The number of frames to generate. If provided, will override duration."
+            "title": "Num Frames"
           },
-          "resolution": {
-            "type": "string",
-            "default": "1080p",
-            "enum": [
-              "480p",
-              "720p",
-              "1080p"
-            ],
-            "title": "Resolution",
-            "description": "Video resolution - 480p for faster generation, 720p for balance, 1080p for higher quality"
-          },
-          "prompt": {
-            "type": "string",
+          "enable_safety_checker": {
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
             "examples": [
-              "A bright blue race car speeds along a snowy racetrack. [Low-angle shot] Captures several cars speeding along the racetrack through a harsh snowstorm. [Overhead shot] The camera gradually pulls upward, revealing the full race scene illuminated by storm lights"
+              true
             ],
-            "title": "Prompt",
-            "description": "The text prompt used to generate the video"
+            "default": true,
+            "type": "boolean",
+            "title": "Enable Safety Checker"
+          }
+        },
+        "required": [
+          "prompt"
+        ],
+        "x-fal-order-properties": [
+          "prompt",
+          "aspect_ratio",
+          "resolution",
+          "duration",
+          "camera_fixed",
+          "seed",
+          "enable_safety_checker",
+          "num_frames"
+        ],
+        "type": "object",
+        "title": "SeedanceProTextToVideoInput"
+      },
+      "BytedanceSeedanceV1ProTextToVideoOutput": {
+        "properties": {
+          "video": {
+            "$ref": "#/components/schemas/File",
+            "description": "Generated video file",
+            "examples": [
+              {
+                "url": "https://storage.googleapis.com/falserverless/example_inputs/seedance_pro_t2v.mp4"
+              }
+            ]
           },
           "seed": {
+            "description": "Seed used for generation",
+            "examples": [
+              42
+            ],
+            "type": "integer",
+            "title": "Seed"
+          }
+        },
+        "required": [
+          "video",
+          "seed"
+        ],
+        "x-fal-order-properties": [
+          "video",
+          "seed"
+        ],
+        "type": "object",
+        "title": "SeedanceProT2VVideoOutput"
+      },
+      "File": {
+        "properties": {
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
             "anyOf": [
               {
                 "type": "integer"
@@ -147,135 +228,54 @@
                 "type": "null"
               }
             ],
-            "title": "Seed",
-            "description": "Random seed to control video generation. Use -1 for random."
+            "title": "File Size"
           },
-          "aspect_ratio": {
-            "type": "string",
-            "default": "16:9",
-            "enum": [
-              "21:9",
-              "16:9",
-              "4:3",
-              "1:1",
-              "3:4",
-              "9:16"
-            ],
-            "title": "Aspect Ratio",
-            "description": "The aspect ratio of the generated video"
-          },
-          "camera_fixed": {
-            "type": "boolean",
-            "default": false,
-            "title": "Camera Fixed",
-            "description": "Whether to fix the camera position"
-          },
-          "enable_safety_checker": {
-            "type": "boolean",
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
-              true
+              "z9RV14K95DvU.png"
             ],
-            "default": true,
-            "title": "Enable Safety Checker",
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked."
-          }
-        },
-        "title": "SeedanceProTextToVideoInput"
-      },
-      "BytedanceSeedanceV1ProTextToVideoOutput": {
-        "type": "object",
-        "x-fal-order-properties": [
-          "video",
-          "seed"
-        ],
-        "required": [
-          "video",
-          "seed"
-        ],
-        "properties": {
-          "video": {
-            "$ref": "#/components/schemas/File",
-            "examples": [
+            "anyOf": [
               {
-                "url": "https://storage.googleapis.com/falserverless/example_inputs/seedance_pro_t2v.mp4"
+                "type": "string"
+              },
+              {
+                "type": "null"
               }
             ],
-            "description": "Generated video file"
+            "title": "File Name"
           },
-          "seed": {
-            "type": "integer",
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
             "examples": [
-              42
+              "image/png"
             ],
-            "title": "Seed",
-            "description": "Seed used for generation"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
           }
         },
-        "title": "SeedanceProT2VVideoOutput"
-      },
-      "File": {
-        "type": "object",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "required": [
-          "url"
-        ],
-        "properties": {
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type",
-            "description": "The mime type of the file."
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "file_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              4404019
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
-          }
-        },
+        "type": "object",
         "title": "File"
       }
     }
