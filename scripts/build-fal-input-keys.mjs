@@ -78,6 +78,40 @@ export function findInputSchema(doc) {
 }
 
 /**
+ * Top-level property names in a **stable** order.
+ *
+ * `Object.keys(properties)` follows fal's JSON insertion order, which they
+ * reshuffle freely: the 2026-08-17 sync reordered `properties` on 235 of
+ * 262 models with no semantic change, rewriting 1233 lines of this file
+ * and burying the one reviewable artifact in the drift PR under noise.
+ *
+ * fal publishes their own canonical order as `x-fal-order-properties` —
+ * present on all 263 input schemas and covering every property in each.
+ * Preferring it gives an order that is both stable across syncs and
+ * meaningful (fal's intended parameter grouping), which alphabetical
+ * sorting would throw away.
+ *
+ * Falls back to sorted keys if the extension is ever absent, and appends
+ * any property the order array omits, so a partial extension can never
+ * silently drop a key from the accepted set.
+ *
+ * Exported for unit testing.
+ *
+ * @param {any} schema an OpenAPI object schema with `properties`
+ * @returns {string[]}
+ */
+export function orderedTopKeys(schema) {
+  const props = Object.keys(schema.properties ?? {});
+  const declared = schema['x-fal-order-properties'];
+  if (!Array.isArray(declared)) return [...props].sort();
+  const known = new Set(props);
+  const ordered = declared.filter((k) => known.has(k));
+  const seen = new Set(ordered);
+  // Anything fal forgot to list still belongs in the accepted set.
+  return [...ordered, ...props.filter((k) => !seen.has(k)).sort()];
+}
+
+/**
  * Collect the accepted top-level keys and the dotted paths of nested
  * object properties.
  *
@@ -94,7 +128,7 @@ export function collectKeys(doc) {
   const schema = findInputSchema(doc);
   if (!schema?.properties) return null;
 
-  const top = Object.keys(schema.properties);
+  const top = orderedTopKeys(schema);
   const nested = [];
 
   const walk = (props, prefix, depth) => {
@@ -115,6 +149,50 @@ export function collectKeys(doc) {
   walk(schema.properties, '', 1);
 
   return { top, nested: [...new Set(nested)].sort() };
+}
+
+/**
+ * Compare two input-key maps and report what actually changed.
+ *
+ * The drift cron was blind to this. On 2026-08-17 `fal-input-keys.json`
+ * changed and the PR body said nothing, because the report only covered
+ * deprecations, fetch failures, prices, and recoveries. That week the
+ * change was pure reordering — but a **removed input parameter** would
+ * have been just as silent, and a caller passing it would only find out
+ * from a stderr warning at call time.
+ *
+ * Order is deliberately ignored: this compares key *sets*, so a
+ * reshuffle reports nothing and only real additions and removals surface.
+ *
+ * Exported for unit testing.
+ *
+ * @param {Record<string, {top: string[], nested: string[]}> | null} before
+ * @param {Record<string, {top: string[], nested: string[]}>} after
+ * @returns {{ modelsAdded: string[], modelsRemoved: string[], changed: Array<{model: string, addedTop: string[], removedTop: string[], addedNested: string[], removedNested: string[]}> }}
+ */
+export function diffInputKeys(before, after) {
+  if (!before) return { modelsAdded: [], modelsRemoved: [], changed: [] };
+
+  const modelsAdded = Object.keys(after).filter((m) => !(m in before)).sort();
+  const modelsRemoved = Object.keys(before).filter((m) => !(m in after)).sort();
+  const changed = [];
+
+  const missing = (a, b) => a.filter((k) => !b.includes(k)).sort();
+
+  for (const model of Object.keys(after)) {
+    const prev = before[model];
+    if (!prev) continue;
+    const next = after[model];
+    const addedTop = missing(next.top, prev.top);
+    const removedTop = missing(prev.top, next.top);
+    const addedNested = missing(next.nested, prev.nested);
+    const removedNested = missing(prev.nested, next.nested);
+    if (addedTop.length || removedTop.length || addedNested.length || removedNested.length) {
+      changed.push({ model, addedTop, removedTop, addedNested, removedNested });
+    }
+  }
+
+  return { modelsAdded, modelsRemoved, changed: changed.sort((a, b) => a.model.localeCompare(b.model)) };
 }
 
 /**

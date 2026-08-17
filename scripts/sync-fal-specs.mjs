@@ -20,7 +20,7 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildMap as buildFalInputKeyMap } from './build-fal-input-keys.mjs';
+import { buildMap as buildFalInputKeyMap, diffInputKeys } from './build-fal-input-keys.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..');
@@ -374,9 +374,41 @@ async function main() {
     } catch {
       // first run
     }
+
+    // Diff the SETS, not the file text. A reordered file is noise; an
+    // added or removed input parameter changes what a caller can send and
+    // must reach the PR body — the report was blind to this until
+    // 2026-08-17.
+    let prevMap = null;
+    if (prevKeys) {
+      try {
+        prevMap = JSON.parse(prevKeys);
+      } catch {
+        prevMap = null;
+      }
+    }
+    report.schemaChanges = diffInputKeys(prevMap, map);
+
     if (prevKeys !== nextKeys) {
       await writeFile(FAL_INPUT_KEYS_JSON, nextKeys);
       console.log(`\nupdated src/catalog/fal-input-keys.json (${Object.keys(map).length} models)`);
+    }
+
+    const sc = report.schemaChanges;
+    const touched = sc.changed.length + sc.modelsAdded.length + sc.modelsRemoved.length;
+    if (touched > 0) {
+      console.log(`\n${touched} input-schema change(s):`);
+      for (const m of sc.modelsAdded) console.log(`  + model ${m}`);
+      for (const m of sc.modelsRemoved) console.log(`  - model ${m}`);
+      for (const c of sc.changed) {
+        console.log(`  ${c.model}`);
+        if (c.addedTop.length) console.log(`    + ${c.addedTop.join(', ')}`);
+        if (c.removedTop.length) console.log(`    - ${c.removedTop.join(', ')}`);
+        if (c.addedNested.length) console.log(`    + ${c.addedNested.join(', ')}`);
+        if (c.removedNested.length) console.log(`    - ${c.removedNested.join(', ')}`);
+      }
+    } else if (prevKeys !== nextKeys) {
+      console.log('  (key sets unchanged — file rewrite is ordering only)');
     }
   }
 

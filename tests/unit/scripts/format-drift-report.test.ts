@@ -111,3 +111,59 @@ describe('formatDriftReport', () => {
     expect(formatDriftReport(EMPTY)).toContain('fal-spec-drift.yml');
   });
 });
+
+describe('formatDriftReport — input-schema changes', () => {
+  const withSchema = (schemaChanges: unknown) => ({ ...EMPTY, schemaChanges });
+
+  it('reports a removed key and calls out the caller consequence', () => {
+    // The blind spot found on 2026-08-17: fal-input-keys.json changed and
+    // the PR body said nothing. A removed key is the dangerous direction —
+    // fal drops it silently and the request still goes out without it.
+    const md = formatDriftReport(
+      withSchema({
+        modelsAdded: [],
+        modelsRemoved: [],
+        changed: [
+          {
+            model: 'fal-ai/x',
+            addedTop: [],
+            removedTop: ['seed'],
+            addedNested: [],
+            removedNested: [],
+          },
+        ],
+      }),
+    );
+    expect(md).toContain('1 input-schema change(s)');
+    expect(md).toContain('`fal-ai/x`');
+    expect(md).toContain('`seed`');
+    expect(md).toContain('silently dropped');
+    // Must not claim the sync was churn-only when a key moved.
+    expect(md).not.toContain('Spec-text churn only');
+  });
+
+  it('reports models appearing and disappearing', () => {
+    const md = formatDriftReport(
+      withSchema({ modelsAdded: ['fal-ai/new'], modelsRemoved: ['fal-ai/old'], changed: [] }),
+    );
+    expect(md).toContain('new model');
+    expect(md).toContain('model gone');
+    expect(md).toContain('2 input-schema change(s)');
+  });
+
+  it('says churn-only when the schema diff is empty', () => {
+    const md = formatDriftReport(
+      withSchema({ modelsAdded: [], modelsRemoved: [], changed: [] }),
+    );
+    expect(md).toContain('Spec-text churn only');
+    // The churn-only sentence itself names input-schema changes, so match
+    // the section HEADING rather than the phrase.
+    expect(md).not.toMatch(/## \d+ input-schema change/);
+  });
+
+  it('tolerates a report with no schemaChanges field at all', () => {
+    // Older report JSON, or a --model run that skips the map rebuild.
+    const md = formatDriftReport(EMPTY);
+    expect(md).toContain('Spec-text churn only');
+  });
+});
