@@ -80,7 +80,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video file
-  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/ltxv-2-t2v-output.mp4","content_type":"video/mp4","file_name":"ltxv-2-t2v-output.mp4"}
+  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/ltxv-2-t2v-output.mp4","file_name":"ltxv-2-t2v-output.mp4","content_type":"video/mp4"}
 
 
 
@@ -90,8 +90,8 @@ The API returns the following output format:
 {
   "video": {
     "url": "https://storage.googleapis.com/falserverless/example_outputs/ltxv-2-t2v-output.mp4",
-    "content_type": "video/mp4",
-    "file_name": "ltxv-2-t2v-output.mp4"
+    "file_name": "ltxv-2-t2v-output.mp4",
+    "content_type": "video/mp4"
   }
 }
 ```

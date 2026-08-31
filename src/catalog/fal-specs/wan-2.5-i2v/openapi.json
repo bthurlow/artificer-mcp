@@ -71,7 +71,113 @@
         ]
       },
       "Wan25PreviewImageToVideoInput": {
-        "type": "object",
+        "properties": {
+          "audio_url": {
+            "title": "Audio Url",
+            "description": "\nURL of the audio to use as the background music. Must be publicly accessible.\nLimit handling: If the audio duration exceeds the duration value (5 or 10 seconds),\nthe audio is truncated to the first 5 or 10 seconds, and the rest is discarded. If\nthe audio is shorter than the video, the remaining part of the video will be silent.\nFor example, if the audio is 3 seconds long and the video duration is 5 seconds, the\nfirst 3 seconds of the output video will have sound, and the last 2 seconds will be silent.\n- Format: WAV, MP3.\n- Duration: 3 to 30 s.\n- File size: Up to 15 MB.\n",
+            "anyOf": [
+              {
+                "ui": {
+                  "field": "audio"
+                },
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "prompt": {
+            "title": "Prompt",
+            "description": "The text prompt describing the desired video motion. Max 1500 characters.",
+            "minLength": 1,
+            "examples": [
+              "The white dragon warrior stands still, eyes full of determination and strength. The camera slowly moves closer or circles around the warrior, highlighting the powerful presence and heroic spirit of the character."
+            ],
+            "type": "string"
+          },
+          "seed": {
+            "title": "Seed",
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resolution": {
+            "title": "Resolution",
+            "enum": [
+              "480p",
+              "720p",
+              "1080p"
+            ],
+            "description": "Video resolution. Valid values: 480p, 720p, 1080p",
+            "type": "string",
+            "default": "1080p"
+          },
+          "duration": {
+            "title": "Duration",
+            "enum": [
+              "5",
+              "10"
+            ],
+            "description": "Duration of the generated video in seconds. Choose between 5 or 10 seconds.",
+            "type": "string",
+            "examples": [
+              "5",
+              "10"
+            ],
+            "default": "5"
+          },
+          "enable_prompt_expansion": {
+            "title": "Enable Prompt Expansion",
+            "description": "Whether to enable prompt rewriting using LLM.",
+            "type": "boolean",
+            "default": true
+          },
+          "negative_prompt": {
+            "title": "Negative Prompt",
+            "description": "Negative prompt to describe content to avoid. Max 500 characters.",
+            "examples": [
+              "low resolution, error, worst quality, low quality, defects"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "type": "boolean",
+            "examples": [
+              true
+            ],
+            "default": true
+          },
+          "image_url": {
+            "max_width": 8000,
+            "description": "URL of the image to use as the first frame. Must be publicly accessible or base64 data URI.",
+            "min_width": 240,
+            "title": "Image URL",
+            "max_file_size": 26214400,
+            "min_height": 240,
+            "type": "string",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/model_tests/wan/dragon-warrior.jpg"
+            ],
+            "max_height": 8000
+          }
+        },
+        "title": "ImageToVideoInput",
         "x-fal-order-properties": [
           "prompt",
           "image_url",
@@ -84,77 +190,20 @@
           "enable_safety_checker"
         ],
         "description": "Input for image-to-video generation",
+        "type": "object",
+        "required": [
+          "prompt",
+          "image_url"
+        ]
+      },
+      "Wan25PreviewImageToVideoOutput": {
         "properties": {
-          "resolution": {
-            "type": "string",
-            "description": "Video resolution. Valid values: 480p, 720p, 1080p",
-            "enum": [
-              "480p",
-              "720p",
-              "1080p"
-            ],
-            "title": "Resolution",
-            "default": "1080p"
-          },
-          "image_url": {
-            "title": "Image URL",
-            "min_height": 240,
-            "max_file_size": 26214400,
-            "min_width": 240,
-            "max_height": 8000,
-            "description": "URL of the image to use as the first frame. Must be publicly accessible or base64 data URI.",
-            "max_width": 8000,
+          "actual_prompt": {
+            "title": "Actual Prompt",
+            "description": "The actual prompt used if prompt rewriting was enabled",
             "examples": [
-              "https://storage.googleapis.com/falserverless/model_tests/wan/dragon-warrior.jpg"
+              "The white dragon warrior stands still in a grand cathedral-like structure, its glowing golden eyes fixed forward. The camera slowly moves closer, focusing on the warrior's armored chest and face. It then begins to circle around the warrior, capturing the intricate details of the white scale armor with gold accents. The warrior maintains a strong, determined posture. Ambient sounds and soft choral tones fill the background, enhancing the majestic atmosphere. The camera continues its slow circular motion, emphasizing the warrior's heroic presence before ending with a close-up of the face."
             ],
-            "type": "string"
-          },
-          "audio_url": {
-            "description": "\nURL of the audio to use as the background music. Must be publicly accessible.\nLimit handling: If the audio duration exceeds the duration value (5 or 10 seconds),\nthe audio is truncated to the first 5 or 10 seconds, and the rest is discarded. If\nthe audio is shorter than the video, the remaining part of the video will be silent.\nFor example, if the audio is 3 seconds long and the video duration is 5 seconds, the\nfirst 3 seconds of the output video will have sound, and the last 2 seconds will be silent.\n- Format: WAV, MP3.\n- Duration: 3 to 30 s.\n- File size: Up to 15 MB.\n",
-            "anyOf": [
-              {
-                "type": "string",
-                "ui": {
-                  "field": "audio"
-                }
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Audio Url"
-          },
-          "enable_safety_checker": {
-            "type": "boolean",
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "title": "Enable Safety Checker",
-            "examples": [
-              true
-            ],
-            "default": true
-          },
-          "enable_prompt_expansion": {
-            "type": "boolean",
-            "description": "Whether to enable prompt rewriting using LLM.",
-            "title": "Enable Prompt Expansion",
-            "default": true
-          },
-          "duration": {
-            "type": "string",
-            "description": "Duration of the generated video in seconds. Choose between 5 or 10 seconds.",
-            "enum": [
-              "5",
-              "10"
-            ],
-            "title": "Duration",
-            "examples": [
-              "5",
-              "10"
-            ],
-            "default": "5"
-          },
-          "negative_prompt": {
-            "description": "Negative prompt to describe content to avoid. Max 500 characters.",
             "anyOf": [
               {
                 "type": "string"
@@ -162,14 +211,57 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Negative Prompt",
+            ]
+          },
+          "video": {
+            "description": "The generated video file",
+            "$ref": "#/components/schemas/VideoFile",
             "examples": [
-              "low resolution, error, worst quality, low quality, defects"
+              {
+                "content_type": "video/mp4",
+                "url": "https://storage.googleapis.com/falserverless/example_outputs/wan-25-i2v-output.mp4"
+              }
             ]
           },
           "seed": {
-            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "title": "Seed",
+            "description": "The seed used for generation",
+            "type": "integer",
+            "examples": [
+              175932751
+            ]
+          }
+        },
+        "title": "VideoOutput",
+        "x-fal-order-properties": [
+          "video",
+          "seed",
+          "actual_prompt"
+        ],
+        "description": "Base output for video generation",
+        "type": "object",
+        "required": [
+          "video",
+          "seed"
+        ]
+      },
+      "VideoFile": {
+        "properties": {
+          "fps": {
+            "title": "Fps",
+            "description": "The FPS of the video",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "width": {
+            "title": "Width",
+            "description": "The width of the video",
             "anyOf": [
               {
                 "type": "integer"
@@ -177,44 +269,29 @@
               {
                 "type": "null"
               }
+            ]
+          },
+          "file_size": {
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
             ],
-            "title": "Seed"
-          },
-          "prompt": {
-            "type": "string",
-            "minLength": 1,
-            "description": "The text prompt describing the desired video motion. Max 1500 characters.",
-            "title": "Prompt",
-            "examples": [
-              "The white dragon warrior stands still, eyes full of determination and strength. The camera slowly moves closer or circles around the warrior, highlighting the powerful presence and heroic spirit of the character."
-            ]
-          }
-        },
-        "required": [
-          "prompt",
-          "image_url"
-        ],
-        "title": "ImageToVideoInput"
-      },
-      "Wan25PreviewImageToVideoOutput": {
-        "type": "object",
-        "x-fal-order-properties": [
-          "video",
-          "seed",
-          "actual_prompt"
-        ],
-        "description": "Base output for video generation",
-        "properties": {
-          "seed": {
-            "type": "integer",
-            "description": "The seed used for generation",
-            "title": "Seed",
-            "examples": [
-              175932751
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
             ]
           },
-          "actual_prompt": {
-            "description": "The actual prompt used if prompt rewriting was enabled",
+          "content_type": {
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
             "anyOf": [
               {
                 "type": "string"
@@ -222,31 +299,66 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Actual Prompt",
-            "examples": [
-              "The white dragon warrior stands still in a grand cathedral-like structure, its glowing golden eyes fixed forward. The camera slowly moves closer, focusing on the warrior's armored chest and face. It then begins to circle around the warrior, capturing the intricate details of the white scale armor with gold accents. The warrior maintains a strong, determined posture. Ambient sounds and soft choral tones fill the background, enhancing the majestic atmosphere. The camera continues its slow circular motion, emphasizing the warrior's heroic presence before ending with a close-up of the face."
             ]
           },
-          "video": {
-            "description": "The generated video file",
-            "examples": [
+          "duration": {
+            "title": "Duration",
+            "description": "The duration of the video",
+            "anyOf": [
               {
-                "url": "https://storage.googleapis.com/falserverless/example_outputs/wan-25-i2v-output.mp4",
-                "content_type": "video/mp4"
+                "type": "number"
+              },
+              {
+                "type": "null"
               }
+            ]
+          },
+          "num_frames": {
+            "title": "Num Frames",
+            "description": "The number of frames in the video",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
             ],
-            "$ref": "#/components/schemas/VideoFile"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "height": {
+            "title": "Height",
+            "description": "The height of the video",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
           }
         },
-        "required": [
-          "video",
-          "seed"
-        ],
-        "title": "VideoOutput"
-      },
-      "VideoFile": {
-        "type": "object",
+        "title": "VideoFile",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -258,122 +370,10 @@
           "duration",
           "num_frames"
         ],
-        "properties": {
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
-          },
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size",
-            "examples": [
-              4404019
-            ]
-          },
-          "fps": {
-            "description": "The FPS of the video",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fps"
-          },
-          "height": {
-            "description": "The height of the video",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Height"
-          },
-          "content_type": {
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ]
-          },
-          "width": {
-            "description": "The width of the video",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Width"
-          },
-          "num_frames": {
-            "description": "The number of frames in the video",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Num Frames"
-          },
-          "duration": {
-            "description": "The duration of the video",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Duration"
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
-          }
-        },
+        "type": "object",
         "required": [
           "url"
-        ],
-        "title": "VideoFile"
+        ]
       }
     }
   },

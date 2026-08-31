@@ -74,28 +74,23 @@
         "properties": {
           "resolution": {
             "description": "Video resolution - 480p for faster generation, 720p for balance, 1080p for higher quality",
-            "default": "1080p",
             "enum": [
               "480p",
               "720p",
               "1080p"
             ],
             "type": "string",
-            "title": "Resolution"
+            "title": "Resolution",
+            "default": "1080p"
           },
-          "aspect_ratio": {
-            "description": "The aspect ratio of the generated video",
-            "default": "16:9",
-            "enum": [
-              "21:9",
-              "16:9",
-              "4:3",
-              "1:1",
-              "3:4",
-              "9:16"
+          "enable_safety_checker": {
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "type": "boolean",
+            "examples": [
+              true
             ],
-            "type": "string",
-            "title": "Aspect Ratio"
+            "title": "Enable Safety Checker",
+            "default": true
           },
           "seed": {
             "description": "Random seed to control video generation. Use -1 for random.",
@@ -109,23 +104,42 @@
             ],
             "title": "Seed"
           },
-          "prompt": {
-            "description": "The text prompt used to generate the video",
-            "examples": [
-              "Inside a quiet dojo, a martial artist moves with precision and grace. The performance highlights the beauty and discipline inherent in the ancient practice. Each form unfolds clearly, a testament to dedication and skill."
+          "num_frames": {
+            "description": "The number of frames to generate. If provided, will override duration.",
+            "anyOf": [
+              {
+                "minimum": 29,
+                "maximum": 289,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Num Frames"
+          },
+          "aspect_ratio": {
+            "description": "The aspect ratio of the generated video",
+            "enum": [
+              "21:9",
+              "16:9",
+              "4:3",
+              "1:1",
+              "3:4",
+              "9:16"
             ],
             "type": "string",
-            "title": "Prompt"
+            "title": "Aspect Ratio",
+            "default": "16:9"
           },
           "camera_fixed": {
             "description": "Whether to fix the camera position",
-            "default": false,
             "type": "boolean",
-            "title": "Camera Fixed"
+            "title": "Camera Fixed",
+            "default": false
           },
           "duration": {
             "description": "Duration of the video in seconds",
-            "default": "5",
             "enum": [
               "2",
               "3",
@@ -140,35 +154,19 @@
               "12"
             ],
             "type": "string",
-            "title": "Duration"
+            "title": "Duration",
+            "default": "5"
           },
-          "num_frames": {
-            "description": "The number of frames to generate. If provided, will override duration.",
-            "anyOf": [
-              {
-                "maximum": 289,
-                "type": "integer",
-                "minimum": 29
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Num Frames"
-          },
-          "enable_safety_checker": {
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
+          "prompt": {
+            "description": "The text prompt used to generate the video",
+            "type": "string",
             "examples": [
-              true
+              "Inside a quiet dojo, a martial artist moves with precision and grace. The performance highlights the beauty and discipline inherent in the ancient practice. Each form unfolds clearly, a testament to dedication and skill."
             ],
-            "default": true,
-            "type": "boolean",
-            "title": "Enable Safety Checker"
+            "title": "Prompt"
           }
         },
-        "required": [
-          "prompt"
-        ],
+        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "aspect_ratio",
@@ -179,47 +177,61 @@
           "enable_safety_checker",
           "num_frames"
         ],
-        "type": "object",
-        "title": "SeedanceProFastTextToVideoInput"
+        "title": "SeedanceProFastTextToVideoInput",
+        "required": [
+          "prompt"
+        ]
       },
       "BytedanceSeedanceV1ProFastTextToVideoOutput": {
         "properties": {
           "video": {
-            "$ref": "#/components/schemas/File",
             "description": "Generated video file",
             "examples": [
               {
                 "url": "https://storage.googleapis.com/falserverless/example_inputs/seedance_fast_t2v_output.mp4"
               }
-            ]
+            ],
+            "$ref": "#/components/schemas/File"
           },
           "seed": {
             "description": "Seed used for generation",
+            "type": "integer",
             "examples": [
               42
             ],
-            "type": "integer",
             "title": "Seed"
           }
         },
-        "required": [
-          "video",
-          "seed"
-        ],
+        "type": "object",
         "x-fal-order-properties": [
           "video",
           "seed"
         ],
-        "type": "object",
-        "title": "SeedanceFastT2VVideoOutput"
+        "title": "SeedanceFastT2VVideoOutput",
+        "required": [
+          "video",
+          "seed"
+        ]
       },
       "File": {
         "properties": {
+          "content_type": {
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type"
+          },
           "file_size": {
             "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
             "anyOf": [
               {
                 "type": "integer"
@@ -228,13 +240,13 @@
                 "type": "null"
               }
             ],
+            "examples": [
+              4404019
+            ],
             "title": "File Size"
           },
           "file_name": {
             "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
             "anyOf": [
               {
                 "type": "string"
@@ -242,6 +254,9 @@
               {
                 "type": "null"
               }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
             ],
             "title": "File Name"
           },
@@ -249,34 +264,19 @@
             "description": "The URL where the file can be downloaded from.",
             "type": "string",
             "title": "Url"
-          },
-          "content_type": {
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type"
           }
         },
-        "required": [
-          "url"
-        ],
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "type": "object",
-        "title": "File"
+        "title": "File",
+        "required": [
+          "url"
+        ]
       }
     }
   },

@@ -71,6 +71,7 @@
         ]
       },
       "Veo31Input": {
+        "title": "Veo31TextToVideoInput",
         "type": "object",
         "x-fal-order-properties": [
           "prompt",
@@ -84,20 +85,29 @@
           "safety_tolerance"
         ],
         "properties": {
-          "duration": {
-            "type": "string",
-            "default": "8s",
-            "enum": [
-              "4s",
-              "6s",
-              "8s"
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "Two person street interview in New York City.\nSample Dialogue:\nHost: \"Did you hear the news?\"\nPerson: \"Yes! Veo 3.1 is now available on fal. If you want to see it, go check their website.\""
             ],
-            "title": "Duration",
-            "description": "The duration of the generated video."
+            "type": "string",
+            "description": "The text prompt describing the video you want to generate",
+            "maxLength": 20000
+          },
+          "resolution": {
+            "title": "Resolution",
+            "type": "string",
+            "description": "The resolution of the generated video.",
+            "default": "720p",
+            "enum": [
+              "720p",
+              "1080p",
+              "4k"
+            ]
           },
           "safety_tolerance": {
+            "title": "Safety Tolerance",
             "type": "string",
-            "default": "4",
             "enum": [
               "1",
               "2",
@@ -106,28 +116,25 @@
               "5",
               "6"
             ],
-            "title": "Safety Tolerance",
-            "description": "The safety tolerance level for content moderation. 1 is the most strict (blocks most content), 6 is the least strict."
+            "description": "The safety tolerance level for content moderation. 1 is the most strict (blocks most content), 6 is the least strict.",
+            "default": "4"
           },
-          "resolution": {
+          "auto_fix": {
+            "title": "Auto Fix",
+            "type": "boolean",
+            "description": "Whether to automatically attempt to fix prompts that fail content policy or other validation checks by rewriting them.",
+            "default": true
+          },
+          "duration": {
+            "title": "Duration",
             "type": "string",
-            "default": "720p",
+            "description": "The duration of the generated video.",
+            "default": "8s",
             "enum": [
-              "720p",
-              "1080p",
-              "4k"
-            ],
-            "title": "Resolution",
-            "description": "The resolution of the generated video."
-          },
-          "prompt": {
-            "type": "string",
-            "maxLength": 20000,
-            "examples": [
-              "Two person street interview in New York City.\nSample Dialogue:\nHost: \"Did you hear the news?\"\nPerson: \"Yes! Veo 3.1 is now available on fal. If you want to see it, go check their website.\""
-            ],
-            "title": "Prompt",
-            "description": "The text prompt describing the video you want to generate"
+              "4s",
+              "6s",
+              "8s"
+            ]
           },
           "negative_prompt": {
             "anyOf": [
@@ -138,8 +145,18 @@
                 "type": "null"
               }
             ],
-            "title": "Negative Prompt",
-            "description": "A negative prompt to guide the video generation."
+            "description": "A negative prompt to guide the video generation.",
+            "title": "Negative Prompt"
+          },
+          "aspect_ratio": {
+            "title": "Aspect Ratio",
+            "type": "string",
+            "description": "Aspect ratio of the generated video",
+            "default": "16:9",
+            "enum": [
+              "16:9",
+              "9:16"
+            ]
           },
           "seed": {
             "anyOf": [
@@ -150,59 +167,43 @@
                 "type": "null"
               }
             ],
-            "title": "Seed",
-            "description": "The seed for the random number generator."
+            "description": "The seed for the random number generator.",
+            "title": "Seed"
           },
           "generate_audio": {
-            "type": "boolean",
-            "default": true,
             "title": "Generate Audio",
-            "description": "Whether to generate audio for the video."
-          },
-          "aspect_ratio": {
-            "type": "string",
-            "default": "16:9",
-            "enum": [
-              "16:9",
-              "9:16"
-            ],
-            "title": "Aspect Ratio",
-            "description": "Aspect ratio of the generated video"
-          },
-          "auto_fix": {
             "type": "boolean",
-            "default": true,
-            "title": "Auto Fix",
-            "description": "Whether to automatically attempt to fix prompts that fail content policy or other validation checks by rewriting them."
+            "description": "Whether to generate audio for the video.",
+            "default": true
           }
         },
         "required": [
           "prompt"
-        ],
-        "title": "Veo31TextToVideoInput"
+        ]
       },
       "Veo31Output": {
+        "title": "Veo31TextToVideoOutput",
         "type": "object",
         "x-fal-order-properties": [
           "video"
         ],
         "properties": {
           "video": {
-            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v3b.fal.media/files/b/kangaroo/oUCiZjQwEy6bIQdPUSLDF_output.mp4"
               }
             ],
+            "$ref": "#/components/schemas/File",
             "description": "The generated video."
           }
         },
         "required": [
           "video"
-        ],
-        "title": "Veo31TextToVideoOutput"
+        ]
       },
       "File": {
+        "title": "File",
         "type": "object",
         "x-fal-order-properties": [
           "url",
@@ -226,26 +227,6 @@
             "title": "Content Type",
             "description": "The mime type of the file."
           },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
           "file_size": {
             "anyOf": [
               {
@@ -260,12 +241,31 @@
             ],
             "title": "File Size",
             "description": "The size of the file in bytes."
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
           }
         },
         "required": [
           "url"
-        ],
-        "title": "File"
+        ]
       }
     }
   },

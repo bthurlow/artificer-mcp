@@ -71,6 +71,7 @@
         ]
       },
       "Veo31ReferenceToVideoInput": {
+        "title": "Veo31ReferenceToVideoInput",
         "type": "object",
         "x-fal-order-properties": [
           "prompt",
@@ -83,16 +84,29 @@
           "image_urls"
         ],
         "properties": {
-          "duration": {
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "A chimpanzee wearing overalls frolics in the grassy field, gently playing with the butterflies. In the background, a circus tent and carousel beckon."
+            ],
             "type": "string",
-            "const": "8s",
-            "default": "8s",
-            "title": "Duration",
-            "description": "The duration of the generated video."
+            "description": "The text prompt describing the video you want to generate",
+            "maxLength": 20000
+          },
+          "resolution": {
+            "title": "Resolution",
+            "type": "string",
+            "description": "The resolution of the generated video.",
+            "default": "720p",
+            "enum": [
+              "720p",
+              "1080p",
+              "4k"
+            ]
           },
           "safety_tolerance": {
+            "title": "Safety Tolerance",
             "type": "string",
-            "default": "4",
             "enum": [
               "1",
               "2",
@@ -101,32 +115,34 @@
               "5",
               "6"
             ],
-            "title": "Safety Tolerance",
-            "description": "The safety tolerance level for content moderation. 1 is the most strict (blocks most content), 6 is the least strict."
+            "description": "The safety tolerance level for content moderation. 1 is the most strict (blocks most content), 6 is the least strict.",
+            "default": "4"
           },
-          "resolution": {
+          "auto_fix": {
+            "title": "Auto Fix",
+            "type": "boolean",
+            "description": "Whether to automatically attempt to fix prompts that fail content policy or other validation checks by rewriting them.",
+            "default": false
+          },
+          "duration": {
+            "title": "Duration",
+            "const": "8s",
             "type": "string",
-            "default": "720p",
+            "description": "The duration of the generated video.",
+            "default": "8s"
+          },
+          "aspect_ratio": {
+            "title": "Aspect Ratio",
+            "type": "string",
+            "description": "The aspect ratio of the generated video.",
+            "default": "16:9",
             "enum": [
-              "720p",
-              "1080p",
-              "4k"
-            ],
-            "title": "Resolution",
-            "description": "The resolution of the generated video."
-          },
-          "prompt": {
-            "type": "string",
-            "maxLength": 20000,
-            "examples": [
-              "A chimpanzee wearing overalls frolics in the grassy field, gently playing with the butterflies. In the background, a circus tent and carousel beckon."
-            ],
-            "title": "Prompt",
-            "description": "The text prompt describing the video you want to generate"
+              "16:9",
+              "9:16"
+            ]
           },
           "image_urls": {
-            "type": "array",
-            "description": "URLs of the reference images to use for consistent subject appearance",
+            "title": "Image Urls",
             "examples": [
               [
                 "https://storage.googleapis.com/falserverless/example_inputs/veo31-r2v-input-1.png",
@@ -134,62 +150,47 @@
                 "https://storage.googleapis.com/falserverless/example_inputs/veo31-r2v-input-3.png"
               ]
             ],
-            "title": "Image Urls",
             "items": {
               "type": "string"
-            }
+            },
+            "type": "array",
+            "description": "URLs of the reference images to use for consistent subject appearance"
           },
           "generate_audio": {
-            "type": "boolean",
-            "default": true,
             "title": "Generate Audio",
-            "description": "Whether to generate audio for the video."
-          },
-          "aspect_ratio": {
-            "type": "string",
-            "default": "16:9",
-            "enum": [
-              "16:9",
-              "9:16"
-            ],
-            "title": "Aspect Ratio",
-            "description": "The aspect ratio of the generated video."
-          },
-          "auto_fix": {
             "type": "boolean",
-            "default": false,
-            "title": "Auto Fix",
-            "description": "Whether to automatically attempt to fix prompts that fail content policy or other validation checks by rewriting them."
+            "description": "Whether to generate audio for the video.",
+            "default": true
           }
         },
         "required": [
           "prompt",
           "image_urls"
-        ],
-        "title": "Veo31ReferenceToVideoInput"
+        ]
       },
       "Veo31ReferenceToVideoOutput": {
+        "title": "Veo31ReferenceToVideoOutput",
         "type": "object",
         "x-fal-order-properties": [
           "video"
         ],
         "properties": {
           "video": {
-            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://storage.googleapis.com/falserverless/example_outputs/veo31-r2v-output.mp4"
               }
             ],
+            "$ref": "#/components/schemas/File",
             "description": "The generated video."
           }
         },
         "required": [
           "video"
-        ],
-        "title": "Veo31ReferenceToVideoOutput"
+        ]
       },
       "File": {
+        "title": "File",
         "type": "object",
         "x-fal-order-properties": [
           "url",
@@ -213,26 +214,6 @@
             "title": "Content Type",
             "description": "The mime type of the file."
           },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
           "file_size": {
             "anyOf": [
               {
@@ -247,12 +228,31 @@
             ],
             "title": "File Size",
             "description": "The size of the file in bytes."
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
           }
         },
         "required": [
           "url"
-        ],
-        "title": "File"
+        ]
       }
     }
   },

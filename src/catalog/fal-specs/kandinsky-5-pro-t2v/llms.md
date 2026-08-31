@@ -93,7 +93,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _optional_):
   The generated video file.
-  - Examples: {"content_type":"application/octet-stream","file_size":14530500,"file_name":"output.mp4","url":"https://v3b.fal.media/files/b/0a87754e/o5FWdz83KTXzq0FB7aG5Q_output.mp4"}
+  - Examples: {"file_name":"output.mp4","content_type":"application/octet-stream","file_size":14530500,"url":"https://v3b.fal.media/files/b/0a87754e/o5FWdz83KTXzq0FB7aG5Q_output.mp4"}
 
 - **`seed`** (`integer`, _required_):
   The seed used for generation.
@@ -105,9 +105,9 @@ The API returns the following output format:
 ```json
 {
   "video": {
+    "file_name": "output.mp4",
     "content_type": "application/octet-stream",
     "file_size": 14530500,
-    "file_name": "output.mp4",
     "url": "https://v3b.fal.media/files/b/0a87754e/o5FWdz83KTXzq0FB7aG5Q_output.mp4"
   }
 }

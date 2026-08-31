@@ -40,7 +40,6 @@ The API accepts the following input parameters:
 
 - **`end_image_url`** (`string`, _optional_):
   URL of the end frame image (optional).
-  - Examples: "https://v3b.fal.media/files/b/0a8d0248/S415GcxackjjLKom6f3jq_VTImWrNO.png"
 
 - **`duration`** (`DurationEnum`, _optional_):
   Video duration in seconds (3-15s). Default value: `"5"`
@@ -78,7 +77,6 @@ The API accepts the following input parameters:
 {
   "prompt": "The character walks forward slowly, with the camera following from behind.",
   "image_url": "https://v3b.fal.media/files/b/0a8cfd5a/8ABMp4n9rh3kfD2Rq8fHd_start_frame.png",
-  "end_image_url": "https://v3b.fal.media/files/b/0a8d0248/S415GcxackjjLKom6f3jq_VTImWrNO.png",
   "duration": "10",
   "multi_prompt": null,
   "shot_type": "customize"
@@ -92,7 +90,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video.
-  - Examples: {"content_type":"video/mp4","file_size":12037975,"file_name":"output.mp4","url":"https://v3b.fal.media/files/b/0a8d0278/pgIO9yOXTFCTetKBsqDwX_output.mp4"}
+  - Examples: {"file_name":"output.mp4","url":"https://v3b.fal.media/files/b/0a8d0278/pgIO9yOXTFCTetKBsqDwX_output.mp4","content_type":"video/mp4","file_size":12037975}
 
 
 
@@ -101,10 +99,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "video/mp4",
-    "file_size": 12037975,
     "file_name": "output.mp4",
-    "url": "https://v3b.fal.media/files/b/0a8d0278/pgIO9yOXTFCTetKBsqDwX_output.mp4"
+    "url": "https://v3b.fal.media/files/b/0a8d0278/pgIO9yOXTFCTetKBsqDwX_output.mp4",
+    "content_type": "video/mp4",
+    "file_size": 12037975
   }
 }
 ```

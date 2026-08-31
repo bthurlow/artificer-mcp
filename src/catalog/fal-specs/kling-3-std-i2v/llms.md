@@ -119,7 +119,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"content_type":"video/mp4","file_size":3149129,"file_name":"out.mp4","url":"https://storage.googleapis.com/falserverless/example_outputs/kling-v3/standard-i2v/out.mp4"}
+  - Examples: {"file_name":"out.mp4","url":"https://storage.googleapis.com/falserverless/example_outputs/kling-v3/standard-i2v/out.mp4","content_type":"video/mp4","file_size":3149129}
 
 
 
@@ -128,10 +128,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "video/mp4",
-    "file_size": 3149129,
     "file_name": "out.mp4",
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/kling-v3/standard-i2v/out.mp4"
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/kling-v3/standard-i2v/out.mp4",
+    "content_type": "video/mp4",
+    "file_size": 3149129
   }
 }
 ```

@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.8** per output audio minute. The audio will be **rounded up** to the closest minute. For instance, a generation with 30 seconds output will be billed as 1 minute.
+Your request will cost **$0.6** per output audio minute. The audio will be **rounded up** to the closest minute. For instance, a generation with 30 seconds output will be billed as 1 minute.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -79,7 +79,7 @@ The API returns the following output format:
 
 - **`audio`** (`File`, _required_):
   The generated music audio file in MP3 format
-  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/elevenlabs/music_generated.mp3","file_name":"music_generated.mp3","content_type":"audio/mpeg"}
+  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/elevenlabs/music_generated.mp3","content_type":"audio/mpeg","file_name":"music_generated.mp3"}
 
 
 
@@ -89,8 +89,8 @@ The API returns the following output format:
 {
   "audio": {
     "url": "https://storage.googleapis.com/falserverless/example_outputs/elevenlabs/music_generated.mp3",
-    "file_name": "music_generated.mp3",
-    "content_type": "audio/mpeg"
+    "content_type": "audio/mpeg",
+    "file_name": "music_generated.mp3"
   }
 }
 ```

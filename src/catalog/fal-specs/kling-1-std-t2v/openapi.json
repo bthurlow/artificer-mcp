@@ -71,57 +71,41 @@
         ]
       },
       "KlingVideoV1StandardTextToVideoInput": {
-        "type": "object",
-        "title": "V1TextToVideoRequest",
-        "x-fal-order-properties": [
-          "prompt",
-          "duration",
-          "aspect_ratio",
-          "negative_prompt",
-          "cfg_scale",
-          "camera_control",
-          "advanced_camera_control"
-        ],
         "required": [
           "prompt"
         ],
         "properties": {
           "cfg_scale": {
             "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
+            "default": 0.5,
+            "maximum": 1,
             "type": "number",
             "title": "Cfg Scale",
-            "maximum": 1,
-            "minimum": 0,
-            "default": 0.5
+            "minimum": 0
+          },
+          "negative_prompt": {
+            "maxLength": 2500,
+            "default": "blur, distort, and low quality",
+            "type": "string",
+            "title": "Negative Prompt"
           },
           "camera_control": {
             "description": "Camera control parameters",
-            "title": "Camera Control",
             "anyOf": [
               {
-                "type": "string",
                 "enum": [
                   "down_back",
                   "forward_up",
                   "right_turn_forward",
                   "left_turn_forward"
-                ]
+                ],
+                "type": "string"
               },
               {
                 "type": "null"
               }
-            ]
-          },
-          "aspect_ratio": {
-            "description": "The aspect ratio of the generated video frame",
-            "type": "string",
-            "title": "Aspect Ratio",
-            "enum": [
-              "16:9",
-              "9:16",
-              "1:1"
             ],
-            "default": "16:9"
+            "title": "Camera Control"
           },
           "advanced_camera_control": {
             "description": "Advanced Camera control parameters",
@@ -134,60 +118,70 @@
               }
             ]
           },
+          "aspect_ratio": {
+            "description": "The aspect ratio of the generated video frame",
+            "default": "16:9",
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1"
+            ],
+            "type": "string",
+            "title": "Aspect Ratio"
+          },
+          "prompt": {
+            "maxLength": 2500,
+            "examples": [
+              "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage. She wears a black leather jacket, a long red dress, and black boots, and carries a black purse."
+            ],
+            "type": "string",
+            "title": "Prompt"
+          },
           "duration": {
             "description": "The duration of the generated video in seconds",
-            "type": "string",
-            "title": "Duration",
+            "default": "5",
             "enum": [
               "5",
               "10"
             ],
-            "default": "5"
-          },
-          "prompt": {
             "type": "string",
-            "examples": [
-              "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage. She wears a black leather jacket, a long red dress, and black boots, and carries a black purse."
-            ],
-            "title": "Prompt",
-            "maxLength": 2500
-          },
-          "negative_prompt": {
-            "type": "string",
-            "title": "Negative Prompt",
-            "default": "blur, distort, and low quality",
-            "maxLength": 2500
+            "title": "Duration"
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "prompt",
+          "duration",
+          "aspect_ratio",
+          "negative_prompt",
+          "cfg_scale",
+          "camera_control",
+          "advanced_camera_control"
+        ],
+        "title": "V1TextToVideoRequest",
+        "type": "object"
       },
       "KlingVideoV1StandardTextToVideoOutput": {
-        "type": "object",
-        "title": "T2VOutput",
-        "x-fal-order-properties": [
-          "video"
-        ],
         "required": [
           "video"
         ],
         "properties": {
           "video": {
             "description": "The generated video",
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v2.fal.media/files/fb33a862b94d4d7195e610e4cbc5d392_output.mp4"
               }
-            ],
-            "$ref": "#/components/schemas/File"
+            ]
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "title": "T2VOutput",
+        "type": "object"
       },
       "CameraControl": {
-        "type": "object",
-        "title": "CameraControl",
-        "x-fal-order-properties": [
-          "movement_type",
-          "movement_value"
-        ],
         "required": [
           "movement_type",
           "movement_value"
@@ -195,18 +189,16 @@
         "properties": {
           "movement_value": {
             "description": "The value of the camera movement",
-            "type": "integer",
-            "title": "Movement Value",
-            "maximum": 10,
             "examples": [
               10
             ],
+            "maximum": 10,
+            "type": "integer",
+            "title": "Movement Value",
             "minimum": -10
           },
           "movement_type": {
             "description": "The type of camera movement",
-            "type": "string",
-            "title": "Movement Type",
             "examples": [
               "horizontal"
             ],
@@ -217,29 +209,28 @@
               "tilt",
               "roll",
               "zoom"
-            ]
+            ],
+            "type": "string",
+            "title": "Movement Type"
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "movement_type",
+          "movement_value"
+        ],
+        "title": "CameraControl",
+        "type": "object"
       },
       "File": {
-        "type": "object",
-        "title": "File",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
         "required": [
           "url"
         ],
         "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
-              "image/png"
+              "z9RV14K95DvU.png"
             ],
-            "title": "Content Type",
             "anyOf": [
               {
                 "type": "string"
@@ -247,14 +238,34 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "File Name"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
           },
           "file_size": {
             "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ],
-            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -262,29 +273,18 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
             ],
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
+            "title": "File Size"
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "title": "File",
+        "type": "object"
       }
     }
   },

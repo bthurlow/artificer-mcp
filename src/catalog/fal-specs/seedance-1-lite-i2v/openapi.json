@@ -74,41 +74,31 @@
         "properties": {
           "resolution": {
             "description": "Video resolution - 480p for faster generation, 720p for higher quality",
-            "default": "720p",
             "enum": [
               "480p",
               "720p",
               "1080p"
             ],
             "type": "string",
-            "title": "Resolution"
+            "title": "Resolution",
+            "default": "720p"
           },
-          "aspect_ratio": {
-            "description": "The aspect ratio of the generated video",
-            "default": "auto",
-            "enum": [
-              "21:9",
-              "16:9",
-              "4:3",
-              "1:1",
-              "3:4",
-              "9:16",
-              "auto"
-            ],
+          "image_url": {
+            "description": "The URL of the image used to generate video",
             "type": "string",
-            "title": "Aspect Ratio"
-          },
-          "end_image_url": {
-            "description": "(Deprecated) The URL of the image the video ends with. This endpoint has been redirected to seedance 1.0 pro fast, which does not support an end frame; this field is accepted for backwards compatibility and ignored.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+            "examples": [
+              "https://fal.media/files/koala/f_xmiodPjhiKjdBkFmTu1.png"
             ],
-            "title": "End Image Url"
+            "title": "Image Url"
+          },
+          "enable_safety_checker": {
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "type": "boolean",
+            "examples": [
+              true
+            ],
+            "title": "Enable Safety Checker",
+            "default": true
           },
           "seed": {
             "description": "Random seed to control video generation. Use -1 for random.",
@@ -122,31 +112,55 @@
             ],
             "title": "Seed"
           },
-          "image_url": {
-            "description": "The URL of the image used to generate video",
-            "examples": [
-              "https://fal.media/files/koala/f_xmiodPjhiKjdBkFmTu1.png"
+          "num_frames": {
+            "description": "The number of frames to generate. If provided, will override duration.",
+            "anyOf": [
+              {
+                "minimum": 29,
+                "maximum": 289,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
             ],
-            "type": "string",
-            "title": "Image Url"
+            "title": "Num Frames"
           },
-          "prompt": {
-            "description": "The text prompt used to generate the video",
-            "examples": [
-              "A little dog is running in the sunshine. The camera follows the dog as it plays in a garden."
+          "aspect_ratio": {
+            "description": "The aspect ratio of the generated video",
+            "enum": [
+              "21:9",
+              "16:9",
+              "4:3",
+              "1:1",
+              "3:4",
+              "9:16",
+              "auto"
             ],
             "type": "string",
-            "title": "Prompt"
+            "title": "Aspect Ratio",
+            "default": "auto"
+          },
+          "end_image_url": {
+            "description": "(Deprecated) The URL of the image the video ends with. This endpoint has been redirected to seedance 1.0 pro fast, which does not support an end frame; this field is accepted for backwards compatibility and ignored.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Image Url"
           },
           "camera_fixed": {
             "description": "Whether to fix the camera position",
-            "default": false,
             "type": "boolean",
-            "title": "Camera Fixed"
+            "title": "Camera Fixed",
+            "default": false
           },
           "duration": {
             "description": "Duration of the video in seconds",
-            "default": "5",
             "enum": [
               "2",
               "3",
@@ -161,36 +175,19 @@
               "12"
             ],
             "type": "string",
-            "title": "Duration"
+            "title": "Duration",
+            "default": "5"
           },
-          "num_frames": {
-            "description": "The number of frames to generate. If provided, will override duration.",
-            "anyOf": [
-              {
-                "maximum": 289,
-                "type": "integer",
-                "minimum": 29
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Num Frames"
-          },
-          "enable_safety_checker": {
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
+          "prompt": {
+            "description": "The text prompt used to generate the video",
+            "type": "string",
             "examples": [
-              true
+              "A little dog is running in the sunshine. The camera follows the dog as it plays in a garden."
             ],
-            "default": true,
-            "type": "boolean",
-            "title": "Enable Safety Checker"
+            "title": "Prompt"
           }
         },
-        "required": [
-          "prompt",
-          "image_url"
-        ],
+        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "aspect_ratio",
@@ -203,47 +200,62 @@
           "image_url",
           "end_image_url"
         ],
-        "type": "object",
-        "title": "SeedanceImageToVideoInput"
+        "title": "SeedanceImageToVideoInput",
+        "required": [
+          "prompt",
+          "image_url"
+        ]
       },
       "BytedanceSeedanceV1LiteImageToVideoOutput": {
         "properties": {
           "video": {
-            "$ref": "#/components/schemas/File",
             "description": "Generated video file",
             "examples": [
               {
                 "url": "https://v3.fal.media/files/penguin/qmLZSvOIzTKs6bDFXiEtH_video.mp4"
               }
-            ]
+            ],
+            "$ref": "#/components/schemas/File"
           },
           "seed": {
             "description": "Seed used for generation",
+            "type": "integer",
             "examples": [
               42
             ],
-            "type": "integer",
             "title": "Seed"
           }
         },
-        "required": [
-          "video",
-          "seed"
-        ],
+        "type": "object",
         "x-fal-order-properties": [
           "video",
           "seed"
         ],
-        "type": "object",
-        "title": "SeedanceVideoOutput"
+        "title": "SeedanceVideoOutput",
+        "required": [
+          "video",
+          "seed"
+        ]
       },
       "File": {
         "properties": {
+          "content_type": {
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type"
+          },
           "file_size": {
             "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
             "anyOf": [
               {
                 "type": "integer"
@@ -252,13 +264,13 @@
                 "type": "null"
               }
             ],
+            "examples": [
+              4404019
+            ],
             "title": "File Size"
           },
           "file_name": {
             "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
             "anyOf": [
               {
                 "type": "string"
@@ -266,6 +278,9 @@
               {
                 "type": "null"
               }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
             ],
             "title": "File Name"
           },
@@ -273,34 +288,19 @@
             "description": "The URL where the file can be downloaded from.",
             "type": "string",
             "title": "Url"
-          },
-          "content_type": {
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type"
           }
         },
-        "required": [
-          "url"
-        ],
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "type": "object",
-        "title": "File"
+        "title": "File",
+        "required": [
+          "url"
+        ]
       }
     }
   },

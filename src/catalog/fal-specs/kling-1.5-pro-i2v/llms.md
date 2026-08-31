@@ -92,12 +92,12 @@ The API accepts the following input parameters:
       "mask_url": "https://storage.googleapis.com/falserverless/kling/new_dynamic_mask.png",
       "trajectories": [
         {
-          "y": 219,
-          "x": 279
+          "x": 279,
+          "y": 219
         },
         {
-          "y": 65,
-          "x": 417
+          "x": 417,
+          "y": 65
         }
       ]
     }

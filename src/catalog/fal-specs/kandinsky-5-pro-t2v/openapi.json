@@ -71,10 +71,6 @@
         ]
       },
       "Kandinsky5ProTextToVideoInput": {
-        "type": "object",
-        "required": [
-          "prompt"
-        ],
         "x-fal-order-properties": [
           "prompt",
           "resolution",
@@ -86,12 +82,53 @@
         ],
         "title": "KandinskyT2VRequest",
         "properties": {
-          "seed": {
-            "description": "The seed to use for generation. If not provided, a random seed will be used.",
+          "prompt": {
+            "description": "The text prompt to guide video generation.",
+            "title": "Prompt",
             "examples": [
-              42
+              "A medium shot establishes a modern, minimalist office setting: clean lines, muted grey walls, and polished wood surfaces. The focus shifts to a close-up on a woman in sharp, navy blue business attire. Her crisp white blouse contrasts with the deep blue of her tailored suit jacket. The subtle texture of the fabric is visible—a fine weave with a slight sheen. Her expression is serious, yet engaging, as she speaks to someone unseen just beyond the frame. Close-up on her eyes, showing the intensity of her gaze and the fine lines around them that hint at experience and focus. Her lips are slightly parted, as if mid-sentence. The light catches the subtle highlights in her auburn hair, meticulously styled. Note the slight catch of light on the silver band of her watch. High resolution 4k"
             ],
-            "title": "Seed",
+            "type": "string"
+          },
+          "aspect_ratio": {
+            "type": "string",
+            "description": "Aspect ratio of the generated video. One of (3:2, 1:1, 2:3).",
+            "default": "3:2",
+            "title": "Aspect Ratio",
+            "enum": [
+              "3:2",
+              "1:1",
+              "2:3"
+            ]
+          },
+          "resolution": {
+            "type": "string",
+            "description": "Video resolution: 512p or 1024p.",
+            "default": "512P",
+            "title": "Resolution",
+            "enum": [
+              "512P",
+              "1024P"
+            ]
+          },
+          "acceleration": {
+            "anyOf": [
+              {
+                "enum": [
+                  "none",
+                  "regular"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Acceleration level for faster generation.",
+            "default": "regular",
+            "title": "Acceleration"
+          },
+          "seed": {
             "anyOf": [
               {
                 "type": "integer"
@@ -99,100 +136,45 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "resolution": {
-            "description": "Video resolution: 512p or 1024p.",
-            "type": "string",
-            "title": "Resolution",
-            "enum": [
-              "512P",
-              "1024P"
             ],
-            "default": "512P"
-          },
-          "aspect_ratio": {
-            "description": "Aspect ratio of the generated video. One of (3:2, 1:1, 2:3).",
-            "type": "string",
-            "title": "Aspect Ratio",
-            "enum": [
-              "3:2",
-              "1:1",
-              "2:3"
+            "description": "The seed to use for generation. If not provided, a random seed will be used.",
+            "examples": [
+              42
             ],
-            "default": "3:2"
+            "title": "Seed"
+          },
+          "num_inference_steps": {
+            "maximum": 50,
+            "description": "The number of inference steps.",
+            "default": 28,
+            "title": "Num Inference Steps",
+            "minimum": 1,
+            "type": "integer"
           },
           "duration": {
+            "const": "5s",
             "description": "The length of the video to generate.",
-            "type": "string",
+            "default": "5s",
             "title": "Duration",
             "examples": [
               "5s"
             ],
-            "default": "5s",
-            "const": "5s"
-          },
-          "acceleration": {
-            "description": "Acceleration level for faster generation.",
-            "title": "Acceleration",
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "none",
-                  "regular"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "regular"
-          },
-          "prompt": {
-            "description": "The text prompt to guide video generation.",
-            "examples": [
-              "A medium shot establishes a modern, minimalist office setting: clean lines, muted grey walls, and polished wood surfaces. The focus shifts to a close-up on a woman in sharp, navy blue business attire. Her crisp white blouse contrasts with the deep blue of her tailored suit jacket. The subtle texture of the fabric is visible—a fine weave with a slight sheen. Her expression is serious, yet engaging, as she speaks to someone unseen just beyond the frame. Close-up on her eyes, showing the intensity of her gaze and the fine lines around them that hint at experience and focus. Her lips are slightly parted, as if mid-sentence. The light catches the subtle highlights in her auburn hair, meticulously styled. Note the slight catch of light on the silver band of her watch. High resolution 4k"
-            ],
-            "title": "Prompt",
             "type": "string"
-          },
-          "num_inference_steps": {
-            "type": "integer",
-            "description": "The number of inference steps.",
-            "title": "Num Inference Steps",
-            "maximum": 50,
-            "default": 28,
-            "minimum": 1
           }
-        }
+        },
+        "required": [
+          "prompt"
+        ],
+        "type": "object"
       },
       "Kandinsky5ProTextToVideoOutput": {
-        "type": "object",
-        "required": [
-          "seed"
-        ],
         "x-fal-order-properties": [
           "video",
           "seed"
         ],
         "title": "KandinskyT2VResponse",
         "properties": {
-          "seed": {
-            "description": "The seed used for generation.",
-            "type": "integer",
-            "title": "Seed"
-          },
           "video": {
-            "description": "The generated video file.",
-            "examples": [
-              {
-                "content_type": "application/octet-stream",
-                "file_size": 14530500,
-                "file_name": "output.mp4",
-                "url": "https://v3b.fal.media/files/b/0a87754e/o5FWdz83KTXzq0FB7aG5Q_output.mp4"
-              }
-            ],
             "anyOf": [
               {
                 "$ref": "#/components/schemas/File"
@@ -200,15 +182,29 @@
               {
                 "type": "null"
               }
+            ],
+            "description": "The generated video file.",
+            "examples": [
+              {
+                "file_name": "output.mp4",
+                "content_type": "application/octet-stream",
+                "file_size": 14530500,
+                "url": "https://v3b.fal.media/files/b/0a87754e/o5FWdz83KTXzq0FB7aG5Q_output.mp4"
+              }
             ]
+          },
+          "seed": {
+            "description": "The seed used for generation.",
+            "title": "Seed",
+            "type": "integer"
           }
-        }
+        },
+        "required": [
+          "seed"
+        ],
+        "type": "object"
       },
       "File": {
-        "type": "object",
-        "required": [
-          "url"
-        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -217,12 +213,7 @@
         ],
         "title": "File",
         "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type",
+          "file_name": {
             "anyOf": [
               {
                 "type": "string"
@@ -230,14 +221,29 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type"
           },
           "file_size": {
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
-            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -245,29 +251,23 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
             ],
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size"
           },
           "url": {
             "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
+            "title": "Url",
+            "type": "string"
           }
-        }
+        },
+        "required": [
+          "url"
+        ],
+        "type": "object"
       }
     }
   },

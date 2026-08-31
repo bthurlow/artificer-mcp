@@ -41,7 +41,6 @@ The API accepts the following input parameters:
 
 - **`start_image_url`** (`string`, _optional_):
   Image to use as the first frame of the video.
-  - Examples: "https://v3b.fal.media/files/b/0a8d1b63/EcYdmuNB1LTFjtn3Ryjrf_6ROoQV4u.png"
 
 - **`end_image_url`** (`string`, _optional_):
   Image to use as the last frame of the video.
@@ -49,12 +48,10 @@ The API accepts the following input parameters:
 - **`image_urls`** (`list<string>`, _optional_):
   Reference images for style/appearance. Reference in prompt as @Image1, @Image2, etc. Maximum 4 total (elements + reference images) when using video.
   - Array of string
-  - Examples: ["https://v3b.fal.media/files/b/0a8d1b63/EcYdmuNB1LTFjtn3Ryjrf_6ROoQV4u.png"]
 
 - **`elements`** (`list<KlingV3ComboElementInput>`, _optional_):
   Elements (characters/objects) to include. Reference in prompt as @Element1, @Element2.
   - Array of KlingV3ComboElementInput
-  - Examples: [{"reference_image_urls":["https://v3b.fal.media/files/b/0a8d1b5e/Gl1qUHJeTG63vAGtQmGM-_S3kPW32v.png"],"frontal_image_url":"https://v3b.fal.media/files/b/0a8d1b64/-ddhNV-utVpHj_1uGfuY-_i6viYke3.png"},{"reference_image_urls":["https://v3b.fal.media/files/b/0a8d1b60/Dt21s8LElZdSccIGDC7ec_Nuaraa9P.png"],"frontal_image_url":"https://v3b.fal.media/files/b/0a8d1b66/cWe8LC84I_OF6ee9ZtnsO_nY9Hw5UB.png"}]
 
 - **`generate_audio`** (`boolean`, _optional_):
   Whether to generate native audio for the video.
@@ -90,23 +87,8 @@ The API accepts the following input parameters:
 {
   "prompt": "@Element1 and @Element2 is having dinner at this table on @Image1",
   "multi_prompt": null,
-  "start_image_url": "https://v3b.fal.media/files/b/0a8d1b63/EcYdmuNB1LTFjtn3Ryjrf_6ROoQV4u.png",
-  "image_urls": [
-    "https://v3b.fal.media/files/b/0a8d1b63/EcYdmuNB1LTFjtn3Ryjrf_6ROoQV4u.png"
-  ],
   "elements": [
-    {
-      "reference_image_urls": [
-        "https://v3b.fal.media/files/b/0a8d1b5e/Gl1qUHJeTG63vAGtQmGM-_S3kPW32v.png"
-      ],
-      "frontal_image_url": "https://v3b.fal.media/files/b/0a8d1b64/-ddhNV-utVpHj_1uGfuY-_i6viYke3.png"
-    },
-    {
-      "reference_image_urls": [
-        "https://v3b.fal.media/files/b/0a8d1b60/Dt21s8LElZdSccIGDC7ec_Nuaraa9P.png"
-      ],
-      "frontal_image_url": "https://v3b.fal.media/files/b/0a8d1b66/cWe8LC84I_OF6ee9ZtnsO_nY9Hw5UB.png"
-    }
+    {}
   ],
   "duration": "8",
   "shot_type": "customize",
@@ -121,7 +103,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video.
-  - Examples: {"content_type":"video/mp4","file_size":3192162,"file_name":"output.mp4","url":"https://v3b.fal.media/files/b/0a8d200d/ejCxI5DalzOPlP4yf6uP3_output.mp4"}
+  - Examples: {"file_name":"output.mp4","url":"https://v3b.fal.media/files/b/0a8d200d/ejCxI5DalzOPlP4yf6uP3_output.mp4","content_type":"video/mp4","file_size":3192162}
 
 
 
@@ -130,10 +112,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "video/mp4",
-    "file_size": 3192162,
     "file_name": "output.mp4",
-    "url": "https://v3b.fal.media/files/b/0a8d200d/ejCxI5DalzOPlP4yf6uP3_output.mp4"
+    "url": "https://v3b.fal.media/files/b/0a8d200d/ejCxI5DalzOPlP4yf6uP3_output.mp4",
+    "content_type": "video/mp4",
+    "file_size": 3192162
   }
 }
 ```

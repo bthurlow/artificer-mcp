@@ -71,8 +71,67 @@
         ]
       },
       "KlingVideoV25TurboProImageToVideoInput": {
-        "type": "object",
-        "title": "ImageToVideoV25ProRequest",
+        "required": [
+          "prompt",
+          "image_url"
+        ],
+        "properties": {
+          "cfg_scale": {
+            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
+            "default": 0.5,
+            "maximum": 1,
+            "type": "number",
+            "title": "Cfg Scale",
+            "minimum": 0
+          },
+          "negative_prompt": {
+            "maxLength": 2500,
+            "default": "blur, distort, and low quality",
+            "type": "string",
+            "title": "Negative Prompt"
+          },
+          "image_url": {
+            "description": "URL of the image to be used for the video",
+            "examples": [
+              "https://v3.fal.media/files/panda/HnY2yf-BbzlrVQxR-qP6m_9912d0932988453aadf3912fc1901f52.jpg"
+            ],
+            "type": "string",
+            "title": "Image Url"
+          },
+          "tail_image_url": {
+            "description": "URL of the image to be used for the end of the video",
+            "anyOf": [
+              {
+                "ui": {
+                  "field": "image"
+                },
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tail Image Url"
+          },
+          "prompt": {
+            "maxLength": 2500,
+            "examples": [
+              "A stark starting line divides two powerful cars, engines revving for the challenge ahead. They surge forward in the heat of competition, a blur of speed and chrome. The finish line looms as they vie for victory."
+            ],
+            "type": "string",
+            "title": "Prompt"
+          },
+          "duration": {
+            "description": "The duration of the generated video in seconds",
+            "default": "5",
+            "enum": [
+              "5",
+              "10"
+            ],
+            "type": "string",
+            "title": "Duration"
+          }
+        },
         "x-fal-order-properties": [
           "prompt",
           "image_url",
@@ -81,108 +140,40 @@
           "cfg_scale",
           "tail_image_url"
         ],
-        "required": [
-          "prompt",
-          "image_url"
-        ],
-        "properties": {
-          "cfg_scale": {
-            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
-            "type": "number",
-            "title": "Cfg Scale",
-            "maximum": 1,
-            "minimum": 0,
-            "default": 0.5
-          },
-          "tail_image_url": {
-            "description": "URL of the image to be used for the end of the video",
-            "title": "Tail Image Url",
-            "anyOf": [
-              {
-                "type": "string",
-                "ui": {
-                  "field": "image"
-                }
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "duration": {
-            "description": "The duration of the generated video in seconds",
-            "type": "string",
-            "title": "Duration",
-            "enum": [
-              "5",
-              "10"
-            ],
-            "default": "5"
-          },
-          "image_url": {
-            "description": "URL of the image to be used for the video",
-            "type": "string",
-            "title": "Image Url",
-            "examples": [
-              "https://v3.fal.media/files/panda/HnY2yf-BbzlrVQxR-qP6m_9912d0932988453aadf3912fc1901f52.jpg"
-            ]
-          },
-          "prompt": {
-            "type": "string",
-            "examples": [
-              "A stark starting line divides two powerful cars, engines revving for the challenge ahead. They surge forward in the heat of competition, a blur of speed and chrome. The finish line looms as they vie for victory."
-            ],
-            "title": "Prompt",
-            "maxLength": 2500
-          },
-          "negative_prompt": {
-            "type": "string",
-            "title": "Negative Prompt",
-            "default": "blur, distort, and low quality",
-            "maxLength": 2500
-          }
-        }
+        "title": "ImageToVideoV25ProRequest",
+        "type": "object"
       },
       "KlingVideoV25TurboProImageToVideoOutput": {
-        "type": "object",
-        "title": "ImageToVideoV25ProOutput",
-        "x-fal-order-properties": [
-          "video"
-        ],
         "required": [
           "video"
         ],
         "properties": {
           "video": {
             "description": "The generated video",
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://storage.googleapis.com/falserverless/model_tests/kling/kling-v2.5-turbo-pro-image-to-video-output.mp4"
               }
-            ],
-            "$ref": "#/components/schemas/File"
+            ]
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "title": "ImageToVideoV25ProOutput",
+        "type": "object"
       },
       "File": {
-        "type": "object",
-        "title": "File",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
         "required": [
           "url"
         ],
         "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
-              "image/png"
+              "z9RV14K95DvU.png"
             ],
-            "title": "Content Type",
             "anyOf": [
               {
                 "type": "string"
@@ -190,14 +181,34 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "File Name"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
           },
           "file_size": {
             "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ],
-            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -205,29 +216,18 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
             ],
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
+            "title": "File Size"
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "title": "File",
+        "type": "object"
       }
     }
   },
