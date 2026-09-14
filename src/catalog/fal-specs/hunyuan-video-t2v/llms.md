@@ -54,7 +54,7 @@ The API accepts the following input parameters:
 - **`num_frames`** (`NumberofFramesEnum`, _optional_):
   The number of frames to generate. Default value: `"129"`
   - Default: `129`
-  - Options: `"129"`, `"85"`
+  - Options: `129`, `85`
 
 - **`enable_safety_checker`** (`boolean`, _optional_):
   If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.

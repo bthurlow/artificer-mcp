@@ -72,8 +72,38 @@
       },
       "ViduQ3ImageToVideoTurboInput": {
         "properties": {
+          "duration": {
+            "title": "Duration",
+            "maximum": 16,
+            "default": 5,
+            "type": "integer",
+            "minimum": 1,
+            "description": "Duration of the video in seconds (1-16 for Q3 models)"
+          },
+          "resolution": {
+            "default": "720p",
+            "title": "Resolution",
+            "type": "string",
+            "enum": [
+              "360p",
+              "540p",
+              "720p",
+              "1080p"
+            ],
+            "description": "Output video resolution. Note: 360p is not available when end_image_url is provided."
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string",
+            "default": "",
+            "maxLength": 2000,
+            "examples": [
+              "The astronaut waved and the camera moved up."
+            ],
+            "description": "Text prompt for video generation, max 2000 characters"
+          },
           "end_image_url": {
-            "description": "URL of the image to use as the ending frame. When provided, generates a transition video between start and end frames.",
+            "title": "End Image Url",
             "anyOf": [
               {
                 "type": "string"
@@ -82,54 +112,24 @@
                 "type": "null"
               }
             ],
-            "title": "End Image Url"
-          },
-          "image_url": {
-            "examples": [
-              "https://prod-ss-images.s3.cn-northwest-1.amazonaws.com.cn/vidu-maas/template/image2video.png"
-            ],
-            "description": "URL or base64 image to use as the starting frame",
-            "title": "Image Url",
-            "type": "string"
-          },
-          "prompt": {
-            "default": "",
-            "description": "Text prompt for video generation, max 2000 characters",
-            "title": "Prompt",
-            "type": "string",
-            "maxLength": 2000,
-            "examples": [
-              "The astronaut waved and the camera moved up."
-            ]
-          },
-          "resolution": {
-            "default": "720p",
-            "description": "Output video resolution. Note: 360p is not available when end_image_url is provided.",
-            "title": "Resolution",
-            "type": "string",
-            "enum": [
-              "360p",
-              "540p",
-              "720p",
-              "1080p"
-            ]
+            "description": "URL of the image to use as the ending frame. When provided, generates a transition video between start and end frames."
           },
           "audio": {
             "default": true,
-            "description": "Whether to use direct audio-video generation. When true, outputs video with sound (including dialogue and sound effects).",
+            "type": "boolean",
             "title": "Audio",
-            "type": "boolean"
+            "description": "Whether to use direct audio-video generation. When true, outputs video with sound (including dialogue and sound effects)."
           },
-          "duration": {
-            "default": 5,
-            "description": "Duration of the video in seconds (1-16 for Q3 models)",
-            "title": "Duration",
-            "type": "integer",
-            "maximum": 16,
-            "minimum": 1
+          "image_url": {
+            "title": "Image Url",
+            "type": "string",
+            "examples": [
+              "https://prod-ss-images.s3.cn-northwest-1.amazonaws.com.cn/vidu-maas/template/image2video.png"
+            ],
+            "description": "URL or base64 image to use as the starting frame"
           },
           "seed": {
-            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "title": "Seed",
             "anyOf": [
               {
                 "type": "integer"
@@ -138,14 +138,9 @@
                 "type": "null"
               }
             ],
-            "title": "Seed"
+            "description": "Random seed for reproducibility. If None, a random seed is chosen."
           }
         },
-        "title": "Q3ImageToVideoRequest",
-        "required": [
-          "image_url"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "image_url",
@@ -154,71 +149,57 @@
           "seed",
           "resolution",
           "audio"
-        ]
+        ],
+        "required": [
+          "image_url"
+        ],
+        "type": "object",
+        "title": "Q3ImageToVideoRequest"
       },
       "ViduQ3ImageToVideoTurboOutput": {
         "properties": {
           "video": {
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v3b.fal.media/files/b/0a8c9189/n9z3uUDPqmU2msAtqr25-_output.mp4"
               }
             ],
-            "$ref": "#/components/schemas/File",
             "description": "The generated video from image using the Q3 model"
           }
         },
-        "title": "Q3ImageToVideoOutput",
+        "x-fal-order-properties": [
+          "video"
+        ],
         "required": [
           "video"
         ],
         "type": "object",
-        "x-fal-order-properties": [
-          "video"
-        ]
+        "title": "Q3ImageToVideoOutput"
       },
       "File": {
         "properties": {
           "url": {
-            "description": "The URL where the file can be downloaded from.",
             "title": "Url",
-            "type": "string"
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
           },
           "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name"
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type"
+            "description": "The name of the file. It will be auto-generated if not provided."
           },
           "file_size": {
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -227,20 +208,39 @@
                 "type": "null"
               }
             ],
-            "title": "File Size"
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes."
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
           }
         },
-        "title": "File",
-        "required": [
-          "url"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
-        ]
+        ],
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "title": "File"
       }
     }
   },

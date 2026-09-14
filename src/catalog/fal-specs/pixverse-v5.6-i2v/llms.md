@@ -99,7 +99,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"content_type":"video/mp4","file_size":6420765,"url":"https://storage.googleapis.com/falserverless/model_tests/video_models/output-3.mp4","file_name":"output.mp4"}
+  - Examples: {"content_type":"video/mp4","file_name":"output.mp4","url":"https://storage.googleapis.com/falserverless/model_tests/video_models/output-3.mp4","file_size":6420765}
 
 
 
@@ -109,9 +109,9 @@ The API returns the following output format:
 {
   "video": {
     "content_type": "video/mp4",
-    "file_size": 6420765,
+    "file_name": "output.mp4",
     "url": "https://storage.googleapis.com/falserverless/model_tests/video_models/output-3.mp4",
-    "file_name": "output.mp4"
+    "file_size": 6420765
   }
 }
 ```

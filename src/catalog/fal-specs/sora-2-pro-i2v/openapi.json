@@ -71,11 +71,6 @@
         ]
       },
       "Sora2ImageToVideoProInput": {
-        "type": "object",
-        "required": [
-          "prompt",
-          "image_url"
-        ],
         "x-fal-order-properties": [
           "prompt",
           "resolution",
@@ -86,62 +81,27 @@
           "character_ids",
           "image_url"
         ],
+        "required": [
+          "prompt",
+          "image_url"
+        ],
         "title": "ProImageToVideoInput",
         "properties": {
-          "aspect_ratio": {
-            "type": "string",
-            "description": "The aspect ratio of the generated video",
-            "title": "Aspect Ratio",
+          "resolution": {
+            "description": "The resolution of the generated video",
+            "default": "auto",
+            "title": "Resolution",
             "enum": [
               "auto",
-              "9:16",
-              "16:9"
+              "720p",
+              "1080p",
+              "true_1080p"
             ],
-            "default": "auto"
-          },
-          "image_url": {
-            "type": "string",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/sora-2-i2v-input.png"
-            ],
-            "title": "Image URL",
-            "description": "The URL of the image to use as the first frame"
-          },
-          "prompt": {
-            "type": "string",
-            "examples": [
-              "Front-facing 'invisible' action-cam on a skydiver in freefall above bright clouds; camera locked on his face. He speaks over the wind with clear lipsync: 'This is insanely fun! You've got to try it—book a tandem and go!' Natural wind roar, voice close-mic'd and slightly compressed so it's intelligible. Midday sun, goggles and jumpsuit flutter, altimeter visible, parachute rig on shoulders. Energetic but stable framing with subtle shake; brief horizon roll. End on first tug of canopy and wind noise dropping."
-            ],
-            "title": "Prompt",
-            "description": "The text prompt describing the video you want to generate",
-            "maxLength": 5000,
-            "minLength": 1
-          },
-          "character_ids": {
-            "description": "Up to two character IDs (from create-character) to use in the video. Refer to characters by name in the prompt. When set, only the OpenAI provider is used.",
-            "title": "Character IDs",
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "maxItems": 2
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "detect_and_block_ip": {
-            "type": "boolean",
-            "description": "If enabled, the prompt (and image for image-to-video) will be checked for known intellectual property references and the request will be blocked if any are detected.",
-            "title": "Detect And Block Ip",
-            "default": false
+            "type": "string"
           },
           "duration": {
-            "type": "integer",
             "description": "Duration of the generated video in seconds",
+            "default": 4,
             "title": "Duration",
             "enum": [
               4,
@@ -150,61 +110,81 @@
               16,
               20
             ],
-            "default": 4
+            "type": "integer"
+          },
+          "prompt": {
+            "description": "The text prompt describing the video you want to generate",
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Prompt",
+            "examples": [
+              "Front-facing 'invisible' action-cam on a skydiver in freefall above bright clouds; camera locked on his face. He speaks over the wind with clear lipsync: 'This is insanely fun! You've got to try it—book a tandem and go!' Natural wind roar, voice close-mic'd and slightly compressed so it's intelligible. Midday sun, goggles and jumpsuit flutter, altimeter visible, parachute rig on shoulders. Energetic but stable framing with subtle shake; brief horizon roll. End on first tug of canopy and wind noise dropping."
+            ],
+            "type": "string"
           },
           "delete_video": {
-            "type": "boolean",
             "description": "Whether to delete the video after generation for privacy reasons. If True, the video cannot be used for remixing and will be permanently deleted.",
+            "default": true,
             "title": "Delete Video",
-            "default": true
+            "type": "boolean"
           },
-          "resolution": {
-            "type": "string",
-            "description": "The resolution of the generated video",
-            "title": "Resolution",
-            "enum": [
-              "auto",
-              "720p",
-              "1080p",
-              "true_1080p"
-            ],
-            "default": "auto"
-          }
-        }
-      },
-      "Sora2ImageToVideoProOutput": {
-        "type": "object",
-        "required": [
-          "video",
-          "video_id"
-        ],
-        "x-fal-order-properties": [
-          "video",
-          "video_id",
-          "thumbnail",
-          "spritesheet"
-        ],
-        "title": "ProImageToVideoOutput",
-        "properties": {
-          "video_id": {
-            "type": "string",
+          "image_url": {
+            "description": "The URL of the image to use as the first frame",
+            "title": "Image URL",
             "examples": [
-              "video_123"
+              "https://storage.googleapis.com/falserverless/example_inputs/sora-2-i2v-input.png"
             ],
-            "title": "Video ID",
-            "description": "The ID of the generated video"
+            "type": "string"
           },
-          "thumbnail": {
-            "description": "Thumbnail image for the video",
+          "detect_and_block_ip": {
+            "description": "If enabled, the prompt (and image for image-to-video) will be checked for known intellectual property references and the request will be blocked if any are detected.",
+            "default": false,
+            "title": "Detect And Block Ip",
+            "type": "boolean"
+          },
+          "character_ids": {
+            "description": "Up to two character IDs (from create-character) to use in the video. Refer to characters by name in the prompt. When set, only the OpenAI provider is used.",
+            "title": "Character IDs",
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ImageFile"
+                "maxItems": 2,
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
             ]
           },
+          "aspect_ratio": {
+            "description": "The aspect ratio of the generated video",
+            "default": "auto",
+            "title": "Aspect Ratio",
+            "enum": [
+              "auto",
+              "9:16",
+              "16:9"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Sora2ImageToVideoProOutput": {
+        "x-fal-order-properties": [
+          "video",
+          "video_id",
+          "thumbnail",
+          "spritesheet"
+        ],
+        "required": [
+          "video",
+          "video_id"
+        ],
+        "title": "ProImageToVideoOutput",
+        "properties": {
           "spritesheet": {
             "description": "Spritesheet image for the video",
             "anyOf": [
@@ -217,22 +197,38 @@
             ]
           },
           "video": {
+            "description": "The generated video",
             "examples": [
               {
                 "content_type": "video/mp4",
                 "url": "https://storage.googleapis.com/falserverless/example_outputs/sora-2-pro-i2v-output.mp4"
               }
             ],
-            "description": "The generated video",
             "$ref": "#/components/schemas/VideoFile"
+          },
+          "video_id": {
+            "description": "The ID of the generated video",
+            "title": "Video ID",
+            "examples": [
+              "video_123"
+            ],
+            "type": "string"
+          },
+          "thumbnail": {
+            "description": "Thumbnail image for the video",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageFile"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
-        }
+        },
+        "type": "object"
       },
       "ImageFile": {
-        "type": "object",
-        "required": [
-          "url"
-        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -240,6 +236,9 @@
           "file_size",
           "width",
           "height"
+        ],
+        "required": [
+          "url"
         ],
         "title": "ImageFile",
         "properties": {
@@ -256,9 +255,6 @@
             ]
           },
           "content_type": {
-            "examples": [
-              "image/png"
-            ],
             "description": "The mime type of the file.",
             "title": "Content Type",
             "anyOf": [
@@ -268,42 +264,10 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "file_size": {
-            "examples": [
-              4404019
             ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "file_name": {
             "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+              "image/png"
             ]
-          },
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
           },
           "height": {
             "description": "The height of the image",
@@ -316,14 +280,46 @@
                 "type": "null"
               }
             ]
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
           }
-        }
+        },
+        "type": "object"
       },
       "VideoFile": {
-        "type": "object",
-        "required": [
-          "url"
-        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -335,20 +331,11 @@
           "duration",
           "num_frames"
         ],
+        "required": [
+          "url"
+        ],
         "title": "VideoFile",
         "properties": {
-          "fps": {
-            "description": "The FPS of the video",
-            "title": "Fps",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "width": {
             "description": "The width of the video",
             "title": "Width",
@@ -360,26 +347,6 @@
                 "type": "null"
               }
             ]
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
           },
           "duration": {
             "description": "The duration of the video",
@@ -393,22 +360,7 @@
               }
             ]
           },
-          "num_frames": {
-            "description": "The number of frames in the video",
-            "title": "Num Frames",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "content_type": {
-            "examples": [
-              "image/png"
-            ],
             "description": "The mime type of the file.",
             "title": "Content Type",
             "anyOf": [
@@ -418,14 +370,29 @@
               {
                 "type": "null"
               }
+            ],
+            "examples": [
+              "image/png"
             ]
           },
-          "file_size": {
-            "examples": [
-              4404019
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
             ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "num_frames": {
+            "description": "The number of frames in the video",
+            "title": "Num Frames",
             "anyOf": [
               {
                 "type": "integer"
@@ -446,8 +413,41 @@
                 "type": "null"
               }
             ]
+          },
+          "fps": {
+            "description": "The FPS of the video",
+            "title": "Fps",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
           }
-        }
+        },
+        "type": "object"
       }
     }
   },

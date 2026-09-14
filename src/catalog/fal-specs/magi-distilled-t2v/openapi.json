@@ -72,20 +72,33 @@
       },
       "MagiDistilledInput": {
         "title": "MagiTextToVideoRequest",
-        "type": "object",
-        "x-fal-order-properties": [
-          "prompt",
-          "num_frames",
-          "seed",
-          "resolution",
-          "num_inference_steps",
-          "enable_safety_checker",
-          "aspect_ratio"
+        "required": [
+          "prompt"
         ],
         "properties": {
+          "num_inference_steps": {
+            "title": "Num Inference Steps",
+            "default": 16,
+            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
+            "enum": [
+              4,
+              8,
+              16,
+              32
+            ],
+            "type": "integer"
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "examples": [
+              true
+            ],
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "default": true,
+            "type": "boolean"
+          },
           "aspect_ratio": {
             "title": "Aspect Ratio",
-            "type": "string",
             "default": "auto",
             "description": "Aspect ratio of the generated video. If 'auto', the aspect ratio will be determined automatically based on the input image.",
             "enum": [
@@ -93,49 +106,23 @@
               "16:9",
               "9:16",
               "1:1"
-            ]
-          },
-          "resolution": {
-            "title": "Resolution",
-            "type": "string",
-            "default": "720p",
-            "description": "Resolution of the generated video (480p or 720p). 480p is 0.5 billing units, and 720p is 1 billing unit.",
-            "enum": [
-              "480p",
-              "720p"
-            ]
-          },
-          "enable_safety_checker": {
-            "title": "Enable Safety Checker",
-            "type": "boolean",
-            "examples": [
-              true
             ],
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "default": true
+            "type": "string"
           },
           "num_frames": {
             "title": "Num Frames",
             "anyOf": [
               {
-                "type": "integer",
                 "minimum": 96,
-                "maximum": 192
+                "maximum": 192,
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Number of frames to generate. Must be between 96 and 192 (inclusive). Each additional 24 frames beyond 96 incurs an additional billing unit.",
-            "default": 96
-          },
-          "prompt": {
-            "title": "Prompt",
-            "type": "string",
-            "examples": [
-              "Close-up shot: the old sea captain stares intently, pipe in mouth, wisps of smoke curling around his weathered face. The camera begins a slow clockwise orbit, pulling back. Finally, the camera rises high above, revealing the entire wooden sailing ship cutting through the waves, the captain unmoved, gazing toward the distant horizon."
-            ],
-            "description": "The text prompt to guide video generation."
+            "default": 96,
+            "description": "Number of frames to generate. Must be between 96 and 192 (inclusive). Each additional 24 frames beyond 96 incurs an additional billing unit."
           },
           "seed": {
             "title": "Seed",
@@ -149,36 +136,43 @@
             ],
             "description": "Random seed for reproducibility. If None, a random seed is chosen."
           },
-          "num_inference_steps": {
-            "title": "Num Inference Steps",
-            "type": "integer",
-            "default": 16,
-            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
+          "resolution": {
+            "title": "Resolution",
+            "default": "720p",
+            "description": "Resolution of the generated video (480p or 720p). 480p is 0.5 billing units, and 720p is 1 billing unit.",
             "enum": [
-              4,
-              8,
-              16,
-              32
-            ]
+              "480p",
+              "720p"
+            ],
+            "type": "string"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "Close-up shot: the old sea captain stares intently, pipe in mouth, wisps of smoke curling around his weathered face. The camera begins a slow clockwise orbit, pulling back. Finally, the camera rises high above, revealing the entire wooden sailing ship cutting through the waves, the captain unmoved, gazing toward the distant horizon."
+            ],
+            "description": "The text prompt to guide video generation.",
+            "type": "string"
           }
         },
-        "required": [
-          "prompt"
-        ]
+        "x-fal-order-properties": [
+          "prompt",
+          "num_frames",
+          "seed",
+          "resolution",
+          "num_inference_steps",
+          "enable_safety_checker",
+          "aspect_ratio"
+        ],
+        "type": "object"
       },
       "MagiDistilledOutput": {
         "title": "MagiResponse",
-        "type": "object",
-        "x-fal-order-properties": [
+        "required": [
           "video",
           "seed"
         ],
         "properties": {
-          "seed": {
-            "title": "Seed",
-            "type": "integer",
-            "description": "The seed used for generation."
-          },
           "video": {
             "$ref": "#/components/schemas/File",
             "examples": [
@@ -187,23 +181,40 @@
               }
             ],
             "description": "The generated video file."
+          },
+          "seed": {
+            "title": "Seed",
+            "description": "The seed used for generation.",
+            "type": "integer"
           }
         },
-        "required": [
+        "x-fal-order-properties": [
           "video",
           "seed"
-        ]
+        ],
+        "type": "object"
       },
       "File": {
         "title": "File",
-        "type": "object",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
+        "required": [
+          "url"
         ],
         "properties": {
+          "content_type": {
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
+          },
           "file_name": {
             "title": "File Name",
             "anyOf": [
@@ -218,11 +229,6 @@
               "z9RV14K95DvU.png"
             ],
             "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
           },
           "file_size": {
             "title": "File Size",
@@ -239,25 +245,19 @@
             ],
             "description": "The size of the file in bytes."
           },
-          "content_type": {
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file."
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
           }
         },
-        "required": [
-          "url"
-        ]
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object"
       }
     }
   },

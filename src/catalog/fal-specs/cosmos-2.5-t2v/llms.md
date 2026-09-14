@@ -99,7 +99,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video file.
-  - Examples: {"content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0a8fabc5/qAi19s0dSuQHDZ3O7D_HV_FkSwbls1.mp4"}
+  - Examples: {"url":"https://v3b.fal.media/files/b/0a8fabc5/qAi19s0dSuQHDZ3O7D_HV_FkSwbls1.mp4","content_type":"video/mp4"}
 
 - **`seed`** (`integer`, _required_):
   The random seed used for generation.
@@ -111,8 +111,8 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "video/mp4",
-    "url": "https://v3b.fal.media/files/b/0a8fabc5/qAi19s0dSuQHDZ3O7D_HV_FkSwbls1.mp4"
+    "url": "https://v3b.fal.media/files/b/0a8fabc5/qAi19s0dSuQHDZ3O7D_HV_FkSwbls1.mp4",
+    "content_type": "video/mp4"
   }
 }
 ```

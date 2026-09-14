@@ -73,53 +73,43 @@
       "ElevenlabsTtsElevenV3Input": {
         "properties": {
           "apply_text_normalization": {
-            "default": "auto",
-            "description": "This parameter controls text normalization with three modes: 'auto', 'on', and 'off'. When set to 'auto', the system will automatically decide whether to apply text normalization (e.g., spelling out numbers). With 'on', text normalization will always be applied, while with 'off', it will be skipped.",
-            "title": "Apply Text Normalization",
-            "type": "string",
             "enum": [
               "auto",
               "on",
               "off"
-            ]
+            ],
+            "description": "This parameter controls text normalization with three modes: 'auto', 'on', and 'off'. When set to 'auto', the system will automatically decide whether to apply text normalization (e.g., spelling out numbers). With 'on', text normalization will always be applied, while with 'off', it will be skipped.",
+            "default": "auto",
+            "type": "string",
+            "title": "Apply Text Normalization"
+          },
+          "timestamps": {
+            "description": "Whether to return timestamps for each word in the generated speech",
+            "default": false,
+            "type": "boolean",
+            "title": "Timestamps"
+          },
+          "stability": {
+            "title": "Stability",
+            "description": "Voice stability (0-1)",
+            "maximum": 1,
+            "default": 0.5,
+            "type": "number",
+            "minimum": 0
           },
           "text": {
+            "title": "Text",
+            "minLength": 1,
+            "description": "The text to convert to speech",
             "examples": [
               "Hello! This is a test of the text to speech system, powered by ElevenLabs. How does it sound?"
             ],
-            "title": "Text",
-            "minLength": 1,
             "type": "string",
-            "maxLength": 5000,
-            "description": "The text to convert to speech"
-          },
-          "language_code": {
-            "description": "Language code (ISO 639-1) used to enforce a language for the model.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Language Code"
-          },
-          "timestamps": {
-            "default": false,
-            "description": "Whether to return timestamps for each word in the generated speech",
-            "title": "Timestamps",
-            "type": "boolean"
-          },
-          "stability": {
-            "default": 0.5,
-            "title": "Stability",
-            "description": "Voice stability (0-1)",
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1
+            "maxLength": 5000
           },
           "voice": {
+            "description": "The voice to use for speech generation",
+            "default": "Rachel",
             "examples": [
               "Aria",
               "Roger",
@@ -142,18 +132,22 @@
               "Lily",
               "Bill"
             ],
-            "description": "The voice to use for speech generation",
-            "default": "Rachel",
             "type": "string",
             "title": "Voice"
+          },
+          "language_code": {
+            "title": "Language Code",
+            "description": "Language code (ISO 639-1) used to enforce a language for the model.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
-        "title": "TextToSpeechRequestV3",
-        "required": [
-          "text"
-        ],
-        "type": "object",
-        "description": "Request model for eleven_v3 which doesn't support previous_text/next_text",
         "x-fal-order-properties": [
           "text",
           "voice",
@@ -161,55 +155,57 @@
           "timestamps",
           "language_code",
           "apply_text_normalization"
-        ]
+        ],
+        "description": "Request model for eleven_v3 which doesn't support previous_text/next_text",
+        "required": [
+          "text"
+        ],
+        "type": "object",
+        "title": "TextToSpeechRequestV3"
       },
       "ElevenlabsTtsElevenV3Output": {
         "properties": {
+          "timestamps": {
+            "title": "Timestamps",
+            "description": "Timestamps for each word in the generated speech. Only returned if `timestamps` is set to True in the request.",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {}
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "audio": {
+            "description": "The generated audio file",
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v3.fal.media/files/zebra/zJL_oRY8h5RWwjoK1w7tx_output.mp3"
               }
-            ],
-            "description": "The generated audio file",
-            "$ref": "#/components/schemas/File"
-          },
-          "timestamps": {
-            "description": "Timestamps for each word in the generated speech. Only returned if `timestamps` is set to True in the request.",
-            "anyOf": [
-              {
-                "items": {},
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Timestamps"
+            ]
           }
         },
-        "title": "TTSOutput",
+        "x-fal-order-properties": [
+          "audio",
+          "timestamps"
+        ],
         "required": [
           "audio"
         ],
         "type": "object",
-        "x-fal-order-properties": [
-          "audio",
-          "timestamps"
-        ]
+        "title": "TTSOutput"
       },
       "File": {
         "properties": {
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
           "file_name": {
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -217,29 +213,19 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Name"
+            ]
           },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type"
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
           },
           "file_size": {
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ],
-            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -247,21 +233,35 @@
               {
                 "type": "null"
               }
+            ]
+          },
+          "content_type": {
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
             ],
-            "title": "File Size"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
-        "title": "File",
-        "required": [
-          "url"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
-        ]
+        ],
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "title": "File"
       }
     }
   },

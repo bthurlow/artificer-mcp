@@ -72,17 +72,45 @@
       },
       "ElevenlabsSoundEffectsV2Input": {
         "properties": {
+          "prompt_influence": {
+            "title": "Prompt Influence",
+            "description": "How closely to follow the prompt (0-1). Higher values mean less variation.",
+            "maximum": 1,
+            "default": 0.3,
+            "type": "number",
+            "minimum": 0
+          },
           "loop": {
-            "default": false,
             "description": "Whether to create a sound effect that loops smoothly.",
-            "title": "Loop",
-            "type": "boolean"
+            "default": false,
+            "type": "boolean",
+            "title": "Loop"
+          },
+          "duration_seconds": {
+            "title": "Duration Seconds",
+            "description": "Duration in seconds (0.5-22). If None, optimal duration will be determined from prompt.",
+            "anyOf": [
+              {
+                "maximum": 22,
+                "type": "number",
+                "minimum": 0.5
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text": {
+            "title": "Text",
+            "description": "The text describing the sound effect to generate",
+            "examples": [
+              "Spacious braam suitable for high-impact movie trailer moments",
+              "A gentle wind chime tinkling in a soft breeze"
+            ],
+            "type": "string",
+            "maxLength": 450
           },
           "output_format": {
-            "default": "mp3_44100_128",
-            "description": "Output format of the generated audio. Formatted as codec_sample_rate_bitrate.",
-            "title": "Output Format",
-            "type": "string",
             "enum": [
               "mp3_22050_32",
               "mp3_44100_32",
@@ -103,88 +131,56 @@
               "opus_48000_96",
               "opus_48000_128",
               "opus_48000_192"
-            ]
-          },
-          "prompt_influence": {
-            "default": 0.3,
-            "title": "Prompt Influence",
-            "description": "How closely to follow the prompt (0-1). Higher values mean less variation.",
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1
-          },
-          "duration_seconds": {
-            "description": "Duration in seconds (0.5-22). If None, optimal duration will be determined from prompt.",
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0.5,
-                "maximum": 22
-              },
-              {
-                "type": "null"
-              }
             ],
-            "title": "Duration Seconds"
-          },
-          "text": {
-            "examples": [
-              "Spacious braam suitable for high-impact movie trailer moments",
-              "A gentle wind chime tinkling in a soft breeze"
-            ],
-            "title": "Text",
-            "description": "The text describing the sound effect to generate",
+            "description": "Output format of the generated audio. Formatted as codec_sample_rate_bitrate.",
+            "default": "mp3_44100_128",
             "type": "string",
-            "maxLength": 450
+            "title": "Output Format"
           }
         },
-        "title": "SoundEffectRequestV2",
-        "required": [
-          "text"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "text",
           "duration_seconds",
           "prompt_influence",
           "output_format",
           "loop"
-        ]
+        ],
+        "required": [
+          "text"
+        ],
+        "type": "object",
+        "title": "SoundEffectRequestV2"
       },
       "ElevenlabsSoundEffectsV2Output": {
         "properties": {
           "audio": {
+            "description": "The generated sound effect audio file in MP3 format",
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v3.fal.media/files/lion/WgnO-jy6WduosuG_Ibobx_sound_effect.mp3"
               }
-            ],
-            "description": "The generated sound effect audio file in MP3 format",
-            "$ref": "#/components/schemas/File"
+            ]
           }
         },
-        "title": "SoundEffectOutput",
+        "x-fal-order-properties": [
+          "audio"
+        ],
+        "description": "Output format for generated sound effects",
         "required": [
           "audio"
         ],
         "type": "object",
-        "description": "Output format for generated sound effects",
-        "x-fal-order-properties": [
-          "audio"
-        ]
+        "title": "SoundEffectOutput"
       },
       "File": {
         "properties": {
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
           "file_name": {
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -192,29 +188,19 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Name"
+            ]
           },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type"
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
           },
           "file_size": {
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ],
-            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -222,21 +208,35 @@
               {
                 "type": "null"
               }
+            ]
+          },
+          "content_type": {
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
             ],
-            "title": "File Size"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
-        "title": "File",
-        "required": [
-          "url"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
-        ]
+        ],
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "title": "File"
       }
     }
   },

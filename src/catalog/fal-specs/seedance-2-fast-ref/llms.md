@@ -44,7 +44,7 @@ The API accepts the following input parameters:
   - Array of string
 
 - **`audio_urls`** (`list<string>`, _optional_):
-  Reference audio to guide video generation. Refer to them in the prompt as @Audio1, @Audio2, etc. Supported formats: MP3, WAV. Up to 3 files, combined duration must not exceed 15 seconds. Max 15 MB per file.If audio is provided, at least one reference image or video is required.
+  Reference audio to guide video generation. Refer to them in the prompt as @Audio1, @Audio2, etc. Supported formats: MP3, WAV. Up to 3 files, combined duration must not exceed 15 seconds. Max 15 MB per file. At least one reference image or video is required.
   - Array of string
 
 - **`resolution`** (`ResolutionEnum`, _optional_):
