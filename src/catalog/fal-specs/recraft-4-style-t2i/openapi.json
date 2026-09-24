@@ -1,0 +1,501 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for recraft/v4/style/text-to-image",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the recraft/v4/style/text-to-image queue.",
+    "x-fal-metadata": {
+      "endpointId": "recraft/v4/style/text-to-image",
+      "category": "text-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aa7e131/NMc_Xsqvh3urFzo6Z1qe1.jpg",
+      "playgroundUrl": "https://fal.ai/models/recraft/v4/style/text-to-image",
+      "documentationUrl": "https://fal.ai/models/recraft/v4/style/text-to-image/api",
+      "about": "Recraft V4 Style"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "V4StyleTextToImageInput": {
+        "properties": {
+          "prompt": {
+            "maxLength": 10000,
+            "minLength": 1,
+            "type": "string",
+            "examples": [
+              "Tilt-shift miniature effect on a real Portuguese fishing village at golden hour, colorful boats in the harbor appearing toy-like, selective focus band across the middle, saturated primary colors of blue red and yellow boats against white buildings, 90mm tilt-shift lens, the familiar made fantastical, Wes Anderson color sensibility"
+            ],
+            "title": "Prompt"
+          },
+          "style_id": {
+            "description": "The ID of an existing V4 custom style.",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid4"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Style ID"
+          },
+          "image_size": {
+            "default": "square_hd",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageSize"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9"
+                ]
+              }
+            ],
+            "examples": [
+              "landscape_16_9"
+            ],
+            "title": "Image Size"
+          },
+          "image_urls": {
+            "description": "The URLs of the style reference images. Supports PNG, JPG, and WEBP; provide between 1 and 10 images.",
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array",
+                "maxItems": 10
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image URLs"
+          },
+          "background_color": {
+            "description": "The preferable background color of the generated images.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RGBColor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "style_match": {
+            "description": "Override how closely the generation follows the custom style.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "precise",
+                  "flexible"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Style Match"
+          },
+          "colors": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/RGBColor"
+            },
+            "description": "An array of preferable colors",
+            "type": "array",
+            "title": "Colors"
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "type": "boolean",
+            "title": "Enable Safety Checker"
+          }
+        },
+        "x-fal-order-properties": [
+          "prompt",
+          "image_size",
+          "colors",
+          "background_color",
+          "enable_safety_checker",
+          "style_id",
+          "image_urls",
+          "style_match"
+        ],
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "title": "RecraftV4StyleTextToImageInput"
+      },
+      "V4StyleTextToImageOutput": {
+        "properties": {
+          "images": {
+            "items": {
+              "$ref": "#/components/schemas/File"
+            },
+            "type": "array",
+            "examples": [
+              [
+                {
+                  "file_size": 272628,
+                  "content_type": "image/webp",
+                  "file_name": "image.webp",
+                  "url": "https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/standard-output.webp"
+                }
+              ]
+            ],
+            "title": "Images"
+          },
+          "style_id": {
+            "description": "The custom style used or created for this generation.",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid4"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Style Id"
+          }
+        },
+        "x-fal-order-properties": [
+          "images",
+          "style_id"
+        ],
+        "type": "object",
+        "required": [
+          "images"
+        ],
+        "title": "RecraftV4StyleTextToImageOutput"
+      },
+      "ImageSize": {
+        "properties": {
+          "width": {
+            "default": 512,
+            "description": "The width of the generated image.",
+            "maximum": 14142,
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "title": "Width"
+          },
+          "height": {
+            "default": 512,
+            "description": "The height of the generated image.",
+            "maximum": 14142,
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "title": "Height"
+          }
+        },
+        "x-fal-order-properties": [
+          "width",
+          "height"
+        ],
+        "type": "object",
+        "title": "ImageSize"
+      },
+      "RGBColor": {
+        "properties": {
+          "r": {
+            "default": 0,
+            "description": "Red color value",
+            "minimum": 0,
+            "maximum": 255,
+            "type": "integer",
+            "title": "R"
+          },
+          "g": {
+            "default": 0,
+            "description": "Green color value",
+            "minimum": 0,
+            "maximum": 255,
+            "type": "integer",
+            "title": "G"
+          },
+          "b": {
+            "default": 0,
+            "description": "Blue color value",
+            "minimum": 0,
+            "maximum": 255,
+            "type": "integer",
+            "title": "B"
+          }
+        },
+        "x-fal-order-properties": [
+          "r",
+          "g",
+          "b"
+        ],
+        "type": "object",
+        "title": "RGBColor"
+      },
+      "File": {
+        "properties": {
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "title": "File Size"
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type"
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "File"
+      }
+    }
+  },
+  "paths": {
+    "/recraft/v4/style/text-to-image/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/recraft/v4/style/text-to-image/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/recraft/v4/style/text-to-image": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V4StyleTextToImageInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/recraft/v4/style/text-to-image/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V4StyleTextToImageOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

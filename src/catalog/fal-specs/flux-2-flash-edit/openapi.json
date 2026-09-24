@@ -1,0 +1,510 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/flux-2/flash/edit",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/flux-2/flash/edit queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/flux-2/flash/edit",
+      "category": "image-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a871484/fjLSktGKoWIGQWm-GRaUM_87cd94bbbff7400b830e73b8f6f075d4.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/flux-2/flash/edit",
+      "documentationUrl": "https://fal.ai/models/fal-ai/flux-2/flash/edit/api",
+      "about": "Flash Edit Image Inference"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "Flux2FlashEditInput": {
+        "title": "Flux2FlashEditImageInput",
+        "required": [
+          "prompt",
+          "image_urls"
+        ],
+        "properties": {
+          "prompt": {
+            "title": "Prompt",
+            "description": "The prompt to edit the image.",
+            "examples": [
+              "Remove the meat from the hamburger"
+            ],
+            "type": "string"
+          },
+          "output_format": {
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
+            ],
+            "title": "Output Format",
+            "default": "png",
+            "description": "The format of the generated image.",
+            "type": "string"
+          },
+          "num_images": {
+            "minimum": 1,
+            "maximum": 4,
+            "description": "The number of images to generate.",
+            "title": "Number of Images",
+            "type": "integer",
+            "default": 1
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "default": true,
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked, and images flagged as unsafe are returned as black images.",
+            "type": "boolean"
+          },
+          "seed": {
+            "title": "Seed",
+            "description": "The seed to use for the generation. If not provided, a random seed will be used.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "image_urls": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Image URLs",
+            "description": "The URLs of the images for editing. A maximum of 4 images are allowed, if more are provided, only the first 4 will be used.",
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/example_outputs/flux-2-flash-edit-input.png"
+              ]
+            ],
+            "type": "array"
+          },
+          "enable_prompt_expansion": {
+            "title": "Enable Prompt Expansion",
+            "default": false,
+            "description": "If set to true, the prompt will be expanded for better results.",
+            "type": "boolean"
+          },
+          "guidance_scale": {
+            "minimum": 0,
+            "maximum": 20,
+            "description": "Guidance Scale is a measure of how close you want the model to stick to your prompt when looking for a related image to show you.",
+            "title": "Guidance Scale",
+            "type": "number",
+            "default": 2.5
+          },
+          "image_size": {
+            "title": "Image Size",
+            "default": "square_hd",
+            "description": "The size of the image to generate. The width and height must be between 512 and 2048 pixels.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageSize"
+              },
+              {
+                "enum": [
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sync_mode": {
+            "title": "Sync Mode",
+            "default": false,
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "type": "boolean"
+          }
+        },
+        "type": "object",
+        "x-fal-order-properties": [
+          "prompt",
+          "guidance_scale",
+          "seed",
+          "image_size",
+          "num_images",
+          "enable_prompt_expansion",
+          "sync_mode",
+          "enable_safety_checker",
+          "output_format",
+          "image_urls"
+        ]
+      },
+      "Flux2FlashEditOutput": {
+        "required": [
+          "images",
+          "timings",
+          "seed",
+          "has_nsfw_concepts",
+          "prompt"
+        ],
+        "title": "Flux2FlashEditImageOutput",
+        "x-fal-order-properties": [
+          "images",
+          "timings",
+          "seed",
+          "has_nsfw_concepts",
+          "prompt"
+        ],
+        "type": "object",
+        "properties": {
+          "seed": {
+            "title": "Seed",
+            "type": "integer",
+            "description": "\n            Seed of the generated Image. It will be the same value of the one passed in the\n            input or the randomly generated that was used in case none was passed.\n        "
+          },
+          "images": {
+            "title": "Images",
+            "items": {
+              "$ref": "#/components/schemas/ImageFile"
+            },
+            "examples": [
+              [
+                {
+                  "url": "https://storage.googleapis.com/falserverless/example_outputs/flux-2-flash-edit.png"
+                }
+              ]
+            ],
+            "type": "array",
+            "description": "The edited images"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string",
+            "description": "The prompt used for generating the image."
+          },
+          "timings": {
+            "title": "Timings",
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "has_nsfw_concepts": {
+            "title": "Has Nsfw Concepts",
+            "items": {
+              "type": "boolean"
+            },
+            "type": "array",
+            "description": "Whether the generated images contain NSFW concepts."
+          }
+        }
+      },
+      "ImageSize": {
+        "properties": {
+          "width": {
+            "title": "Width",
+            "default": 512,
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 14142,
+            "description": "The width of the generated image."
+          },
+          "height": {
+            "title": "Height",
+            "default": 512,
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 14142,
+            "description": "The height of the generated image."
+          }
+        },
+        "title": "ImageSize",
+        "x-fal-order-properties": [
+          "width",
+          "height"
+        ],
+        "type": "object"
+      },
+      "ImageFile": {
+        "required": [
+          "url"
+        ],
+        "title": "ImageFile",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "type": "object",
+        "properties": {
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "description": "The width of the image"
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes."
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "The height of the image"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/flux-2/flash/edit/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/flux-2/flash/edit/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/flux-2/flash/edit": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Flux2FlashEditInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/flux-2/flash/edit/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Flux2FlashEditOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

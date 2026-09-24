@@ -170,7 +170,11 @@ Also unlocks the simpler cases — generic transcription for content moderation,
 
 ---
 
-## 5. fal image-to-image transport (`fal_edit_image`)
+## 5. fal image-to-image transport (`fal_edit_image`) — DONE 2026-09-24 (as `fal_generate_image`)
+
+**Shipped** as one transport, `fal_generate_image`, covering text-to-image and image-to-image (edit, upscale, cutout), the way `fal_generate_video` covers every video mode, rather than separate `fal_edit_image` / `fal_upscale_image` tools. The input-shape variance this item worried about is handled by three structural file args (`image` → `image_url`, `images` → `image_urls`, `mask` → `mask_url`) plus `extra_files` for model-specific keys (try-on person/garment, reference images). Outputs are read from `images[]` or `image`; other file outputs (masks, layers) are reported by URL. Images are saved exactly as returned (no format conversion, by decision 2026-09-24; conversion stays on the Google nano-banana path only). Catalog: 106 entries across `image.general`, `image.edit`, `image.upscale` and `image.background_removal`, with four grouped guides. The "fal image-model list" trigger was met by the 2026-09-24 index survey.
+
+### Original filing (kept for history)
 
 **What:** Add a `fal_edit_image` transport that covers any fal image→image model — img2img variation, ControlNet conditioning, inpainting, outpainting, style transfer, restoration, upscaling. Mirrors `gemini_edit_image` on the fal side. Seeded catalog entries land under `image.edit` (and possibly `image.upscale` if upscalers warrant separation).
 
@@ -432,6 +436,8 @@ Commits `1a1a4f1`, `e122be7`. 9 integration tests assert real pixel color and ge
 **(b) ML-segmentation mode — still open.** Wrapping rembg / U²-Net for soft-glow and photographic backgrounds remains the real fix for cutouts that color-keying and flood-fill both can't handle; flood-fill only helps when the background is flat and edge-connected. This still carries a new binary/model dependency, which is the reason it was deferred and remains so. Brand glow-on-dark assets continue to need the luminance-as-alpha ffmpeg workaround. Source: btmusic `instructions/bg-removal-recipes.md`.
 
 **Trigger for (b):** next asset needing a soft or photographic BG cutout.
+
+**Update 2026-09-24: a remote alternative now exists.** ML cutouts are available through `fal_generate_image` with the `image.background_removal` routes (BiRefNet 2, Pixelcut, FeynoBG, Bria extract-object, SAM 3.1; see `fal_background_removal_prompt_guide`), with no new local dependency. That covers the soft-edge and photographic cases when a network call is acceptable. (b) stays open only for an **offline / local** ML mode inside `background-remove` itself; revisit only if the fal route proves insufficient for glow-on-dark brand assets.
 
 ## 14. audio_info probe primitive — DONE 2026-08-15
 

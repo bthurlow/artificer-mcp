@@ -1,0 +1,390 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for topaz/upscale/image/creative",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the topaz/upscale/image/creative queue.",
+    "x-fal-metadata": {
+      "endpointId": "topaz/upscale/image/creative",
+      "category": "image-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aa5f513/Og4D-4MnoSPwUpoHem_jr.jpg",
+      "playgroundUrl": "https://fal.ai/models/topaz/upscale/image/creative",
+      "documentationUrl": "https://fal.ai/models/topaz/upscale/image/creative/api",
+      "about": "# Topaz Creative Image Upscale (Bloom)\n\nCreative upscaling that transforms AI-generated images while adding\ndetail.\n\n## Models\n- **Bloom** — creative upscaling for AI-generated images.\n- **Bloom Realism** — realistic detail enhancement for AI images."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "UpscaleImageCreativeInput": {
+        "type": "object",
+        "properties": {
+          "creativity": {
+            "description": "Creativity level (1-9). Higher values produce more creative/hallucinated details. Applies to Bloom 2 only.",
+            "title": "Creativity",
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "model": {
+            "enum": [
+              "Bloom 2",
+              "Bloom",
+              "Bloom Realism"
+            ],
+            "type": "string",
+            "description": "Creative (Bloom) upscaling model. Bloom 2 is the latest and most capable; Bloom creatively upscales and transforms AI-generated images; Bloom Realism biases the added detail toward photorealism.",
+            "title": "Model",
+            "default": "Bloom 2"
+          },
+          "image_url": {
+            "type": "string",
+            "description": "Url of the image to be upscaled",
+            "minLength": 1,
+            "examples": [
+              "https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_poor_1.jpeg"
+            ],
+            "title": "Image Url"
+          },
+          "autoprompt": {
+            "description": "Enable automatic prompt generation. Applies to Bloom 2 only; Topaz defaults it to true when omitted.",
+            "title": "Autoprompt",
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "upscale_factor": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Factor to upscale the image by (e.g. 2.0 doubles width and height)",
+            "maximum": 4,
+            "default": 2,
+            "title": "Upscale Factor"
+          },
+          "color_preservation": {
+            "description": "Preserve the source image's colors in the output. Applies to Bloom 2 only.",
+            "title": "Color Preservation",
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "crop_to_fill": {
+            "type": "boolean",
+            "title": "Crop To Fill",
+            "default": false
+          },
+          "output_format": {
+            "enum": [
+              "jpeg",
+              "png"
+            ],
+            "type": "string",
+            "description": "Output format of the upscaled image.",
+            "title": "Output Format",
+            "default": "jpeg"
+          }
+        },
+        "x-fal-order-properties": [
+          "image_url",
+          "model",
+          "upscale_factor",
+          "autoprompt",
+          "creativity",
+          "color_preservation",
+          "crop_to_fill",
+          "output_format"
+        ],
+        "title": "ImageCreativeUpscaleRequest",
+        "required": [
+          "image_url"
+        ]
+      },
+      "UpscaleImageCreativeOutput": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "description": "The upscaled image.",
+            "$ref": "#/components/schemas/File"
+          }
+        },
+        "x-fal-order-properties": [
+          "image"
+        ],
+        "title": "ImageUpscaleOutput",
+        "required": [
+          "image"
+        ]
+      },
+      "File": {
+        "type": "object",
+        "properties": {
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "title": "File",
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/topaz/upscale/image/creative/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/topaz/upscale/image/creative/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/topaz/upscale/image/creative": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpscaleImageCreativeInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/topaz/upscale/image/creative/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpscaleImageCreativeOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

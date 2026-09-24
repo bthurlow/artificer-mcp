@@ -1,0 +1,420 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for bria/genfill/v2",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the bria/genfill/v2 queue.",
+    "x-fal-metadata": {
+      "endpointId": "bria/genfill/v2",
+      "category": "image-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a9d7ee2/ePYzrUawXgdh7Hq4be-v6_bd443c983e2e47d39d3ebd5ad65406a9.jpg",
+      "playgroundUrl": "https://fal.ai/models/bria/genfill/v2",
+      "documentationUrl": "https://fal.ai/models/bria/genfill/v2/api",
+      "about": "Genfill"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "GenfillV2Input": {
+        "properties": {
+          "mask_url": {
+            "description": "The mask image.",
+            "examples": [
+              "https://bria-datasets.s3.us-east-1.amazonaws.com/Fibo_edit/flower_input_mask.png"
+            ],
+            "type": "string",
+            "title": "Mask Url"
+          },
+          "instruction": {
+            "description": "Instruct what elements you would like to fill in your image based on the mask.",
+            "examples": [
+              "A beautiful colorful butterfly"
+            ],
+            "type": "string",
+            "title": "Instruction"
+          },
+          "seed": {
+            "description": "Random seed for reproducibility.",
+            "default": 5555,
+            "type": "integer",
+            "title": "Seed"
+          },
+          "steps_num": {
+            "title": "Steps Num",
+            "description": "Number of inference steps.",
+            "maximum": 50,
+            "default": 30,
+            "type": "integer",
+            "minimum": 20
+          },
+          "image_url": {
+            "description": "The source image.",
+            "examples": [
+              "https://bria-datasets.s3.us-east-1.amazonaws.com/Fibo_edit/flower.png"
+            ],
+            "type": "string",
+            "title": "Image Url"
+          },
+          "sync_mode": {
+            "description": "If true, returns the image directly in the response (increases latency).",
+            "default": false,
+            "type": "boolean",
+            "title": "Sync Mode"
+          }
+        },
+        "x-fal-order-properties": [
+          "image_url",
+          "mask_url",
+          "instruction",
+          "seed",
+          "steps_num",
+          "sync_mode"
+        ],
+        "required": [
+          "image_url",
+          "mask_url",
+          "instruction"
+        ],
+        "type": "object",
+        "title": "GenFillInput"
+      },
+      "GenfillV2Output": {
+        "properties": {
+          "images": {
+            "title": "Images",
+            "description": "Generated images.",
+            "examples": [
+              [
+                {
+                  "url": "https://bria-datasets.s3.us-east-1.amazonaws.com/Fibo_edit/flower_with_butterfly.jpg"
+                }
+              ]
+            ],
+            "default": [],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            }
+          },
+          "image": {
+            "description": "Generated image.",
+            "$ref": "#/components/schemas/Image"
+          },
+          "structured_instruction": {
+            "title": "Structured Instruction",
+            "description": "Deprecated, use `vgl`. The same document under the old name.",
+            "deprecated": true,
+            "type": "object",
+            "additionalProperties": true
+          },
+          "vgl": {
+            "title": "Vgl",
+            "description": "The VGL document the image was generated from.",
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "x-fal-order-properties": [
+          "image",
+          "images",
+          "vgl",
+          "structured_instruction"
+        ],
+        "required": [
+          "image",
+          "vgl",
+          "structured_instruction"
+        ],
+        "type": "object",
+        "title": "GenFillOutputModel"
+      },
+      "Image": {
+        "properties": {
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The width of the image in pixels.",
+            "examples": [
+              1024
+            ],
+            "title": "Width"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The height of the image in pixels.",
+            "examples": [
+              1024
+            ],
+            "title": "Height"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name"
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "description": "Represents an image file.",
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "title": "Image"
+      }
+    }
+  },
+  "paths": {
+    "/bria/genfill/v2/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bria/genfill/v2/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bria/genfill/v2": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenfillV2Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bria/genfill/v2/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenfillV2Output"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

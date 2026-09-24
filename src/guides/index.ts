@@ -54,6 +54,10 @@ import { registerFalLipsyncPromptGuide } from './fal-lipsync.js';
 import { registerFalVideoUpscalePromptGuide } from './fal-video-upscale.js';
 import { registerFalVideoEditPromptGuide } from './fal-video-edit.js';
 import { registerFluxVideoPromptGuide } from './flux-video.js';
+import { registerFalImageGenerationPromptGuide } from './fal-image-generation.js';
+import { registerFalImageEditPromptGuide } from './fal-image-edit.js';
+import { registerFalImageUpscalePromptGuide } from './fal-image-upscale.js';
+import { registerFalBackgroundRemovalPromptGuide } from './fal-background-removal.js';
 import { registerBrandSpecTool } from './brand-spec.js';
 
 /**
@@ -142,6 +146,11 @@ export function registerGuideTools(server: McpServer): void {
   registerFalVideoUpscalePromptGuide(server);
   registerFalVideoEditPromptGuide(server);
   registerFluxVideoPromptGuide(server);
+  // Grouped guides for the 2026-09-24 fal image catalog (fal_generate_image).
+  registerFalImageGenerationPromptGuide(server);
+  registerFalImageEditPromptGuide(server);
+  registerFalImageUpscalePromptGuide(server);
+  registerFalBackgroundRemovalPromptGuide(server);
 
   // Branding
   registerBrandSpecTool(server);

@@ -1,0 +1,565 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for ideogram/v4/tiling",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the ideogram/v4/tiling queue.",
+    "x-fal-metadata": {
+      "endpointId": "ideogram/v4/tiling",
+      "category": "image-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a9dc187/wgqbs05r1GarIV7-_tmEh_aa72f164e692496a9cbc07285ac20409.jpg",
+      "playgroundUrl": "https://fal.ai/models/ideogram/v4/tiling",
+      "documentationUrl": "https://fal.ai/models/ideogram/v4/tiling/api",
+      "about": "Generate a seamlessly tileable image using Ideogram-4."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "V4TilingInput": {
+        "properties": {
+          "mask_url": {
+            "title": "Mask Image URL",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional URL of a mask image for inpainting tiling. White regions are regenerated, black regions are preserved. Requires `image_url`."
+          },
+          "image_url": {
+            "title": "Image URL",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional URL of an image. When provided without `mask_url`, performs image-to-image tiling; with `mask_url`, performs inpainting tiling."
+          },
+          "output_format": {
+            "enum": [
+              "jpeg",
+              "png"
+            ],
+            "default": "jpeg",
+            "type": "string",
+            "description": "The format of the generated image.",
+            "title": "Output Format"
+          },
+          "image_size": {
+            "title": "Image Size",
+            "default": "square_hd",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageSize"
+              },
+              {
+                "enum": [
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9"
+                ],
+                "type": "string"
+              }
+            ],
+            "description": "The resolution of the generated seamlessly tileable image."
+          },
+          "num_images": {
+            "minimum": 1,
+            "maximum": 4,
+            "type": "integer",
+            "description": "Number of images to generate.",
+            "title": "Number of Images",
+            "default": 1
+          },
+          "strength": {
+            "minimum": 0,
+            "maximum": 1,
+            "type": "number",
+            "description": "How much to transform the input image. Only used when `image_url` is provided.",
+            "title": "Strength",
+            "default": 0.8
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The prompt to generate an image from.",
+            "title": "Prompt",
+            "examples": [
+              "A red panda perched on a mossy branch in a misty forest at sunrise"
+            ]
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "The seed to use for generation. If not provided, a random seed will be used."
+          },
+          "sync_mode": {
+            "default": false,
+            "type": "boolean",
+            "description": "If `True`, the image is returned as a data URI and is not stored.",
+            "title": "Sync Mode"
+          },
+          "tiling_mode": {
+            "enum": [
+              "both",
+              "horizontal",
+              "vertical"
+            ],
+            "default": "both",
+            "type": "string",
+            "description": "Tiling direction: 'both' (omnidirectional), 'horizontal' (left-right only), or 'vertical' (top-bottom only).",
+            "title": "Tiling Mode"
+          },
+          "rendering_speed": {
+            "enum": [
+              "TURBO",
+              "BALANCED",
+              "QUALITY"
+            ],
+            "default": "BALANCED",
+            "type": "string",
+            "description": "The rendering speed to use. Faster speeds use fewer denoising steps.",
+            "title": "Rendering Speed"
+          },
+          "acceleration": {
+            "enum": [
+              "none",
+              "low",
+              "regular",
+              "high"
+            ],
+            "default": "none",
+            "type": "string",
+            "description": "The acceleration level to use for the image generation.",
+            "title": "Acceleration",
+            "examples": [
+              "none"
+            ]
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "type": "boolean",
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "title": "Enable Safety Checker"
+          },
+          "expansion_model": {
+            "enum": [
+              "None",
+              "Medium",
+              "Large"
+            ],
+            "examples": [
+              "Large"
+            ],
+            "default": "Medium",
+            "type": "string",
+            "description": "Which model expands the prompt. 'None' disables prompt expansion and skips its fee; 'Medium' is fast; 'Large' uses Ideogram's Magic Prompt for the highest quality.",
+            "title": "Expansion Model"
+          }
+        },
+        "x-fal-order-properties": [
+          "prompt",
+          "expansion_model",
+          "image_size",
+          "rendering_speed",
+          "acceleration",
+          "num_images",
+          "seed",
+          "sync_mode",
+          "enable_safety_checker",
+          "output_format",
+          "image_url",
+          "mask_url",
+          "strength",
+          "tiling_mode"
+        ],
+        "type": "object",
+        "title": "TilingInput",
+        "required": [
+          "prompt"
+        ]
+      },
+      "V4TilingOutput": {
+        "properties": {
+          "seed": {
+            "type": "integer",
+            "description": "\n            Seed of the generated Image. It will be the same value of the one passed in the\n            input or the randomly generated that was used in case none was passed.\n        ",
+            "title": "Seed"
+          },
+          "timings": {
+            "type": "object",
+            "title": "Timings",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "has_nsfw_concepts": {
+            "items": {
+              "type": "boolean"
+            },
+            "type": "array",
+            "description": "Whether the generated images contain NSFW concepts.",
+            "title": "Has Nsfw Concepts"
+          },
+          "images": {
+            "items": {
+              "$ref": "#/components/schemas/ImageFile"
+            },
+            "type": "array",
+            "description": "The generated images.",
+            "title": "Images",
+            "examples": [
+              [
+                {
+                  "url": "https://v3b.fal.media/files/b/0a9c92b2/JLDtkHeeec2BL7ZX3PyvI_KzumHcSa.jpg"
+                }
+              ]
+            ]
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The prompt used for generating the image.",
+            "title": "Prompt"
+          }
+        },
+        "x-fal-order-properties": [
+          "images",
+          "timings",
+          "seed",
+          "has_nsfw_concepts",
+          "prompt"
+        ],
+        "type": "object",
+        "title": "IdeogramV4Output",
+        "required": [
+          "images",
+          "timings",
+          "seed",
+          "has_nsfw_concepts",
+          "prompt"
+        ]
+      },
+      "ImageSize": {
+        "properties": {
+          "height": {
+            "default": 512,
+            "maximum": 14142,
+            "type": "integer",
+            "description": "The height of the generated image.",
+            "exclusiveMinimum": 0,
+            "title": "Height"
+          },
+          "width": {
+            "default": 512,
+            "maximum": 14142,
+            "type": "integer",
+            "description": "The width of the generated image.",
+            "exclusiveMinimum": 0,
+            "title": "Width"
+          }
+        },
+        "type": "object",
+        "title": "ImageSize",
+        "x-fal-order-properties": [
+          "width",
+          "height"
+        ]
+      },
+      "ImageFile": {
+        "properties": {
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file."
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "The height of the image"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "description": "The width of the image"
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes."
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "type": "object",
+        "title": "ImageFile",
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/ideogram/v4/tiling/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ideogram/v4/tiling/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ideogram/v4/tiling": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V4TilingInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ideogram/v4/tiling/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V4TilingOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

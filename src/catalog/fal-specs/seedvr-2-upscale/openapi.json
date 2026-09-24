@@ -1,0 +1,424 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/seedvr/upscale/image",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/seedvr/upscale/image queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/seedvr/upscale/image",
+      "category": "image-to-image",
+      "thumbnailUrl": "https://v3.fal.media/files/panda/_-1rRy0_I6w-fbt3q0RDL_2f47fece6e2b433994dda482e8d20bb9.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/seedvr/upscale/image",
+      "documentationUrl": "https://fal.ai/models/fal-ai/seedvr/upscale/image/api",
+      "about": "Upscale Image"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "SeedvrUpscaleImageInput": {
+        "properties": {
+          "upscale_factor": {
+            "default": 2,
+            "maximum": 10,
+            "minimum": 1,
+            "title": "Upscale Factor",
+            "description": "Upscaling factor to be used. Will multiply the dimensions with this factor when `upscale_mode` is `factor`.",
+            "type": "number"
+          },
+          "sync_mode": {
+            "default": false,
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "title": "Sync Mode",
+            "type": "boolean"
+          },
+          "seed": {
+            "description": "The random seed used for the generation process.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "image_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/seedvr2/image_in.png"
+            ],
+            "description": "The input image to be processed",
+            "title": "Image Url",
+            "type": "string"
+          },
+          "output_format": {
+            "default": "jpg",
+            "enum": [
+              "png",
+              "jpg",
+              "webp"
+            ],
+            "description": "The format of the output image.",
+            "title": "Output Format",
+            "type": "string"
+          },
+          "noise_scale": {
+            "default": 0.1,
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Noise Scale",
+            "description": "The noise scale to use for the generation process.",
+            "type": "number",
+            "multipleOf": 0.001
+          },
+          "upscale_mode": {
+            "default": "factor",
+            "enum": [
+              "target",
+              "factor"
+            ],
+            "description": "The mode to use for the upscale. If 'target', the upscale factor will be calculated based on the target resolution. If 'factor', the upscale factor will be used directly.",
+            "title": "Upscale Mode",
+            "type": "string"
+          },
+          "target_resolution": {
+            "default": "1080p",
+            "enum": [
+              "720p",
+              "1080p",
+              "1440p",
+              "2160p"
+            ],
+            "description": "The target resolution to upscale to when `upscale_mode` is `target`.",
+            "title": "Target Resolution",
+            "type": "string"
+          }
+        },
+        "x-fal-order-properties": [
+          "image_url",
+          "upscale_mode",
+          "upscale_factor",
+          "target_resolution",
+          "seed",
+          "noise_scale",
+          "output_format",
+          "sync_mode"
+        ],
+        "title": "SeedVRImageInput",
+        "required": [
+          "image_url"
+        ],
+        "type": "object"
+      },
+      "SeedvrUpscaleImageOutput": {
+        "properties": {
+          "seed": {
+            "description": "The random seed used for the generation process.",
+            "title": "Seed",
+            "type": "integer"
+          },
+          "image": {
+            "examples": [
+              {
+                "content_type": "image/png",
+                "url": "https://storage.googleapis.com/falserverless/example_outputs/seedvr2/image_out.png"
+              }
+            ],
+            "description": "Upscaled image file after processing",
+            "$ref": "#/components/schemas/ImageFile"
+          }
+        },
+        "x-fal-order-properties": [
+          "image",
+          "seed"
+        ],
+        "title": "SeedVRImageOutput",
+        "required": [
+          "image",
+          "seed"
+        ],
+        "type": "object"
+      },
+      "ImageFile": {
+        "properties": {
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size"
+          },
+          "height": {
+            "description": "The height of the image",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name"
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
+          },
+          "width": {
+            "description": "The width of the image",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "title": "ImageFile",
+        "required": [
+          "url"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/seedvr/upscale/image/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/seedvr/upscale/image/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/seedvr/upscale/image": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeedvrUpscaleImageInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/seedvr/upscale/image/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeedvrUpscaleImageOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

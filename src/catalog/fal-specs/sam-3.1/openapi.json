@@ -1,0 +1,721 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/sam-3-1/image",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/sam-3-1/image queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/sam-3-1/image",
+      "category": "image-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a944385/lr68yq78ZUUsBb6jo1wyv_34caef38c38747f9a97fb1f4f9b1d1c0.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/sam-3-1/image",
+      "documentationUrl": "https://fal.ai/models/fal-ai/sam-3-1/image/api",
+      "about": "Segment Image"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "Sam31ImageInput": {
+        "type": "object",
+        "title": "SAM31ImageInput",
+        "required": [
+          "image_url"
+        ],
+        "x-fal-order-properties": [
+          "image_url",
+          "prompt",
+          "point_prompts",
+          "box_prompts",
+          "apply_mask",
+          "sync_mode",
+          "output_format",
+          "return_multiple_masks",
+          "max_masks",
+          "include_scores",
+          "include_boxes"
+        ],
+        "properties": {
+          "apply_mask": {
+            "type": "boolean",
+            "description": "Apply the mask on the image.",
+            "title": "Apply Mask",
+            "default": true
+          },
+          "image_url": {
+            "type": "string",
+            "description": "URL of the image to be segmented",
+            "title": "Image Url",
+            "examples": [
+              "https://raw.githubusercontent.com/facebookresearch/segment-anything-2/main/notebooks/images/truck.jpg"
+            ]
+          },
+          "include_scores": {
+            "type": "boolean",
+            "description": "Whether to include mask confidence scores.",
+            "title": "Include Scores",
+            "default": false
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Text prompt for segmentation",
+            "title": "Prompt",
+            "examples": [
+              "wheel",
+              "person",
+              "car"
+            ],
+            "default": "wheel"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
+            ],
+            "description": "The format of the generated image.",
+            "title": "Output Format",
+            "default": "png"
+          },
+          "box_prompts": {
+            "type": "array",
+            "description": "Box prompt coordinates (x_min, y_min, x_max, y_max). Multiple boxes supported - use object_id to group boxes for the same object or leave empty for separate objects.",
+            "title": "Box Prompts",
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/BoxPrompt"
+            }
+          },
+          "point_prompts": {
+            "type": "array",
+            "description": "List of point prompts",
+            "title": "Point Prompts",
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/PointPrompt"
+            }
+          },
+          "return_multiple_masks": {
+            "type": "boolean",
+            "description": "If True, upload and return multiple generated masks as defined by `max_masks`.",
+            "title": "Return Multiple Masks",
+            "default": false
+          },
+          "include_boxes": {
+            "type": "boolean",
+            "description": "Whether to include bounding boxes for each mask (when available).",
+            "title": "Include Boxes",
+            "default": false
+          },
+          "sync_mode": {
+            "type": "boolean",
+            "description": "If True, the media will be returned as a data URI.",
+            "title": "Sync Mode",
+            "default": false
+          },
+          "max_masks": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Maximum number of masks to return when `return_multiple_masks` is enabled.",
+            "title": "Max Masks",
+            "maximum": 32,
+            "default": 3
+          }
+        }
+      },
+      "Sam31ImageOutput": {
+        "type": "object",
+        "title": "SAM31ImageOutput",
+        "required": [
+          "masks"
+        ],
+        "x-fal-order-properties": [
+          "image",
+          "masks",
+          "metadata",
+          "scores",
+          "boxes"
+        ],
+        "properties": {
+          "image": {
+            "description": "Primary segmented mask preview.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Image"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metadata": {
+            "description": "Per-mask metadata including scores and boxes.",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/MaskMetadata"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata"
+          },
+          "boxes": {
+            "description": "Per-mask normalized bounding boxes [cx, cy, w, h] when requested.",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boxes"
+          },
+          "scores": {
+            "description": "Per-mask confidence scores when requested.",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scores"
+          },
+          "masks": {
+            "type": "array",
+            "description": "Segmented mask images.",
+            "title": "Masks",
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            }
+          }
+        }
+      },
+      "BoxPrompt": {
+        "type": "object",
+        "title": "BoxPrompt",
+        "properties": {
+          "y_min": {
+            "description": "Y Min Coordinate of the box",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y Min"
+          },
+          "x_max": {
+            "description": "X Max Coordinate of the box",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "X Max"
+          },
+          "y_max": {
+            "description": "Y Max Coordinate of the box",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y Max"
+          },
+          "frame_index": {
+            "description": "The frame index to interact with.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frame Index"
+          },
+          "x_min": {
+            "description": "X Min Coordinate of the box",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "X Min"
+          },
+          "object_id": {
+            "description": "Optional object identifier. Boxes sharing an object id refine the same object.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Object Id"
+          }
+        },
+        "x-fal-order-properties": [
+          "x_min",
+          "y_min",
+          "x_max",
+          "y_max",
+          "object_id",
+          "frame_index"
+        ]
+      },
+      "PointPrompt": {
+        "type": "object",
+        "title": "PointPrompt",
+        "properties": {
+          "x": {
+            "description": "X Coordinate of the prompt",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "X"
+          },
+          "object_id": {
+            "description": "Optional object identifier. Prompts sharing an object id refine the same object. When a text prompt is also given, the id selects which detected object the points refine.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Object Id"
+          },
+          "frame_index": {
+            "description": "The frame index to interact with.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frame Index"
+          },
+          "label": {
+            "description": "1 for foreground, 0 for background",
+            "anyOf": [
+              {
+                "type": "integer",
+                "enum": [
+                  0,
+                  1
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "y": {
+            "description": "Y Coordinate of the prompt",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y"
+          }
+        },
+        "x-fal-order-properties": [
+          "x",
+          "y",
+          "label",
+          "object_id",
+          "frame_index"
+        ]
+      },
+      "Image": {
+        "type": "object",
+        "description": "Represents an image file.",
+        "title": "Image",
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "properties": {
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "examples": [
+              4404019
+            ]
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "width": {
+            "description": "The width of the image in pixels.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "examples": [
+              1024
+            ]
+          },
+          "height": {
+            "description": "The height of the image in pixels.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "examples": [
+              1024
+            ]
+          }
+        }
+      },
+      "MaskMetadata": {
+        "type": "object",
+        "title": "MaskMetadata",
+        "required": [
+          "index"
+        ],
+        "x-fal-order-properties": [
+          "index",
+          "score",
+          "box"
+        ],
+        "properties": {
+          "box": {
+            "description": "Bounding box for the mask in normalized cxcywh coordinates.",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Box"
+          },
+          "index": {
+            "type": "integer",
+            "description": "Index of the mask inside the model output.",
+            "title": "Index"
+          },
+          "score": {
+            "description": "Score for this mask.",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/sam-3-1/image/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/sam-3-1/image/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/sam-3-1/image": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Sam31ImageInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/sam-3-1/image/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sam31ImageOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}
