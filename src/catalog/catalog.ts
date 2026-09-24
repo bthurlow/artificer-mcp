@@ -6,7 +6,15 @@ import { fileURLToPath } from 'node:url';
 import { registerTool } from '../utils/register.js';
 import { isToolRegistered } from './tool-registry.js';
 
-const CAPABILITIES = ['video', 'image', 'music', 'speech', 'safety', 'transcription'] as const;
+const CAPABILITIES = [
+  'video',
+  'image',
+  'music',
+  'speech',
+  'audio',
+  'safety',
+  'transcription',
+] as const;
 type Capability = (typeof CAPABILITIES)[number];
 
 interface AccessRoute {
@@ -195,7 +203,7 @@ const catalogSchema = z.object({
     .enum(CAPABILITIES)
     .optional()
     .describe(
-      'Optional filter — restrict the response to a single capability (video, image, music, speech, safety, transcription).',
+      'Optional filter — restrict the response to a single capability (video, image, music, speech, audio, safety, transcription). `audio` holds audio-processing models such as stem separation.',
     ),
   include_unavailable: z
     .boolean()

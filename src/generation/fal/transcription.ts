@@ -2,6 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerTool } from '../../utils/register.js';
 import { getFalClient } from './client.js';
 import { parseFalError } from './errors.js';
+import { checkExtraParams } from './extra-params.js';
 import { resolveForFal, resolveExtraFiles } from './inputs.js';
 import {
   type FalTranscribeParams,
@@ -159,6 +160,11 @@ export function registerFalTranscriptionTools(server: McpServer): void {
               `but also as structural arg(s); structural args win. ` +
               `Remove from extra_params to silence this warning.`,
           );
+        }
+        // Keys the model's spec doesn't accept are dropped by fal without an
+        // error (TODO #16b). Diagnostic only; the payload is sent as built.
+        for (const warning of await checkExtraParams('fal_transcribe', model, mergedExtra)) {
+          console.error(warning);
         }
 
         let result;
