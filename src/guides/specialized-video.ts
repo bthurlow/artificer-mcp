@@ -24,11 +24,10 @@ Human-centric video foundation model. Trained heavily on people-and-action foota
 - Input: portrait or full-body source image. Maps to \`image_url\`.
 - Example: \`prompt: "Subject walks confidently toward the camera, slight smile, hands in pockets"\`
 
-## Lyra-2 Zoom
-Pseudo-3D camera-zoom motion from a single image. NOT full 3D scene reconstruction — generates the appearance of a parallax-aware zoom into the source image. Best for Ken Burns-style cinematic motion on still photos, real estate hero shots, photo-to-reel conversion.
-- Slug: \`lyra-2-zoom-i2v\` → \`fal-ai/lyra-2/zoom\`
-- Input: source image. The motion is camera-zoom-only; no subject animation.
-- Example: \`prompt: "slow push-in toward the focal subject"\`
+## Lyra-2 Zoom — RETIRED 2026-09-24
+Lyra-2 Zoom produced a pseudo-3D, parallax-aware camera zoom from a single still. fal removed \`fal-ai/lyra-2/zoom\` — the endpoint now 404s — and the \`lyra-2-zoom-i2v\` slug was dropped with it.
+
+For Ken Burns-style motion on a still, prompt a general i2v model for camera-only movement (e.g. \`"slow push-in toward the focal subject, the scene itself stays still"\`). Expect some subject motion to creep in, which Lyra-2 avoided by construction.
 
 ## Ovi
 **Joint audio + video generation.** Both modalities produced together in one model call (not video + separate TTS). Best when audio and motion need to be co-generated — e.g., a clip of a dog barking where the bark sound and the mouth movement are produced jointly.
@@ -49,13 +48,12 @@ None of these models share a uniform schema — read each model's \`fal-specs/{s
 |------|--------------|
 | \`multishot-master-t2v\` | \`fal-ai/multishot-master\` |
 | \`skyreels-i2v\` | \`fal-ai/skyreels-i2v\` |
-| \`lyra-2-zoom-i2v\` | \`fal-ai/lyra-2/zoom\` |
 | \`ovi-t2v\` | \`fal-ai/ovi\` |
 | \`ovi-i2v\` | \`fal-ai/ovi/image-to-video\` |
 | \`infinity-star-t2v\` | \`fal-ai/infinity-star/text-to-video\` |
 
 ## Last verified
-2026-04-28 — initial seed of full fal video catalog.
+2026-09-24 — \`lyra-2-zoom-i2v\` retired (endpoint 404s). 2026-08-15 — \`transpixar-t2v\` retired. Model notes are otherwise unchanged since the 2026-04-28 initial seed and were not re-verified.
 
 ## Official references
 Per-model fal pages — search at https://fal.ai/explore for the exact slug.
@@ -65,7 +63,7 @@ export function registerSpecializedVideoPromptGuide(server: McpServer): void {
   registerTool<Record<string, never>>(
     server,
     'specialized_video_prompt_guide',
-    "Reference guide for specialized fal video models — MultiShot Master (narrative arcs), SkyReels (human-centric), Lyra-2 Zoom (pseudo-3D), Ovi (joint audio+video), Infinity Star (autoregressive). One model per niche. Also records that TransPixar, the catalog's only alpha-channel route, was retired with no replacement. No API call — pure reference.",
+    "Reference guide for specialized fal video models — MultiShot Master (narrative arcs), SkyReels (human-centric), Ovi (joint audio+video), Infinity Star (autoregressive). One model per niche. Also records the retired routes: TransPixar, the catalog's only alpha-channel route, and Lyra-2 Zoom (pseudo-3D zoom), neither with a replacement. No API call — pure reference.",
     z.object({}).shape,
     async () => ({ content: [{ type: 'text', text: SPECIALIZED_VIDEO_GUIDE }] }),
   );

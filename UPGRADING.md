@@ -9,6 +9,32 @@ because they landed under a commit type it hides.
 
 ---
 
+## 0.10.x → 0.11.0
+
+### Catalog routes retired, and `sana_prompt_guide` removed
+
+**Removed — these 404 upstream with no successor.** Each was verified dead on
+both fal's OpenAPI and `llms.txt` surfaces on 2026-09-24, and fal's model index
+was searched for a renamed replacement before removal:
+
+`hunyuan-video-lora-t2v` · `sana-video-t2v` · `lyra-2-zoom-i2v`
+
+What each one costs:
+
+- **`hunyuan-video-lora-t2v` was the last LoRA-capable Hunyuan route.** Hunyuan
+  has no LoRA support at all now. For custom-style work, move to the LTX LoRA
+  variants (`ltx-2.3-22b-lora-t2v` / `-i2v` and siblings; see
+  `ltx_video_prompt_guide`), which cover both t2v and i2v.
+- **`sana-video-t2v` was the only model behind `sana_prompt_guide`, so that tool
+  is gone too.** A caller that invokes `sana_prompt_guide` now gets an
+  unknown-tool error. For cheap, fast t2v iteration, pick a distilled or
+  "fast" route from `model_catalog`.
+- **`lyra-2-zoom-i2v` was the only pseudo-3D zoom model.** For Ken Burns-style
+  motion on a still, prompt a general i2v model for camera-only movement. Expect
+  some subject motion to creep in, which Lyra-2 avoided by construction.
+
+---
+
 ## 0.9.1 → 0.10.0
 
 Three changes require action. Each fails loudly rather than silently, so the

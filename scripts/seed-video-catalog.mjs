@@ -717,7 +717,6 @@ const general = [
     'fal-ai/hunyuan-video-image-to-video',
     'hunyuan_video_prompt_guide',
   ),
-  falEntry('hunyuan-video-lora-t2v', 'fal-ai/hunyuan-video-lora', 'hunyuan_video_prompt_guide'),
   falEntry(
     'hunyuan-video-img2vid-lora-i2v',
     'fal-ai/hunyuan-video-img2vid-lora',
@@ -852,7 +851,6 @@ const general = [
   ),
 
   // Sana Video (lightweight/fast)
-  falEntry('sana-video-t2v', 'fal-ai/sana-video', 'sana_prompt_guide'),
 
   // MAGI (physics-aware)
   falEntry('magi-t2v', 'fal-ai/magi', 'magi_prompt_guide'),
@@ -864,7 +862,6 @@ const general = [
   falEntry('multishot-master-t2v', 'fal-ai/multishot-master', 'specialized_video_prompt_guide'),
   falEntry('transpixar-t2v', 'fal-ai/transpixar', 'specialized_video_prompt_guide'),
   falEntry('skyreels-i2v', 'fal-ai/skyreels-i2v', 'specialized_video_prompt_guide'),
-  falEntry('lyra-2-zoom-i2v', 'fal-ai/lyra-2/zoom', 'specialized_video_prompt_guide'),
   falEntry('ovi-t2v', 'fal-ai/ovi', 'specialized_video_prompt_guide'),
   falEntry('ovi-i2v', 'fal-ai/ovi/image-to-video', 'specialized_video_prompt_guide'),
   falEntry(
