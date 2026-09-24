@@ -288,7 +288,7 @@ afterAll(async () => {
 });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Video tools (14)
+// Video tools (15)
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('Integration: video_concatenate', () => {
@@ -604,6 +604,135 @@ describe('Integration: video_set_frame_rate', () => {
     expect(await fileExists(output)).toBe(true);
     const probe = await probeVideo(output);
     expect(probe.frameRate).toBeCloseTo(15, 0);
+  }, 30_000);
+});
+
+describe('Integration: video_make_loop', () => {
+  // A solid-color fixture has a perfect seam no matter what the tool does,
+  // so these tests need real motion: testsrc2 moves every frame and its
+  // last frame differs visibly from its first. 3s at 30fps = 90 frames.
+  let movingClip: string;
+
+  /** Decoded frame count, the unit the loop math is written in. */
+  async function countFrames(path: string): Promise<number> {
+    const { stdout } = await execFileAsync('ffprobe', [
+      '-v',
+      'error',
+      '-count_frames',
+      '-select_streams',
+      'v:0',
+      '-show_entries',
+      'stream=nb_read_frames',
+      '-of',
+      'csv=p=0',
+      path,
+    ]);
+    return parseInt(stdout.trim(), 10);
+  }
+
+  async function callLoop(
+    args: Record<string, unknown>,
+  ): Promise<{ text: string; isError: boolean }> {
+    const result = await client.callTool({ name: 'video_make_loop', arguments: args });
+    const text = (result.content as Array<{ type: string; text: string }>)[0]?.text ?? '';
+    return { text, isError: result.isError === true };
+  }
+
+  beforeAll(async () => {
+    if (!hasFfmpeg) return;
+    movingClip = join(testDir, 'fixture_moving.mp4');
+    await execFileAsync('ffmpeg', [
+      '-y',
+      '-f',
+      'lavfi',
+      '-i',
+      'testsrc2=s=320x240:r=30:d=3',
+      '-f',
+      'lavfi',
+      '-i',
+      'sine=f=440:d=3',
+      '-shortest',
+      '-c:v',
+      'libx264',
+      '-pix_fmt',
+      'yuv420p',
+      '-c:a',
+      'aac',
+      movingClip,
+    ]);
+  }, 30_000);
+
+  it.skipIf(!hasFfmpeg)('check: flags the jump in a clip that was never looped', async () => {
+    const { text, isError } = await callLoop({ input: movingClip, mode: 'check' });
+    expect(isError, `tool error: ${text}`).toBe(false);
+    expect(text).toContain('90 frames');
+    expect(text).toContain('visible jump');
+  }, 60_000);
+
+  it.skipIf(!hasFfmpeg)('rebound: forward + reverse minus both turn frames, silent, seamless', async () => {
+    const output = join(testDir, 'loop_rebound.mp4');
+    const { text, isError } = await callLoop({ input: movingClip, output, mode: 'rebound' });
+    expect(isError, `tool error: ${text}`).toBe(false);
+    // 90 forward + 88 reversed (turn-around and wrap frames dropped).
+    expect(await countFrames(output)).toBe(178);
+    expect((await probeVideo(output)).hasAudio).toBe(false);
+    expect(text).toContain('Seam: seamless');
+  }, 60_000);
+
+  it.skipIf(!hasFfmpeg)('crossfade: output is one crossfade shorter, and seamless', async () => {
+    const output = join(testDir, 'loop_crossfade.mp4');
+    const { text, isError } = await callLoop({
+      input: movingClip,
+      output,
+      mode: 'crossfade',
+      crossfade_seconds: 0.5,
+    });
+    expect(isError, `tool error: ${text}`).toBe(false);
+    // 90 source frames - 15 crossfade frames.
+    expect(await countFrames(output)).toBe(75);
+    expect((await probeVideo(output)).hasAudio).toBe(false);
+    expect(text).toContain('Seam: seamless');
+  }, 60_000);
+
+  it.skipIf(!hasFfmpeg)('max_duration trims the source first, so the loop stays seamless', async () => {
+    const output = join(testDir, 'loop_rebound_max.mp4');
+    const { text, isError } = await callLoop({
+      input: movingClip,
+      output,
+      mode: 'rebound',
+      max_duration: 2,
+    });
+    expect(isError, `tool error: ${text}`).toBe(false);
+    // 2s at 30fps = 60 frames max → 31 source frames → 2*31-2 = 60.
+    expect(await countFrames(output)).toBe(60);
+    expect(text).toContain('Used 31 of 90 source frames');
+    expect(text).toContain('Seam: seamless');
+  }, 60_000);
+
+  it.skipIf(!hasFfmpeg)('min_duration repeats whole cycles', async () => {
+    const output = join(testDir, 'loop_crossfade_min.mp4');
+    const { text, isError } = await callLoop({
+      input: movingClip,
+      output,
+      mode: 'crossfade',
+      min_duration: 4,
+    });
+    expect(isError, `tool error: ${text}`).toBe(false);
+    // One cycle is 75 frames (2.5s); 4s needs 2 cycles.
+    expect(await countFrames(output)).toBe(150);
+    expect(text).toContain('2 cycles');
+    expect(text).toContain('Seam: seamless');
+  }, 60_000);
+
+  it.skipIf(!hasFfmpeg)('rejects a crossfade longer than half the clip', async () => {
+    const { text, isError } = await callLoop({
+      input: movingClip,
+      output: join(testDir, 'loop_bad.mp4'),
+      mode: 'crossfade',
+      crossfade_seconds: 2,
+    });
+    expect(isError).toBe(true);
+    expect(text).toContain('more than twice crossfade_seconds');
   }, 30_000);
 });
 

@@ -18,7 +18,7 @@
 - **Speech generation** via Gemini TTS (prebuilt voices, natural-language style/accent control)
 - **Music generation** via Lyria 3 (batch) + Lyria RealTime (streaming)
 - **Image processing** via ImageMagick (57 tools — resize, composite, text, social cards, ad creatives, app icons, and more)
-- **Video + audio post-processing** via FFmpeg (16 video + 9 audio tools — concatenate, trim, aspect, transitions, overlays, subtitles, b-roll, encoding controls, image-to-video, audio mixing with sidechain ducking, loudness normalization, and more)
+- **Video + audio post-processing** via FFmpeg (17 video + 9 audio tools — concatenate, trim, aspect, transitions, overlays, subtitles, b-roll, encoding controls, image-to-video, seamless loops, audio mixing with sidechain ducking, loudness normalization, and more)
 - **Pluggable storage** — local filesystem + Google Cloud Storage out of the box; S3 / OneDrive stubbed for contribution; 7 storage tools (upload, download, list, delete, exists, public URL, signed URL)
 - **Opinionated workflows** — one-call chains for common patterns (brand asset pack, social carousel, multi-element carousel compose, talking-head video, ad creative set, 9:16 short-form video for IG/TikTok/YT/FB, narrated explainer)
 - **Brand spec** — one JSON env var (`ARTIFICER_BRAND_SPEC`) defines colors, fonts, TTS voice, music prompt, and logo variants so every tool can soft-default to project-consistent choices

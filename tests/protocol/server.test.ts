@@ -97,6 +97,7 @@ const EXPECTED_TOOLS = {
     'video_set_frame_rate',
     'video_from_image',
     'video_set_audio',
+    'video_make_loop',
     'build_ass_karaoke',
   ],
   audio: [
@@ -227,15 +228,15 @@ describe('MCP Protocol — artificer-mcp Server', () => {
   // ── 2. Tool discovery ─────────────────────────────────────────────────────
 
   describe('tool discovery', () => {
-    it('should return exactly 166 tools', () => {
-      expect(tools).toHaveLength(166);
+    it('should return exactly 167 tools', () => {
+      expect(tools).toHaveLength(167);
     });
   });
 
   // ── 3. Tool names ─────────────────────────────────────────────────────────
 
   describe('tool names', () => {
-    it('should contain all 166 expected tool names', () => {
+    it('should contain all 167 expected tool names', () => {
       const registeredNames = tools.map((t) => t.name).sort();
       const expectedNames = [...ALL_TOOL_NAMES].sort();
 

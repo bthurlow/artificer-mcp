@@ -62,7 +62,9 @@ The 404 case is why the job can fail rather than just PR: a dead route writes *n
 
 That makes the in-job checks **load-bearing rather than a nicety**: nobody watches a weekly cron the way they watch a release, so the drift PR's gated run may sit unapproved indefinitely. Running `yarn typecheck && yarn test:unit` *inside* the drift job, and stamping a loud "❌ Catalog guards failed" section into the PR body when they fail, is what guarantees the result is visible at all.
 
-**Not verified:** the workflow has never run on GitHub. YAML validity, step-output references, the report shape, the exit codes, and the rendered markdown are all verified locally, but the first real Monday run is the smoke test. Watch it, and check the repo allows Actions to create PRs (Settings → Actions → *Allow GitHub Actions to create and approve pull requests*) — that switch being off is the most likely first failure.
+~~**Not verified:** the workflow has never run on GitHub.~~ It has now, and the first real runs exposed a bug the local verification could not see:
+
+**Fixed 2026-09-24 (#46): the cron only ever opened one PR.** The "open or update" step checked `gh pr view chore/fal-spec-drift`, which also matches a **merged** PR on that branch. After the first drift PR (#41) merged, every later run took the "update" path, edited the closed #41, and never opened a new one. The job went red every Monday from 2026-08-31 (three routes had started 404ing), but its findings reached no reviewer for five weeks. The lookup now matches open PRs only (`gh pr list --state open`). The first run after the fix opened #49, as expected.
 
 **Also hardened (same PR):** both `wget` calls in `ci.yml` now retry (`--tries=3 --timeout=30 --retry-connrefused`). That fetch failed twice on 2026-08-15 — once a genuine URL rot, once a transient blip — and the integration job is the *only* place ffmpeg- and ImageMagick-backed code is ever actually exercised, so a flaky red there trains everyone to ignore a signal that matters.
 
@@ -221,6 +223,18 @@ Also unlocks the simpler cases — generic transcription for content moderation,
 **Trigger to pick this up:** User provides the fal v2v model list. Probably best bundled with the image list arrival since the playbook is identical and both touch Phase 4-adjacent territory.
 
 **Depends on / blocked by:** Nothing technical. Phase 1 fal scaffolding already covers it.
+
+### Addendum 2026-09-24: video UPSCALE is the first concrete v2v need (btmusic)
+
+**Real caller:** btmusic motion-art / Canvas exports. Apple Music album motion art requires a **3840×3840** square (plus 2048×2732 tall); no generation model we use outputs that natively. (Apple motion is deferred on the btmusic side because DistroKid can't deliver it, but the need recurs for any 4K / print-adjacent video surface.)
+
+**fal upscalers verified live 2026-09-24** (fal model search, "video upscale"):
+- `fal-ai/topaz/upscale/video`: **$0.01/s** (≤720p out), **$0.02/s** (720p-1080p), **$0.08/s** (>1080p); 2x at 60fps; half price on the Gaia 2 model. Also `topaz/upscale/video/{precision,creative,generative}` variants (no `fal-ai/` prefix).
+- `fal-ai/seedvr/upscale/video`: **$0.001 per megapixel of video data** (w×h×frames; 1080p × 121 frames ≈ $0.25). `target` vs `factor` mode.
+- Others listed: `fal-ai/flashvsr/upscale/video`, `fal-ai/bytedance-upscaler/upscale/video`, `clarityai/crystal-video-upscaler`, `blackforestlabs/flux-video-upscale`, `fal-ai/video-upscaler`.
+- Alternative to upscaling: `kling-o3-4k-i2v` / `-ref` already in the catalog generate native 4K at $0.42/s.
+
+**Suggested scope cut:** ship `video.upscale` first (single video in, single video out, no prompt; the thinnest slice of this TODO), Topaz + SeedVR as the two seeded routes. Interpolation / style can follow. **Open question to settle at build:** whether this can ride `fal_generate_video` + `extra_files` (`video_url`) like the #20 lip-sync routes, or whether it warrants the dedicated `fal_edit_video` transport this entry proposes.
 
 ---
 
@@ -532,6 +546,8 @@ Entries and their spec dirs deleted; every referencing guide updated. **Two of t
 
 Also lost: SparseCtrl conditioning (only AnimateDiff variant offering it) and LoRA-capable Hunyuan **i2v** (t2v LoRA survives).
 
+**Second round, 2026-09-24 (#46):** `hunyuan-video-lora-t2v` · `sana-video-t2v` · `lyra-2-zoom-i2v` also 404 on both surfaces with no successor in fal's index, and were retired the same way. Hunyuan now has **no** LoRA route at all (the guide points LoRA work at the LTX LoRA variants), `sana_prompt_guide` was removed with its only model, and Lyra-2 was the only pseudo-3D zoom route. This was the first `!` commit, and it shipped as 0.11.0; UPGRADING.md has the migration. Note that fal's model index still listed the already-dead `hunyuan-video-img2vid-lora`, so the index lags behind reality: a 404 on both surfaces is the signal to trust.
+
 ### Price changes worth knowing
 - **`ltx-video-13b-distilled-i2v` switched from per-video to per-second billing** — $0.04/video → $0.04/s, or $0.08/s with the detail pass. A 10s clip went from a flat $0.04 to $0.40–$0.80, a **10–20× jump** for anyone budgeting against the old flat rate. Its sibling `-t2v` did *not* change, so the pair no longer behaves alike. Flagged loudly in `ltx_video_prompt_guide`.
 - LTX-2.3 closed tier rose: Fast $0.04→$0.06/s, Pro i2v $0.06→$0.08/s at 1080p. Pro and Fast have each converged to one rate across t2v and i2v.
@@ -607,3 +623,103 @@ Authoritative now:
 **Trigger:** implementation when the music-video pilot is scoped (or sooner if another caller wants short-form vertical video). Re-verify the 720p/duration roadmap + `google-genai` `interactions` support at build time.
 
 ---
+
+## 20. Lip-sync / singing-performance video routes (catalog + guides) (NEW, filed 2026-09-24)
+
+**What:** Seed catalog routes + a prompt guide for fal's audio-driven performance models, so a music video can put a character on camera *singing the real vocal*. Two families:
+
+| Family | Slug candidates (all verified 200 on fal openapi 2026-09-24) | Live fal price | Notes |
+|---|---|---|---|
+| **image + audio → video** (generate a singing shot from a still keyframe) | `fal-ai/bytedance/omnihuman/v1.5` | $0.16/s | 30s/call at 1080p (60s at 720p); prompt + mask inputs; strongest singing claims (breath, high-note expression, body motion) |
+| | `minimax/h3-max/lip-sync/image-to-video` | $0.05 (480p) / $0.08 (768p) / $0.16 (1080p) / $0.32 (2K) per s | 5-15s/call (longer audio trimmed); set `enable_transcription:false` for singing |
+| | `fal-ai/ai-avatar/multi` (MultiTalk) | $0.20/s (2x at 720p) | **only live fal option for two people in one shot** (one image + one audio per person); 720p max; turn-taking, may not hold simultaneous singing |
+| | `fal-ai/infinitalk`, `fal-ai/wan/v2.2-14b/speech-to-video` | ~$0.10-0.20/s | 720p max; lower priority |
+| **video + audio → video** (re-lip-sync an existing Kling/Veo clip) | `fal-ai/sync-lipsync/v3` (sync-3) | $8/min (~$0.133/s) | Handles tight close-ups, profiles, occluders (mics, hands); `sync_mode` for duration mismatch (default `cut_off`); one face per pass |
+| | `fal-ai/sync-lipsync/react-1` | $10/min | Also re-drives expression/head motion (`emotion` enum); for when the source clip's acting is flat |
+| | `fal-ai/kling-video/lipsync/audio-to-video` | $0.014 per input-video second, **rounded up to 5s increments** | Very cheap first-pass tool; 2-10s input clips (fits Kling/Veo clip lengths) |
+
+Skip: `fal-ai/bytedance/omnihuman` (1.0, $0.14/s, superseded by 1.5), `fal-ai/sync-lipsync/v2/pro` (superseded by sync-3), `fal-ai/hunyuan-avatar` (~$0.28/s, poor value), LongCat Multi-Avatar (deprecated on fal).
+
+**Why:** btmusic (Cathode Saint) cinematic-music-video pilot. The current catalog has only `kling-ai-avatar-v2-pro` ($0.115/s, 60s audio cap on fal) and `veed-fabric-1.0` (720p ceiling, talking-head tuned). Neither is the right pick for photoreal 1080p *singing*, and there is no video+audio re-lip-sync route at all. The third-party music-video platforms evaluated 2026-09-24 (Flova, ACE Studio, MusVideo, SunoMV, Neural Frames, Freebeat, etc.) were mostly resellers of the same fal models; **on-camera lip-sync was the one capability they had that Artificer lacked.**
+
+**Likely no new transport needed.** `fal_generate_video` already maps `image_url` + `audio_url`, and `video_url` can ride `extra_params` + `extra_files` (upload via `resolveForFal`). **Confirm at build:** each output schema returns a single `video` File that the existing downloader handles; per #19's lesson, make one live call per route before calling it done (mocks can't see output-shape surprises).
+
+**Scope decision to re-open:** #6 records that video-sync (lip-sync to existing video) was *explicitly excluded from Phase 5 by user direction*. This filing asks to reverse that for the vid+audio family. It does not require building #6's general `fal_edit_video` transport.
+
+**Guide content (singing-specific, the part the vendor docs don't cover):**
+- Feed the **isolated vocal stem**, not the full mix (drums/guitars read as mouth motion; reverb tails smear word endings). Lay the full master back over the finished edit. Relates to #21.
+- Chunk long passages at **phrase boundaries** to fit per-call caps (OmniHuman 30s at 1080p, H3 Max 15s); start each chunk slightly before the vocal entrance so the first consonant has room.
+- **Duets:** no fal model reliably renders two faces singing at once. Default to single-singer shots; for a two-shot, run sync-3 twice (one face + that singer's audio per pass). Demucs does not split two vocalists, so duet vocals must be split by timestamp (mute the other voice's lines) before per-singer passes.
+- Resolution ceilings: MultiTalk / InfiniteTalk / Wan S2V / Fabric are 720p max, which rules them out for 1080p hero shots.
+
+**Not verified:** singing quality beyond vendor claims (no independent belting / sustained-vowel / fast-lyric tests found); sync-3 max duration; Kling Avatar output resolution on fal. A small bake-off (one sustained-note phrase + one fast-lyric phrase through OmniHuman 1.5, H3 Max, sync-3) would settle ranking for ~$5-10. Candidate first use of #1's generalized harness (a lip-sync rubric already exists there).
+
+**Not on fal (out of scope here):** Hedra Character-3 ($0.0625/s at 1080p, 10-min clips) is only on Hedra's own API. If the bake-off shows the fal options losing on singing, that becomes a separate non-fal provider decision.
+
+**Trigger:** btmusic music-video pilot needs an on-camera singing shot (the Beneath the Masks pilot shot list has none; the next video with a singing character would).
+
+---
+
+## 21. Audio stem separation transport (`fal_separate_audio`) (NEW, filed 2026-09-24)
+
+**What:** A transport for `fal-ai/demucs` (verified live 2026-09-24): **$0.0007/s** of input audio (a 5-min song ≈ $0.21). Inputs: `audio_url`, `model` enum (`htdemucs_6s` default; also `htdemucs`, `htdemucs_ft`, `hdemucs_mmi`, `mdx`, `mdx_extra`, `mdx_q`, `mdx_extra_q`), `stems` list (vocals / drums / bass / guitar / piano / other). Seed a new `audio.separation` catalog sub-class.
+
+**Why:** Prerequisite for #20 (lip-sync wants the isolated vocal stem). Also useful on its own: instrumental / karaoke versions, TikTok stems, cleaner Scribe v2 transcription for karaoke timing (vocals-only input should cut ASR misses on dense mixes; relates to #7).
+
+**Why a new transport, not `extra_params` on an existing one:** output is **multiple files** (one per stem), and no current fal transport downloads a multi-file result. Output handling = write each stem as `{basename}-{stem}.{ext}` next to the input (or into an `output_dir`) and return the path map.
+
+**Context:** Suno-generated tracks can export stems natively, so Cathode Saint mostly needs this for non-Suno sources (MiniMax-era Album 1 tracks are single mixed files) and as a fallback. **Limitation to document:** all models output one combined `vocals` stem; they do not separate two singers (duets).
+
+**Trigger:** the first #20 lip-sync route used on a mixed master, or the first request for an instrumental/karaoke version.
+
+---
+
+## 22. Luma Ray 3.2 routes (multi-keyframe i2v, v2v modify, reframe) (NEW, filed 2026-09-24)
+
+**What:** Seed `luma/agent/ray/v3.2/*` (note: **no `fal-ai/` prefix**, like H3), verified live 2026-09-24:
+- `.../image-to-video`: first/last frame (`image_url` + `end_image_url`) **or** `keyframes` (1-64 image URLs) + `keyframe_indexes` (output-frame positions at 24fps: 5s → 0-120, 10s → 0-240). The two modes are mutually exclusive. **10s and HDR only unlock with multi-keyframe input.** Price per 5s: $0.15 (540p) / $0.30 (720p) / **$1.20 (1080p) ≈ $0.24/s**; HDR 1080p $2.40/5s.
+- `.../video-to-video` (modify an existing clip): 1080p $2.16/5s ≈ **$0.43/s**.
+- `.../reframe` and `.../text-to-video`.
+
+**Why:** Two capabilities the current pipeline lacks. (a) **Choreographed motion inside one clip**: pin several keyframes, not just start and end. Our FLF chains (Kling O3 Pro) anchor only two frames per clip, so mid-clip beats drift (the FLF beat-sync limitation logged in btmusic's lyric-video workflow). (b) **Fix a take instead of re-rolling it** via v2v modify, which protects continuity across a long chain. Runway Aleph was the other candidate for (b) but is **not on fal**.
+
+**Context:** Check whether the existing `luma_ray_prompt_guide` covers only Ray 2; extend it rather than forking. The keyframe-index math (frame positions, not seconds) is the gotcha the guide must spell out. Cost is ~2x Kling O3 Pro per second at 1080p, so the guide should frame it as a hero-shot / repair tool, not the default chain model. `keyframes` is a URL list, so it needs `extra_files` array support (already exists in `resolveExtraFiles`).
+
+**Trigger:** a music-video shot that needs mid-clip choreography, or a chained clip worth repairing rather than regenerating.
+
+---
+
+## 23. Sora 2 routes: verify status (NEW, filed 2026-09-24, low priority)
+
+**What:** Secondary research on 2026-09-24 reported that OpenAI shut down the Sora app on 2026-04-26 and **sunsets the Sora API on 2026-09-24** (citing an OpenAI Help Center article). As of the same day, fal still answers 200 on `fal-ai/sora-2/text-to-video` and `fal-ai/sora-2/image-to-video/pro`, still lists $0.10/s, and shows **no deprecation notice**.
+
+**Why:** If upstream is gone, the fal routes will 404, or worse, get silently re-pointed. The weekly drift cron (#2) catches both 404s and deprecation notices, so this mainly guards the window before the next Monday run.
+
+**Action:** On the next drift PR (or with one cheap live call), confirm. If dead, retire the `sora-2-*` routes and update `sora_video_prompt_guide` per the #18b retirement pattern. Not verified from a primary OpenAI source.
+
+---
+
+## 24. Seamless-loop helper (`video_make_loop`) (local ffmpeg) — DONE 2026-09-24
+
+**Shipped** as `video_make_loop` with `mode: rebound | crossfade | check`. What changed from the filing below, and why:
+
+- **`target_duration` became `max_duration` + `min_duration`.** Clamping a *finished* loop to a target cuts it mid-cycle and puts the seam back. So `max_duration` trims the **source** before the loop is built, and `min_duration` repeats **whole cycles**. If both can't hold, the seamless length wins and the result carries a warning.
+- **Everything is frame-exact.** Rebound is `2n − 2` frames: the turn-around frame and the wrap frame are each dropped from the reversed half, since otherwise each shows twice and stalls. Crossfade output is `n − k` frames.
+- **The crossfade uses `blend` with a timestamp ramp, not `xfade`.** Measured: both `xfade` and a frame-counter (`N`) ramp leave a faint ghost of the tail on the last frame, so the seam scored below the clip's own frame steps. With a `T` ramp the last frame is the clean head frame, and the seam scores the same as the source's natural step (0.909 vs 0.910).
+- **The `check` verdict is relative, not a fixed threshold.** It compares the last→first SSIM against the clip's own frame-to-frame SSIMs (below the 10th percentile counts as a seam). Fast footage has low adjacent SSIM everywhere, so an absolute cutoff would fail good action loops and pass bad static ones. Every built loop is also checked, and the result reports it.
+- **Memory guard for `rebound`.** FFmpeg's `reverse` buffers the whole clip, so the tool refuses more than about 1.5 GB of decoded frames (~16s at 1080p) and names `max_duration` as the fix.
+- **Always silent H.264 yuv420p**, as filed.
+
+### Original filing (kept for history)
+
+**What:** A local (non-fal) video tool in the existing `video_*` family that turns a clip into a seamless loop for platform loop surfaces. Modes:
+- `rebound`: play forward then reversed (`reverse` + concat), dropping the duplicated turn-around frames so there is no stutter at either end. Matches Spotify Canvas's own "rebound" loop style.
+- `crossfade`: blend the tail into the head (`xfade` of the last N ms over the first N ms, output shortened by N) so a clip whose first and last frames differ still loops without a visible jump.
+- `check`: report the seam delta (e.g. SSIM/PSNR of last frame vs first frame) so a caller can tell whether a first=last-frame generation actually closed the loop before shipping it.
+Plus: `target_duration` (clamp or pad to a platform window, e.g. Canvas 3-8s), and always output **silent** (loop surfaces play over the track).
+
+**Why:** btmusic Spotify Canvas pipeline (per-track 9:16 loops, 3-8s). Canvas is harvested from music-video "loop shots" or generated standalone; generated clips rarely close the loop exactly, even with first=last-frame anchoring. Today this is hand-rolled ffmpeg every time. Also applies to Apple motion art (seamless loop is a hard rejection criterion, if that path ever opens) and to TikTok/IG ambient loops.
+
+**Context:** Building blocks already exist in `src/video/index.ts` (the `xfade` chain in `video_concatenate`, the forced `yuv420p` libx264 path) and `src/content/index.ts` (a `-reverse` use). Reverse loads the whole clip into memory, which is fine for ≤10s loops; document the length guard. Out of scope for the fal-only filings (#20-23) by design: this is local processing.
+
+**Trigger:** first btmusic Canvas export.

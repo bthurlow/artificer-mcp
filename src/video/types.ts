@@ -551,3 +551,51 @@ export const videoSetFrameRateSchema = z.object({
       'If true, uses the fps filter (frame-accurate; drops/duplicates frames to hit target). If false, uses -r (simpler but may stretch/shrink duration).',
     ),
 });
+
+/** Parameters for the video_make_loop tool */
+export interface VideoMakeLoopParams {
+  input: string;
+  output?: string;
+  mode: 'rebound' | 'crossfade' | 'check';
+  crossfade_seconds: number;
+  max_duration?: number;
+  min_duration?: number;
+}
+
+export const videoMakeLoopSchema = z.object({
+  input: z.string().describe('Path to the source video clip.'),
+  output: z
+    .string()
+    .optional()
+    .describe(
+      'Path for the looping output (mp4/mov; encoded H.264 yuv420p, no audio). Required for `rebound` and `crossfade`; ignored for `check`.',
+    ),
+  mode: z
+    .enum(['rebound', 'crossfade', 'check'])
+    .describe(
+      '`rebound`: play forward then in reverse (the Spotify Canvas "rebound" style), dropping the duplicated turn-around frames so neither end stalls. Output is about twice the source length. ' +
+        '`crossfade`: blend the last `crossfade_seconds` into the first, so a clip whose first and last frames differ loops without a jump. Output is `crossfade_seconds` shorter than the source. ' +
+        "`check`: build nothing; measure how visible the input's own last→first seam is, e.g. to test whether a first=last-frame generation actually closed the loop.",
+    ),
+  crossfade_seconds: z
+    .number()
+    .positive()
+    .default(0.5)
+    .describe(
+      'Crossfade length in seconds (`crossfade` mode). The source must be longer than twice this. Longer blends hide bigger differences but show more ghosting.',
+    ),
+  max_duration: z
+    .number()
+    .positive()
+    .optional()
+    .describe(
+      'Upper bound on the loop length in seconds (e.g. 8 for Spotify Canvas). Applied by trimming the SOURCE before the loop is built, so the result stays seamless; the finished loop is never cut mid-cycle.',
+    ),
+  min_duration: z
+    .number()
+    .positive()
+    .optional()
+    .describe(
+      'Lower bound on the output length in seconds (e.g. 3 for Spotify Canvas). Reached by repeating whole loop cycles, which keeps the seam clean. If that overshoots `max_duration`, the seamless length is kept and a warning is returned.',
+    ),
+});

@@ -1,11 +1,17 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach, afterEach, vi } from 'vitest';
+import { writeFile } from 'node:fs/promises';
 
 vi.mock('../../../src/utils/exec-ffmpeg.js', async () => {
   const { createFfmpegMock } = await import('../../helpers/mock-ffmpeg.js');
   return createFfmpegMock();
 });
 
-import { ffmpegState, resetFfmpegMock } from '../../helpers/mock-ffmpeg.js';
+import {
+  ffmpegState,
+  mockFfmpeg,
+  resetFfmpegMock,
+  setProbeOutput,
+} from '../../helpers/mock-ffmpeg.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -982,6 +988,140 @@ describe('Video Tools', () => {
       });
 
       expect(ffmpegState.calls[0].args).toContain('-shortest');
+    });
+  });
+
+  // ── video_make_loop ────────────────────────────────────────────────────
+
+  describe('video_make_loop', () => {
+    type ToolResult = { isError?: boolean; content: Array<{ type: string; text: string }> };
+
+    /** The mocked source: 90 frames (the default getVideoInfo mock is 30 fps). */
+    beforeEach(() => {
+      setProbeOutput('90\n');
+    });
+
+    /**
+     * Make the mocked ffmpeg behave like the real seam measurement: write the
+     * per-frame stats file it was pointed at, and print a summary score.
+     */
+    function mockSeamMeasurement(seam: number, adjacent: number): void {
+      mockFfmpeg.mockImplementation(async (args: string[]) => {
+        ffmpegState.calls.push({ args });
+        const graph = args[args.indexOf('-filter_complex') + 1] ?? '';
+        const statsMatch = /stats_file='([^']+)'/.exec(graph);
+        if (statsMatch) {
+          const path = statsMatch[1].replace(/\\:/g, ':');
+          const lines = Array.from({ length: 89 }, (_, i) => `n:${i + 1} All:${adjacent}`);
+          await writeFile(path, lines.join('\n'));
+          return '';
+        }
+        if (graph.includes('[last][first]ssim')) {
+          return `[Parsed_ssim_5 @ 0] SSIM Y:${seam} All:${seam} (10.0)\n`;
+        }
+        return '';
+      });
+    }
+
+    afterEach(() => {
+      mockFfmpeg.mockImplementation(async (args: string[]) => {
+        ffmpegState.calls.push({ args });
+        return '';
+      });
+    });
+
+    it('rebound: builds a silent yuv420p H.264 loop from a reverse graph', async () => {
+      mockSeamMeasurement(0.95, 0.95);
+      const result = (await client.callTool({
+        name: 'video_make_loop',
+        arguments: { input: '/tmp/clip.mp4', output: '/tmp/loop.mp4', mode: 'rebound' },
+      })) as ToolResult;
+
+      expect(result.isError).not.toBe(true);
+      const build = ffmpegState.calls[0].args;
+      const graph = build[build.indexOf('-filter_complex') + 1];
+      expect(graph).toContain('reverse,trim=start_frame=1:end_frame=89');
+      expect(build).toContain('-an');
+      expect(build[build.indexOf('-c:v') + 1]).toBe('libx264');
+      expect(build[build.indexOf('-pix_fmt') + 1]).toBe('yuv420p');
+      expect(build.at(-1)).toContain('loop.mp4');
+      expect(result.content[0].text).toContain('178 frames');
+      expect(result.content[0].text).toContain('Seam: seamless');
+    });
+
+    it('crossfade: blends tail into head', async () => {
+      mockSeamMeasurement(0.95, 0.95);
+      const result = (await client.callTool({
+        name: 'video_make_loop',
+        arguments: {
+          input: '/tmp/clip.mp4',
+          output: '/tmp/loop.mp4',
+          mode: 'crossfade',
+          crossfade_seconds: 0.5,
+        },
+      })) as ToolResult;
+
+      const graph = ffmpegState.calls[0].args[ffmpegState.calls[0].args.indexOf('-filter_complex') + 1];
+      expect(graph).toContain('[tail][head]blend=');
+      expect(result.content[0].text).toContain('75 frames');
+      expect(result.content[0].text).toContain('crossfade 15 frames');
+    });
+
+    it('min_duration repeats cycles with a stream-copy pass', async () => {
+      mockSeamMeasurement(0.95, 0.95);
+      const result = (await client.callTool({
+        name: 'video_make_loop',
+        arguments: {
+          input: '/tmp/clip.mp4',
+          output: '/tmp/loop.mp4',
+          mode: 'crossfade',
+          min_duration: 4,
+        },
+      })) as ToolResult;
+
+      const repeat = ffmpegState.calls[1].args;
+      expect(repeat[repeat.indexOf('-stream_loop') + 1]).toBe('1');
+      expect(repeat[repeat.indexOf('-c') + 1]).toBe('copy');
+      expect(repeat.at(-1)).toContain('loop.mp4');
+      // The first pass wrote a temp cycle, not the final output.
+      expect(ffmpegState.calls[0].args.at(-1)).not.toContain('loop.mp4');
+      expect(result.content[0].text).toContain('2 cycles');
+    });
+
+    it('check: measures the input and writes nothing', async () => {
+      mockSeamMeasurement(0.7, 0.95);
+      const result = (await client.callTool({
+        name: 'video_make_loop',
+        arguments: { input: '/tmp/clip.mp4', mode: 'check' },
+      })) as ToolResult;
+
+      expect(result.isError).not.toBe(true);
+      expect(result.content[0].text).toContain('visible jump');
+      // Only the two measurement passes ran, both to the null muxer.
+      expect(ffmpegState.calls).toHaveLength(2);
+      for (const call of ffmpegState.calls) expect(call.args.slice(-3)).toEqual(['-f', 'null', '-']);
+    });
+
+    it('keeps a built loop when the seam measurement fails', async () => {
+      // Default mock writes no stats file, so measurement throws.
+      const result = (await client.callTool({
+        name: 'video_make_loop',
+        arguments: { input: '/tmp/clip.mp4', output: '/tmp/loop.mp4', mode: 'rebound' },
+      })) as ToolResult;
+
+      expect(result.isError).not.toBe(true);
+      expect(result.content[0].text).toContain('Seam check could not run');
+    });
+
+    it('requires output for the build modes', async () => {
+      const result = (await client.callTool({
+        name: 'video_make_loop',
+        arguments: { input: '/tmp/clip.mp4', mode: 'rebound' },
+      })) as ToolResult;
+
+      expect(result.isError).toBe(true);
+      expect(result.content[0].text).toContain('output is required');
+      expect(ffmpegState.calls).toHaveLength(0);
     });
   });
 });
