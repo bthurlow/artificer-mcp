@@ -1,0 +1,347 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/elevenlabs/forced-alignment",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/elevenlabs/forced-alignment queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/elevenlabs/forced-alignment",
+      "category": "speech-to-text",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aa999b9/uY0VJCvmmd7X0Y6-7CxK1.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/elevenlabs/forced-alignment",
+      "documentationUrl": "https://fal.ai/models/fal-ai/elevenlabs/forced-alignment/api",
+      "about": "Align a transcript with an audio file at character and word level."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "ElevenlabsForcedAlignmentInput": {
+        "type": "object",
+        "title": "ForcedAlignmentRequest",
+        "x-fal-order-properties": [
+          "audio_url",
+          "text"
+        ],
+        "required": [
+          "audio_url",
+          "text"
+        ],
+        "properties": {
+          "audio_url": {
+            "type": "string",
+            "title": "Audio Url",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/elevenlabs/scribe_v2_in.mp3"
+            ],
+            "description": "URL of the audio file to align. The file can be up to 3 GB and the audio can be up to 10 hours long."
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text",
+            "examples": [
+              "Hey, this is a test recording for Scribe version two, which is now available on fal.ai."
+            ],
+            "description": "Transcript to align with the audio",
+            "maxLength": 675000
+          }
+        }
+      },
+      "ElevenlabsForcedAlignmentOutput": {
+        "type": "object",
+        "title": "ForcedAlignmentOutput",
+        "x-fal-order-properties": [
+          "characters",
+          "words",
+          "loss"
+        ],
+        "required": [
+          "characters",
+          "words",
+          "loss"
+        ],
+        "properties": {
+          "loss": {
+            "type": "number",
+            "title": "Loss",
+            "description": "Average alignment loss for the transcript"
+          },
+          "words": {
+            "type": "array",
+            "title": "Words",
+            "items": {
+              "$ref": "#/components/schemas/ForcedAlignmentWord"
+            },
+            "description": "Word-level alignment details"
+          },
+          "characters": {
+            "type": "array",
+            "title": "Characters",
+            "items": {
+              "$ref": "#/components/schemas/ForcedAlignmentCharacter"
+            },
+            "description": "Character-level alignment details"
+          }
+        }
+      },
+      "ForcedAlignmentWord": {
+        "type": "object",
+        "title": "ForcedAlignmentWord",
+        "x-fal-order-properties": [
+          "text",
+          "start",
+          "end",
+          "loss"
+        ],
+        "required": [
+          "text",
+          "start",
+          "end",
+          "loss"
+        ],
+        "properties": {
+          "loss": {
+            "type": "number",
+            "title": "Loss",
+            "description": "Average alignment loss for the word"
+          },
+          "start": {
+            "type": "number",
+            "title": "Start",
+            "description": "Start time in seconds"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "The aligned character"
+          },
+          "end": {
+            "type": "number",
+            "title": "End",
+            "description": "End time in seconds"
+          }
+        }
+      },
+      "ForcedAlignmentCharacter": {
+        "type": "object",
+        "title": "ForcedAlignmentCharacter",
+        "x-fal-order-properties": [
+          "text",
+          "start",
+          "end"
+        ],
+        "required": [
+          "text",
+          "start",
+          "end"
+        ],
+        "properties": {
+          "start": {
+            "type": "number",
+            "title": "Start",
+            "description": "Start time in seconds"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "The aligned character"
+          },
+          "end": {
+            "type": "number",
+            "title": "End",
+            "description": "End time in seconds"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/elevenlabs/forced-alignment/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/elevenlabs/forced-alignment/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/elevenlabs/forced-alignment": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ElevenlabsForcedAlignmentInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/elevenlabs/forced-alignment/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ElevenlabsForcedAlignmentOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

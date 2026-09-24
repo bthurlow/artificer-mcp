@@ -71,6 +71,16 @@ fal_separate_audio({ model: "fal-ai/demucs", audio: "./song.wav", output_dir: ".
 
 Typical uses: an isolated vocal for lip-sync (see `fal_lipsync_prompt_guide`) or for cleaner karaoke timing, and instrumental versions. Demucs puts every singer in one `vocals` stem; it can't split a duet. See `fal_stem_separation_prompt_guide`.
 
+## Forced alignment (fal)
+
+### align_text_to_audio
+
+Times a **known** transcript (lyrics, script, voiceover) against its audio, returning line- and word-level start/end times and optionally writing `.lrc` (synced lyrics) or `.srt` (subtitles). Each non-empty line of `text` becomes one timed line. Default model: fal's ElevenLabs forced aligner ($0.22 per started hour of audio). Requires `FAL_KEY`. Unlike ASR, the words are always exactly your text; use `fal_transcribe` when you don't have it. See the alignment section of `transcription_prompt_guide`.
+
+```
+align_text_to_audio({ audio: "./stems/song-vocals.wav", text: "line one\nline two", output: "./song.lrc" })
+```
+
 The rest of the fal audio catalog (music, SFX, TTS, dialogue, ASR) is discoverable through `model_catalog` and runs through `fal_generate_music`, `fal_generate_speech` and `fal_transcribe`. Grouped guides: `fal_music_prompt_guide`, `fal_sfx_prompt_guide`, `fal_tts_prompt_guide`, `fal_dialogue_prompt_guide`.
 
 ## Prompt guide
