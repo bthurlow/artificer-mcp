@@ -259,6 +259,7 @@ Default to **pure brackets with no cue content underneath**. In a listening bake
 | Provider | Tool                   | Model ID                      | Cost                   | Notes |
 |----------|------------------------|-------------------------------|------------------------|-------|
 | fal      | \`fal_generate_music\` | \`fal-ai/minimax-music/v2.6\` | $0.15 per generation   | Full songs with vocals. Use \`is_instrumental: true\` to disable vocals. |
+| fal      | \`fal_generate_music\` | \`minimax/music-3\` (slug \`minimax-music-3\`) | $0.002 per second of output | MiniMax Music 3, added 2026-09-24. Takes \`prompt\` and \`lyrics\` (structural args), plus \`duration\`, \`seed\`, \`num_inference_steps\`, \`guidance_scale\` via extra_params. Its spec has no \`is_instrumental\` or \`audio_setting\`, so the v2.6 notes above don't carry over. |
 
 Earlier versions (2.5, V2, V1) are also on fal under the minimax-music family with similar prompt language.
 

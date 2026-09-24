@@ -84,6 +84,7 @@ Write natural prose in the target language. Use timing markers and interjections
 | Provider | Tool                    | Model ID                        | Cost                         | Notes |
 |----------|-------------------------|---------------------------------|------------------------------|-------|
 | fal      | \`fal_generate_speech\` | \`fal-ai/minimax/speech-2.8-hd\`| $0.10 per 1000 characters    | Uses \`prompt\` not \`text\`. Set \`output_format: "url"\` in extra_params. |
+| fal      | \`fal_generate_speech\` | \`fal-ai/minimax/speech-2.8-turbo\` (slug \`minimax-speech-2.8-turbo\`) | $0.06 per 1000 characters | Faster, cheaper tier of 2.8, added 2026-09-24. Same input keys as HD (\`prompt\`, \`voice_setting\`, \`audio_setting\`, \`output_format\`, …), so the same two notes apply. |
 
 Other MiniMax speech variants on fal (Speech 2.8 Turbo, 2.6 HD, 2.6 Turbo, 02 HD, 02 Turbo) share this prompt language; pick per cost / latency trade-off. See \`model_catalog\` with capability:"speech".
 

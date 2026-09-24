@@ -238,7 +238,13 @@ Also unlocks the simpler cases — generic transcription for content moderation,
 
 ---
 
-## 7. Forced-alignment via ASR-wrapper (`align_text_to_audio`)
+## 7. Forced alignment (`align_text_to_audio`) — PLAN CHANGED 2026-09-24, in progress
+
+**The premise below is out of date: fal now hosts a real forced aligner.** `fal-ai/elevenlabs/forced-alignment` (listed 2026-09-08) takes `audio_url` + `text` and returns `words[]` and `characters[]`, each with `start` / `end` seconds, plus a per-word and overall alignment `loss`. That is true acoustic alignment against the known script, so the ASR-wrapper and Needleman-Wunsch plan below is no longer needed. Price: $0.22 per hour of input, **rounded up to a whole hour**, so every call costs at least $0.22.
+
+New plan: `align_text_to_audio` wraps that model and adds what the karaoke/lyric pipelines need on top: line-level timings from the known script's own line breaks, low-confidence words flagged from `loss`, and optional LRC / SRT output. It seeds `transcription.alignment`. It was kept out of the audio catalog PR on purpose: `fal_transcribe` would parse its `words[]` but joins word texts with no separator (right for Scribe's spacing tokens, wrong here), so it needs its own tool.
+
+### Original filing (kept for history)
 
 **What:** A non-fal alignment tool that takes an audio file plus a known transcript and returns precise word-level (and possibly syllable-level) timestamps. Implementation v1: wrap `fal_transcribe` (scribe-v2), then string-match the ASR output against the known transcript and redistribute the timing onto the canonical text. Bypasses ASR errors when the transcript is authoritative (e.g., TTS source script, song lyrics, a known voiceover script).
 
@@ -467,7 +473,11 @@ The input schema is located via the POST operation's `requestBody.$ref`, not by 
 
 **Scope note:** wired to `fal_generate_music` only, which is what this item filed. `fal_generate_video` / `_speech` / `_transcribe` have the identical silent-drop exposure and the checker is model-agnostic — adopting it there is a one-line change per transport, deliberately not taken here to keep the blast radius to the filed scope. Filed as **#16b**.
 
-## 16b. Extend the extra_params warning to the other fal transports (NEW, filed 2026-08-15)
+## 16b. Extend the extra_params warning to the other fal transports — DONE 2026-09-24
+
+**Shipped** across the 2026-09-24 catalog PRs: `fal_generate_speech`, `fal_transcribe` and the new `fal_separate_audio` (audio PR), `fal_generate_video` (video PR) and the new `fal_generate_image` (image PR) all call `checkExtraParams`, as `fal_generate_music` already did. The stderr-noise concern stands as written below, but it only fires for keys fal is already dropping silently, which is exactly what the new catalog's per-model knob differences make likely (e.g. Mirelo's `text_prompt`, Seed Audio's `prompt`).
+
+### Original filing (kept for history)
 
 **What:** `checkExtraParams` is generic and covers all 262 catalogued models, but only `fal_generate_music` calls it. Add the same three-line block to `fal_generate_video`, `fal_generate_speech`, and `fal_transcribe`.
 
@@ -660,7 +670,11 @@ Skip: `fal-ai/bytedance/omnihuman` (1.0, $0.14/s, superseded by 1.5), `fal-ai/sy
 
 ---
 
-## 21. Audio stem separation transport (`fal_separate_audio`) (NEW, filed 2026-09-24)
+## 21. Audio stem separation transport (`fal_separate_audio`) — DONE 2026-09-24
+
+**Shipped:** `fal_separate_audio({ model, audio, output_dir, basename?, stems?, extra_params? })`, with a new `audio` catalog capability, sub-class `separation`, seeded with `fal-ai/demucs` (slug `demucs-stem-separation`, $0.0007/s of input). It writes each stem the model returns as `<basename>-<stem>.<ext>` (extension taken from the returned file, never forced) and returns the stem → path map. Demucs's own `model` input (network choice, e.g. `htdemucs_6s` for guitar/piano) goes in `extra_params`, since the top-level `model` is the fal endpoint. Guide: `fal_stem_separation_prompt_guide`, including the duet limitation below. `fal-ai/sam-audio/*` was considered and left out: its output is `{target, residual}` (one prompted source), not per-stem files, so it would need its own shape.
+
+### Original filing (kept for history)
 
 **What:** A transport for `fal-ai/demucs` (verified live 2026-09-24): **$0.0007/s** of input audio (a 5-min song ≈ $0.21). Inputs: `audio_url`, `model` enum (`htdemucs_6s` default; also `htdemucs`, `htdemucs_ft`, `hdemucs_mmi`, `mdx`, `mdx_extra`, `mdx_q`, `mdx_extra_q`), `stems` list (vocals / drums / bass / guitar / piano / other). Seed a new `audio.separation` catalog sub-class.
 
@@ -689,7 +703,11 @@ Skip: `fal-ai/bytedance/omnihuman` (1.0, $0.14/s, superseded by 1.5), `fal-ai/sy
 
 ---
 
-## 23. Sora 2 routes: verify status (NEW, filed 2026-09-24, low priority)
+## 23. Sora 2 routes: verify status — CLOSED 2026-09-24 (covered by the drift cron)
+
+Closed without separate work: the weekly drift job (#2) catches both failure modes this item worried about. A dead route 404s and turns the job red; a silent redirect shows up as a `deprecated` notice. Its first run after the #46 fix (2026-09-24) reported neither for `sora-2-*`. If a Monday run flags them, retire them per the #18b pattern.
+
+### Original filing (kept for history)
 
 **What:** Secondary research on 2026-09-24 reported that OpenAI shut down the Sora app on 2026-04-26 and **sunsets the Sora API on 2026-09-24** (citing an OpenAI Help Center article). As of the same day, fal still answers 200 on `fal-ai/sora-2/text-to-video` and `fal-ai/sora-2/image-to-video/pro`, still lists $0.10/s, and shows **no deprecation notice**.
 
@@ -750,3 +768,17 @@ Plus: `target_duration` (clamp or pad to a platform window, e.g. Canvas 3-8s), a
 - Sniff reference-image MIME from magic bytes, not the extension.
 
 **Trigger:** now. It affects every brand asset produced through this route.
+
+---
+
+## 26. Video-to-audio (foley / SFX for silent clips) (NEW, filed 2026-09-24, follow-up)
+
+**What:** Generate sound effects and ambience synchronized to what is on screen, from a silent video: footsteps on the frames they land, impacts, weather. fal hosts several current models (from its `video-to-audio` category, 2026-09-24): Mirelo SFX 1.6 / 1.5 video-to-audio, HunyuanVideo-Foley, MMAudio v2, Kling video-to-audio, ThinkSound, Sonilo.
+
+**Why:** Many video models return silent clips (Wan, most LTX, Hunyuan, many i2v models). Social b-roll, ads and product shots need believable sound, and a controllable SFX layer can replace a model's baked-in audio (Veo 3, Kling 3, Seedance 2, Omni), which cannot be adjusted.
+
+**Why not now:** btmusic's audio is the song, and Spotify Canvas loops are silent by design. Newer flagship video models increasingly generate their own audio. Deferred on 2026-09-24 by user direction.
+
+**Likely shape:** a `video` input on `fal_generate_music` (→ `video_url`, same as the video transport got in the catalog-expansion PR), plus catalog entries under `music.sfx` and a grouped guide. Check each model's output: some return a muxed video rather than audio.
+
+**Trigger:** first pipeline that needs synchronized SFX on silent generated footage.

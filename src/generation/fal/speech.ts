@@ -3,6 +3,7 @@ import { registerTool } from '../../utils/register.js';
 import { downloadAndWrite } from '../utils/download-and-write.js';
 import { getFalClient } from './client.js';
 import { parseFalError } from './errors.js';
+import { checkExtraParams } from './extra-params.js';
 import { resolveForFal, resolveExtraFiles } from './inputs.js';
 import { type FalGenerateSpeechParams, falGenerateSpeechSchema } from './types-audio.js';
 
@@ -109,6 +110,11 @@ export function registerFalSpeechTools(server: McpServer): void {
               `but also as structural arg(s); structural args win. ` +
               `Remove from extra_params to silence this warning.`,
           );
+        }
+        // Keys the model's spec doesn't accept are dropped by fal without an
+        // error (TODO #16b). Diagnostic only; the payload is sent as built.
+        for (const warning of await checkExtraParams('fal_generate_speech', model, mergedExtra)) {
+          console.error(warning);
         }
 
         let result;
