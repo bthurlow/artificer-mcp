@@ -158,6 +158,7 @@ export interface NanobananaGenerateImageParams {
   output: string;
   reference_images?: string[];
   aspect_ratio?: string;
+  image_size?: '1K' | '2K' | '4K';
   include_text: boolean;
 }
 
@@ -182,6 +183,12 @@ export const nanobananaGenerateImageSchema = z.object({
     .string()
     .optional()
     .describe('Optional aspect ratio hint — "1:1", "3:4", "4:3", "9:16", "16:9".'),
+  image_size: z
+    .enum(['1K', '2K', '4K'])
+    .optional()
+    .describe(
+      'Output resolution tier. Omit for the API default, 1K (e.g. 896×1200 at 3:4). "2K" and "4K" cost more per image; see gemini_nanobanana_prompt_guide for per-tier pricing. Supported by the Gemini 3 image models; older models may reject it.',
+    ),
   include_text: z
     .boolean()
     .default(false)

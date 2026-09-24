@@ -723,3 +723,30 @@ Plus: `target_duration` (clamp or pad to a platform window, e.g. Canvas 3-8s), a
 **Context:** Building blocks already exist in `src/video/index.ts` (the `xfade` chain in `video_concatenate`, the forced `yuv420p` libx264 path) and `src/content/index.ts` (a `-reverse` use). Reverse loads the whole clip into memory, which is fine for ≤10s loops; document the length guard. Out of scope for the fal-only filings (#20-23) by design: this is local processing.
 
 **Trigger:** first btmusic Canvas export.
+
+## 25. nano-banana: output format mismatch + no resolution knob — DONE 2026-09-24
+
+**Shipped**, with all three fix options:
+- **Format follows the extension.** The returned bytes are sniffed (magic bytes, not the API's MIME type), and when they disagree with a `.png` / `.jpg` / `.webp` / `.gif` output they are converted with ImageMagick. Matching bytes are written untouched. An extension the tool cannot convert to (e.g. `.tiff`) is written as-is, and the result says what the bytes actually are, instead of mislabeling silently. The result line now reports pixel size and any conversion: `saved to bust.png (896×1200, converted from JPEG to PNG)`. Requesting PNG from the API is not possible: `outputMimeType` / `imageOutputOptions` are Vertex-only per the SDK types.
+- **`image_size`: `1K | 2K | 4K`**, sent only when set, so existing calls keep the 1K default. Values come from the pinned SDK's `ImageConfig` type. **Not yet confirmed live** (no `GOOGLE_API_KEY` in the dev shell). The first real 2K call should confirm that the result reports the larger dimensions.
+- **Reference images** are sent with the MIME type of their bytes, falling back to the extension.
+
+**Alternative noted, not taken:** fal hosts the same model (`fal-ai/nano-banana-2`) with native `output_format` and `resolution` knobs, at about 6–20% more per image ($0.08 at 1K vs $0.067 direct). Relevant to #5.
+
+### Original filing (kept for history)
+
+**Observed (btmusic vocalist busts, 2026-09-24):** every `gemini_nanobanana_generate_image` call with `output: "*.png"` (models `gemini-3-pro-image` and `gemini-3.1-flash-image`) wrote **JPEG bytes into a `.png` file** (`magick identify` → `JPEG 896x1200`). All outputs were **896×1200** at 3:4 (≈1K), although the catalog prices 2K and 4K tiers for this model.
+
+**Cause (read in `src/generation/nanobanana.ts`):**
+1. Line ~98-108: `ext = extname(output) || '.png'`, then the returned `inlineData` bytes are written verbatim with `inline.mimeType ?? 'image/png'`. The model returns `image/jpeg`; nothing converts or renames, so the extension lies.
+2. No image-size parameter is sent (Gemini image config `imageSize` e.g. `"1K" | "2K" | "4K"` on the models that support it), so every call gets the default ~1K. There is no way to buy the 2K/4K tier the catalog advertises.
+3. Latent: `mimeFromPath(reference_images[i])` trusts the extension, so these same mislabeled files get sent back as `image/png` when reused as references. It worked in practice, but it is the wrong MIME type on the wire.
+
+**Why it matters:** downstream tools that key off the extension break silently. btmusic's brand-metadata pipeline writes **PNG tEXt** chunks, which do not exist in a JPEG, so assets would ship untagged. Canonical brand masters also need ≥2K. (btmusic worked around it by re-encoding with `magick ... PNG:out.png`.)
+
+**Fix options:**
+- Honor the requested extension: if `output` ends in `.png` and the model returned JPEG, transcode (sharp/ImageMagick is already a dependency of the image tools), or write the true extension and return the real path. At minimum return the actual MIME type/extension in the tool result and warn.
+- Add `image_size` (`1K`/`2K`/`4K`) to the tool schema, pass it through to the Gemini image config, and document the per-tier price from `model_catalog` in `gemini_nanobanana_prompt_guide`.
+- Sniff reference-image MIME from magic bytes, not the extension.
+
+**Trigger:** now. It affects every brand asset produced through this route.

@@ -9,7 +9,7 @@ artificer-mcp ships AI-powered image generation via Google's Gemini stack.
 | `gemini_generate_image` | Imagen 4 (`imagen-4.0-generate-001`) | Text-to-image generation |
 | `gemini_edit_image` | Imagen 3 capability (`imagen-3.0-capability-001`) | Edit an existing image from a text instruction |
 | `gemini_upscale_image` | Imagen upscale (`imagen-4.0-upscale-preview`) | Upscale an existing image 2× or 4× |
-| `gemini_nanobanana_generate_image` | Gemini 2.5 Flash Image (`gemini-2.5-flash-image`) | Fast, low-cost alternative image generator |
+| `gemini_nanobanana_generate_image` | Nano Banana 2 (`gemini-3.1-flash-image`) by default | Generation, edits and composites from reference images. `image_size` picks 1K/2K/4K, and the file format follows the output extension |
 
 All four accept per-call `model` overrides. Env fallbacks (see [README](../README.md#environment-variables)): `ARTIFICER_IMAGEN_MODEL`, `ARTIFICER_IMAGEN_EDIT_MODEL`, `ARTIFICER_IMAGEN_UPSCALE_MODEL`, `ARTIFICER_NANOBANANA_MODEL`.
 

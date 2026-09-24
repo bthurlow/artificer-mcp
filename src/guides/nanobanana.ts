@@ -88,6 +88,8 @@ The \`aspect_ratio\` you pass must match the aspect ratio of the downstream dest
 - **gemini-3.1-flash-image** (Nano Banana 2) — Production default. Fast (seconds, not minutes). Override via \`ARTIFICER_NANOBANANA_MODEL\` env var.
 - **Siblings** you can pass explicitly via \`model\` or the env override: \`gemini-3.1-flash-lite-image\` (Nano Banana 2 Lite — cheaper/faster) and \`gemini-3-pro-image\` (Nano Banana Pro — highest fidelity). \`gemini-2.5-flash-image\` is the previous generation and still active.
 - **Resolution drives cost** — roughly $0.045 per 0.5K image, $0.067 per 1K, $0.101 per 2K, $0.151 per 4K.
+- **image_size**: \`"1K"\` (the API default when omitted, e.g. 896×1200 at 3:4), \`"2K"\` or \`"4K"\`. Omitting it always gets you ~1K, so pass \`"2K"\` or more for brand masters and print. Older models (\`gemini-2.5-flash-image\`) may reject it.
+- **Output format follows your extension.** The model picks its own encoding (in practice JPEG, even for a \`.png\` request), and the Gemini API has no option to request a format. The tool converts locally when the bytes and the extension disagree (\`.png\`, \`.jpg\`, \`.webp\`, \`.gif\`), and the result reports the size and any conversion. PNG output matters for PNG-only features such as tEXt metadata chunks; a JPEG in a \`.png\` file silently loses them.
 - **aspect_ratio**: Optional hint but strongly recommended when composition matters. Common values: 1:1, 3:4, 4:3, 9:16, 16:9, 4:5, 2:3, 1.91:1. See "Aspect ratio" section above for the interop rule with Veo image-to-video.
 - **include_text**: If true, the model can emit a text commentary alongside the image — useful when you want the model to _explain_ what it changed.
 - **No negative prompts / seed / enhance_prompt / safety knobs.** These were Imagen-only and Imagen is retired — there is no route that offers them. **Express exclusions as positive prompt language**: instead of \`negative_prompt: "blurry, text, watermark"\`, write "…sharp focus throughout, clean composition with no text, lettering, or watermarks." Use explicit preservation language on edits ("keep the lighting", "do not change the pose").
@@ -96,11 +98,12 @@ The \`aspect_ratio\` you pass must match the aspect ratio of the downstream dest
 
 | Provider | Tool                                  | Model ID                    | Cost                   | Notes |
 |----------|---------------------------------------|-----------------------------|------------------------|-------|
-| google   | \`gemini_nanobanana_generate_image\`  | \`gemini-3.1-flash-image\`  | $0.045 (0.5K) / $0.067 (1K) / $0.101 (2K) / $0.151 (4K) per image | Multimodal (text + reference images). Exposes \`aspect_ratio\`, \`reference_images[]\`, \`include_text\`. No \`seed\` / \`number_of_images\` / \`negative_prompt\` / safety knobs. |
+| google   | \`gemini_nanobanana_generate_image\`  | \`gemini-3.1-flash-image\`  | $0.045 (0.5K) / $0.067 (1K) / $0.101 (2K) / $0.151 (4K) per image | Multimodal (text + reference images). Exposes \`aspect_ratio\`, \`image_size\`, \`reference_images[]\`, \`include_text\`. No \`seed\` / \`number_of_images\` / \`negative_prompt\` / safety knobs. |
 
 Nano-banana is Google-route only. Fal hosts other multimodal image models (Flux, Seedream, etc.) — those are their own logical models with their own guides when the fal image transport lands.
 
 ## Last verified
+2026-09-24: \`image_size\` added, and output is converted to match the requested extension (TODO #25, from btmusic: every \`.png\` request had written JPEG bytes at ~1K). The \`imageSize\` values come from the pinned \`@google/genai\` ImageConfig type; not yet confirmed with a live 2K/4K call.
 2026-08-15 against artificer-mcp — prompt structure, aspect interop rule, and reference-image limits validated through shipping use. Model ID promoted from \`gemini-2.5-flash-image\` to \`gemini-3.1-flash-image\` and pricing added, verified against ai.google.dev model + pricing docs 2026-08-15.
 
 ## Official References
