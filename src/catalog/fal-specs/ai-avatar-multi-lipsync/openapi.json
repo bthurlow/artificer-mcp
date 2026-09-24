@@ -1,0 +1,409 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/ai-avatar/multi",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/ai-avatar/multi queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/ai-avatar/multi",
+      "category": "image-to-video",
+      "thumbnailUrl": "https://storage.googleapis.com/fal_cdn/fal/Sound.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/ai-avatar/multi",
+      "documentationUrl": "https://fal.ai/models/fal-ai/ai-avatar/multi/api",
+      "about": "MultiTalk model generates a two-person talking avatar video from an image\nand one or two audio files."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "AiAvatarMultiInput": {
+        "title": "AvatarMultiAudioPersonRequest",
+        "required": [
+          "image_url",
+          "first_audio_url",
+          "prompt"
+        ],
+        "x-fal-order-properties": [
+          "image_url",
+          "first_audio_url",
+          "second_audio_url",
+          "prompt",
+          "num_frames",
+          "resolution",
+          "seed",
+          "use_only_first_audio",
+          "acceleration"
+        ],
+        "type": "object",
+        "properties": {
+          "resolution": {
+            "default": "480p",
+            "description": "Resolution of the video to generate. Must be either 480p or 720p.",
+            "enum": [
+              "480p",
+              "720p"
+            ],
+            "type": "string",
+            "title": "Resolution"
+          },
+          "acceleration": {
+            "default": "regular",
+            "description": "The acceleration level to use for generation.",
+            "enum": [
+              "none",
+              "regular",
+              "high"
+            ],
+            "type": "string",
+            "title": "Acceleration"
+          },
+          "first_audio_url": {
+            "examples": [
+              "https://v3.fal.media/files/monkey/1XKPx3Xu-IhNLbuinVSwP_output.mp3"
+            ],
+            "description": "The URL of the Person 1 audio file.",
+            "title": "First Audio URL",
+            "type": "string"
+          },
+          "second_audio_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "https://v3.fal.media/files/zebra/oVKyL8JZ1K2GreeIMxVzm_output.mp3"
+            ],
+            "description": "The URL of the Person 2 audio file.",
+            "title": "Second Audio URL"
+          },
+          "prompt": {
+            "examples": [
+              "A smiling man and woman wearing headphones sit in front of microphones, appearing to host a podcast. They are engaged in conversation, looking at each other and the camera as they speak. The scene captures a lively and collaborative podcasting session."
+            ],
+            "description": "The text prompt to guide video generation.",
+            "title": "Prompt",
+            "type": "string"
+          },
+          "use_only_first_audio": {
+            "default": false,
+            "description": "Whether to use only the first audio file.",
+            "title": "Use Only First Audio",
+            "type": "boolean"
+          },
+          "num_frames": {
+            "default": 181,
+            "minimum": 41,
+            "description": "Number of frames to generate. Must be between 81 to 129 (inclusive). If the number of frames is greater than 81, the video will be generated with 1.25x more billing units.",
+            "title": "Number of Frames",
+            "type": "integer",
+            "maximum": 241
+          },
+          "image_url": {
+            "examples": [
+              "https://v3.fal.media/files/elephant/Q2ZU6q-d-1boGXhpDgWs9_15a22f816fd34cad969b2329946267b3.png"
+            ],
+            "description": "URL of the input image. If the input image does not match the chosen aspect ratio, it is resized and center cropped.",
+            "title": "Image URL",
+            "type": "string"
+          },
+          "seed": {
+            "default": 81,
+            "minimum": 0,
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "title": "Seed",
+            "type": "integer",
+            "maximum": 4294967295
+          }
+        }
+      },
+      "AiAvatarMultiOutput": {
+        "title": "AvatarMultiAudioResponse",
+        "required": [
+          "video",
+          "seed"
+        ],
+        "x-fal-order-properties": [
+          "video",
+          "seed"
+        ],
+        "type": "object",
+        "properties": {
+          "video": {
+            "examples": [
+              {
+                "file_size": 704757,
+                "url": "https://v3.fal.media/files/kangaroo/uAF7N-Ow8WwuvbFw8J4Br_ab27ac57e9464dbea1ef78f7a25469d2.mp4",
+                "content_type": "application/octet-stream",
+                "file_name": "ab27ac57e9464dbea1ef78f7a25469d2.mp4"
+              }
+            ],
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video file."
+          },
+          "seed": {
+            "description": "The seed used for generation.",
+            "title": "Seed",
+            "type": "integer"
+          }
+        }
+      },
+      "File": {
+        "title": "File",
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object",
+        "properties": {
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/ai-avatar/multi/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/ai-avatar/multi/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/ai-avatar/multi": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiAvatarMultiInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/ai-avatar/multi/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiAvatarMultiOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

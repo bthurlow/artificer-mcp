@@ -140,6 +140,18 @@ Validated 2026-04-24 against artificer-mcp v0.9.0 in the Q2 talking-head bake-of
 | \`wan-alpha-t2v\` | \`fal-ai/wan-alpha\` |
 | \`krea-wan-14b-t2v\` | \`fal-ai/krea-wan-14b/text-to-video\` |
 
+## Newer routes (added 2026-09-24)
+Added in the 2026-09-24 fal catalog refresh. Model descriptions are fal's own; inputs come from each route's committed spec (\`src/catalog/fal-specs/<slug>/openapi.json\`). The sections above predate these routes and were not re-verified against them, so check a newer model's spec before assuming it matches.
+
+| Slug | Model (fal's description) | Inputs (**required**, then notable) |
+|------|----------------------------|--------------------------------------|
+| \`wan-3.0-prime-t2v\` | Wan 3.0 Prime Text-to-Video transforms written prompts into polished videos with accelerated generation, fluid motion, strong scene fidelity, and coherent vi… | **\`prompt\`**, \`duration\`, \`aspect_ratio\`, \`resolution\` (+5 more) |
+| \`wan-3.0-prime-i2v\` | Wan 3.0 Prime Image-to-Video turns still images into dynamic, cinematic sequences with rapid turnaround, natural motion, and excellent visual continuity. It… | **\`start_image_url\`**, \`end_image_url\`, \`prompt\`, \`aspect_ratio\`, \`duration\`, \`resolution\` (+5 more) |
+| \`wan-3.0-prime-ref\` | Wan 3.0 Prime Reference-to-Video combines reference images, videos, and audio into a unified video with fast generation and strong multimodal coherence. It f… | \`prompt\`, \`aspect_ratio\`, \`duration\`, \`reference_image_urls\`, \`resolution\` (+9 more) |
+| \`wan-3.0-t2v\` | Wan 3.0 is the latest generation AI video model, delivering enhanced motion smoothness, superior scene fidelity, and greater visual coherence. | **\`prompt\`**, \`aspect_ratio\`, \`duration\`, \`resolution\` (+5 more) |
+| \`wan-3.0-i2v\` | Wan 3.0 is the latest generation AI video model, delivering enhanced motion smoothness, superior scene fidelity, and greater visual coherence. | **\`start_image_url\`**, \`prompt\`, \`aspect_ratio\`, \`duration\`, \`resolution\`, \`end_image_url\` (+5 more) |
+| \`wan-3.0-ref\` | Wan 3.0 is the latest generation AI video model, delivering enhanced motion smoothness, superior scene fidelity, and greater visual coherence. | \`prompt\`, \`aspect_ratio\`, \`reference_image_urls\`, \`duration\`, \`resolution\` (+9 more) |
+
 ## Last verified
 - Wan 2.7 talking-head: 2026-04-24 (Q2 bake-off).
 - Full family seed: 2026-04-28.

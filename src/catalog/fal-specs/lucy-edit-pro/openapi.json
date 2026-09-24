@@ -1,0 +1,364 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for decart/lucy-edit/pro",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the decart/lucy-edit/pro queue.",
+    "x-fal-metadata": {
+      "endpointId": "decart/lucy-edit/pro",
+      "category": "video-to-video",
+      "thumbnailUrl": "https://v3.fal.media/files/kangaroo/_g9nFjAdwfSx3rZckDkCG_7076290e770c43a094a751a42799f16b.jpg",
+      "playgroundUrl": "https://fal.ai/models/decart/lucy-edit/pro",
+      "documentationUrl": "https://fal.ai/models/decart/lucy-edit/pro/api",
+      "about": "Generate a video from an input video and text prompt using AI video generation\nmodels.\n\nThis endpoint accepts a base64-encoded video and a text prompt, then returns\nan MP4 video file with H.264 encoding."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "LucyEditProInput": {
+        "properties": {
+          "resolution": {
+            "default": "720p",
+            "const": "720p",
+            "description": "Resolution of the generated video",
+            "title": "Resolution",
+            "type": "string"
+          },
+          "enhance_prompt": {
+            "default": true,
+            "description": "Whether to enhance the prompt for better results.",
+            "title": "Enhance Prompt",
+            "type": "boolean"
+          },
+          "video_url": {
+            "examples": [
+              "https://v3.fal.media/files/monkey/GI7ArkqpQVk3M6V1C_epr_original.mp4"
+            ],
+            "description": "URL of the video to edit",
+            "title": "Video Url",
+            "type": "string"
+          },
+          "sync_mode": {
+            "default": true,
+            "description": "\n            If set to true, the function will wait for the video to be generated\n            and uploaded before returning the response. This will increase the\n            latency of the function but it allows you to get the video directly\n            in the response without going through the CDN.\n        ",
+            "title": "Sync Mode",
+            "type": "boolean"
+          },
+          "prompt": {
+            "examples": [
+              "Transform the woman's outfit into a regal medieval gown with flowing velvet fabric, intricate gold embroidery, and a jeweled crown, giving her the appearance of a queen."
+            ],
+            "description": "Text description of the desired video content",
+            "maxLength": 1500,
+            "title": "Prompt",
+            "type": "string"
+          },
+          "seed": {
+            "description": "Seed for video generation. If not provided, a random seed will be used.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          }
+        },
+        "x-fal-order-properties": [
+          "prompt",
+          "video_url",
+          "sync_mode",
+          "enhance_prompt",
+          "seed",
+          "resolution"
+        ],
+        "title": "LucyEditProInput",
+        "required": [
+          "prompt",
+          "video_url"
+        ],
+        "type": "object"
+      },
+      "LucyEditProOutput": {
+        "properties": {
+          "video": {
+            "examples": [
+              {
+                "file_size": 687298,
+                "file_name": "generated_video.mp4",
+                "content_type": "video/mp4",
+                "url": "https://v3b.fal.media/files/b/lion/j1BSX8UnGbBZeJXqSWg2E_generated_video.mp4"
+              }
+            ],
+            "description": "The generated video",
+            "$ref": "#/components/schemas/File"
+          }
+        },
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "title": "LucyEditProOutput",
+        "required": [
+          "video"
+        ],
+        "type": "object"
+      },
+      "File": {
+        "properties": {
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name"
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "title": "File",
+        "required": [
+          "url"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/decart/lucy-edit/pro/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/decart/lucy-edit/pro/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/decart/lucy-edit/pro": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LucyEditProInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/decart/lucy-edit/pro/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LucyEditProOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

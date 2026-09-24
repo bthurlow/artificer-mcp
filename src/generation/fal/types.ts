@@ -21,6 +21,7 @@ export interface FalGenerateVideoParams {
   output: string;
   image?: string;
   audio?: string;
+  video?: string;
   duration_seconds?: number;
   aspect_ratio?: string;
   resolution?: string;
@@ -55,6 +56,12 @@ export const falGenerateVideoSchema = z.object({
     .optional()
     .describe(
       'Input audio URL or local path for audio-driven models (Wan 2.7, Kling AI Avatar, veed/fabric). Same resolution rules as `image`.',
+    ),
+  video: z
+    .string()
+    .optional()
+    .describe(
+      'Input video URL or local path → `video_url`, for video-to-video models (upscale, restore, edit, restyle, lip-sync). Same resolution rules as `image`. Many v2v models bill per second of INPUT video; check the prompt guide.',
     ),
   duration_seconds: z
     .number()

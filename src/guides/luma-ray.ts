@@ -103,6 +103,14 @@ For first-last-frame (i2v with both \`image_url\` and \`end_image_url\`), descri
 
 All four route through \`fal_generate_video\` with \`FAL_KEY\`. No Google or direct-Luma route in this catalog.
 
+## Newer routes (added 2026-09-24)
+Added in the 2026-09-24 fal catalog refresh. Model descriptions are fal's own; inputs come from each route's committed spec (\`src/catalog/fal-specs/<slug>/openapi.json\`). The sections above predate these routes and were not re-verified against them, so check a newer model's spec before assuming it matches.
+
+| Slug | Model (fal's description) | Inputs (**required**, then notable) |
+|------|----------------------------|--------------------------------------|
+| \`luma-ray-3.2-t2v\` | Luma Ray 3.2 generates cinematic video from a text prompt, with control over resolution, duration, and seamless looping, plus reference images to lock in sub… | **\`prompt\`**, \`aspect_ratio\`, \`resolution\`, \`duration\` (+3 more) |
+| \`luma-ray-3.2-i2v\` | Luma Ray 3.2 animates a source image into cinematic motion guided by a text prompt, preserving the starting frame's look while controlling resolution, durati… | **\`prompt\`**, \`image_url\`, \`end_image_url\`, \`duration\`, \`keyframe_indexes\`, \`keyframes\`, \`aspect_ratio\`, \`resolution\` (+3 more) |
+
 ## Last verified
 2026-04-28 — initial seed of full fal video catalog. Pricing and input schemas grounded in committed fal-specs (luma-ray-2-t2v, luma-ray-2-i2v, luma-ray-2-flash-t2v, luma-ray-2-flash-i2v).
 

@@ -1,0 +1,436 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/kling-video/o3/4k/text-to-video",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/kling-video/o3/4k/text-to-video queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/kling-video/o3/4k/text-to-video",
+      "category": "text-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a9740a0/uJcikAkIJZE8L06x0HY5R_78d7451cfa254ef7bbd247305bc1b84c.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/kling-video/o3/4k/text-to-video",
+      "documentationUrl": "https://fal.ai/models/fal-ai/kling-video/o3/4k/text-to-video/api",
+      "about": "Generate a video from text prompt using O3 model (4k mode).\n\nO3 4k produces ultra-high-resolution output. Only the Singapore server\nsupports this mode."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "KlingVideoO34kTextToVideoInput": {
+        "properties": {
+          "aspect_ratio": {
+            "default": "16:9",
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1"
+            ],
+            "description": "Aspect ratio of the generated video.",
+            "title": "Aspect Ratio",
+            "type": "string"
+          },
+          "prompt": {
+            "examples": [
+              "A mecha lands on the ground to save the city, and says \"I'm here\", in anime style"
+            ],
+            "description": "Text prompt for video generation. Required unless multi_prompt is provided.",
+            "anyOf": [
+              {
+                "maxLength": 2500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt"
+          },
+          "duration": {
+            "default": "5",
+            "enum": [
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "description": "Video duration in seconds (3-15s).",
+            "title": "Duration",
+            "type": "string"
+          },
+          "multi_prompt": {
+            "examples": [
+              null
+            ],
+            "description": "List of prompts for multi-shot video generation.",
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/KlingV3MultiPromptElement"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Multi Prompt"
+          },
+          "generate_audio": {
+            "default": false,
+            "description": "Whether to generate native audio for the video.",
+            "title": "Generate Audio",
+            "type": "boolean"
+          },
+          "shot_type": {
+            "default": "customize",
+            "enum": [
+              "customize",
+              "intelligent"
+            ],
+            "description": "The type of multi-shot video generation. 'intelligent' lets the model automatically determine shot structure.",
+            "title": "Shot Type",
+            "type": "string"
+          }
+        },
+        "x-fal-order-properties": [
+          "prompt",
+          "duration",
+          "aspect_ratio",
+          "generate_audio",
+          "multi_prompt",
+          "shot_type"
+        ],
+        "title": "O3_4kTextToVideoInput",
+        "type": "object"
+      },
+      "KlingVideoO34kTextToVideoOutput": {
+        "required": [
+          "video"
+        ],
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "title": "O3_4kTextToVideoOutput",
+        "description": "Output for O3 4k text-to-video endpoint.",
+        "type": "object",
+        "properties": {
+          "video": {
+            "examples": [
+              {
+                "file_size": 13096952,
+                "file_name": "output.mp4",
+                "content_type": "video/mp4",
+                "url": "https://v3b.fal.media/files/b/0a8d04e2/idOb9V-Q9ujlggPSKqsfS_output.mp4"
+              }
+            ],
+            "description": "The generated video.",
+            "$ref": "#/components/schemas/File"
+          }
+        }
+      },
+      "KlingV3MultiPromptElement": {
+        "required": [
+          "prompt"
+        ],
+        "x-fal-order-properties": [
+          "prompt",
+          "duration"
+        ],
+        "title": "KlingV3MultiPromptElement",
+        "properties": {
+          "duration": {
+            "default": "5",
+            "enum": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6",
+              "7",
+              "8",
+              "9",
+              "10",
+              "11",
+              "12",
+              "13",
+              "14",
+              "15"
+            ],
+            "description": "The duration of this shot in seconds",
+            "title": "Duration",
+            "type": "string"
+          },
+          "prompt": {
+            "description": "The prompt for this shot.",
+            "title": "Prompt",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "File": {
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "title": "File",
+        "properties": {
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name"
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/kling-video/o3/4k/text-to-video/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/kling-video/o3/4k/text-to-video/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/kling-video/o3/4k/text-to-video": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KlingVideoO34kTextToVideoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/kling-video/o3/4k/text-to-video/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KlingVideoO34kTextToVideoOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

@@ -1,0 +1,326 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for topaz/sdr-to-hdr/video",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the topaz/sdr-to-hdr/video queue.",
+    "x-fal-metadata": {
+      "endpointId": "topaz/sdr-to-hdr/video",
+      "category": "video-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aa5f408/lYPF0zAsvN4YNzqdxmndB.jpg",
+      "playgroundUrl": "https://fal.ai/models/topaz/sdr-to-hdr/video",
+      "documentationUrl": "https://fal.ai/models/topaz/sdr-to-hdr/video/api",
+      "about": "# Topaz SDR to HDR (Hyperion 2.5)\n\nAutomatically converts SDR footage into HDR, redistributing\nluminance and color across tonal ranges while preserving detail in\ntext, faces and motion. Resolution and frame rate are kept from the\nsource.\n\nVideos are limited to 5 minutes."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "SdrToHdrVideoInput": {
+        "type": "object",
+        "properties": {
+          "video_url": {
+            "type": "string",
+            "description": "URL of the SDR video to convert to HDR",
+            "examples": [
+              "https://v3.fal.media/files/kangaroo/y5-1YTGpun17eSeggZMzX_video-1733468228.mp4"
+            ],
+            "title": "Video Url"
+          },
+          "output_format": {
+            "enum": [
+              "mp4",
+              "prores"
+            ],
+            "type": "string",
+            "description": "Output container/codec: mp4 delivers 10-bit H265 HDR10; prores delivers 10-bit ProRes 422 HQ in a .mov, Topaz's recommended format for grading and mastering workflows (much larger files).",
+            "title": "Output Format",
+            "default": "mp4"
+          }
+        },
+        "x-fal-order-properties": [
+          "video_url",
+          "output_format"
+        ],
+        "title": "VideoSdrToHdrRequest",
+        "required": [
+          "video_url"
+        ]
+      },
+      "SdrToHdrVideoOutput": {
+        "type": "object",
+        "properties": {
+          "video": {
+            "description": "The upscaled video file",
+            "$ref": "#/components/schemas/File",
+            "examples": [
+              {
+                "url": "https://v3.fal.media/files/penguin/ztj_LB4gQlW6HIfVs8zX4_upscaled.mp4"
+              }
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "title": "VideoUpscaleOutput",
+        "required": [
+          "video"
+        ]
+      },
+      "File": {
+        "type": "object",
+        "properties": {
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "title": "File",
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/topaz/sdr-to-hdr/video/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/topaz/sdr-to-hdr/video/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/topaz/sdr-to-hdr/video": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SdrToHdrVideoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/topaz/sdr-to-hdr/video/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SdrToHdrVideoOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

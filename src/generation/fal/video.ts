@@ -4,6 +4,7 @@ import { downloadAndWrite } from '../utils/download-and-write.js';
 import { getFalClient } from './client.js';
 import { parseFalError } from './errors.js';
 import { resolveForFal, isPublicHttpsUrl, resolveExtraFiles } from './inputs.js';
+import { checkExtraParams } from './extra-params.js';
 import { type FalGenerateVideoParams, falGenerateVideoSchema } from './types.js';
 
 /**
@@ -16,6 +17,7 @@ const STRUCTURAL_FAL_KEYS = new Set([
   'prompt',
   'image_url',
   'audio_url',
+  'video_url',
   'duration',
   'aspect_ratio',
   'resolution',
@@ -31,6 +33,7 @@ function buildFalInput(
     prompt?: string;
     imageUrl?: string;
     audioUrl?: string;
+    videoUrl?: string;
     duration?: number;
     aspectRatio?: string;
     resolution?: string;
@@ -52,6 +55,7 @@ function buildFalInput(
   assign('prompt', args.prompt);
   assign('image_url', args.imageUrl);
   assign('audio_url', args.audioUrl);
+  assign('video_url', args.videoUrl);
   assign('duration', args.duration);
   assign('aspect_ratio', args.aspectRatio);
   assign('resolution', args.resolution);
@@ -88,7 +92,7 @@ export function registerFalVideoTools(server: McpServer): void {
   registerTool<FalGenerateVideoParams>(
     server,
     'fal_generate_video',
-    'Generate a video via any fal-hosted video model. Transport tool only — pass an explicit `model` (no server-side default). Use `model_catalog` to discover available models and the matching `*_prompt_guide` tool to learn the per-model prompt structure. Uses FAL_KEY env var.',
+    'Generate or transform a video via any fal-hosted video model: text/image/audio-to-video, and video-to-video (upscale, restore, edit, restyle, lip-sync) via the `video` input. Transport tool only — pass an explicit `model` (no server-side default). Use `model_catalog` to discover available models and the matching `*_prompt_guide` tool to learn the per-model prompt structure. Uses FAL_KEY env var.',
     falGenerateVideoSchema.shape,
     async ({
       model,
@@ -96,6 +100,7 @@ export function registerFalVideoTools(server: McpServer): void {
       output,
       image,
       audio,
+      video,
       duration_seconds,
       aspect_ratio,
       resolution,
@@ -112,6 +117,9 @@ export function registerFalVideoTools(server: McpServer): void {
       const audioResolved = audio
         ? await resolveForFal(audio, (b) => client.storage.upload(b))
         : undefined;
+      const videoResolved = video
+        ? await resolveForFal(video, (b) => client.storage.upload(b))
+        : undefined;
       const extraFilesResolved = await resolveExtraFiles(extra_files, (b) =>
         client.storage.upload(b),
       );
@@ -123,6 +131,7 @@ export function registerFalVideoTools(server: McpServer): void {
             prompt,
             imageUrl: imageResolved?.url,
             audioUrl: audioResolved?.url,
+            videoUrl: videoResolved?.url,
             duration: duration_seconds,
             aspectRatio: aspect_ratio,
             resolution,
@@ -139,6 +148,11 @@ export function registerFalVideoTools(server: McpServer): void {
               `but also as structural arg(s); structural args win. ` +
               `Remove from extra_params to silence this warning.`,
           );
+        }
+        // Keys the model's spec doesn't accept are dropped by fal without an
+        // error (TODO #16b). Diagnostic only; the payload is sent as built.
+        for (const warning of await checkExtraParams('fal_generate_video', model, mergedExtra)) {
+          console.error(warning);
         }
 
         // fal.subscribe's `timeout` is in ms and limits queue + inference.
@@ -181,6 +195,7 @@ export function registerFalVideoTools(server: McpServer): void {
       } finally {
         await imageResolved?.cleanup?.();
         await audioResolved?.cleanup?.();
+        await videoResolved?.cleanup?.();
         await extraFilesResolved.cleanup();
       }
     },

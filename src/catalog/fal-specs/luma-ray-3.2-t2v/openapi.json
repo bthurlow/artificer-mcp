@@ -1,0 +1,386 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for luma/agent/ray/v3.2/text-to-video",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the luma/agent/ray/v3.2/text-to-video queue.",
+    "x-fal-metadata": {
+      "endpointId": "luma/agent/ray/v3.2/text-to-video",
+      "category": "text-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a9d98a0/DwsmVaf6M6SVp2KIN3bId_321b3394d9f243de98b9f6295b4c48b5.jpg",
+      "playgroundUrl": "https://fal.ai/models/luma/agent/ray/v3.2/text-to-video",
+      "documentationUrl": "https://fal.ai/models/luma/agent/ray/v3.2/text-to-video/api",
+      "about": "ray-3.2 text-to-video generation via the Luma Agents API."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "AgentRayV32TextToVideoInput": {
+        "type": "object",
+        "title": "RayTextToVideoRequest",
+        "required": [
+          "prompt"
+        ],
+        "x-fal-order-properties": [
+          "prompt",
+          "aspect_ratio",
+          "resolution",
+          "duration",
+          "loop",
+          "hdr",
+          "exr_export"
+        ],
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "examples": [
+              "A herd of wild horses galloping across a dusty desert plain under a blazing midday sun, their manes flying in the wind; wide tracking shot."
+            ],
+            "maxLength": 6000,
+            "title": "Prompt",
+            "description": "Text prompt describing the video to generate."
+          },
+          "hdr": {
+            "type": "boolean",
+            "description": "Generate an HDR-encoded MP4. Requires HDR access on the account and a resolution of 720p or 1080p; not supported with 10s or loop.",
+            "title": "Hdr",
+            "default": false
+          },
+          "aspect_ratio": {
+            "type": "string",
+            "enum": [
+              "3:4",
+              "4:3",
+              "1:1",
+              "9:16",
+              "16:9",
+              "21:9"
+            ],
+            "examples": [
+              "16:9"
+            ],
+            "title": "Aspect Ratio",
+            "description": "Aspect ratio of the generated video.",
+            "default": "16:9"
+          },
+          "loop": {
+            "type": "boolean",
+            "description": "Generate a seamless loop. Only valid for 5s, standard-dynamic-range generations without an end frame.",
+            "title": "Loop",
+            "default": false
+          },
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "540p",
+              "720p",
+              "1080p"
+            ],
+            "description": "Resolution of the generated video. Higher resolutions cost more.",
+            "title": "Resolution",
+            "default": "540p"
+          },
+          "duration": {
+            "type": "string",
+            "enum": [
+              "5s",
+              "10s"
+            ],
+            "description": "Duration of the generated video.",
+            "title": "Duration",
+            "default": "5s"
+          },
+          "exr_export": {
+            "type": "boolean",
+            "description": "Also export an EXR file alongside the MP4. Requires hdr=true and HDR access.",
+            "title": "Exr Export",
+            "default": false
+          }
+        }
+      },
+      "AgentRayV32TextToVideoOutput": {
+        "type": "object",
+        "title": "VideoOutput",
+        "required": [
+          "video"
+        ],
+        "x-fal-order-properties": [
+          "video",
+          "exr_file"
+        ],
+        "properties": {
+          "exr_file": {
+            "description": "The generated EXR sidecar when exr_export is true. This may be a single EXR file or a ZIP package depending on Luma's export shape.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/File"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "video": {
+            "description": "The generated video.",
+            "$ref": "#/components/schemas/File"
+          }
+        }
+      },
+      "File": {
+        "type": "object",
+        "title": "File",
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes."
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file."
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/luma/agent/ray/v3.2/text-to-video/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/luma/agent/ray/v3.2/text-to-video/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/luma/agent/ray/v3.2/text-to-video": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRayV32TextToVideoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/luma/agent/ray/v3.2/text-to-video/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRayV32TextToVideoOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

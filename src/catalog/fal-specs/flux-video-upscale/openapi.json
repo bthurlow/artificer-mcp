@@ -1,0 +1,352 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for blackforestlabs/flux-video-upscale",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the blackforestlabs/flux-video-upscale queue.",
+    "x-fal-metadata": {
+      "endpointId": "blackforestlabs/flux-video-upscale",
+      "category": "video-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aa7182f/Frq0vrwqyitVDqknXCE-t.jpg",
+      "playgroundUrl": "https://fal.ai/models/blackforestlabs/flux-video-upscale",
+      "documentationUrl": "https://fal.ai/models/blackforestlabs/flux-video-upscale/api",
+      "about": "Upscale"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "FluxVideoUpscaleInput": {
+        "title": "FluxVideoUpscaleInput",
+        "x-fal-order-properties": [
+          "video_url",
+          "upscale_factor",
+          "creativity",
+          "prompt",
+          "safety_tolerance"
+        ],
+        "type": "object",
+        "properties": {
+          "safety_tolerance": {
+            "title": "Safety Tolerance",
+            "maximum": 4,
+            "description": "Moderation strictness. Lower values are stricter.",
+            "type": "integer",
+            "default": 2,
+            "minimum": 0
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt",
+            "description": "Optional description used to guide creative detail enhancement."
+          },
+          "creativity": {
+            "title": "Creativity",
+            "description": "Use 0 for a source-faithful upscale or 1 for creative detail enhancement.",
+            "type": "integer",
+            "default": 1,
+            "enum": [
+              0,
+              1
+            ]
+          },
+          "video_url": {
+            "title": "Video Url",
+            "examples": [
+              "https://v3b.fal.media/files/b/0a93a27d/-iFpecUCsSdwXVMevsZa3_output_5s_448x256.mp4"
+            ],
+            "description": "URL of the MP4 video to upscale. The video must be at most 20 seconds and 50 MB.",
+            "type": "string"
+          },
+          "upscale_factor": {
+            "title": "Upscale Factor",
+            "maximum": 3,
+            "description": "Output scaling factor. The source aspect ratio is preserved.",
+            "type": "number",
+            "default": 2,
+            "minimum": 1.5
+          }
+        },
+        "required": [
+          "video_url"
+        ]
+      },
+      "FluxVideoUpscaleOutput": {
+        "title": "FluxVideoUpscaleOutput",
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "type": "object",
+        "properties": {
+          "video": {
+            "description": "The upscaled MP4 video.",
+            "$ref": "#/components/schemas/File"
+          }
+        },
+        "required": [
+          "video"
+        ]
+      },
+      "File": {
+        "title": "File",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object",
+        "properties": {
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type"
+          },
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/blackforestlabs/flux-video-upscale/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blackforestlabs/flux-video-upscale/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blackforestlabs/flux-video-upscale": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FluxVideoUpscaleInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blackforestlabs/flux-video-upscale/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FluxVideoUpscaleOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

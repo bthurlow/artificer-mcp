@@ -44,3 +44,17 @@ Pair the tool with `veo_video_prompt_guide` — it returns model-specific notes 
 ## Brand spec integration
 
 When `ARTIFICER_BRAND_SPEC.scene_description` is set, compose it into your Veo prompt for project-consistent environments / lighting / props across generations.
+
+## fal video models (`fal_generate_video`)
+
+`fal_generate_video` is a thin transport for every fal-hosted video model in `model_catalog` (capability `video`). Pass an explicit fal endpoint as `model`, and read the model's prompt guide first. Structural inputs map onto fal's common keys: `image` → `image_url`, `audio` → `audio_url`, `video` → `video_url`, `duration_seconds` → `duration`, plus `aspect_ratio`, `resolution` and `negative_prompt`. Anything model-specific goes in `extra_params`, and extra file inputs (end frames, references, masks) go in `extra_files`, which uploads local paths for you.
+
+The `video` input covers video-to-video work. Catalog groups:
+
+| Group | What | Guide |
+|---|---|---|
+| `video.upscale` | Upscale, interpolate, denoise, deblur, SDR→HDR, colorize (Topaz, SeedVR2, FlashVSR, …) | `fal_video_upscale_prompt_guide` |
+| `video.edit` | Modify / restyle, extend, inpaint / outpaint, reframe, erase objects, remove background | `fal_video_edit_prompt_guide` |
+| `video.lipsync` | Lip-sync a still or re-sync an existing clip to new audio, including singing | `fal_lipsync_prompt_guide` |
+
+Many video-to-video models bill per second of **input** video. Check the route's `cost` in `model_catalog` before running a long clip.

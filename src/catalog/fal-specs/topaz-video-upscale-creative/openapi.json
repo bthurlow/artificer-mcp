@@ -1,0 +1,399 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for topaz/upscale/video/creative",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the topaz/upscale/video/creative queue.",
+    "x-fal-metadata": {
+      "endpointId": "topaz/upscale/video/creative",
+      "category": "video-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aa5f332/C_CTi7DkU-vpFO4ls5s05.jpg",
+      "playgroundUrl": "https://fal.ai/models/topaz/upscale/video/creative",
+      "documentationUrl": "https://fal.ai/models/topaz/upscale/video/creative/api",
+      "about": "# Topaz Creative Video Upscale (Astra 2)\n\nCreatively transforms AI-generated and stylized video while\nupscaling, inventing new detail and texture instead of only\npreserving what is there. Works best on stylized sources, wide\nshots and detail-sparse scenes.\n\n## Controls\n- **creativity** — how much new detail Astra 2 invents.\n- **prompt** — optional guidance for the generated detail (limits\nthe input to 450 frames).\n- **realism** — bias generated detail toward photorealism.\n- **sharp** — output sharpness (0.5 is neutral).\n\nVideos are limited to 5 minutes."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "UpscaleVideoCreativeInput": {
+        "type": "object",
+        "properties": {
+          "video_url": {
+            "type": "string",
+            "description": "URL of the video to upscale",
+            "examples": [
+              "https://v3.fal.media/files/kangaroo/y5-1YTGpun17eSeggZMzX_video-1733468228.mp4"
+            ],
+            "title": "Video Url"
+          },
+          "target_fps": {
+            "description": "Target FPS for the output. Frame interpolation is enabled only when this differs from the source FPS.",
+            "title": "Target Fps",
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 16,
+                "maximum": 60
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sharp": {
+            "description": "Output sharpness. 0.0 softens, 0.5 is neutral passthrough, 1.0 applies strong sharpening. Defaults to Topaz's neutral 0.5.",
+            "title": "Sharp",
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "H264_output": {
+            "type": "boolean",
+            "description": "Whether to use H264 codec for output video. Default is H265.",
+            "title": "H264 Output",
+            "default": false
+          },
+          "upscale_factor": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Requested upscale factor (e.g. 2.0 doubles width and height). Note: Astra 2 snaps to its own supported output resolutions (typically 4K when upscaling) and may override the requested target. Billing is based on the delivered resolution.",
+            "maximum": 4,
+            "default": 2,
+            "title": "Upscale Factor"
+          },
+          "realism": {
+            "description": "Bias generated detail toward photorealism (0.0-1.0).",
+            "title": "Realism",
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "prompt": {
+            "description": "Optional text prompt guiding the detail Astra 2 generates. When set, the input video is limited to 450 frames.",
+            "title": "Prompt",
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1024
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "creativity": {
+            "type": "number",
+            "minimum": 0,
+            "description": "How much new detail and texture Astra 2 invents. 0.0 stays faithful to the source, 1.0 is maximally creative.",
+            "maximum": 1,
+            "default": 0.5,
+            "title": "Creativity"
+          }
+        },
+        "x-fal-order-properties": [
+          "video_url",
+          "prompt",
+          "creativity",
+          "realism",
+          "sharp",
+          "upscale_factor",
+          "target_fps",
+          "H264_output"
+        ],
+        "title": "VideoCreativeUpscaleRequest",
+        "required": [
+          "video_url"
+        ]
+      },
+      "UpscaleVideoCreativeOutput": {
+        "type": "object",
+        "properties": {
+          "video": {
+            "description": "The upscaled video file",
+            "$ref": "#/components/schemas/File",
+            "examples": [
+              {
+                "url": "https://v3.fal.media/files/penguin/ztj_LB4gQlW6HIfVs8zX4_upscaled.mp4"
+              }
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "title": "VideoUpscaleOutput",
+        "required": [
+          "video"
+        ]
+      },
+      "File": {
+        "type": "object",
+        "properties": {
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "title": "File",
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/topaz/upscale/video/creative/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/topaz/upscale/video/creative/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/topaz/upscale/video/creative": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpscaleVideoCreativeInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/topaz/upscale/video/creative/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpscaleVideoCreativeOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

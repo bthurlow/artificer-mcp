@@ -1,0 +1,188 @@
+# sync-3 Lipsync
+
+> sync-3 most powerful lipsync model yet, featuring native visual intelligence for professional-quality video.
+
+
+## Overview
+
+- **Endpoint**: `https://fal.run/fal-ai/sync-lipsync/v3`
+- **Model ID**: `fal-ai/sync-lipsync/v3`
+- **Category**: video-to-video
+- **Kind**: inference
+**Tags**: stylized, transform, lipsync
+
+
+
+## Pricing
+
+- **Price**: $8 per minutes
+
+For more details, see [fal.ai pricing](https://fal.ai/pricing).
+
+## API Information
+
+This model can be used via our HTTP API or more conveniently via our client libraries.
+See the input and output schema below, as well as the usage examples.
+
+
+### Input Schema
+
+The API accepts the following input parameters:
+
+
+- **`video_url`** (`string`, _required_):
+  URL of the input video
+  - Examples: "https://v3.fal.media/files/tiger/IugLCDJRIoGqvqTa-EJTr_3wg74vCqyNuQ-IiBd77MM_output.mp4"
+
+- **`audio_url`** (`string`, _required_):
+  URL of the input audio
+  - Examples: "https://fal.media/files/lion/vyFWygmZsIZlUO4s0nr2n.wav"
+
+- **`sync_mode`** (`SyncModeEnum`, _optional_):
+  Lipsync mode when audio and video durations are out of sync. Default value: `"cut_off"`
+  - Default: `"cut_off"`
+  - Options: `"cut_off"`, `"loop"`, `"bounce"`, `"silence"`, `"remap"`
+
+- **`options`** (`Sync3GenerationOptions`, _optional_):
+  Additional Sync.so generation options. If options.sync_mode is set, it overrides the top-level sync_mode field.
+
+
+
+**Required Parameters Example**:
+
+```json
+{
+  "video_url": "https://v3.fal.media/files/tiger/IugLCDJRIoGqvqTa-EJTr_3wg74vCqyNuQ-IiBd77MM_output.mp4",
+  "audio_url": "https://fal.media/files/lion/vyFWygmZsIZlUO4s0nr2n.wav"
+}
+```
+
+**Full Example**:
+
+```json
+{
+  "video_url": "https://v3.fal.media/files/tiger/IugLCDJRIoGqvqTa-EJTr_3wg74vCqyNuQ-IiBd77MM_output.mp4",
+  "audio_url": "https://fal.media/files/lion/vyFWygmZsIZlUO4s0nr2n.wav",
+  "sync_mode": "cut_off"
+}
+```
+
+
+### Output Schema
+
+The API returns the following output format:
+
+- **`video`** (`File`, _required_):
+  The generated video
+  - Examples: {"url":"https://v3b.fal.media/files/b/0a93c312/TqKMiLtCcTKWSeAWXJRD0_output.mp4"}
+
+
+
+**Example Response**:
+
+```json
+{
+  "video": {
+    "url": "https://v3b.fal.media/files/b/0a93c312/TqKMiLtCcTKWSeAWXJRD0_output.mp4"
+  }
+}
+```
+
+
+## Usage Examples
+
+### cURL
+
+```bash
+curl --request POST \
+  --url https://fal.run/fal-ai/sync-lipsync/v3 \
+  --header "Authorization: Key $FAL_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{
+     "video_url": "https://v3.fal.media/files/tiger/IugLCDJRIoGqvqTa-EJTr_3wg74vCqyNuQ-IiBd77MM_output.mp4",
+     "audio_url": "https://fal.media/files/lion/vyFWygmZsIZlUO4s0nr2n.wav"
+   }'
+```
+
+### Python
+
+Ensure you have the Python client installed:
+
+```bash
+pip install fal-client
+```
+
+Then use the API client to make requests:
+
+```python
+import fal_client
+
+def on_queue_update(update):
+    if isinstance(update, fal_client.InProgress):
+        for log in update.logs:
+           print(log["message"])
+
+result = fal_client.subscribe(
+    "fal-ai/sync-lipsync/v3",
+    arguments={
+        "video_url": "https://v3.fal.media/files/tiger/IugLCDJRIoGqvqTa-EJTr_3wg74vCqyNuQ-IiBd77MM_output.mp4",
+        "audio_url": "https://fal.media/files/lion/vyFWygmZsIZlUO4s0nr2n.wav"
+    },
+    with_logs=True,
+    on_queue_update=on_queue_update,
+)
+print(result)
+```
+
+### JavaScript
+
+Ensure you have the JavaScript client installed:
+
+```bash
+npm install --save @fal-ai/client
+```
+
+Then use the API client to make requests:
+
+```javascript
+import { fal } from "@fal-ai/client";
+
+const result = await fal.subscribe("fal-ai/sync-lipsync/v3", {
+  input: {
+    video_url: "https://v3.fal.media/files/tiger/IugLCDJRIoGqvqTa-EJTr_3wg74vCqyNuQ-IiBd77MM_output.mp4",
+    audio_url: "https://fal.media/files/lion/vyFWygmZsIZlUO4s0nr2n.wav"
+  },
+  logs: true,
+  onQueueUpdate: (update) => {
+    if (update.status === "IN_PROGRESS") {
+      update.logs.map((log) => log.message).forEach(console.log);
+    }
+  },
+});
+console.log(result.data);
+console.log(result.requestId);
+```
+
+
+## Additional Resources
+
+### Documentation
+
+- [Model Playground](https://fal.ai/models/fal-ai/sync-lipsync/v3)
+- [API Documentation](https://fal.ai/models/fal-ai/sync-lipsync/v3/api)
+- [OpenAPI Schema](https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=fal-ai/sync-lipsync/v3)
+
+### fal.ai Platform
+
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

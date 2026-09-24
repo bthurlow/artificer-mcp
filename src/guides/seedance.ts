@@ -85,6 +85,15 @@ Seedance handles directorial vocabulary well — shot types, camera moves, light
 | \`seedance-1-lite-i2v\` | \`fal-ai/bytedance/seedance/v1/lite/image-to-video\` |
 | \`seedance-1-lite-ref\` | \`fal-ai/bytedance/seedance/v1/lite/reference-to-video\` |
 
+## Newer routes (added 2026-09-24)
+Added in the 2026-09-24 fal catalog refresh. Model descriptions are fal's own; inputs come from each route's committed spec (\`src/catalog/fal-specs/<slug>/openapi.json\`). The sections above predate these routes and were not re-verified against them, so check a newer model's spec before assuming it matches.
+
+| Slug | Model (fal's description) | Inputs (**required**, then notable) |
+|------|----------------------------|--------------------------------------|
+| \`seedance-2.5-t2v\` | Dreamina Seedance 2.5 generates native 30-second single-shot video at up to 720p from a single text prompt, reasoning about the whole shot at once so motion,… | **\`prompt\`**, \`aspect_ratio\`, \`resolution\`, \`duration\` (+4 more) |
+| \`seedance-2.5-i2v\` | Dreamina Seedance 2.5 animates a single still into a native 30-second clip at up to 720p, extending one frame into continuous, coherent motion without the dr… | **\`prompt\`**, **\`image_url\`**, \`aspect_ratio\`, \`resolution\`, \`duration\`, \`end_image_url\` (+4 more) |
+| \`seedance-2.5-ref\` | Dreamina Seedance 2.5 generates video from up to 50 multimodal references images, video, audio, and style inputs, locking a character, set, and palette acros… | **\`prompt\`**, \`image_urls\`, \`aspect_ratio\`, \`resolution\`, \`duration\` (+8 more) |
+
 ## Last verified
 2026-08-15 — 1.0 Lite tier confirmed deprecated (all three routes re-route silently); Seedance 2.0 pricing re-synced and now documents 1080p at $0.682/s plus a cheaper 4k token rate. Prompt guidance and the 2.0 / 1.5 / 1.0 Pro capability notes are unchanged since the 2026-04-28 initial seed and were not re-verified.
 
