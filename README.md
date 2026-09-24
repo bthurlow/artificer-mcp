@@ -38,8 +38,10 @@ Looking for just ImageMagick without AI generation dependencies? Use the focused
 
 - **Node.js** 22+
 - **ImageMagick 7+** with `magick` in PATH — [install](https://imagemagick.org/script/download.php)
-- **FFmpeg 6+** with `ffmpeg` in PATH — [install](https://ffmpeg.org/download.html)
+- **FFmpeg 6+** with `ffmpeg` and `ffprobe` in PATH — [install](https://ffmpeg.org/download.html). Use a full build: the video tools need `libx264`, `libvpx-vp9`, `libopus`, `libmp3lame` and the `drawtext` / `subtitles` filters, which minimal builds leave out.
+- **Ghostscript** (if using `pdf-to-image`) — ImageMagick calls it to read PDFs (`gswin64c` on Windows, `gs` elsewhere). Without it, PDF input fails with `PDFDelegateFailed`. [install](https://ghostscript.com/releases/gsdnld.html)
 - **Google Gemini API key** (if using image or video generation) — [get one](https://aistudio.google.com/apikey)
+- **fal.ai API key** (if using any `fal_*` tool) — set as `FAL_KEY`. [get one](https://fal.ai/dashboard/keys)
 - **Google Cloud credentials** (if using GCS storage) — `GOOGLE_APPLICATION_CREDENTIALS` env var pointing to a service account JSON
 
 ## Installation
@@ -84,11 +86,15 @@ Add to your MCP config:
 |---|---|
 | `GOOGLE_API_KEY` | Required for all Gemini/Imagen/Veo tools. |
 | `GOOGLE_APPLICATION_CREDENTIALS` | Required for `gs://` storage URIs. Path to a GCP service-account JSON. |
-| `ARTIFICER_IMAGEN_MODEL` | Override default model for `gemini_generate_image` (fallback: `imagen-4.0-generate-001`). |
-| `ARTIFICER_IMAGEN_EDIT_MODEL` | Override default model for `gemini_edit_image` (fallback: `imagen-3.0-capability-001`). |
+| `GOOGLE_CLOUD_PROJECT` | Switches Gemini calls to Vertex AI. Required for `gemini_upscale_image` and for `negative_prompt` on Imagen tools. |
+| `GOOGLE_CLOUD_LOCATION` | Vertex AI region (default: `us-central1`). |
+| `FAL_KEY` | Required for all `fal_*` tools. |
+| `ARTIFICER_IMAGEN_MODEL` | Sets a default model for `gemini_generate_image`. There is **no built-in default** since 0.10.0 (Imagen is deprecated), so without this, pass `model` on every call. See [UPGRADING.md](UPGRADING.md). |
+| `ARTIFICER_IMAGEN_EDIT_MODEL` | Sets a default model for `gemini_edit_image`. There is **no built-in default** since 0.10.0. |
 | `ARTIFICER_IMAGEN_UPSCALE_MODEL` | Override default model for `gemini_upscale_image` (fallback: `imagen-4.0-upscale-preview`). |
 | `ARTIFICER_VEO_MODEL` | Override default model for `gemini_generate_video` (fallback: `veo-2.0-generate-001`). |
-| `ARTIFICER_NANOBANANA_MODEL` | Override default model for `gemini_nanobanana_generate_image` (fallback: `gemini-2.5-flash-image`). |
+| `ARTIFICER_OMNI_VIDEO_MODEL` | Override default model for `gemini_omni_generate_video` (fallback: `gemini-omni-flash-preview`). |
+| `ARTIFICER_NANOBANANA_MODEL` | Override default model for `gemini_nanobanana_generate_image` (fallback: `gemini-3.1-flash-image`). |
 | `ARTIFICER_TTS_MODEL` | Override default model for `gemini_generate_speech` (fallback: `gemini-2.5-flash-preview-tts`). |
 | `ARTIFICER_LYRIA_MODEL` | Override default model for `gemini_generate_music` (fallback: `lyria-3-clip-preview`). Also valid: `lyria-3-pro-preview`. |
 | `ARTIFICER_LYRIA_LIVE_MODEL` | Override default model for `gemini_generate_music_live` (fallback: `models/lyria-realtime-exp`). |

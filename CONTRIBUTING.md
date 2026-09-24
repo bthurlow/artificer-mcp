@@ -14,7 +14,10 @@ The repo uses Yarn 4 (`node-modules` linker), and the release is committed at `.
 
 ### Dependency security alerts
 
-Fix alerts on **direct** dependencies by bumping them. Don't pin transitive dependencies (no `resolutions` entries). A transitive alert gets fixed by bumping the direct dependency that pulls it in, or by refreshing the lockfile within existing ranges.
+When scanning Dependabot alerts or updates, **only act on direct dependencies**, meaning the packages listed in `package.json`. Those are the versions we control.
+
+- **Direct alert:** bump that dependency.
+- **Transitive alert:** leave it to the upstream package that depends on it. Don't pin it with `resolutions`, don't refresh the lockfile just to pull in a newer transitive version, and don't dismiss the alert. It stays open until the upstream package ships a fix and we pick that up in a normal direct-dependency bump.
 
 ## Generation tool providers
 
