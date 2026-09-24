@@ -1,8 +1,8 @@
 # Video & Audio Post-Processing
 
-25 FFmpeg-backed tools for video and audio post-processing. Requires FFmpeg 6+ with `ffmpeg` and `ffprobe` in PATH (hard floor is 4.3 for `xfade`; 6+ is the tested baseline). A libass-enabled build is needed for `video_add_subtitles` burn-in.
+26 FFmpeg-backed tools for video and audio post-processing. Requires FFmpeg 6+ with `ffmpeg` and `ffprobe` in PATH (hard floor is 4.3 for `xfade`; 6+ is the tested baseline). A libass-enabled build is needed for `video_add_subtitles` burn-in.
 
-## Video tools (16)
+## Video tools (17)
 
 ### Core operations
 
@@ -11,6 +11,7 @@
 | `video_concatenate` | Join videos end-to-end, optionally with a transition (fade/wipe/dissolve/slide/etc.) when `transition` is set | `inputs[]`, `reencode`, `transition`, `transition_duration` |
 | `video_from_image` | Create a short video clip from a still image (title / end cards, static intros) | `input` (image), `duration_seconds`, `frame_rate`, optional `width`/`height`, optional `audio` |
 | `video_set_audio` | Replace or add an audio track on a finished video (video stream copied, audio re-encoded) | `input`, `audio`, `audio_codec`, `shortest` |
+| `video_make_loop` | Turn a clip into a seamless loop (rebound or crossfade), or measure an existing clip's loop seam. Output is silent H.264, and every built loop is seam-checked | `mode` (rebound/crossfade/check), `crossfade_seconds`, `max_duration`, `min_duration` |
 | `video_trim` | Cut to time range | `start_seconds`, `duration_seconds` or `end_seconds`, `reencode` |
 | `video_change_aspect_ratio` | Reframe via crop or pad | `aspect_ratio` ("9:16", "1:1", etc.), `mode` (crop/pad), `pad_color` |
 | `video_convert_format` | Change container format | `format` (mp4/webm/mov/mkv/avi/flv). Codec picked per target. |
@@ -120,6 +121,18 @@ video_set_audio input=./video.mp4 audio=./mixed.wav output=./final.mp4 audio_cod
 ```
 
 Video is stream-copied (no re-encode). Use after `audio_mix` to produce the final broadcast file.
+
+### Make a Spotify Canvas loop (3–8s, silent)
+
+```
+video_make_loop input=./shot.mp4 output=./canvas.mp4 mode=rebound min_duration=3 max_duration=8
+```
+
+`rebound` plays the clip forward, then in reverse, dropping the duplicated turn-around frames so neither end stalls. For a clip that should keep moving in one direction, use `mode=crossfade` instead: it blends the last `crossfade_seconds` into the start. Duration limits are applied without cutting the loop mid-cycle: `max_duration` trims the source before the loop is built, and `min_duration` repeats whole cycles.
+
+The result reports a seam verdict. It judges the last→first step against the clip's own frame-to-frame motion (SSIM), not a fixed threshold, so fast footage is not penalized for moving. Run `mode=check` on a generated first=last-frame clip to see whether it actually closed the loop before you ship it.
+
+`rebound` holds the whole source in memory (FFmpeg's `reverse` filter), so it refuses clips above about 1.5 GB of decoded frames, roughly 16s at 1080p. Pass `max_duration` to stay under.
 
 ## Codec defaults
 

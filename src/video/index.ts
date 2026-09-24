@@ -1,15 +1,26 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { registerTool } from '../utils/register.js';
 import {
   ffmpegBatch,
+  ffprobe,
   getVideoInfo,
   VIDEO_ASPECT_RATIOS,
   VIDEO_RESOLUTIONS,
 } from '../utils/exec-ffmpeg.js';
 import { tempPath } from '../utils/exec.js';
 import { resolveInput, resolveOutput } from '../utils/resource.js';
+import {
+  buildCrossfadeFilter,
+  buildReboundFilter,
+  describeSeam,
+  judgeSeam,
+  parseSsimStats,
+  parseSsimSummary,
+  planLoop,
+  type SeamReport,
+} from './loop.js';
 import {
   type VideoConcatenateParams,
   type VideoTrimParams,
@@ -27,6 +38,7 @@ import {
   type VideoSetFrameRateParams,
   type VideoFromImageParams,
   type VideoSetAudioParams,
+  type VideoMakeLoopParams,
   videoConcatenateSchema,
   videoTrimSchema,
   videoChangeAspectRatioSchema,
@@ -43,6 +55,7 @@ import {
   videoSetFrameRateSchema,
   videoFromImageSchema,
   videoSetAudioSchema,
+  videoMakeLoopSchema,
 } from './types.js';
 
 /** Escape a file path for the subtitles filter (colons on Windows break it). */
@@ -55,6 +68,71 @@ function escapeSubtitlePath(path: string): string {
 function escapeConcatPath(path: string): string {
   // Concat demuxer wants single-quoted paths; escape any existing single quotes.
   return `'${path.replace(/'/g, `'\\''`)}'`;
+}
+
+/**
+ * Exact decoded frame count of the first video stream.
+ *
+ * Loop seams are single-frame boundaries, so this decodes the clip rather
+ * than trusting container metadata (`nb_frames` is absent from many
+ * encodes and wrong in some). Fine for loop-length clips.
+ */
+async function countVideoFrames(path: string): Promise<number> {
+  const stdout = await ffprobe([
+    '-v',
+    'error',
+    '-count_frames',
+    '-select_streams',
+    'v:0',
+    '-show_entries',
+    'stream=nb_read_frames',
+    '-of',
+    'csv=p=0',
+    path,
+  ]);
+  return Number.parseInt(stdout.trim(), 10);
+}
+
+/**
+ * Measure a clip's wrap-around seam against its own frame-to-frame motion.
+ *
+ * Two SSIM passes: every frame against the next (per-frame stats, the
+ * clip's normal range of motion), and the last frame against the first.
+ */
+async function measureSeam(path: string, frames: number): Promise<SeamReport> {
+  const statsPath = tempPath('.log');
+  try {
+    await ffmpegBatch([
+      '-i',
+      path,
+      '-filter_complex',
+      `[0:v]split[a][b];[b]trim=start_frame=1,setpts=PTS-STARTPTS[next];` +
+        `[a]trim=end_frame=${frames - 1},setpts=PTS-STARTPTS[cur];` +
+        // Quoted AND escaped, as for `subtitles`: either alone fails to parse
+        // a Windows drive-letter path inside -filter_complex.
+        `[cur][next]ssim=shortest=1:stats_file='${escapeSubtitlePath(statsPath)}'`,
+      '-f',
+      'null',
+      '-',
+    ]);
+    const adjacent = parseSsimStats(await readFile(statsPath, 'utf8'));
+
+    const stderr = await ffmpegBatch([
+      '-i',
+      path,
+      '-filter_complex',
+      `[0:v]split[a][b];[a]trim=start_frame=${frames - 1},setpts=PTS-STARTPTS[last];` +
+        `[b]trim=end_frame=1,setpts=PTS-STARTPTS[first];[last][first]ssim`,
+      '-f',
+      'null',
+      '-',
+    ]);
+    const seam = parseSsimSummary(stderr);
+    if (seam === undefined) throw new Error('FFmpeg did not report an SSIM score for the seam.');
+    return judgeSeam(seam, adjacent);
+  } finally {
+    await rm(statsPath, { force: true });
+  }
 }
 
 /**
@@ -1135,6 +1213,117 @@ export function registerVideoTools(server: McpServer): void {
         await inR.cleanup?.();
         await audioR.cleanup?.();
         await outR.cleanup?.();
+      }
+    },
+  );
+
+  // ── video_make_loop ─────────────────────────────────────────────────────
+  registerTool<VideoMakeLoopParams>(
+    server,
+    'video_make_loop',
+    "Turn a clip into a seamless loop for loop surfaces (Spotify Canvas, Apple motion art, ambient TikTok/IG loops), or check how visible an existing clip's loop seam is. Modes: `rebound` (forward then reverse), `crossfade` (blend the end into the start), `check` (measure only). Output is always silent H.264, since loop surfaces play over the track. Use max_duration / min_duration for platform windows, e.g. Canvas 3–8s. Every built loop is seam-checked and the result reports it.",
+    videoMakeLoopSchema.shape,
+    async ({ input, output, mode, crossfade_seconds, max_duration, min_duration }) => {
+      if (mode !== 'check' && !output) {
+        throw new Error(`output is required for mode "${mode}".`);
+      }
+      const inR = await resolveInput(input);
+      const outR = mode === 'check' || !output ? undefined : await resolveOutput(output);
+      const cycleTemp = tempPath('.mp4');
+      try {
+        const [info, sourceFrames] = await Promise.all([
+          getVideoInfo(inR.localPath),
+          countVideoFrames(inR.localPath),
+        ]);
+        const fps = info.frameRate;
+
+        if (mode === 'check' || !outR) {
+          const report = await measureSeam(inR.localPath, sourceFrames);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Checked ${input} (${sourceFrames} frames, ${(sourceFrames / fps).toFixed(2)}s at ${fps.toFixed(2)} fps). ${describeSeam(report)}`,
+              },
+            ],
+          };
+        }
+
+        const plan = planLoop({
+          mode,
+          sourceFrames,
+          frameRate: fps,
+          width: info.width,
+          height: info.height,
+          crossfadeSeconds: crossfade_seconds,
+          maxDuration: max_duration,
+          minDuration: min_duration,
+        });
+        const filter =
+          mode === 'rebound'
+            ? buildReboundFilter(plan, sourceFrames)
+            : buildCrossfadeFilter(plan, sourceFrames, fps);
+
+        await mkdir(dirname(outR.localPath), { recursive: true });
+        const cycleOut = plan.cycles > 1 ? cycleTemp : outR.localPath;
+        await ffmpegBatch([
+          '-y',
+          '-i',
+          inR.localPath,
+          '-filter_complex',
+          filter,
+          '-map',
+          '[out]',
+          '-an',
+          '-c:v',
+          'libx264',
+          // Same reason as video_concatenate: keep consumer players able to decode.
+          '-pix_fmt',
+          'yuv420p',
+          cycleOut,
+        ]);
+        if (plan.cycles > 1) {
+          // Whole cycles repeat seamlessly, so stream copy is safe here.
+          await ffmpegBatch([
+            '-y',
+            '-stream_loop',
+            String(plan.cycles - 1),
+            '-i',
+            cycleTemp,
+            '-c',
+            'copy',
+            '-an',
+            outR.localPath,
+          ]);
+        }
+
+        const totalFrames = plan.loopFrames * plan.cycles;
+        let seamLine: string;
+        try {
+          seamLine = describeSeam(await measureSeam(outR.localPath, totalFrames));
+        } catch (err) {
+          // The loop is built; a failed measurement should not discard it.
+          seamLine = `Seam check could not run: ${(err as Error).message}`;
+        }
+        await outR.commit();
+
+        const cycleNote =
+          plan.cycles > 1
+            ? ` (${plan.cycles} cycles of ${(plan.loopFrames / fps).toFixed(2)}s)`
+            : '';
+        const fadeNote = mode === 'crossfade' ? `, crossfade ${plan.crossfadeFrames} frames` : '';
+        const lines = [
+          `${mode === 'rebound' ? 'Rebound' : 'Crossfade'} loop → ${output}: ${totalFrames} frames, ` +
+            `${(totalFrames / fps).toFixed(2)}s at ${fps.toFixed(2)} fps${cycleNote}. ` +
+            `Used ${plan.usedFrames} of ${sourceFrames} source frames${fadeNote}.`,
+          seamLine,
+        ];
+        if (plan.warning) lines.push(`Warning: ${plan.warning}`);
+        return { content: [{ type: 'text', text: lines.join('\n') }] };
+      } finally {
+        await rm(cycleTemp, { force: true });
+        await inR.cleanup?.();
+        await outR?.cleanup?.();
       }
     },
   );
