@@ -44,7 +44,7 @@ The API accepts the following input parameters:
   - Array of string
 
 - **`audio_urls`** (`list<string>`, _optional_):
-  Reference audio to guide video generation. Refer to them in the prompt as @Audio1, @Audio2, etc. Supported formats: MP3, WAV. Up to 3 files, combined duration must not exceed 15 seconds. Max 15 MB per file.If audio is provided, at least one reference image or video is required.
+  Reference audio to guide video generation. Refer to them in the prompt as @Audio1, @Audio2, etc. Supported formats: MP3, WAV. Up to 3 files, combined duration must not exceed 15 seconds. Max 15 MB per file. At least one reference image or video is required.
   - Array of string
 
 - **`resolution`** (`ResolutionEnum`, _optional_):
@@ -72,6 +72,12 @@ The API accepts the following input parameters:
   - Options: `"standard"`, `"high"`
   - Examples: "standard"
 
+- **`codec`** (`CodecEnum`, _optional_):
+  'auto' retains default video codec behaviour; 'H264' uses H.264; 'H265' uses H.265. Default value: `"auto"`
+  - Default: `"auto"`
+  - Options: `"auto"`, `"H264"`, `"H265"`
+  - Examples: "auto", "H264", "H265"
+
 - **`end_user_id`** (`string`, _optional_):
   The unique user ID of the end user.
 
@@ -97,7 +103,8 @@ The API accepts the following input parameters:
   "duration": "auto",
   "aspect_ratio": "auto",
   "generate_audio": true,
-  "bitrate_mode": "standard"
+  "bitrate_mode": "standard",
+  "codec": "auto"
 }
 ```
 

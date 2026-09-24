@@ -42,9 +42,9 @@ The API accepts the following input parameters:
   - Options: `"9:16"`, `"16:9"`
 
 - **`sync_mode`** (`boolean`, _optional_):
-  If set to true, the function will wait for the image to be generated
+  If set to true, the function will wait for the video to be generated
   and uploaded before returning the response. This will increase the
-  latency of the function but it allows you to get the image directly
+  latency of the function but it allows you to get the video directly
   in the response without going through the CDN. Default value: `true`
   - Default: `true`
 

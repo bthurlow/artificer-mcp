@@ -50,8 +50,8 @@ The API accepts the following input parameters:
   The resolution of the video to generate. Default value: `"720p"`
   - Default: `"720p"`
 
-- **`num_frames`** (`string`, _optional_):
-  The number of frames to generate. Default value: `"129"`
+- **`num_frames`** (`integer`, _optional_):
+  The number of frames to generate. Default value: `129`
   - Default: `129`
 
 - **`i2v_stability`** (`boolean`, _optional_):

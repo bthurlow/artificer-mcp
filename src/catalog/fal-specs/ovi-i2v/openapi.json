@@ -72,6 +72,57 @@
       },
       "OviImageToVideoInput": {
         "type": "object",
+        "properties": {
+          "prompt": {
+            "examples": [
+              "An intimate close-up of a European woman with long dark hair as she gently brushes her hair in a softly lit bedroom, her delicate hand moving in the foreground. She looks directly into the camera with calm, focused eyes, a faint serene smile glowing in the warm lamp light. She says, <S>[soft whisper] I am an artificial intelligence.<E>.<AUDCAP>Soft whispering female voice, ASMR tone with gentle breaths, cozy room acoustics, subtle emphasis on \"I am an artificial intelligence\".<ENDAUDCAP>"
+            ],
+            "type": "string",
+            "title": "Prompt",
+            "description": "The text prompt to guide video generation."
+          },
+          "audio_negative_prompt": {
+            "type": "string",
+            "title": "Audio Negative Prompt",
+            "description": "Negative prompt for audio generation.",
+            "default": "robotic, muffled, echo, distorted"
+          },
+          "image_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/ovi_i2v_input.png"
+            ],
+            "type": "string",
+            "title": "Image Url",
+            "description": "The image URL to guide video generation."
+          },
+          "negative_prompt": {
+            "type": "string",
+            "title": "Negative Prompt",
+            "description": "Negative prompt for video generation.",
+            "default": "jitter, bad hands, blur, distortion"
+          },
+          "num_inference_steps": {
+            "type": "integer",
+            "title": "Num Inference Steps",
+            "maximum": 50,
+            "description": "The number of inference steps.",
+            "minimum": 1,
+            "default": 30
+          },
+          "seed": {
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Random seed for reproducibility. If None, a random seed is chosen."
+          }
+        },
+        "title": "OviI2VRequest",
         "x-fal-order-properties": [
           "prompt",
           "negative_prompt",
@@ -80,76 +131,25 @@
           "seed",
           "image_url"
         ],
-        "properties": {
-          "audio_negative_prompt": {
-            "type": "string",
-            "description": "Negative prompt for audio generation.",
-            "title": "Audio Negative Prompt",
-            "default": "robotic, muffled, echo, distorted"
-          },
-          "seed": {
-            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Seed"
-          },
-          "negative_prompt": {
-            "type": "string",
-            "description": "Negative prompt for video generation.",
-            "title": "Negative Prompt",
-            "default": "jitter, bad hands, blur, distortion"
-          },
-          "image_url": {
-            "type": "string",
-            "description": "The image URL to guide video generation.",
-            "title": "Image Url",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/ovi_i2v_input.png"
-            ]
-          },
-          "num_inference_steps": {
-            "maximum": 50,
-            "type": "integer",
-            "minimum": 1,
-            "description": "The number of inference steps.",
-            "title": "Num Inference Steps",
-            "default": 30
-          },
-          "prompt": {
-            "type": "string",
-            "description": "The text prompt to guide video generation.",
-            "title": "Prompt",
-            "examples": [
-              "An intimate close-up of a European woman with long dark hair as she gently brushes her hair in a softly lit bedroom, her delicate hand moving in the foreground. She looks directly into the camera with calm, focused eyes, a faint serene smile glowing in the warm lamp light. She says, <S>[soft whisper] I am an artificial intelligence.<E>.<AUDCAP>Soft whispering female voice, ASMR tone with gentle breaths, cozy room acoustics, subtle emphasis on \"I am an artificial intelligence\".<ENDAUDCAP>"
-            ]
-          }
-        },
         "required": [
           "prompt",
           "image_url"
-        ],
-        "title": "OviI2VRequest"
+        ]
       },
       "OviImageToVideoOutput": {
         "type": "object",
-        "x-fal-order-properties": [
-          "video",
-          "seed"
-        ],
         "properties": {
           "seed": {
             "type": "integer",
-            "description": "The seed used for generation.",
-            "title": "Seed"
+            "title": "Seed",
+            "description": "The seed used for generation."
           },
           "video": {
-            "description": "The generated video file.",
+            "examples": [
+              {
+                "url": "https://storage.googleapis.com/falserverless/example_inputs/ovi_i2v_output.mp4"
+              }
+            ],
             "anyOf": [
               {
                 "$ref": "#/components/schemas/File"
@@ -158,34 +158,41 @@
                 "type": "null"
               }
             ],
-            "examples": [
-              {
-                "url": "https://storage.googleapis.com/falserverless/example_inputs/ovi_i2v_output.mp4"
-              }
-            ]
+            "description": "The generated video file."
           }
         },
-        "required": [
+        "title": "OviI2VResponse",
+        "x-fal-order-properties": [
+          "video",
           "seed"
         ],
-        "title": "OviI2VResponse"
+        "required": [
+          "seed"
+        ]
       },
       "File": {
         "type": "object",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
         "properties": {
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file."
           },
           "file_size": {
-            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -194,28 +201,18 @@
                 "type": "null"
               }
             ],
-            "title": "File Size",
-            "examples": [
-              4404019
-            ]
+            "description": "The size of the file in bytes."
           },
-          "content_type": {
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ]
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
           },
           "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -224,16 +221,19 @@
                 "type": "null"
               }
             ],
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
+            "description": "The name of the file. It will be auto-generated if not provided."
           }
         },
+        "title": "File",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
         "required": [
           "url"
-        ],
-        "title": "File"
+        ]
       }
     }
   },

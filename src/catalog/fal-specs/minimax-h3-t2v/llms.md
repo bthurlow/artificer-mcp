@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Video costs **$0.05** per second at **480p**, **$0.08** per second at **768p**, **$0.13** per second at **2K** and **$0.16** per second at **4K**.
+Video costs **$0.05** per second at **480p**, **$0.06** per second at **768p**, **$0.13** per second at **2K** and **$0.16** per second at **4K**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -47,13 +47,21 @@ The API accepts the following input parameters:
 - **`seed`** (`integer`, _optional_):
   Random seed. A random seed is selected when omitted.
 
-- **`enable_prompt_expansion`** (`boolean`, _optional_):
-  Whether to expand the prompt with a vision language model before generation. Default value: `true`
-  - Default: `true`
-
 - **`enable_safety_checker`** (`boolean`, _optional_):
   If set to true, the safety checker will be enabled. Default value: `true`
   - Default: `true`
+
+- **`sync_mode`** (`boolean`, _optional_):
+  Return the generated video as base64 instead of a CDN URL.
+  - Default: `false`
+
+- **`prompt_expansion_mode`** (`string`, _optional_):
+  How much effort to spend rewriting the prompt before generation. 'disabled' skips prompt expansion. 'fast' returns in about a second. 'balanced' picks per request. 'quality' spends up to ~30s on a richer prompt. Default value: `"balanced"`
+  - Default: `"balanced"`
+  - Examples: "disabled", "fast", "balanced", "quality"
+
+- **`target_audio_url`** (`string`, _optional_):
+  Optional URL of an audio clip at least 2 seconds long (maximum 15 MB) to pin to the generated soundtrack. Longer clips are trimmed to the requested video duration, keeping the beginning. The original audio replaces the output soundtrack, padded with silence if shorter than the video, without changing playback speed. Exceptionally high sample rates may be resampled to 96 kHz. Accepts an HTTP(S) URL or a base64 data URI.
 
 - **`aspect_ratio`** (`AspectRatioEnum`, _optional_):
   The aspect ratio of the generated video. Default value: `"16:9"`
@@ -77,8 +85,8 @@ The API accepts the following input parameters:
   "prompt": "A white kitten chases a butterfly across a sunlit garden. Gentle camera tracking, natural movement, soft afternoon light filtering through the leaves.",
   "duration": 5,
   "resolution": "2K",
-  "enable_prompt_expansion": true,
   "enable_safety_checker": true,
+  "prompt_expansion_mode": "disabled",
   "aspect_ratio": "16:9"
 }
 ```
@@ -90,7 +98,10 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"content_type":"video/mp4","file_name":"--prs89fkHtWW406fmEs__NRhTqNku.mp4","url":"https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4","file_size":6463396}
+  - Examples: {"file_size":6463396,"file_name":"--prs89fkHtWW406fmEs__NRhTqNku.mp4","content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4"}
+
+- **`expanded_prompt`** (`string`, _optional_):
+  The prompt after expansion, as sent to the model. Null when prompt expansion was disabled, left the prompt unchanged, or was performed internally by MiniMax's hosted API.
 
 
 
@@ -99,10 +110,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "video/mp4",
+    "file_size": 6463396,
     "file_name": "--prs89fkHtWW406fmEs__NRhTqNku.mp4",
-    "url": "https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4",
-    "file_size": 6463396
+    "content_type": "video/mp4",
+    "url": "https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4"
   }
 }
 ```

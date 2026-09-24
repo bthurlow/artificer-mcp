@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Video costs **$0.05** per second at **480p**, **$0.08** per second at **768p**, **$0.13** per second at **2K** and **$0.16** per second at **4K**.
+Video costs **$0.05** per second at **480p**, **$0.06** per second at **768p**, **$0.13** per second at **2K** and **$0.16** per second at **4K**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -47,20 +47,28 @@ The API accepts the following input parameters:
 - **`seed`** (`integer`, _optional_):
   Random seed. A random seed is selected when omitted.
 
-- **`enable_prompt_expansion`** (`boolean`, _optional_):
-  Whether to expand the prompt with a vision language model before generation. Default value: `true`
-  - Default: `true`
-
 - **`enable_safety_checker`** (`boolean`, _optional_):
   If set to true, the safety checker will be enabled. Default value: `true`
   - Default: `true`
 
+- **`sync_mode`** (`boolean`, _optional_):
+  Return the generated video as base64 instead of a CDN URL.
+  - Default: `false`
+
+- **`prompt_expansion_mode`** (`string`, _optional_):
+  How much effort to spend rewriting the prompt before generation. 'disabled' skips prompt expansion. 'fast' returns in about a second. 'balanced' picks per request. 'quality' spends up to ~30s on a richer prompt. Default value: `"balanced"`
+  - Default: `"balanced"`
+  - Examples: "disabled", "fast", "balanced", "quality"
+
+- **`target_audio_url`** (`string`, _optional_):
+  Optional URL of an audio clip at least 2 seconds long (maximum 15 MB) to pin to the generated soundtrack. Longer clips are trimmed to the requested video duration, keeping the beginning. The original audio replaces the output soundtrack, padded with silence if shorter than the video, without changing playback speed. Exceptionally high sample rates may be resampled to 96 kHz. Accepts an HTTP(S) URL or a base64 data URI.
+
 - **`image_url`** (`string`, _optional_):
-  Optional URL of the image to use as the first frame. When provided, the output aspect ratio follows this image. When omitted, the request is handled as text-to-video (16:9 by default).
+  Optional URL of the image to use as the first frame. When provided, the output canvas follows this image. If only end_image_url is provided, the canvas follows that last frame instead. If both images are omitted, the request is handled as text-to-video (16:9 by default).
   - Examples: "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg"
 
 - **`end_image_url`** (`string`, _optional_):
-  Optional URL of the image to use as the last frame, for first-to-last keyframe generation.
+  Optional URL of the image to use as the last frame. It may be provided alone for end-only keyframe generation; in that case the output canvas follows this image.
 
 
 
@@ -79,8 +87,8 @@ The API accepts the following input parameters:
   "prompt": "The camera slowly pulls back from the scene, revealing the full landscape as clouds drift overhead and light shifts across the terrain.",
   "duration": 5,
   "resolution": "2K",
-  "enable_prompt_expansion": true,
   "enable_safety_checker": true,
+  "prompt_expansion_mode": "disabled",
   "image_url": "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg"
 }
 ```
@@ -92,6 +100,9 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
+
+- **`expanded_prompt`** (`string`, _optional_):
+  The prompt after expansion, as sent to the model. Null when prompt expansion was disabled, left the prompt unchanged, or was performed internally by MiniMax's hosted API.
 
 
 
