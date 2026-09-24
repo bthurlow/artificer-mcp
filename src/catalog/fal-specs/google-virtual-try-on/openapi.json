@@ -1,0 +1,359 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for google/virtual-try-on",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the google/virtual-try-on queue.",
+    "x-fal-metadata": {
+      "endpointId": "google/virtual-try-on",
+      "category": "image-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aa7ad3c/U6EU6wzTNjAqqI69BYiIc.jpg",
+      "playgroundUrl": "https://fal.ai/models/google/virtual-try-on",
+      "documentationUrl": "https://fal.ai/models/google/virtual-try-on/api",
+      "about": "Generate"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "VirtualTryOnInput": {
+        "properties": {
+          "product_image_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/model_tests/leffa/tshirt_image.jpg"
+            ],
+            "description": "The URL of the product image to try on.",
+            "title": "Product Image Url",
+            "type": "string"
+          },
+          "person_image_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/model_tests/leffa/person_image.jpg"
+            ],
+            "description": "The URL of the image of the person trying on the product.",
+            "title": "Person Image Url",
+            "type": "string"
+          },
+          "num_images": {
+            "default": 1,
+            "minimum": 1,
+            "description": "The number of virtual try-on images to generate.",
+            "title": "Num Images",
+            "maximum": 4,
+            "type": "integer"
+          }
+        },
+        "x-fal-order-properties": [
+          "person_image_url",
+          "product_image_url",
+          "num_images"
+        ],
+        "title": "VirtualTryOnInput",
+        "required": [
+          "person_image_url",
+          "product_image_url"
+        ],
+        "type": "object"
+      },
+      "VirtualTryOnOutput": {
+        "properties": {
+          "images": {
+            "description": "The generated virtual try-on images.",
+            "title": "Images",
+            "items": {
+              "$ref": "#/components/schemas/ImageFile"
+            },
+            "type": "array"
+          }
+        },
+        "x-fal-order-properties": [
+          "images"
+        ],
+        "title": "VirtualTryOnOutput",
+        "required": [
+          "images"
+        ],
+        "type": "object"
+      },
+      "ImageFile": {
+        "properties": {
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size"
+          },
+          "height": {
+            "description": "The height of the image",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name"
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
+          },
+          "width": {
+            "description": "The width of the image",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "title": "ImageFile",
+        "required": [
+          "url"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/google/virtual-try-on/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/google/virtual-try-on/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/google/virtual-try-on": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VirtualTryOnInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/google/virtual-try-on/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VirtualTryOnOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

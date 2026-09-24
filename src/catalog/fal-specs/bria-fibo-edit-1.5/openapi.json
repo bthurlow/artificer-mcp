@@ -1,0 +1,991 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for bria/fibo-edit-1.5/edit",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the bria/fibo-edit-1.5/edit queue.",
+    "x-fal-metadata": {
+      "endpointId": "bria/fibo-edit-1.5/edit",
+      "category": "image-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aa6d5e8/yOi-9W3zC_BCDdcIiU-ga.jpg",
+      "playgroundUrl": "https://fal.ai/models/bria/fibo-edit-1.5/edit",
+      "documentationUrl": "https://fal.ai/models/bria/fibo-edit-1.5/edit/api",
+      "about": "Edit Open"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "FiboEdit15EditInput": {
+        "title": "FiboEditInputModel",
+        "x-fal-order-properties": [
+          "image_urls",
+          "instruction",
+          "aspect_ratio",
+          "seed",
+          "mask_url",
+          "sync_mode",
+          "structured_instruction"
+        ],
+        "type": "object",
+        "properties": {
+          "structured_instruction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructuredInstruction"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A pre-built structured prompt, used verbatim instead of having VGL build one when no instruction is sent. Accepts what a previous edit returned."
+          },
+          "sync_mode": {
+            "title": "Sync Mode",
+            "default": false,
+            "type": "boolean",
+            "description": "If true, returns the image directly in the response (increases latency)."
+          },
+          "instruction": {
+            "title": "Instruction",
+            "examples": [
+              "Uncross her arms and place the serum bottle in her right hand raised beside her face, label toward the camera."
+            ],
+            "description": "Instruction for image editing.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "image_urls": {
+            "title": "Image Urls",
+            "examples": [
+              [
+                "https://v3b.fal.media/files/b/0aa69153/6d2UFjgrQCRM6BoWpXpZ3_126_1.jpg",
+                "https://v3b.fal.media/files/b/0aa69153/Gy-fjFofCbQP9w3lsfc2e_126_2.jpg"
+              ]
+            ],
+            "description": "1-4 reference images (files or URLs). Order is significant: the instruction is resolved against the images in the order they are sent.",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mask_url": {
+            "title": "Mask Url",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mask (file or URL) marking the region to regenerate: white where the model should edit, black elsewhere. Single-reference requests only, and it must be the same size as that image. A masked edit comes back at the reference's own resolution."
+          },
+          "aspect_ratio": {
+            "title": "Aspect Ratio",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "1:1",
+                  "2:3",
+                  "3:2",
+                  "3:4",
+                  "4:3",
+                  "4:5",
+                  "5:4",
+                  "9:16",
+                  "16:9"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Output aspect ratio. Left unset, the output keeps the ratio of the first reference image. A chosen ratio applies only with two or more reference images; with a single reference the output keeps that image's ratio either way."
+          },
+          "seed": {
+            "title": "Seed",
+            "default": 5555,
+            "type": "integer",
+            "description": "Random seed for reproducibility."
+          }
+        }
+      },
+      "FiboEdit15EditOutput": {
+        "title": "FiboEditOutputModel",
+        "x-fal-order-properties": [
+          "image",
+          "images",
+          "structured_instruction"
+        ],
+        "type": "object",
+        "properties": {
+          "image": {
+            "description": "Generated image.",
+            "$ref": "#/components/schemas/Image"
+          },
+          "images": {
+            "title": "Images",
+            "examples": [
+              [
+                {
+                  "url": "https://v3b.fal.media/files/b/0aa6910f/ie5dAn55wDh7Y1adCFGyE_85a45d82c6d141c2a28d92367596dfac.png"
+                }
+              ]
+            ],
+            "default": [],
+            "type": "array",
+            "description": "Generated images.",
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            }
+          },
+          "structured_instruction": {
+            "title": "Structured Instruction",
+            "type": "object",
+            "description": "Current instruction.",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "image",
+          "structured_instruction"
+        ]
+      },
+      "StructuredInstruction": {
+        "title": "StructuredInstruction",
+        "x-fal-order-properties": [
+          "short_description",
+          "objects",
+          "background_setting",
+          "lighting",
+          "aesthetics",
+          "photographic_characteristics",
+          "style_medium",
+          "text_render",
+          "context",
+          "artistic_style",
+          "edit_instruction"
+        ],
+        "type": "object",
+        "properties": {
+          "lighting": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Lighting"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The lighting of the image to be generated."
+          },
+          "artistic_style": {
+            "title": "Artistic Style",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The artistic style of the image to be generated."
+          },
+          "text_render": {
+            "title": "Text Render",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {}
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": [],
+            "description": "A list of text to be rendered in the image."
+          },
+          "edit_instruction": {
+            "title": "Edit Instruction",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The edit instruction for the image."
+          },
+          "objects": {
+            "title": "Objects",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PromptObject"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": [],
+            "description": "A list of objects in the image to be generated, along with their attributes and relationships to other objects in the image."
+          },
+          "context": {
+            "title": "Context",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The context of the image to be generated."
+          },
+          "background_setting": {
+            "title": "Background Setting",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The background setting of the image to be generated."
+          },
+          "photographic_characteristics": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PhotographicCharacteristics"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The photographic characteristics of the image to be generated."
+          },
+          "style_medium": {
+            "title": "Style Medium",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The style medium of the image to be generated."
+          },
+          "aesthetics": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Aesthetics"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The aesthetics of the image to be generated."
+          },
+          "short_description": {
+            "title": "Short Description",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A short description of the image to be generated."
+          }
+        },
+        "additionalProperties": true
+      },
+      "Image": {
+        "title": "Image",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "width": {
+            "title": "Width",
+            "examples": [
+              1024
+            ],
+            "description": "The width of the image in pixels.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "height": {
+            "title": "Height",
+            "examples": [
+              1024
+            ],
+            "description": "The height of the image in pixels.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "description": "Represents an image file."
+      },
+      "Lighting": {
+        "title": "Lighting",
+        "x-fal-order-properties": [
+          "conditions",
+          "direction",
+          "shadows"
+        ],
+        "type": "object",
+        "properties": {
+          "conditions": {
+            "title": "Conditions",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The conditions of the lighting in the image to be generated."
+          },
+          "direction": {
+            "title": "Direction",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The direction of the lighting in the image to be generated."
+          },
+          "shadows": {
+            "title": "Shadows",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The shadows in the image to be generated."
+          }
+        }
+      },
+      "PromptObject": {
+        "title": "PromptObject",
+        "x-fal-order-properties": [
+          "description",
+          "location",
+          "relationship",
+          "relative_size",
+          "shape_and_color",
+          "texture",
+          "appearance_details",
+          "number_of_objects",
+          "pose",
+          "expression",
+          "clothing",
+          "action",
+          "gender",
+          "skin_tone_and_texture",
+          "orientation"
+        ],
+        "type": "object",
+        "properties": {
+          "expression": {
+            "title": "Expression",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The expression of the object in the image."
+          },
+          "clothing": {
+            "title": "Clothing",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The clothing of the object in the image."
+          },
+          "appearance_details": {
+            "title": "Appearance Details",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The appearance details of the object."
+          },
+          "relationship": {
+            "title": "Relationship",
+            "type": "string",
+            "description": "The relationship of the object to other objects in the image."
+          },
+          "pose": {
+            "title": "Pose",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The pose of the object in the image."
+          },
+          "action": {
+            "title": "Action",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The action of the object in the image."
+          },
+          "shape_and_color": {
+            "title": "Shape And Color",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The shape and color of the object."
+          },
+          "orientation": {
+            "title": "Orientation",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The orientation of the object in the image."
+          },
+          "gender": {
+            "title": "Gender",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The gender of the object in the image."
+          },
+          "texture": {
+            "title": "Texture",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The texture of the object."
+          },
+          "number_of_objects": {
+            "title": "Number Of Objects",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The number of objects in the image."
+          },
+          "skin_tone_and_texture": {
+            "title": "Skin Tone And Texture",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The skin tone and texture of the object in the image."
+          },
+          "description": {
+            "title": "Description",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A description of the object to be generated."
+          },
+          "location": {
+            "title": "Location",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The location of the object in the image."
+          },
+          "relative_size": {
+            "title": "Relative Size",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The relative size of the object in the image."
+          }
+        },
+        "required": [
+          "relationship"
+        ]
+      },
+      "PhotographicCharacteristics": {
+        "title": "PhotographicCharacteristics",
+        "x-fal-order-properties": [
+          "depth_of_field",
+          "focus",
+          "camera_angle",
+          "lens_focal_length"
+        ],
+        "type": "object",
+        "properties": {
+          "depth_of_field": {
+            "title": "Depth Of Field",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The depth of field in the image to be generated."
+          },
+          "lens_focal_length": {
+            "title": "Lens Focal Length",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The focal length of the lens in the image to be generated."
+          },
+          "focus": {
+            "title": "Focus",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The focus in the image to be generated."
+          },
+          "camera_angle": {
+            "title": "Camera Angle",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The angle of the camera in the image to be generated."
+          }
+        }
+      },
+      "Aesthetics": {
+        "title": "Aesthetics",
+        "x-fal-order-properties": [
+          "composition",
+          "color_scheme",
+          "mood_atmosphere",
+          "aesthetic_score",
+          "preference_score"
+        ],
+        "type": "object",
+        "properties": {
+          "aesthetic_score": {
+            "title": "Aesthetic Score",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The aesthetic score of the image to be generated."
+          },
+          "composition": {
+            "title": "Composition",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The composition of the image to be generated."
+          },
+          "preference_score": {
+            "title": "Preference Score",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The preference score of the image to be generated."
+          },
+          "color_scheme": {
+            "title": "Color Scheme",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The color scheme of the image to be generated."
+          },
+          "mood_atmosphere": {
+            "title": "Mood Atmosphere",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mood and atmosphere of the image to be generated."
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/bria/fibo-edit-1.5/edit/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bria/fibo-edit-1.5/edit/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bria/fibo-edit-1.5/edit": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FiboEdit15EditInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bria/fibo-edit-1.5/edit/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FiboEdit15EditOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

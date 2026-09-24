@@ -100,7 +100,18 @@ The \`aspect_ratio\` you pass must match the aspect ratio of the downstream dest
 |----------|---------------------------------------|-----------------------------|------------------------|-------|
 | google   | \`gemini_nanobanana_generate_image\`  | \`gemini-3.1-flash-image\`  | $0.045 (0.5K) / $0.067 (1K) / $0.101 (2K) / $0.151 (4K) per image | Multimodal (text + reference images). Exposes \`aspect_ratio\`, \`image_size\`, \`reference_images[]\`, \`include_text\`. No \`seed\` / \`number_of_images\` / \`negative_prompt\` / safety knobs. |
 
-Nano-banana is Google-route only. Fal hosts other multimodal image models (Flux, Seedream, etc.) — those are their own logical models with their own guides when the fal image transport lands.
+**fal routes (added 2026-09-24).** fal hosts the same models, callable through \`fal_generate_image\` with FAL_KEY. The \`gemini-nano-banana\` entry now has a second route: \`fal-ai/nano-banana-2\` (the same Nano Banana 2 model). Nano Banana Pro, the Lite models and the fal edit endpoints have their own slugs, listed under "Newer routes" below. The fal versions differ from the Google tool in two useful ways: they take \`output_format\` (\`"png"\` / \`"jpeg"\` / \`"webp"\`, via extra_params), so fal returns the format you ask for, and \`resolution\` (\`"0.5K"\`–\`"4K"\` on Nano Banana 2; \`"1K"\`–\`"4K"\` on Pro). fal's price per image is somewhat higher than Google direct; compare the routes' \`cost\` in \`model_catalog\`. Edits on fal pass reference images as \`images\` (→ \`image_urls\`), not \`reference_images\`. Other fal image models have their own guides: \`fal_image_generation_prompt_guide\`, \`fal_image_edit_prompt_guide\`.
+
+## Newer routes (added 2026-09-24)
+Added in the 2026-09-24 fal catalog refresh. Model descriptions are fal's own; inputs come from each route's committed spec (\`src/catalog/fal-specs/<slug>/openapi.json\`). The sections above predate these routes and were not re-verified against them, so check a newer model's spec before assuming it matches.
+
+| Slug | Model (fal's description) | Inputs (**required**, then notable) |
+|------|----------------------------|--------------------------------------|
+| \`nano-banana-pro-t2i\` | Nano Banana Pro is Google's new state-of-the-art image generation and editing model | **\`prompt\`**, \`num_images\`, \`aspect_ratio\`, \`sync_mode\`, \`output_format\`, \`resolution\` (+5 more) |
+| \`nano-banana-2-lite-t2i\` | Nano banana lite is the efficiency-focused model in the image generation family. Sub-2 second latency with cost-effective generation and editing, fast multi-… | **\`prompt\`**, \`aspect_ratio\`, \`num_images\`, \`sync_mode\`, \`output_format\` (+5 more) |
+| \`nano-banana-2-edit\` | Nano Banana 2 is Google's new state-of-the-art image generation and editing model | **\`prompt\`**, \`output_format\`, \`resolution\`, \`image_urls\`, \`aspect_ratio\`, \`sync_mode\`, \`audio_url\`, \`num_images\`, \`video_url\` (+7 more) |
+| \`nano-banana-pro-edit\` | Nano Banana Pro is Google's new state-of-the-art image generation and editing model | **\`image_urls\`**, **\`prompt\`**, \`num_images\`, \`aspect_ratio\`, \`sync_mode\`, \`output_format\`, \`resolution\` (+5 more) |
+| \`nano-banana-lite-edit\` | Nano banana lite is the efficiency-focused model in the image generation family. Sub-2 second latency with cost-effective generation and editing, fast multi-… | **\`prompt\`**, \`image_urls\`, \`aspect_ratio\`, \`sync_mode\`, \`num_images\`, \`output_format\` (+5 more) |
 
 ## Last verified
 2026-09-24: \`image_size\` added, and output is converted to match the requested extension (TODO #25, from btmusic: every \`.png\` request had written JPEG bytes at ~1K). The \`imageSize\` values come from the pinned \`@google/genai\` ImageConfig type; not yet confirmed with a live 2K/4K call.

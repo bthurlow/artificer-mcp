@@ -1,0 +1,375 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for bria/extract-object",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the bria/extract-object queue.",
+    "x-fal-metadata": {
+      "endpointId": "bria/extract-object",
+      "category": "image-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aa0257a/9ELrmKOSBXCg7yslCX0W0.jpg",
+      "playgroundUrl": "https://fal.ai/models/bria/extract-object",
+      "documentationUrl": "https://fal.ai/models/bria/extract-object/api",
+      "about": "Extract Object"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "ExtractObjectInput": {
+        "properties": {
+          "remove_background": {
+            "description": "When True, refine the cutout alpha with background removal (RMBG). When False (default), use the SAM segmentation mask as the cutout's alpha -- faster, with no salient-object matting (helpful when RMBG over-trims text, logos, or graphics).",
+            "title": "Remove Background",
+            "type": "boolean",
+            "default": false
+          },
+          "sync_mode": {
+            "description": "\n            If true, the function waits for the image to be generated and uploaded\n            before returning, so the image is returned directly (base64) instead of\n            via the CDN. Increases latency.\n        ",
+            "title": "Sync Mode",
+            "type": "boolean",
+            "default": false
+          },
+          "autocrop": {
+            "description": "Tighten the output canvas to the extracted object.",
+            "title": "Autocrop",
+            "type": "boolean",
+            "default": false
+          },
+          "prompt": {
+            "description": "Natural-language description of the object to act on, e.g. 'the red car'.",
+            "title": "Prompt",
+            "type": "string",
+            "default": "yellow hammer"
+          },
+          "image_url": {
+            "description": "Source image as a public URL or raw base64-encoded image bytes (no data-URI prefix).",
+            "title": "Image Url",
+            "type": "string",
+            "default": "https://bria-datasets.s3.amazonaws.com/object-extraction/tools_construction_flatlay.jpg",
+            "examples": [
+              "https://bria-datasets.s3.amazonaws.com/object-extraction/tools_construction_flatlay.jpg"
+            ]
+          }
+        },
+        "title": "ExtractObjectInput",
+        "type": "object",
+        "x-fal-order-properties": [
+          "image_url",
+          "prompt",
+          "sync_mode",
+          "autocrop",
+          "remove_background"
+        ]
+      },
+      "ExtractObjectOutput": {
+        "properties": {
+          "image": {
+            "description": "Extracted object on a transparent background (RGBA).",
+            "$ref": "#/components/schemas/Image"
+          },
+          "mask": {
+            "description": "Segmentation mask used for the extraction.",
+            "$ref": "#/components/schemas/Image"
+          }
+        },
+        "title": "ExtractObjectOutput",
+        "type": "object",
+        "x-fal-order-properties": [
+          "image",
+          "mask"
+        ],
+        "required": [
+          "image",
+          "mask"
+        ]
+      },
+      "Image": {
+        "properties": {
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ]
+          },
+          "height": {
+            "description": "The height of the image in pixels.",
+            "title": "Height",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              1024
+            ]
+          },
+          "width": {
+            "description": "The width of the image in pixels.",
+            "title": "Width",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              1024
+            ]
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          }
+        },
+        "description": "Represents an image file.",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "type": "object",
+        "title": "Image",
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/bria/extract-object/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bria/extract-object/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bria/extract-object": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExtractObjectInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bria/extract-object/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtractObjectOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

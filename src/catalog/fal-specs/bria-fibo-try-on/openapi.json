@@ -1,0 +1,440 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for bria/fibo-edit-1.5/virtual-try-on",
+    "version": "1.0.0",
+    "description": "Bria Virtual Try-On uses FIBO-Edit-1.5 to visualize garments and accessories on a person. The endpoint accepts a person image and one to three garment or accessory reference images for outfit changes in a single generation.\n\nAn optional instruction adds direction to the built-in try-on instruction, specifying which garments to replace, how to layer them, and which items should stay unchanged. The output keeps the person image's aspect ratio unless an explicit aspect ratio is selected. A seed controls reproducibility, and sync mode can return the image directly in the response.\n\nUse cases include apparel e-commerce listings, digital lookbooks, seasonal catalogs, virtual fitting rooms, and social commerce creative.",
+    "x-fal-metadata": {
+      "endpointId": "bria/fibo-edit-1.5/virtual-try-on",
+      "category": "image-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aaace34/m1K534dU518WX0hCH5qrc.jpg",
+      "playgroundUrl": "https://fal.ai/models/bria/fibo-edit-1.5/virtual-try-on",
+      "documentationUrl": "https://fal.ai/models/bria/fibo-edit-1.5/virtual-try-on/api",
+      "about": "Virtual Try On"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "FiboEdit15VirtualTryOnInput": {
+        "title": "VirtualTryOnInputModel",
+        "x-fal-order-properties": [
+          "person_image_url",
+          "garment_image_urls",
+          "instruction",
+          "aspect_ratio",
+          "seed",
+          "sync_mode"
+        ],
+        "type": "object",
+        "properties": {
+          "seed": {
+            "title": "Seed",
+            "default": 5555,
+            "type": "integer",
+            "description": "Random seed for reproducibility."
+          },
+          "sync_mode": {
+            "title": "Sync Mode",
+            "default": false,
+            "type": "boolean",
+            "description": "If true, returns the image directly in the response (increases latency)."
+          },
+          "instruction": {
+            "title": "Instruction",
+            "examples": [
+              "He wears the navy blazer over the white t-shirt he already has, and the grey tailored trousers instead of his jeans; his sneakers stay unchanged."
+            ],
+            "description": "Extra direction, appended after the built-in instruction.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "person_image_url": {
+            "title": "Person Image Url",
+            "examples": [
+              "https://labs-assets.bria.ai/fal-examples/fibo-edit-1.5/virtual-try-on/person.jpg"
+            ],
+            "type": "string",
+            "description": "Photo of the person who will wear the garments."
+          },
+          "aspect_ratio": {
+            "title": "Aspect Ratio",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "1:1",
+                  "2:3",
+                  "3:2",
+                  "3:4",
+                  "4:3",
+                  "4:5",
+                  "5:4",
+                  "9:16",
+                  "16:9"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Output aspect ratio. Left unset, the output keeps the ratio of the person image."
+          },
+          "garment_image_urls": {
+            "examples": [
+              [
+                "https://labs-assets.bria.ai/fal-examples/fibo-edit-1.5/virtual-try-on/garment-1.jpg",
+                "https://labs-assets.bria.ai/fal-examples/fibo-edit-1.5/virtual-try-on/garment-2.jpg"
+              ]
+            ],
+            "description": "1-3 garment or accessory images to put on the person.",
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            },
+            "title": "Garment Image Urls"
+          }
+        },
+        "required": [
+          "person_image_url",
+          "garment_image_urls"
+        ]
+      },
+      "FiboEdit15VirtualTryOnOutput": {
+        "title": "FiboEditOutputModel",
+        "x-fal-order-properties": [
+          "image",
+          "images",
+          "structured_instruction"
+        ],
+        "type": "object",
+        "properties": {
+          "image": {
+            "description": "Generated image.",
+            "$ref": "#/components/schemas/Image"
+          },
+          "images": {
+            "title": "Images",
+            "examples": [
+              [
+                {
+                  "url": "https://v3b.fal.media/files/b/0aa6910f/ie5dAn55wDh7Y1adCFGyE_85a45d82c6d141c2a28d92367596dfac.png"
+                }
+              ]
+            ],
+            "default": [],
+            "type": "array",
+            "description": "Generated images.",
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            }
+          },
+          "structured_instruction": {
+            "title": "Structured Instruction",
+            "type": "object",
+            "description": "Current instruction.",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "image",
+          "structured_instruction"
+        ]
+      },
+      "Image": {
+        "title": "Image",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "width": {
+            "title": "Width",
+            "examples": [
+              1024
+            ],
+            "description": "The width of the image in pixels.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "height": {
+            "title": "Height",
+            "examples": [
+              1024
+            ],
+            "description": "The height of the image in pixels.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "description": "Represents an image file."
+      }
+    }
+  },
+  "paths": {
+    "/bria/fibo-edit-1.5/virtual-try-on/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bria/fibo-edit-1.5/virtual-try-on/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bria/fibo-edit-1.5/virtual-try-on": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FiboEdit15VirtualTryOnInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bria/fibo-edit-1.5/virtual-try-on/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FiboEdit15VirtualTryOnOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

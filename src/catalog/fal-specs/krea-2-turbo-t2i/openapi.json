@@ -1,0 +1,505 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/krea-2/turbo",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/krea-2/turbo queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/krea-2/turbo",
+      "category": "text-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a9ec8c9/8GzWPYzjnpIp9l_nVysti_51daab936c734a849698a7fee8718d5e.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/krea-2/turbo",
+      "documentationUrl": "https://fal.ai/models/fal-ai/krea-2/turbo/api",
+      "about": "Generate an image with the distilled Krea 2 turbo checkpoint."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "Krea2TurboInput": {
+        "properties": {
+          "image_size": {
+            "default": "square_hd",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageSize"
+              },
+              {
+                "enum": [
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9"
+                ],
+                "type": "string"
+              }
+            ],
+            "title": "Image Size",
+            "description": "The size of the generated image."
+          },
+          "num_images": {
+            "minimum": 1,
+            "default": 1,
+            "type": "integer",
+            "description": "The number of images to generate.",
+            "title": "Number of Images",
+            "maximum": 4
+          },
+          "prompt": {
+            "minLength": 1,
+            "type": "string",
+            "maxLength": 5000,
+            "description": "Base text description of the image to generate.",
+            "title": "Prompt",
+            "examples": [
+              "a vintage travel poster for Mars"
+            ]
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "Random seed for reproducible generation. Image *i* uses `seed + i`."
+          },
+          "sync_mode": {
+            "default": false,
+            "type": "boolean",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "title": "Sync Mode"
+          },
+          "acceleration": {
+            "enum": [
+              "none",
+              "regular"
+            ],
+            "default": "none",
+            "type": "string",
+            "description": "The acceleration level to use for the image generation.",
+            "title": "Acceleration"
+          },
+          "output_format": {
+            "enum": [
+              "jpeg",
+              "png"
+            ],
+            "default": "png",
+            "type": "string",
+            "description": "The format of the generated image. Default value: \"png\".",
+            "title": "Output Format"
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "type": "boolean",
+            "description": "If true, the output safety checker is enabled. Disabling it requires account authorization; unauthorized requests are always checked, and images flagged as unsafe are returned as black images.",
+            "title": "Enable Safety Checker"
+          },
+          "enable_prompt_expansion": {
+            "default": false,
+            "type": "boolean",
+            "description": "If true, the prompt is expanded with an LLM into a more detailed image-generation prompt for higher quality results. On failure, the original prompt is used unchanged.",
+            "title": "Enable Prompt Expansion"
+          }
+        },
+        "title": "Krea2Input",
+        "type": "object",
+        "x-fal-order-properties": [
+          "prompt",
+          "seed",
+          "image_size",
+          "num_images",
+          "acceleration",
+          "enable_prompt_expansion",
+          "sync_mode",
+          "enable_safety_checker",
+          "output_format"
+        ],
+        "required": [
+          "prompt"
+        ]
+      },
+      "Krea2TurboOutput": {
+        "properties": {
+          "seed": {
+            "type": "integer",
+            "description": "The seed used to generate the image(s).",
+            "title": "Seed",
+            "examples": [
+              12345
+            ]
+          },
+          "timings": {
+            "type": "object",
+            "description": "Timing information for the request, in seconds.",
+            "title": "Timings",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "has_nsfw_concepts": {
+            "items": {
+              "type": "boolean"
+            },
+            "type": "array",
+            "description": "Whether each generated image contains NSFW concepts.",
+            "title": "Has Nsfw Concepts"
+          },
+          "actual_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Prompt",
+            "description": "The final prompt after expansion, if prompt expansion was enabled."
+          },
+          "images": {
+            "items": {
+              "$ref": "#/components/schemas/ImageFile"
+            },
+            "type": "array",
+            "description": "The generated images.",
+            "title": "Images"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The prompt used for generation.",
+            "title": "Prompt"
+          }
+        },
+        "title": "Krea2Output",
+        "type": "object",
+        "x-fal-order-properties": [
+          "images",
+          "timings",
+          "seed",
+          "has_nsfw_concepts",
+          "prompt",
+          "actual_prompt"
+        ],
+        "required": [
+          "images",
+          "timings",
+          "seed",
+          "has_nsfw_concepts",
+          "prompt"
+        ]
+      },
+      "ImageSize": {
+        "properties": {
+          "height": {
+            "maximum": 14142,
+            "default": 512,
+            "type": "integer",
+            "description": "The height of the generated image.",
+            "title": "Height",
+            "exclusiveMinimum": 0
+          },
+          "width": {
+            "maximum": 14142,
+            "default": 512,
+            "type": "integer",
+            "description": "The width of the generated image.",
+            "title": "Width",
+            "exclusiveMinimum": 0
+          }
+        },
+        "type": "object",
+        "title": "ImageSize",
+        "x-fal-order-properties": [
+          "width",
+          "height"
+        ]
+      },
+      "ImageFile": {
+        "properties": {
+          "content_type": {
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "The height of the image"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "description": "The width of the image"
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "examples": [
+              4404019
+            ]
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          }
+        },
+        "title": "ImageFile",
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/krea-2/turbo/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/krea-2/turbo/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/krea-2/turbo": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Krea2TurboInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/krea-2/turbo/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Krea2TurboOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

@@ -1,0 +1,514 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/hidream-o1-image",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/hidream-o1-image queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/hidream-o1-image",
+      "category": "text-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a999217/79hRTD17Is8llel4R5GvK_fb7bcffb53ea405198c7978f9886a668.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/hidream-o1-image",
+      "documentationUrl": "https://fal.ai/models/fal-ai/hidream-o1-image/api",
+      "about": "Generate"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "HidreamO1ImageInput": {
+        "properties": {
+          "image_size": {
+            "default": {
+              "height": 1024,
+              "width": 1024
+            },
+            "description": "Requested output image size. Dimensions are rounded down to a multiple of 32, up to about 2048x2048 pixels.",
+            "title": "Image Size",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageSize"
+              },
+              {
+                "enum": [
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9"
+                ],
+                "type": "string"
+              }
+            ]
+          },
+          "num_images": {
+            "minimum": 1,
+            "maximum": 4,
+            "type": "integer",
+            "description": "Number of images to generate.",
+            "title": "Num Images",
+            "default": 1
+          },
+          "prompt": {
+            "minLength": 1,
+            "type": "string",
+            "description": "Text prompt for image generation, editing, or subject-driven personalization.",
+            "examples": [
+              "A cinematic product photo of a ceramic mug on a marble counter, soft window light, shallow depth of field."
+            ],
+            "title": "Prompt"
+          },
+          "guidance_scale": {
+            "minimum": 0,
+            "maximum": 20,
+            "type": "number",
+            "description": "Classifier-free guidance scale. The full model uses 5.0 by default.",
+            "title": "Guidance Scale",
+            "default": 5
+          },
+          "sync_mode": {
+            "default": false,
+            "type": "boolean",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "title": "Sync Mode"
+          },
+          "reference_image_urls": {
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "type": "array",
+            "description": "Optional reference images. Use none for text-to-image, one for image editing, or multiple for subject-driven personalization.",
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/model_tests/hidream/woman.png"
+              ]
+            ],
+            "title": "Reference Image Urls"
+          },
+          "output_format": {
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
+            ],
+            "default": "png",
+            "type": "string",
+            "description": "The format of the generated image.",
+            "title": "Output Format"
+          },
+          "seed": {
+            "description": "Random seed for reproducible generation.",
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "num_inference_steps": {
+            "minimum": 1,
+            "maximum": 50,
+            "type": "integer",
+            "description": "Number of denoising steps.",
+            "title": "Num Inference Steps",
+            "default": 50
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "type": "boolean",
+            "description": "Enable the safety checker on generated images.",
+            "title": "Enable Safety Checker"
+          },
+          "keep_original_aspect": {
+            "default": false,
+            "type": "boolean",
+            "description": "When exactly one reference image is provided, preserve its aspect ratio for the output image.",
+            "title": "Keep Original Aspect"
+          }
+        },
+        "x-fal-order-properties": [
+          "prompt",
+          "reference_image_urls",
+          "image_size",
+          "num_inference_steps",
+          "guidance_scale",
+          "seed",
+          "num_images",
+          "output_format",
+          "sync_mode",
+          "enable_safety_checker",
+          "keep_original_aspect"
+        ],
+        "type": "object",
+        "title": "HiDreamO1ImageInput",
+        "required": [
+          "prompt"
+        ]
+      },
+      "HidreamO1ImageOutput": {
+        "properties": {
+          "seed": {
+            "type": "integer",
+            "description": "The seed used for generation.",
+            "title": "Seed"
+          },
+          "timings": {
+            "type": "object",
+            "description": "Generation timings.",
+            "title": "Timings",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "has_nsfw_concepts": {
+            "items": {
+              "type": "boolean"
+            },
+            "type": "array",
+            "description": "Whether each generated image was flagged by the safety checker.",
+            "title": "Has Nsfw Concepts"
+          },
+          "images": {
+            "items": {
+              "$ref": "#/components/schemas/ImageFile"
+            },
+            "type": "array",
+            "description": "Generated images.",
+            "title": "Images"
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The prompt used for generation.",
+            "title": "Prompt"
+          }
+        },
+        "x-fal-order-properties": [
+          "images",
+          "seed",
+          "has_nsfw_concepts",
+          "prompt",
+          "timings"
+        ],
+        "type": "object",
+        "title": "HiDreamO1ImageOutput",
+        "required": [
+          "images",
+          "seed",
+          "has_nsfw_concepts",
+          "prompt",
+          "timings"
+        ]
+      },
+      "ImageSize": {
+        "properties": {
+          "height": {
+            "exclusiveMinimum": 0,
+            "maximum": 14142,
+            "type": "integer",
+            "description": "The height of the generated image.",
+            "title": "Height",
+            "default": 512
+          },
+          "width": {
+            "exclusiveMinimum": 0,
+            "maximum": 14142,
+            "type": "integer",
+            "description": "The width of the generated image.",
+            "title": "Width",
+            "default": 512
+          }
+        },
+        "type": "object",
+        "title": "ImageSize",
+        "x-fal-order-properties": [
+          "width",
+          "height"
+        ]
+      },
+      "ImageFile": {
+        "properties": {
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type"
+          },
+          "height": {
+            "description": "The height of the image",
+            "title": "Height",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "width": {
+            "description": "The width of the image",
+            "title": "Width",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name"
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "type": "object",
+        "title": "ImageFile",
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/hidream-o1-image/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/hidream-o1-image/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/hidream-o1-image": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HidreamO1ImageInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/hidream-o1-image/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HidreamO1ImageOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

@@ -1,0 +1,941 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for bria/fibo-gen-1.5/text-to-image",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the bria/fibo-gen-1.5/text-to-image queue.",
+    "x-fal-metadata": {
+      "endpointId": "bria/fibo-gen-1.5/text-to-image",
+      "category": "text-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aa6d4c9/_rpYrcZ6wOWy82Q_F5OuM.jpg",
+      "playgroundUrl": "https://fal.ai/models/bria/fibo-gen-1.5/text-to-image",
+      "documentationUrl": "https://fal.ai/models/bria/fibo-gen-1.5/text-to-image/api",
+      "about": "Generate an image from text prompt only."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "FiboGen15TextToImageInput": {
+        "properties": {
+          "seed": {
+            "description": "Random seed for reproducibility.",
+            "title": "Seed",
+            "default": 5555,
+            "type": "integer"
+          },
+          "sync_mode": {
+            "description": "If true, returns the image directly in the response (increases latency).",
+            "title": "Sync Mode",
+            "default": false,
+            "type": "boolean"
+          },
+          "structured_prompt": {
+            "description": "The structured prompt to generate an image from.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructuredPrompt"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "aspect_ratio": {
+            "description": "Aspect ratio. Options: 1:1, 2:3, 3:2, 3:4, 4:3, 4:5, 5:4, 9:16, 16:9",
+            "title": "Aspect Ratio",
+            "default": "1:1",
+            "type": "string",
+            "enum": [
+              "1:1",
+              "2:3",
+              "3:2",
+              "3:4",
+              "4:3",
+              "4:5",
+              "5:4",
+              "9:16",
+              "16:9"
+            ]
+          },
+          "prompt": {
+            "description": "Prompt for image generation.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt",
+            "examples": [
+              "A weathered brown leather armchair in a sunlit study, cracked grain texture, soft afternoon light raking across the surface."
+            ]
+          },
+          "resolution": {
+            "description": "Output image resolution",
+            "title": "Resolution",
+            "default": "1MP",
+            "type": "string",
+            "enum": [
+              "1MP",
+              "4MP"
+            ]
+          }
+        },
+        "title": "GaiaInputModel",
+        "type": "object",
+        "x-fal-order-properties": [
+          "prompt",
+          "structured_prompt",
+          "seed",
+          "aspect_ratio",
+          "resolution",
+          "sync_mode"
+        ]
+      },
+      "FiboGen15TextToImageOutput": {
+        "properties": {
+          "structured_prompt": {
+            "description": "Current prompt.",
+            "title": "Structured Prompt",
+            "type": "object",
+            "additionalProperties": true
+          },
+          "image": {
+            "$ref": "#/components/schemas/Image",
+            "description": "Generated image."
+          },
+          "images": {
+            "description": "Generated images.",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "title": "Images",
+            "type": "array",
+            "default": []
+          }
+        },
+        "title": "GaiaOutputModel",
+        "type": "object",
+        "x-fal-order-properties": [
+          "image",
+          "images",
+          "structured_prompt"
+        ],
+        "required": [
+          "image",
+          "structured_prompt"
+        ]
+      },
+      "StructuredPrompt": {
+        "properties": {
+          "lighting": {
+            "description": "The lighting of the image to be generated.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Lighting"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "short_description": {
+            "description": "A short description of the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Short Description"
+          },
+          "aesthetics": {
+            "description": "The aesthetics of the image to be generated.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Aesthetics"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "objects": {
+            "description": "A list of objects in the image to be generated, along with their attributes and relationships to other objects in the image.",
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/PromptObject"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objects",
+            "default": []
+          },
+          "background_setting": {
+            "description": "The background setting of the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Background Setting"
+          },
+          "style_medium": {
+            "description": "The style medium of the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Style Medium"
+          },
+          "artistic_style": {
+            "description": "The artistic style of the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artistic Style"
+          },
+          "text_render": {
+            "description": "A list of text to be rendered in the image.",
+            "anyOf": [
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text Render",
+            "default": []
+          },
+          "context": {
+            "description": "The context of the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context"
+          },
+          "photographic_characteristics": {
+            "description": "The photographic characteristics of the image to be generated.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PhotographicCharacteristics"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "StructuredPrompt",
+        "type": "object",
+        "x-fal-order-properties": [
+          "short_description",
+          "objects",
+          "background_setting",
+          "lighting",
+          "aesthetics",
+          "photographic_characteristics",
+          "style_medium",
+          "text_render",
+          "context",
+          "artistic_style"
+        ]
+      },
+      "Image": {
+        "properties": {
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "examples": [
+              4404019
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "width": {
+            "description": "The width of the image in pixels.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "examples": [
+              1024
+            ]
+          },
+          "height": {
+            "description": "The height of the image in pixels.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "examples": [
+              1024
+            ]
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          }
+        },
+        "description": "Represents an image file.",
+        "title": "Image",
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ]
+      },
+      "Lighting": {
+        "properties": {
+          "shadows": {
+            "description": "The shadows in the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shadows"
+          },
+          "direction": {
+            "description": "The direction of the lighting in the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Direction"
+          },
+          "conditions": {
+            "description": "The conditions of the lighting in the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conditions"
+          }
+        },
+        "title": "Lighting",
+        "type": "object",
+        "x-fal-order-properties": [
+          "conditions",
+          "direction",
+          "shadows"
+        ]
+      },
+      "Aesthetics": {
+        "properties": {
+          "composition": {
+            "description": "The composition of the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Composition"
+          },
+          "mood_atmosphere": {
+            "description": "The mood and atmosphere of the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mood Atmosphere"
+          },
+          "preference_score": {
+            "description": "The preference score of the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preference Score"
+          },
+          "aesthetic_score": {
+            "description": "The aesthetic score of the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aesthetic Score"
+          },
+          "color_scheme": {
+            "description": "The color scheme of the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Color Scheme"
+          }
+        },
+        "title": "Aesthetics",
+        "type": "object",
+        "x-fal-order-properties": [
+          "composition",
+          "color_scheme",
+          "mood_atmosphere",
+          "aesthetic_score",
+          "preference_score"
+        ]
+      },
+      "PromptObject": {
+        "properties": {
+          "clothing": {
+            "description": "The clothing of the object in the image.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clothing"
+          },
+          "shape_and_color": {
+            "description": "The shape and color of the object.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shape And Color"
+          },
+          "orientation": {
+            "description": "The orientation of the object in the image.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Orientation"
+          },
+          "skin_tone_and_texture": {
+            "description": "The skin tone and texture of the object in the image.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skin Tone And Texture"
+          },
+          "pose": {
+            "description": "The pose of the object in the image.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pose"
+          },
+          "number_of_objects": {
+            "description": "The number of objects in the image.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number Of Objects"
+          },
+          "location": {
+            "description": "The location of the object in the image.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "texture": {
+            "description": "The texture of the object.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Texture"
+          },
+          "relationship": {
+            "description": "The relationship of the object to other objects in the image.",
+            "title": "Relationship",
+            "type": "string"
+          },
+          "description": {
+            "description": "A description of the object to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "relative_size": {
+            "description": "The relative size of the object in the image.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relative Size"
+          },
+          "appearance_details": {
+            "description": "The appearance details of the object.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appearance Details"
+          },
+          "gender": {
+            "description": "The gender of the object in the image.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "action": {
+            "description": "The action of the object in the image.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action"
+          },
+          "expression": {
+            "description": "The expression of the object in the image.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expression"
+          }
+        },
+        "title": "PromptObject",
+        "type": "object",
+        "x-fal-order-properties": [
+          "description",
+          "location",
+          "relationship",
+          "relative_size",
+          "shape_and_color",
+          "texture",
+          "appearance_details",
+          "number_of_objects",
+          "pose",
+          "expression",
+          "clothing",
+          "action",
+          "gender",
+          "skin_tone_and_texture",
+          "orientation"
+        ],
+        "required": [
+          "relationship"
+        ]
+      },
+      "PhotographicCharacteristics": {
+        "properties": {
+          "lens_focal_length": {
+            "description": "The focal length of the lens in the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lens Focal Length"
+          },
+          "camera_angle": {
+            "description": "The angle of the camera in the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Camera Angle"
+          },
+          "depth_of_field": {
+            "description": "The depth of field in the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Depth Of Field"
+          },
+          "focus": {
+            "description": "The focus in the image to be generated.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Focus"
+          }
+        },
+        "title": "PhotographicCharacteristics",
+        "type": "object",
+        "x-fal-order-properties": [
+          "depth_of_field",
+          "focus",
+          "camera_angle",
+          "lens_focal_length"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/bria/fibo-gen-1.5/text-to-image/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bria/fibo-gen-1.5/text-to-image/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bria/fibo-gen-1.5/text-to-image": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FiboGen15TextToImageInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bria/fibo-gen-1.5/text-to-image/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FiboGen15TextToImageOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

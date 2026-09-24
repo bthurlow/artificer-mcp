@@ -1,0 +1,404 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for microsoft/mai-image-2.5-pro/edit",
+    "version": "1.0.0",
+    "description": "MAI Image 2.5 Pro Edit performs instruction-guided image editing with Microsoft's highest-fidelity MAI model. Use one reference image to change objects, materials, lighting, backgrounds, layout, or text while preserving important visual structure. It is designed for hero assets, high-detail refinements, typography fixes, art direction, and production design.",
+    "x-fal-metadata": {
+      "endpointId": "microsoft/mai-image-2.5-pro/edit",
+      "category": "image-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aa41899/nk1T8qzlhZ1edxsb1N9YO.jpg",
+      "playgroundUrl": "https://fal.ai/models/microsoft/mai-image-2.5-pro/edit",
+      "documentationUrl": "https://fal.ai/models/microsoft/mai-image-2.5-pro/edit/api",
+      "about": "Edit one or more images with MAI-Image-2.5 Pro."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "MaiImage25ProEditInput": {
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "title": "MaiImage25ProImageToImageInput",
+        "properties": {
+          "num_images": {
+            "minimum": 1,
+            "type": "integer",
+            "maximum": 4,
+            "description": "The number of images to generate.",
+            "default": 1,
+            "title": "Number of Images"
+          },
+          "aspect_ratio": {
+            "title": "Aspect Ratio",
+            "type": "string",
+            "description": "The aspect ratio of the generated image. Use \"auto\" to match the input or let the model decide.",
+            "enum": [
+              "auto",
+              "1:1",
+              "4:3",
+              "3:4",
+              "16:9",
+              "9:16",
+              "3:2",
+              "2:3"
+            ],
+            "default": "auto"
+          },
+          "output_format": {
+            "type": "string",
+            "description": "The format of the generated image.",
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
+            ],
+            "default": "png",
+            "title": "Output Format"
+          },
+          "prompt": {
+            "examples": [
+              "Turn this into a clean, futuristic product shot with soft studio lighting."
+            ],
+            "description": "The instruction describing how to edit the input image(s).",
+            "type": "string",
+            "minLength": 3,
+            "title": "Prompt",
+            "maxLength": 5000
+          },
+          "image_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/nano-banana-edit-input.png"
+            ],
+            "type": "string",
+            "description": "The URL of the image to edit. Provide one http(s) or data: URL.",
+            "default": "",
+            "title": "Image URL"
+          },
+          "sync_mode": {
+            "type": "boolean",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "default": false,
+            "title": "Sync Mode"
+          }
+        },
+        "x-fal-order-properties": [
+          "prompt",
+          "num_images",
+          "aspect_ratio",
+          "output_format",
+          "sync_mode",
+          "image_url"
+        ]
+      },
+      "MaiImage25ProEditOutput": {
+        "type": "object",
+        "required": [
+          "images",
+          "description"
+        ],
+        "title": "MaiImage25ProImageToImageOutput",
+        "properties": {
+          "images": {
+            "description": "The edited images.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImageFile"
+            },
+            "title": "Images"
+          },
+          "description": {
+            "description": "The description of the generated images.",
+            "type": "string",
+            "title": "Description"
+          }
+        },
+        "x-fal-order-properties": [
+          "images",
+          "description"
+        ]
+      },
+      "ImageFile": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "ImageFile",
+        "properties": {
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The height of the image",
+            "title": "Height"
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The width of the image",
+            "title": "Width"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/microsoft/mai-image-2.5-pro/edit/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/microsoft/mai-image-2.5-pro/edit/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/microsoft/mai-image-2.5-pro/edit": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaiImage25ProEditInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/microsoft/mai-image-2.5-pro/edit/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaiImage25ProEditOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

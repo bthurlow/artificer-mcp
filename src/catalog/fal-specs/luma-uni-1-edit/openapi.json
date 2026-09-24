@@ -1,0 +1,371 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for luma/agent/uni-1/v1/edit",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the luma/agent/uni-1/v1/edit queue.",
+    "x-fal-metadata": {
+      "endpointId": "luma/agent/uni-1/v1/edit",
+      "category": "image-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a9d98d3/t8rhVKRw9Rj_5adYTDK6m_b393038bbf464975b8d573f94f2fadc0.jpg",
+      "playgroundUrl": "https://fal.ai/models/luma/agent/uni-1/v1/edit",
+      "documentationUrl": "https://fal.ai/models/luma/agent/uni-1/v1/edit/api",
+      "about": "Edit Image"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "AgentUni1V1EditInput": {
+        "type": "object",
+        "title": "ImageEditRequest",
+        "required": [
+          "prompt",
+          "image_url"
+        ],
+        "x-fal-order-properties": [
+          "prompt",
+          "image_url",
+          "style",
+          "output_format",
+          "reference_image_urls"
+        ],
+        "properties": {
+          "image_url": {
+            "type": "string",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/gallery/example_inputs_liuyifei.png"
+            ],
+            "title": "Image Url",
+            "description": "URL of the source image to edit."
+          },
+          "reference_image_urls": {
+            "description": "Optional list of reference image URLs used to guide the edit.",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Image Urls"
+          },
+          "output_format": {
+            "description": "Encoding format of the edited image.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "png",
+                  "jpeg"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Format"
+          },
+          "prompt": {
+            "type": "string",
+            "minLength": 1,
+            "examples": [
+              "Replace the background with a sunset over the ocean."
+            ],
+            "maxLength": 6000,
+            "title": "Prompt",
+            "description": "Text prompt describing the edit to apply."
+          },
+          "style": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "manga"
+            ],
+            "description": "Visual style of the edited image.",
+            "title": "Style",
+            "default": "auto"
+          }
+        }
+      },
+      "AgentUni1V1EditOutput": {
+        "type": "object",
+        "title": "ImageOutput",
+        "required": [
+          "images"
+        ],
+        "x-fal-order-properties": [
+          "images"
+        ],
+        "properties": {
+          "images": {
+            "type": "array",
+            "description": "The generated image(s).",
+            "title": "Images",
+            "items": {
+              "$ref": "#/components/schemas/File"
+            }
+          }
+        }
+      },
+      "File": {
+        "type": "object",
+        "title": "File",
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes."
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file."
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/luma/agent/uni-1/v1/edit/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/luma/agent/uni-1/v1/edit/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/luma/agent/uni-1/v1/edit": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentUni1V1EditInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/luma/agent/uni-1/v1/edit/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentUni1V1EditOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

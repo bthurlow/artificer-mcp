@@ -1,0 +1,460 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for alibaba/qwen-image-3/text-to-image",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the alibaba/qwen-image-3/text-to-image queue.",
+    "x-fal-metadata": {
+      "endpointId": "alibaba/qwen-image-3/text-to-image",
+      "category": "text-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aa32176/fKEJboHYu3FM-sgXnS9j1.jpg",
+      "playgroundUrl": "https://fal.ai/models/alibaba/qwen-image-3/text-to-image",
+      "documentationUrl": "https://fal.ai/models/alibaba/qwen-image-3/text-to-image/api",
+      "about": "Generate images from text using Qwen Image 3 Pro."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "QwenImage3TextToImageInput": {
+        "type": "object",
+        "properties": {
+          "enable_safety_checker": {
+            "default": true,
+            "title": "Enable Safety Checker",
+            "type": "boolean",
+            "description": "Enable content moderation for input and output. Disabling it requires account authorization; unauthorized requests are always checked."
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "examples": [
+              "A cute baby koala holding a card that says \"Qwen Image 3 is now available on fal\" while on a water slide"
+            ],
+            "description": "Text prompt describing the desired image. Supports Chinese and English. Max 5000 characters.",
+            "minLength": 1,
+            "maxLength": 5000
+          },
+          "seed": {
+            "title": "Seed",
+            "description": "Random seed for reproducibility (0-2147483647).",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "enable_prompt_expansion": {
+            "default": true,
+            "title": "Enable Prompt Expansion",
+            "type": "boolean",
+            "description": "Enable automatic LLM prompt rewriting for better results."
+          },
+          "image_size": {
+            "default": "square_hd",
+            "title": "Image Size",
+            "examples": [
+              {
+                "height": 1024,
+                "width": 1024
+              }
+            ],
+            "description": "The size of the generated image. Total number of pixels must be between 512x512 and 2048x2048.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageSize"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9"
+                ]
+              }
+            ]
+          },
+          "output_format": {
+            "default": "png",
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
+            ],
+            "type": "string",
+            "description": "The format of the generated image.",
+            "title": "Output Format"
+          },
+          "negative_prompt": {
+            "default": "",
+            "title": "Negative Prompt",
+            "examples": [
+              "low resolution, error, worst quality, low quality, deformed"
+            ],
+            "description": "Content to avoid in the generated image. Max 500 characters.",
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sync_mode": {
+            "default": false,
+            "title": "Sync Mode",
+            "type": "boolean",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
+          },
+          "num_images": {
+            "minimum": 1,
+            "default": 1,
+            "maximum": 6,
+            "type": "integer",
+            "description": "The number of images to generate.",
+            "title": "Num Images"
+          }
+        },
+        "title": "QwenImage3TextToImageInput",
+        "x-fal-order-properties": [
+          "prompt",
+          "negative_prompt",
+          "image_size",
+          "enable_prompt_expansion",
+          "seed",
+          "enable_safety_checker",
+          "sync_mode",
+          "num_images",
+          "output_format"
+        ],
+        "required": [
+          "prompt"
+        ]
+      },
+      "QwenImage3TextToImageOutput": {
+        "type": "object",
+        "properties": {
+          "images": {
+            "type": "array",
+            "title": "Images",
+            "items": {
+              "$ref": "#/components/schemas/File"
+            },
+            "description": "Generated images.",
+            "examples": [
+              [
+                {
+                  "url": "https://v3b.fal.media/files/b/0a8bf02b/bKyzcdmA_kYq4ru5s9H7k_sQ893ydD.png"
+                }
+              ]
+            ]
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed",
+            "examples": [
+              42
+            ],
+            "description": "The seed used for generation."
+          }
+        },
+        "title": "QwenImage3TextToImageOutput",
+        "x-fal-order-properties": [
+          "images",
+          "seed"
+        ],
+        "required": [
+          "images",
+          "seed"
+        ]
+      },
+      "ImageSize": {
+        "type": "object",
+        "properties": {
+          "height": {
+            "default": 512,
+            "maximum": 14142,
+            "type": "integer",
+            "description": "The height of the generated image.",
+            "exclusiveMinimum": 0,
+            "title": "Height"
+          },
+          "width": {
+            "default": 512,
+            "maximum": 14142,
+            "type": "integer",
+            "description": "The width of the generated image.",
+            "exclusiveMinimum": 0,
+            "title": "Width"
+          }
+        },
+        "title": "ImageSize",
+        "x-fal-order-properties": [
+          "width",
+          "height"
+        ]
+      },
+      "File": {
+        "type": "object",
+        "properties": {
+          "content_type": {
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          }
+        },
+        "title": "File",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/alibaba/qwen-image-3/text-to-image/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alibaba/qwen-image-3/text-to-image/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alibaba/qwen-image-3/text-to-image": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QwenImage3TextToImageInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alibaba/qwen-image-3/text-to-image/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QwenImage3TextToImageOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

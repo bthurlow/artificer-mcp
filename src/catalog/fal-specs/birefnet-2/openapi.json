@@ -1,0 +1,425 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/birefnet/v2",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/birefnet/v2 queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/birefnet/v2",
+      "category": "image-to-image",
+      "thumbnailUrl": "https://storage.googleapis.com/falserverless/gallery/birefnet.webp",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/birefnet/v2",
+      "documentationUrl": "https://fal.ai/models/fal-ai/birefnet/v2/api",
+      "about": "Remove Background Http V2"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "BirefnetV2Input": {
+        "properties": {
+          "mask_only": {
+            "default": false,
+            "type": "boolean",
+            "title": "Mask Only",
+            "description": "Whether to return only the segmentation mask without applying it to the image. When set to `True`, only the mask will be returned and foreground refinement will be skipped. Useful for reducing computation and data transfer when only the mask is needed."
+          },
+          "image_url": {
+            "type": "string",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/birefnet-input.jpeg"
+            ],
+            "description": "URL of the image to remove background from",
+            "_fal_ui_field": "image",
+            "title": "Image Url"
+          },
+          "refine_foreground": {
+            "default": true,
+            "type": "boolean",
+            "title": "Refine Foreground",
+            "description": "Whether to refine the foreground using the estimated mask"
+          },
+          "output_mask": {
+            "default": false,
+            "type": "boolean",
+            "title": "Output Mask",
+            "description": "Whether to output the mask used to remove the background"
+          },
+          "output_format": {
+            "default": "png",
+            "type": "string",
+            "enum": [
+              "webp",
+              "png",
+              "gif"
+            ],
+            "title": "Output Format",
+            "description": "The format of the output image"
+          },
+          "sync_mode": {
+            "default": false,
+            "type": "boolean",
+            "title": "Sync Mode",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
+          },
+          "operating_resolution": {
+            "default": "1024x1024",
+            "type": "string",
+            "enum": [
+              "1024x1024",
+              "2048x2048",
+              "2304x2304"
+            ],
+            "title": "Operating Resolution",
+            "description": "The resolution to operate on. The higher the resolution, the more accurate the output will be for high res input images. The '2304x2304' option is only available for the 'General Use (Dynamic)' model."
+          },
+          "model": {
+            "default": "General Use (Light)",
+            "type": "string",
+            "enum": [
+              "General Use (Light)",
+              "General Use (Light 2K)",
+              "General Use (Heavy)",
+              "Matting",
+              "Portrait",
+              "General Use (Dynamic)"
+            ],
+            "title": "Model",
+            "description": "\n            Model to use for background removal.\n            The 'General Use (Light)' model is the original model used in the BiRefNet repository.\n            The 'General Use (Light 2K)' model is the original model used in the BiRefNet repository but trained with 2K images.\n            The 'General Use (Heavy)' model is a slower but more accurate model.\n            The 'Matting' model is a model trained specifically for matting images.\n            The 'Portrait' model is a model trained specifically for portrait images.\n            The 'General Use (Dynamic)' model supports dynamic resolutions from 256x256 to 2304x2304.\n            The 'General Use (Light)' model is recommended for most use cases.\n\n            The corresponding models are as follows:\n            - 'General Use (Light)': BiRefNet\n            - 'General Use (Light 2K)': BiRefNet_lite-2K\n            - 'General Use (Heavy)': BiRefNet_lite\n            - 'Matting': BiRefNet-matting\n            - 'Portrait': BiRefNet-portrait\n            - 'General Use (Dynamic)': BiRefNet_dynamic\n        "
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_url"
+        ],
+        "x-fal-order-properties": [
+          "model",
+          "operating_resolution",
+          "output_mask",
+          "refine_foreground",
+          "sync_mode",
+          "image_url",
+          "output_format",
+          "mask_only"
+        ],
+        "title": "InputV2"
+      },
+      "BirefnetV2Output": {
+        "properties": {
+          "mask_image": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageFile"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mask used to remove the background"
+          },
+          "image": {
+            "examples": [
+              {
+                "url": "https://storage.googleapis.com/falserverless/example_outputs/birefnet-output.png",
+                "height": 1024,
+                "content_type": "image/png",
+                "file_name": "birefnet-output.png",
+                "width": 1024
+              }
+            ],
+            "$ref": "#/components/schemas/ImageFile",
+            "description": "Image with background removed. When `mask_only` is `True`, this contains the segmentation mask instead."
+          }
+        },
+        "type": "object",
+        "required": [
+          "image"
+        ],
+        "x-fal-order-properties": [
+          "image",
+          "mask_image"
+        ],
+        "title": "OutputV2"
+      },
+      "ImageFile": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "The height of the image"
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type"
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "description": "The width of the image"
+          }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "title": "ImageFile"
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/birefnet/v2/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/birefnet/v2/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/birefnet/v2": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BirefnetV2Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/birefnet/v2/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BirefnetV2Output"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

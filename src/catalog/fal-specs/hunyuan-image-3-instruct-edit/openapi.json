@@ -1,0 +1,491 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/hunyuan-image/v3/instruct/edit",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/hunyuan-image/v3/instruct/edit queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/hunyuan-image/v3/instruct/edit",
+      "category": "image-to-image",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a8c3dc2/kFAFxnTUhioIU9gO4SE5x_6ab7631c86e84c4ab9645aea5a90242b.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/hunyuan-image/v3/instruct/edit",
+      "documentationUrl": "https://fal.ai/models/fal-ai/hunyuan-image/v3/instruct/edit/api",
+      "about": "Edit Image"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "HunyuanImageV3InstructEditInput": {
+        "x-fal-order-properties": [
+          "prompt",
+          "image_size",
+          "num_images",
+          "guidance_scale",
+          "enable_prompt_expansion",
+          "seed",
+          "enable_safety_checker",
+          "sync_mode",
+          "output_format",
+          "image_urls"
+        ],
+        "properties": {
+          "output_format": {
+            "enum": [
+              "jpeg",
+              "png"
+            ],
+            "default": "png",
+            "type": "string",
+            "description": "The format of the generated image.",
+            "title": "Output Format"
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "type": "boolean",
+            "description": "If set to true, the safety checker will be enabled.",
+            "title": "Enable Safety Checker"
+          },
+          "image_size": {
+            "default": "auto",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageSize"
+              },
+              {
+                "enum": [
+                  "auto",
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9"
+                ],
+                "type": "string"
+              }
+            ],
+            "title": "Image Size",
+            "description": "The desired size of the generated image. If auto, image size will be determined by the model."
+          },
+          "num_images": {
+            "maximum": 4,
+            "default": 1,
+            "type": "integer",
+            "description": "The number of images to generate.",
+            "title": "Num Images",
+            "minimum": 1
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "Random seed for reproducible results. If None, a random seed is used."
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The text prompt to generate an image from.",
+            "title": "Prompt",
+            "examples": [
+              "Turn this artwork into a realistic image"
+            ]
+          },
+          "sync_mode": {
+            "default": false,
+            "type": "boolean",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "title": "Sync Mode"
+          },
+          "guidance_scale": {
+            "maximum": 20,
+            "default": 3.5,
+            "exclusiveMinimum": 1,
+            "type": "number",
+            "description": "Controls how much the model adheres to the prompt. Higher values mean stricter adherence.",
+            "title": "Guidance Scale"
+          },
+          "image_urls": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "The URLs of the images to use as a reference for the generation. A maximum of 3 images are supported.",
+            "title": "Image Urls",
+            "examples": [
+              [
+                "https://v3b.fal.media/files/b/0a8c3cf9/voXcX8hd5maRSrSvZalXh_jAMqrScj.png"
+              ]
+            ]
+          },
+          "enable_prompt_expansion": {
+            "default": true,
+            "type": "boolean",
+            "description": "If set to true, the prompt will be expanded through the model's internal recaptioning step.",
+            "title": "Enable Prompt Expansion"
+          }
+        },
+        "type": "object",
+        "title": "HunyuanImageEditRequest",
+        "required": [
+          "prompt",
+          "image_urls"
+        ]
+      },
+      "HunyuanImageV3InstructEditOutput": {
+        "x-fal-order-properties": [
+          "images",
+          "seed"
+        ],
+        "properties": {
+          "images": {
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            },
+            "type": "array",
+            "description": "A list of the generated images.",
+            "title": "Images",
+            "examples": [
+              [
+                {
+                  "height": 1024,
+                  "content_type": "image/png",
+                  "url": "https://v3b.fal.media/files/b/0a8c3d5f/K7ecUzkFaxU-5hvzdhvG-_SOvArpR4.png",
+                  "width": 1024
+                }
+              ]
+            ]
+          },
+          "seed": {
+            "type": "integer",
+            "description": "The base seed used for the generation process.",
+            "title": "Seed"
+          }
+        },
+        "type": "object",
+        "title": "HunyuanImageEditResponse",
+        "required": [
+          "images",
+          "seed"
+        ]
+      },
+      "ImageSize": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "width",
+          "height"
+        ],
+        "properties": {
+          "height": {
+            "exclusiveMinimum": 0,
+            "type": "integer",
+            "maximum": 14142,
+            "description": "The height of the generated image.",
+            "title": "Height",
+            "default": 512
+          },
+          "width": {
+            "exclusiveMinimum": 0,
+            "type": "integer",
+            "maximum": 14142,
+            "description": "The width of the generated image.",
+            "title": "Width",
+            "default": 512
+          }
+        },
+        "title": "ImageSize"
+      },
+      "Image": {
+        "properties": {
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type"
+          },
+          "height": {
+            "examples": [
+              1024
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The height of the image in pixels.",
+            "title": "Height"
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size"
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "width": {
+            "examples": [
+              1024
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The width of the image in pixels.",
+            "title": "Width"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
+          }
+        },
+        "type": "object",
+        "description": "Represents an image file.",
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "title": "Image"
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/hunyuan-image/v3/instruct/edit/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/hunyuan-image/v3/instruct/edit/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/hunyuan-image/v3/instruct/edit": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HunyuanImageV3InstructEditInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/hunyuan-image/v3/instruct/edit/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HunyuanImageV3InstructEditOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

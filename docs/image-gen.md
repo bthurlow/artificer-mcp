@@ -13,6 +13,21 @@ artificer-mcp ships AI-powered image generation via Google's Gemini stack.
 
 All four accept per-call `model` overrides. Env fallbacks (see [README](../README.md#environment-variables)): `ARTIFICER_IMAGEN_MODEL`, `ARTIFICER_IMAGEN_EDIT_MODEL`, `ARTIFICER_IMAGEN_UPSCALE_MODEL`, `ARTIFICER_NANOBANANA_MODEL`.
 
+### fal image models (`fal_generate_image`)
+
+`fal_generate_image` is a thin transport for every fal-hosted image model in `model_catalog` (capability `image`). Pass an explicit fal endpoint as `model` and read its guide first. Structural inputs: `prompt`, `image` → `image_url`, `images` → `image_urls`, `mask` → `mask_url`, `aspect_ratio`, `image_size`, `resolution`, `num_images`, `negative_prompt`. Everything else goes in `extra_params`, and extra file inputs (try-on person and garment images, reference images) go in `extra_files`, which uploads local paths.
+
+Unlike `gemini_nanobanana_generate_image`, **the fal tool saves each image exactly as the model returns it**. Choose a format with `extra_params.output_format` where the model supports it, and use a matching extension; the result flags any mismatch. Extra outputs (masks, layers) are reported by URL.
+
+| Group | What | Guide |
+|---|---|---|
+| `image.general` | Text-to-image (Seedream 5, GPT Image 2/2.5, FLUX.2, Recraft 4.1 incl. SVG, Ideogram 4, Qwen, MAI, Grok, Krea 2, …) | `fal_image_generation_prompt_guide` |
+| `image.edit` | Instruction / multi-reference edits, outpaint, reframe, background replacement, object removal, try-on | `fal_image_edit_prompt_guide` |
+| `image.upscale` | Upscale, restore, denoise, sharpen, face restore, colorize | `fal_image_upscale_prompt_guide` |
+| `image.background_removal` | ML cutouts, matting, segmentation | `fal_background_removal_prompt_guide` |
+
+Nano Banana itself is also on fal (Nano Banana 2, Pro, Lite), with native `output_format` and `resolution`; see `gemini_nanobanana_prompt_guide`. Requires `FAL_KEY`.
+
 ## Prompt guides
 
 Pair any image tool with its prompt guide:
