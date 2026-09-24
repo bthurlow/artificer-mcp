@@ -10,7 +10,7 @@
       "thumbnailUrl": "https://storage.googleapis.com/fal_cdn/fal/for%20videos-1.jpg",
       "playgroundUrl": "https://fal.ai/models/fal-ai/veo3/fast/image-to-video",
       "documentationUrl": "https://fal.ai/models/fal-ai/veo3/fast/image-to-video/api",
-      "about": "Generate videos by animating an input image using Google's Veo 3 Fast model.\n\nThe prompt should describe how to animate the input image. Include:\n- Action: How the image should be animated\n- Style: Desired animation style\n- Camera motion (optional): How camera should move\n- Ambiance (optional): Desired mood and atmosphere\n\nMore details are available in our [prompting guide](https://blog.fal.ai/mastering-video-generation-with-veo-2-a-comprehensive-guide/).\n\nThe model supports:\n- Input images up to 8MB in size\n- 720p or 1080p output resolution\n- 16:9 or 9:16 aspect ratio\n- Natural motion and realistic animations\n- Control over animation via text prompts\n\nSafety filters are applied to both input images and generated content."
+      "about": "Generate videos by animating an input image using Google's Veo 3.1 Fast model.\n\nThe prompt should describe how to animate the input image. Include:\n- Action: How the image should be animated\n- Style: Desired animation style\n- Camera motion (optional): How camera should move\n- Ambiance (optional): Desired mood and atmosphere\n\nMore details are available in our [prompting guide](https://blog.fal.ai/mastering-video-generation-with-veo-2-a-comprehensive-guide/).\n\nThe model supports:\n- Input images up to 8MB in size\n- 720p or 1080p output resolution\n- 16:9 or 9:16 aspect ratio\n- Natural motion and realistic animations\n- Control over animation via text prompts\n\nSafety filters are applied to both input images and generated content."
     }
   },
   "components": {
@@ -72,17 +72,56 @@
       },
       "Veo3FastImageToVideoInput": {
         "properties": {
+          "generate_audio": {
+            "default": true,
+            "description": "Whether to generate audio for the video.",
+            "type": "boolean",
+            "title": "Generate Audio"
+          },
+          "safety_tolerance": {
+            "default": "4",
+            "type": "string",
+            "description": "The safety tolerance level for content moderation. 1 is the most strict (blocks most content), 6 is the least strict.",
+            "enum": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5",
+              "6"
+            ],
+            "title": "Safety Tolerance"
+          },
+          "image_url": {
+            "description": "URL of the input image to animate. Should be 720p or higher resolution in 16:9 or 9:16 aspect ratio. If the image is not in 16:9 or 9:16 aspect ratio, it will be cropped to fit.",
+            "type": "string",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/veo3-i2v-input.png"
+            ],
+            "title": "Image URL"
+          },
           "prompt": {
+            "maxLength": 20000,
+            "description": "The text prompt describing how the image should be animated",
+            "type": "string",
             "examples": [
               "A woman looks into the camera, breathes in, then exclaims energetically, \"have you guys checked out Veo3 Image-to-Video on Fal? It's incredible!\""
             ],
-            "title": "Prompt",
-            "description": "The text prompt describing how the image should be animated",
+            "title": "Prompt"
+          },
+          "aspect_ratio": {
+            "default": "auto",
             "type": "string",
-            "maxLength": 20000
+            "description": "The aspect ratio of the generated video.",
+            "enum": [
+              "auto",
+              "16:9",
+              "9:16"
+            ],
+            "title": "Aspect Ratio"
           },
           "negative_prompt": {
-            "title": "Negative Prompt",
+            "description": "A negative prompt to guide the video generation.",
             "anyOf": [
               {
                 "type": "string"
@@ -91,27 +130,10 @@
                 "type": "null"
               }
             ],
-            "description": "A negative prompt to guide the video generation."
-          },
-          "auto_fix": {
-            "default": false,
-            "title": "Auto Fix",
-            "description": "Whether to automatically attempt to fix prompts that fail content policy or other validation checks by rewriting them.",
-            "type": "boolean"
-          },
-          "aspect_ratio": {
-            "default": "auto",
-            "title": "Aspect Ratio",
-            "description": "The aspect ratio of the generated video.",
-            "type": "string",
-            "enum": [
-              "auto",
-              "16:9",
-              "9:16"
-            ]
+            "title": "Negative Prompt"
           },
           "seed": {
-            "title": "Seed",
+            "description": "The seed for the random number generator.",
             "anyOf": [
               {
                 "type": "integer"
@@ -120,64 +142,36 @@
                 "type": "null"
               }
             ],
-            "description": "The seed for the random number generator."
-          },
-          "resolution": {
-            "default": "720p",
-            "title": "Resolution",
-            "description": "The resolution of the generated video.",
-            "type": "string",
-            "enum": [
-              "720p",
-              "1080p"
-            ]
+            "title": "Seed"
           },
           "duration": {
             "default": "8s",
-            "title": "Duration",
             "description": "The duration of the generated video.",
-            "type": "string",
             "enum": [
               "4s",
               "6s",
               "8s"
-            ]
-          },
-          "image_url": {
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/veo3-i2v-input.png"
             ],
-            "title": "Image URL",
-            "description": "URL of the input image to animate. Should be 720p or higher resolution in 16:9 or 9:16 aspect ratio. If the image is not in 16:9 or 9:16 aspect ratio, it will be cropped to fit.",
-            "type": "string"
-          },
-          "generate_audio": {
-            "default": true,
-            "title": "Generate Audio",
-            "description": "Whether to generate audio for the video.",
-            "type": "boolean"
-          },
-          "safety_tolerance": {
-            "default": "4",
-            "title": "Safety Tolerance",
-            "description": "The safety tolerance level for content moderation. 1 is the most strict (blocks most content), 6 is the least strict.",
             "type": "string",
+            "title": "Duration"
+          },
+          "resolution": {
+            "default": "720p",
+            "description": "The resolution of the generated video.",
             "enum": [
-              "1",
-              "2",
-              "3",
-              "4",
-              "5",
-              "6"
-            ]
+              "720p",
+              "1080p"
+            ],
+            "type": "string",
+            "title": "Resolution"
+          },
+          "auto_fix": {
+            "default": false,
+            "description": "Whether to automatically attempt to fix prompts that fail content policy or other validation checks by rewriting them.",
+            "type": "boolean",
+            "title": "Auto Fix"
           }
         },
-        "title": "Veo3ImageToVideoInput",
-        "required": [
-          "prompt",
-          "image_url"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "aspect_ratio",
@@ -189,56 +183,39 @@
           "auto_fix",
           "safety_tolerance",
           "image_url"
-        ]
+        ],
+        "required": [
+          "prompt",
+          "image_url"
+        ],
+        "type": "object",
+        "title": "Veo3ImageToVideoInput"
       },
       "Veo3FastImageToVideoOutput": {
         "properties": {
           "video": {
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video.",
             "examples": [
               {
                 "url": "https://storage.googleapis.com/falserverless/example_outputs/veo3-i2v-output.mp4"
               }
-            ],
-            "description": "The generated video.",
-            "$ref": "#/components/schemas/File"
+            ]
           }
         },
-        "title": "Veo3ImageToVideoOutput",
+        "x-fal-order-properties": [
+          "video"
+        ],
         "required": [
           "video"
         ],
         "type": "object",
-        "x-fal-order-properties": [
-          "video"
-        ]
+        "title": "Veo3ImageToVideoOutput"
       },
       "File": {
         "properties": {
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
           "file_size": {
-            "examples": [
-              4404019
-            ],
-            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -247,13 +224,13 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes."
+            "examples": [
+              4404019
+            ],
+            "title": "File Size"
           },
           "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type",
+            "description": "The mime type of the file.",
             "anyOf": [
               {
                 "type": "string"
@@ -262,20 +239,43 @@
                 "type": "null"
               }
             ],
-            "description": "The mime type of the file."
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type"
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
           }
         },
-        "title": "File",
-        "required": [
-          "url"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
-        ]
+        ],
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "title": "File"
       }
     }
   },

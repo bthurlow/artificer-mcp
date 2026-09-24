@@ -71,21 +71,32 @@
         ]
       },
       "BytedanceSeedanceV1ProFastImageToVideoInput": {
+        "required": [
+          "prompt",
+          "image_url"
+        ],
         "properties": {
-          "resolution": {
-            "description": "Video resolution - 480p for faster generation, 720p for balance, 1080p for higher quality",
-            "default": "1080p",
-            "enum": [
-              "480p",
-              "720p",
-              "1080p"
-            ],
-            "type": "string",
-            "title": "Resolution"
+          "camera_fixed": {
+            "description": "Whether to fix the camera position",
+            "type": "boolean",
+            "default": false,
+            "title": "Camera Fixed"
+          },
+          "seed": {
+            "title": "Seed",
+            "description": "Random seed to control video generation. Use -1 for random.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "aspect_ratio": {
             "description": "The aspect ratio of the generated video",
-            "default": "auto",
+            "type": "string",
             "enum": [
               "21:9",
               "16:9",
@@ -95,46 +106,37 @@
               "9:16",
               "auto"
             ],
-            "type": "string",
+            "default": "auto",
             "title": "Aspect Ratio"
           },
-          "seed": {
-            "description": "Random seed to control video generation. Use -1 for random.",
+          "num_frames": {
+            "title": "Num Frames",
+            "description": "The number of frames to generate. If provided, will override duration.",
             "anyOf": [
               {
-                "type": "integer"
+                "maximum": 289,
+                "type": "integer",
+                "minimum": 29
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Seed"
+            ]
           },
-          "image_url": {
-            "description": "The URL of the image used to generate video",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/seedance_fast_i2v_input.png"
-            ],
+          "resolution": {
+            "description": "Video resolution - 480p for faster generation, 720p for balance, 1080p for higher quality",
             "type": "string",
-            "title": "Image Url"
-          },
-          "prompt": {
-            "description": "The text prompt used to generate the video",
-            "examples": [
-              "Bathed in a stark spotlight, a lone ballet dancer takes center stage. Her movements, precise and graceful, tell a story of passion and dedication against the velvet darkness. The scene evokes a sense of intimacy, highlighting the raw emotion and artistry of her performance."
+            "enum": [
+              "480p",
+              "720p",
+              "1080p"
             ],
-            "type": "string",
-            "title": "Prompt"
-          },
-          "camera_fixed": {
-            "description": "Whether to fix the camera position",
-            "default": false,
-            "type": "boolean",
-            "title": "Camera Fixed"
+            "default": "1080p",
+            "title": "Resolution"
           },
           "duration": {
             "description": "Duration of the video in seconds",
-            "default": "5",
+            "type": "string",
             "enum": [
               "2",
               "3",
@@ -148,37 +150,37 @@
               "11",
               "12"
             ],
-            "type": "string",
+            "default": "5",
             "title": "Duration"
           },
-          "num_frames": {
-            "description": "The number of frames to generate. If provided, will override duration.",
-            "anyOf": [
-              {
-                "maximum": 289,
-                "type": "integer",
-                "minimum": 29
-              },
-              {
-                "type": "null"
-              }
+          "image_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/seedance_fast_i2v_input.png"
             ],
-            "title": "Num Frames"
+            "description": "The URL of the image used to generate video",
+            "type": "string",
+            "title": "Image Url"
           },
           "enable_safety_checker": {
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
             "examples": [
               true
             ],
-            "default": true,
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
             "type": "boolean",
+            "default": true,
             "title": "Enable Safety Checker"
+          },
+          "prompt": {
+            "examples": [
+              "Bathed in a stark spotlight, a lone ballet dancer takes center stage. Her movements, precise and graceful, tell a story of passion and dedication against the velvet darkness. The scene evokes a sense of intimacy, highlighting the raw emotion and artistry of her performance."
+            ],
+            "description": "The text prompt used to generate the video",
+            "type": "string",
+            "title": "Prompt"
           }
         },
-        "required": [
-          "prompt",
-          "image_url"
-        ],
+        "title": "SeedanceProFastImageToVideoInput",
+        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "aspect_ratio",
@@ -189,48 +191,50 @@
           "enable_safety_checker",
           "num_frames",
           "image_url"
-        ],
-        "type": "object",
-        "title": "SeedanceProFastImageToVideoInput"
+        ]
       },
       "BytedanceSeedanceV1ProFastImageToVideoOutput": {
-        "properties": {
-          "video": {
-            "$ref": "#/components/schemas/File",
-            "description": "Generated video file",
-            "examples": [
-              {
-                "url": "https://storage.googleapis.com/falserverless/example_inputs/seedance_fast_i2v_output.mp4"
-              }
-            ]
-          },
-          "seed": {
-            "description": "Seed used for generation",
-            "examples": [
-              42
-            ],
-            "type": "integer",
-            "title": "Seed"
-          }
-        },
         "required": [
           "video",
           "seed"
         ],
+        "properties": {
+          "seed": {
+            "examples": [
+              42
+            ],
+            "description": "Seed used for generation",
+            "type": "integer",
+            "title": "Seed"
+          },
+          "video": {
+            "examples": [
+              {
+                "url": "https://storage.googleapis.com/falserverless/example_inputs/seedance_fast_i2v_output.mp4"
+              }
+            ],
+            "description": "Generated video file",
+            "$ref": "#/components/schemas/File"
+          }
+        },
+        "title": "SeedanceFastI2VVideoOutput",
+        "type": "object",
         "x-fal-order-properties": [
           "video",
           "seed"
-        ],
-        "type": "object",
-        "title": "SeedanceFastI2VVideoOutput"
+        ]
       },
       "File": {
+        "required": [
+          "url"
+        ],
         "properties": {
           "file_size": {
-            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "examples": [
               4404019
             ],
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -238,14 +242,14 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Size"
+            ]
           },
           "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
             ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -253,8 +257,7 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Name"
+            ]
           },
           "url": {
             "description": "The URL where the file can be downloaded from.",
@@ -262,10 +265,11 @@
             "title": "Url"
           },
           "content_type": {
-            "description": "The mime type of the file.",
+            "title": "Content Type",
             "examples": [
               "image/png"
             ],
+            "description": "The mime type of the file.",
             "anyOf": [
               {
                 "type": "string"
@@ -273,21 +277,17 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Content Type"
+            ]
           }
         },
-        "required": [
-          "url"
-        ],
+        "title": "File",
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
-        ],
-        "type": "object",
-        "title": "File"
+        ]
       }
     }
   },

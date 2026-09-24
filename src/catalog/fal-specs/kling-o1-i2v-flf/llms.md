@@ -35,7 +35,7 @@ The API accepts the following input parameters:
 - **`start_image_url`** (`string`, _required_):
   Image to use as the first frame of the video.
   
-  Max file size: 10.0MB, Min width: 300px, Min height: 300px, Min aspect ratio: 0.40, Max aspect ratio: 2.50, Timeout: 20.0s
+  Max file size: 50.0MB, Min width: 300px, Min height: 300px, Min aspect ratio: 0.40, Max aspect ratio: 2.50, Timeout: 20.0s
   - Examples: "https://v3b.fal.media/files/b/rabbit/NaslJIC7F2WodS6DFZRRJ.png"
 
 - **`end_image_url`** (`string`, _optional_):
@@ -76,7 +76,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video.
-  - Examples: {"content_type":"video/mp4","file_size":27588984,"file_name":"output.mp4","url":"https://v3b.fal.media/files/b/koala/knryyyGF3ZVyMMrGr77CL_output.mp4"}
+  - Examples: {"file_size":27588984,"file_name":"output.mp4","content_type":"video/mp4","url":"https://v3b.fal.media/files/b/koala/knryyyGF3ZVyMMrGr77CL_output.mp4"}
 
 
 
@@ -85,9 +85,9 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "video/mp4",
     "file_size": 27588984,
     "file_name": "output.mp4",
+    "content_type": "video/mp4",
     "url": "https://v3b.fal.media/files/b/koala/knryyyGF3ZVyMMrGr77CL_output.mp4"
   }
 }

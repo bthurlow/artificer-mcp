@@ -40,7 +40,7 @@ The API accepts the following input parameters:
 - **`elements`** (`list<OmniVideoElementInput>`, _optional_):
   Elements (characters/objects) to include in the video. Reference in prompt as @Element1, @Element2, etc. Maximum 7 total (elements + reference images + start image).
   - Array of OmniVideoElementInput
-  - Examples: [{"reference_image_urls":["https://v3b.fal.media/files/b/kangaroo/YMpmQkYt9xugpOTQyZW0O.png","https://v3b.fal.media/files/b/zebra/d6ywajNyJ6bnpa_xBue-K.png"],"frontal_image_url":"https://v3b.fal.media/files/b/panda/MQp-ghIqshvMZROKh9lW3.png"},{"reference_image_urls":["https://v3b.fal.media/files/b/kangaroo/EBF4nWihspyv4pp6hgj7D.png"],"frontal_image_url":"https://v3b.fal.media/files/b/koala/gSnsA7HJlgcaTyR5Ujj2H.png"}]
+  - Examples: [{"frontal_image_url":"https://v3b.fal.media/files/b/panda/MQp-ghIqshvMZROKh9lW3.png","reference_image_urls":["https://v3b.fal.media/files/b/kangaroo/YMpmQkYt9xugpOTQyZW0O.png","https://v3b.fal.media/files/b/zebra/d6ywajNyJ6bnpa_xBue-K.png"]},{"frontal_image_url":"https://v3b.fal.media/files/b/koala/gSnsA7HJlgcaTyR5Ujj2H.png","reference_image_urls":["https://v3b.fal.media/files/b/kangaroo/EBF4nWihspyv4pp6hgj7D.png"]}]
 
 - **`duration`** (`DurationEnum`, _optional_):
   Video duration in seconds. Default value: `"5"`
@@ -73,17 +73,17 @@ The API accepts the following input parameters:
   ],
   "elements": [
     {
+      "frontal_image_url": "https://v3b.fal.media/files/b/panda/MQp-ghIqshvMZROKh9lW3.png",
       "reference_image_urls": [
         "https://v3b.fal.media/files/b/kangaroo/YMpmQkYt9xugpOTQyZW0O.png",
         "https://v3b.fal.media/files/b/zebra/d6ywajNyJ6bnpa_xBue-K.png"
-      ],
-      "frontal_image_url": "https://v3b.fal.media/files/b/panda/MQp-ghIqshvMZROKh9lW3.png"
+      ]
     },
     {
+      "frontal_image_url": "https://v3b.fal.media/files/b/koala/gSnsA7HJlgcaTyR5Ujj2H.png",
       "reference_image_urls": [
         "https://v3b.fal.media/files/b/kangaroo/EBF4nWihspyv4pp6hgj7D.png"
-      ],
-      "frontal_image_url": "https://v3b.fal.media/files/b/koala/gSnsA7HJlgcaTyR5Ujj2H.png"
+      ]
     }
   ],
   "duration": "5",
@@ -98,7 +98,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video.
-  - Examples: {"content_type":"video/mp4","file_size":47359974,"file_name":"output.mp4","url":"https://v3b.fal.media/files/b/panda/oVdiICFXY03Vbam-08Aj8_output.mp4"}
+  - Examples: {"file_size":47359974,"file_name":"output.mp4","content_type":"video/mp4","url":"https://v3b.fal.media/files/b/panda/oVdiICFXY03Vbam-08Aj8_output.mp4"}
 
 
 
@@ -107,9 +107,9 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "video/mp4",
     "file_size": 47359974,
     "file_name": "output.mp4",
+    "content_type": "video/mp4",
     "url": "https://v3b.fal.media/files/b/panda/oVdiICFXY03Vbam-08Aj8_output.mp4"
   }
 }

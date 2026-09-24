@@ -59,6 +59,12 @@ The API accepts the following input parameters:
   - Options: `"standard"`, `"high"`
   - Examples: "standard"
 
+- **`codec`** (`CodecEnum`, _optional_):
+  'auto' retains default video codec behaviour; 'H264' uses H.264; 'H265' uses H.265. Default value: `"auto"`
+  - Default: `"auto"`
+  - Options: `"auto"`, `"H264"`, `"H265"`
+  - Examples: "auto", "H264", "H265"
+
 - **`end_user_id`** (`string`, _optional_):
   The unique user ID of the end user.
 
@@ -81,7 +87,8 @@ The API accepts the following input parameters:
   "duration": "auto",
   "aspect_ratio": "auto",
   "generate_audio": true,
-  "bitrate_mode": "standard"
+  "bitrate_mode": "standard",
+  "codec": "auto"
 }
 ```
 

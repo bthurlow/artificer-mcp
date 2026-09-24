@@ -71,8 +71,10 @@
         ]
       },
       "KlingVideoV25TurboProImageToVideoInput": {
-        "type": "object",
-        "title": "ImageToVideoV25ProRequest",
+        "required": [
+          "prompt",
+          "image_url"
+        ],
         "x-fal-order-properties": [
           "prompt",
           "image_url",
@@ -81,22 +83,50 @@
           "cfg_scale",
           "tail_image_url"
         ],
-        "required": [
-          "prompt",
-          "image_url"
-        ],
+        "title": "ImageToVideoV25ProRequest",
         "properties": {
           "cfg_scale": {
-            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
-            "type": "number",
-            "title": "Cfg Scale",
+            "default": 0.5,
             "maximum": 1,
+            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
+            "title": "Cfg Scale",
             "minimum": 0,
-            "default": 0.5
+            "type": "number"
+          },
+          "negative_prompt": {
+            "default": "blur, distort, and low quality",
+            "maxLength": 2500,
+            "title": "Negative Prompt",
+            "type": "string"
+          },
+          "image_url": {
+            "examples": [
+              "https://v3.fal.media/files/panda/HnY2yf-BbzlrVQxR-qP6m_9912d0932988453aadf3912fc1901f52.jpg"
+            ],
+            "description": "URL of the image to be used for the video",
+            "title": "Image Url",
+            "type": "string"
+          },
+          "prompt": {
+            "examples": [
+              "A stark starting line divides two powerful cars, engines revving for the challenge ahead. They surge forward in the heat of competition, a blur of speed and chrome. The finish line looms as they vie for victory."
+            ],
+            "maxLength": 2500,
+            "title": "Prompt",
+            "type": "string"
+          },
+          "duration": {
+            "default": "5",
+            "enum": [
+              "5",
+              "10"
+            ],
+            "description": "The duration of the generated video in seconds",
+            "title": "Duration",
+            "type": "string"
           },
           "tail_image_url": {
             "description": "URL of the image to be used for the end of the video",
-            "title": "Tail Image Url",
             "anyOf": [
               {
                 "type": "string",
@@ -107,97 +137,50 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "duration": {
-            "description": "The duration of the generated video in seconds",
-            "type": "string",
-            "title": "Duration",
-            "enum": [
-              "5",
-              "10"
             ],
-            "default": "5"
-          },
-          "image_url": {
-            "description": "URL of the image to be used for the video",
-            "type": "string",
-            "title": "Image Url",
-            "examples": [
-              "https://v3.fal.media/files/panda/HnY2yf-BbzlrVQxR-qP6m_9912d0932988453aadf3912fc1901f52.jpg"
-            ]
-          },
-          "prompt": {
-            "type": "string",
-            "examples": [
-              "A stark starting line divides two powerful cars, engines revving for the challenge ahead. They surge forward in the heat of competition, a blur of speed and chrome. The finish line looms as they vie for victory."
-            ],
-            "title": "Prompt",
-            "maxLength": 2500
-          },
-          "negative_prompt": {
-            "type": "string",
-            "title": "Negative Prompt",
-            "default": "blur, distort, and low quality",
-            "maxLength": 2500
+            "title": "Tail Image Url"
           }
-        }
+        },
+        "type": "object"
       },
       "KlingVideoV25TurboProImageToVideoOutput": {
-        "type": "object",
-        "title": "ImageToVideoV25ProOutput",
-        "x-fal-order-properties": [
-          "video"
-        ],
         "required": [
           "video"
         ],
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "title": "ImageToVideoV25ProOutput",
         "properties": {
           "video": {
-            "description": "The generated video",
             "examples": [
               {
                 "url": "https://storage.googleapis.com/falserverless/model_tests/kling/kling-v2.5-turbo-pro-image-to-video-output.mp4"
               }
             ],
+            "description": "The generated video",
             "$ref": "#/components/schemas/File"
           }
-        }
+        },
+        "type": "object"
       },
       "File": {
-        "type": "object",
-        "title": "File",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "required": [
-          "url"
-        ],
+        "title": "File",
         "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "file_size": {
-            "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ],
-            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -205,14 +188,14 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "File Size"
           },
           "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -220,14 +203,31 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "File Name"
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
           },
           "url": {
             "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
+            "title": "Url",
+            "type": "string"
           }
-        }
+        },
+        "type": "object"
       }
     }
   },

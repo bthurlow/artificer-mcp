@@ -53,7 +53,7 @@ The API accepts the following input parameters:
 - **`elements`** (`list<KlingV3ComboElementInput>`, _optional_):
   Elements (characters/objects) to include. Reference in prompt as @Element1, @Element2.
   - Array of KlingV3ComboElementInput
-  - Examples: [{"reference_image_urls":["https://v3b.fal.media/files/b/0a8d1b1a/eZfSbcQ58EzD_l2SEbevg_F3U9GMLK.png"],"frontal_image_url":"https://v3b.fal.media/files/b/0a8d1b2e/yiHiZP1Now0V5JC5_OClE_PaKOtOGJ.png"},{"reference_image_urls":["https://v3b.fal.media/files/b/0a8d1b3c/_ZE2iIjkb-Eun3WXXGP4x_TSG1ELBo.png"],"frontal_image_url":"https://v3b.fal.media/files/b/0a8d1b19/_eIj7GjmI5zgQkMN936YJ_2f3hZ7Xb.png"}]
+  - Examples: [{"frontal_image_url":"https://v3b.fal.media/files/b/0a8d1b2e/yiHiZP1Now0V5JC5_OClE_PaKOtOGJ.png","reference_image_urls":["https://v3b.fal.media/files/b/0a8d1b1a/eZfSbcQ58EzD_l2SEbevg_F3U9GMLK.png"]},{"frontal_image_url":"https://v3b.fal.media/files/b/0a8d1b19/_eIj7GjmI5zgQkMN936YJ_2f3hZ7Xb.png","reference_image_urls":["https://v3b.fal.media/files/b/0a8d1b3c/_ZE2iIjkb-Eun3WXXGP4x_TSG1ELBo.png"]}]
 
 - **`generate_audio`** (`boolean`, _optional_):
   Whether to generate native audio for the video.
@@ -92,16 +92,16 @@ The API accepts the following input parameters:
   "start_image_url": "https://v3b.fal.media/files/b/0a8d1b38/myilPNN_WYdJCmpTy4Sjr_6XNBi9Mm.png",
   "elements": [
     {
+      "frontal_image_url": "https://v3b.fal.media/files/b/0a8d1b2e/yiHiZP1Now0V5JC5_OClE_PaKOtOGJ.png",
       "reference_image_urls": [
         "https://v3b.fal.media/files/b/0a8d1b1a/eZfSbcQ58EzD_l2SEbevg_F3U9GMLK.png"
-      ],
-      "frontal_image_url": "https://v3b.fal.media/files/b/0a8d1b2e/yiHiZP1Now0V5JC5_OClE_PaKOtOGJ.png"
+      ]
     },
     {
+      "frontal_image_url": "https://v3b.fal.media/files/b/0a8d1b19/_eIj7GjmI5zgQkMN936YJ_2f3hZ7Xb.png",
       "reference_image_urls": [
         "https://v3b.fal.media/files/b/0a8d1b3c/_ZE2iIjkb-Eun3WXXGP4x_TSG1ELBo.png"
-      ],
-      "frontal_image_url": "https://v3b.fal.media/files/b/0a8d1b19/_eIj7GjmI5zgQkMN936YJ_2f3hZ7Xb.png"
+      ]
     }
   ],
   "duration": "8",
@@ -117,7 +117,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video.
-  - Examples: {"content_type":"video/mp4","file_size":18468404,"file_name":"output.mp4","url":"https://v3b.fal.media/files/b/0a8d1c8a/ZxdKrvPb3CQEmeuS-u_kU_output.mp4"}
+  - Examples: {"file_size":18468404,"file_name":"output.mp4","content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0a8d1c8a/ZxdKrvPb3CQEmeuS-u_kU_output.mp4"}
 
 
 
@@ -126,9 +126,9 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "video/mp4",
     "file_size": 18468404,
     "file_name": "output.mp4",
+    "content_type": "video/mp4",
     "url": "https://v3b.fal.media/files/b/0a8d1c8a/ZxdKrvPb3CQEmeuS-u_kU_output.mp4"
   }
 }
