@@ -1,0 +1,493 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for bytedance/seed-audio-1.0",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the bytedance/seed-audio-1.0 queue.",
+    "x-fal-metadata": {
+      "endpointId": "bytedance/seed-audio-1.0",
+      "category": "text-to-audio",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a9fb613/LcZVbUHHvdKBUIFSlv9Yx.jpg",
+      "playgroundUrl": "https://fal.ai/models/bytedance/seed-audio-1.0",
+      "documentationUrl": "https://fal.ai/models/bytedance/seed-audio-1.0/api",
+      "about": "Generate"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "SeedAudio10Input": {
+        "required": [
+          "prompt"
+        ],
+        "title": "SeedAudioInput",
+        "properties": {
+          "volume": {
+            "title": "Volume",
+            "default": 1,
+            "type": "number",
+            "maximum": 2,
+            "description": "Volume. 1.0 is normal volume, 0.5 is half, 2.0 is double.",
+            "minimum": 0.5
+          },
+          "speed": {
+            "title": "Speed",
+            "default": 1,
+            "type": "number",
+            "maximum": 2,
+            "description": "Speech speed. 1.0 is normal speed, 0.5 is half speed, 2.0 is double speed.",
+            "minimum": 0.5
+          },
+          "multilingual": {
+            "title": "Multilingual",
+            "default": false,
+            "type": "boolean",
+            "description": "Use the multilingual model variant, which handles non-English and mixed-language prompts better."
+          },
+          "image_url": {
+            "title": "Image URL",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A single reference image URL (jpeg/png/webp, up to 10MB). Cannot be combined with audio references."
+          },
+          "voice": {
+            "title": "Voice",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Voice to use for synthesis: either a preset voice name or a cloned voice id.",
+            "examples": [
+              "stokie_en",
+              "vivi_mixed_en_zh_ja_es_id",
+              "mindy_en_es_id_pt_zh",
+              "kian_en_zh",
+              "cedric_en_zh",
+              "sophie_en_zh",
+              "jean_en_zh",
+              "magnus_en_zh",
+              "mabel_en_zh",
+              "nadia_en_zh",
+              "opal_en_zh",
+              "pearl_en_zh",
+              "quentin_en_zh",
+              "corinne_mixed_en_zh",
+              "esther_mixed_en_zh",
+              "lyla_mixed_en_zh",
+              "tracy_es_zh",
+              "sandy_es_mixed_en_zh",
+              "felix_zh",
+              "celeste_zh",
+              "monkey_king_zh",
+              null
+            ]
+          },
+          "prompt": {
+            "title": "Prompt",
+            "maxLength": 2048,
+            "type": "string",
+            "description": "Prompt or text to synthesize. Reference audio inputs by order with @Audio1, @Audio2, @Audio3.",
+            "examples": [
+              "Here's a quick look at your day: you've got three meetings, one lunch, and just enough time in between to grab a coffee and relax."
+            ]
+          },
+          "output_format": {
+            "title": "Output Format",
+            "default": "mp3",
+            "enum": [
+              "wav",
+              "mp3",
+              "pcm",
+              "ogg_opus"
+            ],
+            "type": "string",
+            "description": "Output audio format."
+          },
+          "pitch": {
+            "title": "Pitch",
+            "default": 0,
+            "type": "integer",
+            "maximum": 12,
+            "description": "Voice pitch shift in semitones. 0 is normal pitch, -12 lowers by one octave, 12 raises by one octave.",
+            "minimum": -12
+          },
+          "sample_rate": {
+            "title": "Sample Rate",
+            "default": 24000,
+            "enum": [
+              8000,
+              16000,
+              24000,
+              32000,
+              44100,
+              48000
+            ],
+            "type": "integer",
+            "description": "Sample rate of the output audio in Hz."
+          },
+          "audio_urls": {
+            "title": "Audio URLs",
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "description": "Up to 3 reference audio URLs, referenced in prompt as @Audio1, @Audio2, @Audio3. Each clip: up to 30s, 10MB, wav/mp3/pcm/ogg_opus."
+          }
+        },
+        "type": "object",
+        "x-fal-order-properties": [
+          "prompt",
+          "voice",
+          "audio_urls",
+          "image_url",
+          "output_format",
+          "sample_rate",
+          "speed",
+          "volume",
+          "pitch",
+          "multilingual"
+        ]
+      },
+      "SeedAudio10Output": {
+        "required": [
+          "audio"
+        ],
+        "title": "SeedAudioOutput",
+        "properties": {
+          "audio": {
+            "description": "The generated audio file.",
+            "examples": [
+              {
+                "url": "https://v3b.fal.media/files/b/0aa97081/TYxWX8Yp1jjq9qObOdSRn_speech.mp3"
+              }
+            ],
+            "$ref": "#/components/schemas/AudioFile"
+          }
+        },
+        "type": "object",
+        "x-fal-order-properties": [
+          "audio"
+        ]
+      },
+      "AudioFile": {
+        "required": [
+          "url"
+        ],
+        "title": "AudioFile",
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "duration": {
+            "title": "Duration",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The duration of the audio"
+          },
+          "channels": {
+            "title": "Channels",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The number of channels in the audio"
+          },
+          "bitrate": {
+            "title": "Bitrate",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The bitrate of the audio (e.g., '192k' or 192000)"
+          },
+          "content_type": {
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "file_size": {
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ]
+          },
+          "file_name": {
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "sample_rate": {
+            "title": "Sample Rate",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The sample rate of the audio"
+          }
+        },
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "duration",
+          "channels",
+          "sample_rate",
+          "bitrate"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/bytedance/seed-audio-1.0/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bytedance/seed-audio-1.0/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bytedance/seed-audio-1.0": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeedAudio10Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bytedance/seed-audio-1.0/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeedAudio10Output"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

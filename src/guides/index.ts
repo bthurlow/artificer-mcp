@@ -45,6 +45,11 @@ import { registerSpecializedVideoPromptGuide } from './specialized-video.js';
 import { registerLegacyVideoPromptGuide } from './legacy-video.js';
 import { registerHappyHorsePromptGuide } from './happy-horse.js';
 import { registerBytedanceLynxPromptGuide } from './bytedance-lynx.js';
+import { registerFalMusicPromptGuide } from './fal-music.js';
+import { registerFalTtsPromptGuide } from './fal-tts.js';
+import { registerFalSfxPromptGuide } from './fal-sfx.js';
+import { registerFalDialoguePromptGuide } from './fal-dialogue.js';
+import { registerFalStemSeparationPromptGuide } from './fal-stem-separation.js';
 import { registerBrandSpecTool } from './brand-spec.js';
 
 /**
@@ -122,6 +127,12 @@ export function registerGuideTools(server: McpServer): void {
   // Video — talking-head (audio-driven / lip-sync / character-id)
   registerHappyHorsePromptGuide(server);
   registerBytedanceLynxPromptGuide(server);
+  // Grouped guides for the 2026-09-24 fal audio catalog refresh.
+  registerFalMusicPromptGuide(server);
+  registerFalTtsPromptGuide(server);
+  registerFalSfxPromptGuide(server);
+  registerFalDialoguePromptGuide(server);
+  registerFalStemSeparationPromptGuide(server);
 
   // Branding
   registerBrandSpecTool(server);

@@ -111,6 +111,7 @@ Describe style via attributes, not by referencing named artists.
 |----------|-----------------------------------|----------------------------------|------------------------|-------|
 | google   | \`gemini_generate_music\`         | \`lyria-3-clip-preview\` (default, 30s MP3) / \`lyria-3-pro-preview\` (up to ~2min WAV) | See Google Cloud pricing | Batch, synchronous. **Vocal-capable** — supports vocals and timed lyrics; prompt for "instrumental" if you want none. 44.1 kHz stereo. Pro supports timeline prompts with \`[mm:ss - mm:ss]\` markers and intensity scales. No dedicated \`negative_prompt\` field on Lyria 3 — artificer appends \`\\nAvoid: ...\` as prompt guidance. |
 | google   | \`gemini_generate_music_live\`    | \`models/lyria-realtime-exp\`    | See Google Cloud pricing | Streaming WebSocket session. Caller-side deadline capped 120s in artificer. Output is 16-bit PCM 48kHz stereo wrapped in WAV. |
+| fal      | \`fal_generate_music\`            | \`google/lyria-3.5\` (catalog slug \`lyria-3.5\`) | $0.10 per generation | Lyria 3.5 hosted on fal; uses FAL_KEY. Inputs: \`prompt\`, \`negative_prompt\` (via extra_params), and an optional \`image_url\` (via extra_files) to condition on an image. Added 2026-09-24; not yet compared with Lyria 3 here. |
 
 Fal hosts alternative music generation (Suno, MusicGen) — those are separate logical models with their own guides when Phase 5 lands.
 

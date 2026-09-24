@@ -80,6 +80,7 @@ Stable Audio handles both descriptive prose and keyword stacks. For music, use p
 | Provider | Tool                   | Model ID                               | Cost              | Notes |
 |----------|------------------------|----------------------------------------|-------------------|-------|
 | fal      | \`fal_generate_music\` | \`fal-ai/stable-audio-25/text-to-audio\`| $0.20 per audio   | Flat per-output pricing — generate full-length clips when cost is the same regardless. |
+| fal      | \`fal_generate_music\` | \`fal-ai/stable-audio-3/medium/text-to-audio\` (slug \`stable-audio-3-medium\`) | $0.0376 per audio | Stable Audio 3 Medium, added 2026-09-24. Instrumental only. Knobs via extra_params: \`duration\`, \`negative_prompt\`, \`num_inference_steps\`, \`guidance_scale\`, \`seed\`, \`enable_prompt_expansion\`, \`output_format\`, \`bitrate\`. For sound effects see \`fal_sfx_prompt_guide\` (Stable Audio 3 Small SFX). |
 
 ## Last verified
 2026-04-24 against artificer-mcp v0.9.0 — schema from \`src/catalog/fal-specs/stable-audio-2.5/llms.md\`. Parameter ranges validated.

@@ -59,6 +59,20 @@ Prefer `gemini_generate_music` for one-shot music beds (simpler, deterministic).
 
 `ARTIFICER_BRAND_SPEC.music.default_prompt` is used by higher-level workflows (e.g., `workflow_narrated_explainer`) when the caller doesn't pass their own prompt. The raw `gemini_generate_music` tools always require an explicit prompt.
 
+## Stem separation (fal)
+
+### fal_separate_audio
+
+Splits a mixed track into stems (vocals, drums, bass, other, and with Demucs's 6-stem network also guitar and piano). Writes one file per stem into `output_dir` as `<basename>-<stem>.<ext>` and returns the stem → path map. Requires `FAL_KEY`.
+
+```
+fal_separate_audio({ model: "fal-ai/demucs", audio: "./song.wav", output_dir: "./stems", stems: ["vocals"] })
+```
+
+Typical uses: an isolated vocal for lip-sync (see `fal_lipsync_prompt_guide`) or for cleaner karaoke timing, and instrumental versions. Demucs puts every singer in one `vocals` stem; it can't split a duet. See `fal_stem_separation_prompt_guide`.
+
+The rest of the fal audio catalog (music, SFX, TTS, dialogue, ASR) is discoverable through `model_catalog` and runs through `fal_generate_music`, `fal_generate_speech` and `fal_transcribe`. Grouped guides: `fal_music_prompt_guide`, `fal_sfx_prompt_guide`, `fal_tts_prompt_guide`, `fal_dialogue_prompt_guide`.
+
 ## Prompt guide
 
 `gemini_lyria_prompt_guide` — prompt anatomy, Lyria 3 Pro timestamp syntax, negative-prompt patterns, realtime session lifecycle, safety-filter notes.

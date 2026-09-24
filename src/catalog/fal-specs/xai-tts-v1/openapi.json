@@ -1,0 +1,449 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for xai/tts/v1",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the xai/tts/v1 queue.",
+    "x-fal-metadata": {
+      "endpointId": "xai/tts/v1",
+      "category": "text-to-speech",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a92763c/4toOv_gM9xUL_Zwmt4Gc8_67e9f077fc4c48e78dfa428f7d50b190.jpg",
+      "playgroundUrl": "https://fal.ai/models/xai/tts/v1",
+      "documentationUrl": "https://fal.ai/models/xai/tts/v1/api",
+      "about": "Convert text to speech using xAI's TTS API.\n\nSupports xAI's built-in voices, inline speech tags for fine-grained\ndelivery control, and output formats from high-fidelity MP3 to\ntelephony-optimized μ-law."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "TtsV1Input": {
+        "type": "object",
+        "title": "XAITTSInput",
+        "x-fal-order-properties": [
+          "text",
+          "voice",
+          "language",
+          "output_format"
+        ],
+        "required": [
+          "text"
+        ],
+        "description": "Input for xAI text-to-speech generation.",
+        "properties": {
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "description": "BCP-47 language code or 'auto' for automatic detection. Supported: en, zh, fr, de, hi, id, it, ja, ko, pt-BR, pt-PT, ru, es-MX, es-ES, tr, vi, bn, ar-EG, ar-SA, ar-AE.",
+            "default": "auto",
+            "enum": [
+              "auto",
+              "en",
+              "ar-EG",
+              "ar-SA",
+              "ar-AE",
+              "bn",
+              "zh",
+              "fr",
+              "de",
+              "hi",
+              "id",
+              "it",
+              "ja",
+              "ko",
+              "pt-BR",
+              "pt-PT",
+              "ru",
+              "es-MX",
+              "es-ES",
+              "tr",
+              "vi"
+            ]
+          },
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "minLength": 1,
+            "examples": [
+              "Hello! This is xAI text to speech, brought to you by Fal AI."
+            ],
+            "maxLength": 15000,
+            "description": "The text to convert to speech. Maximum 15,000 characters. Supports speech tags for expressive delivery: inline tags like [laugh], [pause], [sigh] and wrapping tags like <whisper>text</whisper>, <slow>text</slow>."
+          },
+          "output_format": {
+            "$ref": "#/components/schemas/OutputFormat",
+            "description": "Output format configuration. Defaults to MP3 at 24 kHz / 128 kbps."
+          },
+          "voice": {
+            "type": "string",
+            "title": "Voice",
+            "description": "Built-in xAI voice to use for synthesis.",
+            "default": "eve",
+            "enum": [
+              "carina",
+              "zagan",
+              "helix",
+              "orion",
+              "luna",
+              "iris",
+              "altair",
+              "zenith",
+              "perseus",
+              "helios",
+              "lux",
+              "kepler",
+              "rigel",
+              "cosmo",
+              "celeste",
+              "ursa",
+              "sirius",
+              "lumen",
+              "castor",
+              "naksh",
+              "atlas",
+              "aurora",
+              "liora",
+              "ara",
+              "eve",
+              "leo",
+              "rex",
+              "sal"
+            ]
+          }
+        }
+      },
+      "TtsV1Output": {
+        "type": "object",
+        "title": "XAITTSOutput",
+        "x-fal-order-properties": [
+          "audio"
+        ],
+        "required": [
+          "audio"
+        ],
+        "description": "Output for xAI text-to-speech generation.",
+        "properties": {
+          "audio": {
+            "$ref": "#/components/schemas/File",
+            "examples": [
+              {
+                "url": "https://v3b.fal.media/files/b/0a92750b/exZJCm6TDejS5xIulJs2r_xai_tts_output.mp3"
+              }
+            ],
+            "description": "The generated audio file."
+          }
+        }
+      },
+      "OutputFormat": {
+        "type": "object",
+        "title": "OutputFormat",
+        "x-fal-order-properties": [
+          "codec",
+          "sample_rate",
+          "bit_rate"
+        ],
+        "description": "Output format configuration for the TTS API.",
+        "properties": {
+          "bit_rate": {
+            "title": "Bit Rate",
+            "anyOf": [
+              {
+                "type": "integer",
+                "enum": [
+                  32000,
+                  64000,
+                  96000,
+                  128000,
+                  192000
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Bit rate in bps. Only applicable for MP3 codec. Defaults to 128000 for MP3."
+          },
+          "codec": {
+            "type": "string",
+            "title": "Codec",
+            "default": "mp3",
+            "description": "Audio codec. Supported: mp3, wav, pcm, mulaw, alaw.",
+            "enum": [
+              "mp3",
+              "wav",
+              "pcm",
+              "mulaw",
+              "alaw"
+            ]
+          },
+          "sample_rate": {
+            "type": "integer",
+            "title": "Sample Rate",
+            "default": 24000,
+            "description": "Sample rate in Hz.",
+            "enum": [
+              8000,
+              16000,
+              22050,
+              24000,
+              44100,
+              48000
+            ]
+          }
+        }
+      },
+      "File": {
+        "type": "object",
+        "title": "File",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "file_name": {
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "content_type": {
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "file_size": {
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes."
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/xai/tts/v1/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/xai/tts/v1/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/xai/tts/v1": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TtsV1Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/xai/tts/v1/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TtsV1Output"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

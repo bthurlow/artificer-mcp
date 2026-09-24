@@ -104,6 +104,7 @@ Baker: I just use twice the ingredients...
 | Provider | Tool                        | Model ID                              | Cost                   | Notes |
 |----------|-----------------------------|---------------------------------------|------------------------|-------|
 | google   | \`gemini_generate_speech\`  | \`gemini-2.5-flash-preview-tts\` (default) / Pro / Flash 3.1 | See Google Cloud pricing | Exposes \`voice\`, \`language_code\`, \`style\`. 30 prebuilt voices. Emits WAV natively; other formats transcoded via ffmpeg. |
+| fal      | \`fal_generate_speech\`     | \`fal-ai/gemini-3.1-flash-tts\` (slug \`gemini-3.1-flash-tts\`) | $0.05 per 1000 characters | Gemini 3.1 Flash TTS hosted on fal; uses FAL_KEY instead of GOOGLE_API_KEY. The fal spec takes the text as \`prompt\` (pass it via extra_params), plus \`voice\`, \`language_code\`, \`style_instructions\`, \`speakers\` (multi-speaker), \`temperature\`, \`output_format\`. Added 2026-09-24. |
 
 Fal hosts alternative TTS providers (ElevenLabs, OpenAI-compatible voices) — those are their own logical models with their own guides when Phase 5 lands.
 

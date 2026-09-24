@@ -127,6 +127,9 @@ All seven models route through \`fal_transcribe\` with \`FAL_KEY\` in env. Catal
 | Wizper | \`fal-ai/wizper\` |
 | fal STT | \`fal-ai/speech-to-text\` |
 | fal STT Turbo | \`fal-ai/speech-to-text/turbo\` |
+| NVIDIA Nemotron ASR (multilingual) | \`nvidia/nemotron-asr-multilingual/asr\` |
+
+**Nemotron ASR** (slug \`nemotron-asr-multilingual\`, added 2026-09-24, $0.008 per minute) returns \`{ output, partial }\`, the same shape as fal STT: \`text\` only, with no word or segment timing. Use Scribe v2 when you need timing.
 | Cohere Transcribe | \`fal-ai/cohere-transcribe\` |
 
 ## Last verified

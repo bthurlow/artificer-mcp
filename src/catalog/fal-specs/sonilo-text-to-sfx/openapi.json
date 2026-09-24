@@ -1,0 +1,379 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for sonilo/v1.1/text-to-sound-effects",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the sonilo/v1.1/text-to-sound-effects queue.",
+    "x-fal-metadata": {
+      "endpointId": "sonilo/v1.1/text-to-sound-effects",
+      "category": "text-to-audio",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aa30e7f/6mq820o99Kn43TR-qmOnk.jpg",
+      "playgroundUrl": "https://fal.ai/models/sonilo/v1.1/text-to-sound-effects",
+      "documentationUrl": "https://fal.ai/models/sonilo/v1.1/text-to-sound-effects/api",
+      "about": "Text To Audio"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "V11TextToSoundEffectsInput": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "prompt",
+          "duration",
+          "audio_format"
+        ],
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "examples": [
+              "Heavy rain on a tin roof with distant rolling thunder"
+            ],
+            "title": "Prompt",
+            "description": "Describe the sound you want to create."
+          },
+          "duration": {
+            "type": "number",
+            "maximum": 180,
+            "default": 8,
+            "title": "Duration",
+            "minimum": 0.5,
+            "description": "How long the audio should be, in seconds (0.5 to 180)."
+          },
+          "audio_format": {
+            "enum": [
+              "wav",
+              "mp3",
+              "aac",
+              "flac"
+            ],
+            "type": "string",
+            "default": "aac",
+            "title": "Audio Format",
+            "description": "Audio file format: aac (default), mp3, wav, or flac."
+          }
+        },
+        "title": "Sfxv1TextToAudioInput",
+        "description": "sfx-v1.0 /text-to-audio schema: plain-language field help for the product\nPlayground. Duration accepts fractional seconds; flash and seed are hidden.",
+        "required": [
+          "prompt"
+        ]
+      },
+      "V11TextToSoundEffectsOutput": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "audio",
+          "audios",
+          "watermark"
+        ],
+        "properties": {
+          "audios": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Audio"
+            },
+            "title": "Audios",
+            "description": "All generated sounds, one per sample."
+          },
+          "audio": {
+            "$ref": "#/components/schemas/Audio",
+            "description": "The generated sound, in your chosen audio format."
+          },
+          "watermark": {
+            "description": "Present when the audio carries the inaudible provenance watermark.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WatermarkInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "TrioAudioOutput",
+        "required": [
+          "audio",
+          "audios"
+        ]
+      },
+      "Audio": {
+        "type": "object",
+        "title": "Audio",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes."
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file."
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ]
+      },
+      "WatermarkInfo": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "scheme",
+          "message_hex"
+        ],
+        "properties": {
+          "message_hex": {
+            "type": "string",
+            "title": "Message Hex",
+            "description": "The 40-bit message embedded in the audio, hex."
+          },
+          "scheme": {
+            "type": "string",
+            "default": "sc44k-1",
+            "title": "Scheme",
+            "description": "Watermark scheme identifier."
+          }
+        },
+        "title": "WatermarkInfo",
+        "required": [
+          "message_hex"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/sonilo/v1.1/text-to-sound-effects/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sonilo/v1.1/text-to-sound-effects/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sonilo/v1.1/text-to-sound-effects": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/V11TextToSoundEffectsInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sonilo/v1.1/text-to-sound-effects/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V11TextToSoundEffectsOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

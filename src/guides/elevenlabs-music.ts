@@ -81,6 +81,7 @@ Lead with genre, then mood, then instrumentation. Tempo and soundscape go last.
 | Provider | Tool                   | Model ID                    | Cost                                                                    | Notes |
 |----------|------------------------|-----------------------------|-------------------------------------------------------------------------|-------|
 | fal      | \`fal_generate_music\` | \`fal-ai/elevenlabs/music\` | $0.80 per output audio minute (rounded up to the nearest whole minute)  | Vocal-capable. Authored lyrics require \`composition_plan\` via extra_params; prompt mode has no lyrics field. \`force_instrumental: true\` guarantees no vocals. |
+| fal      | \`fal_generate_music\` | \`elevenlabs/music/v2.5\` (slug \`elevenlabs-music-v2.5\`) | $0.60 per output audio minute (rounded up to the nearest whole minute) | v2.5, added 2026-09-24. Same knobs as above: \`composition_plan\`, \`music_length_ms\`, \`force_instrumental\`, \`seed\`, \`output_format\` (all via extra_params). |
 
 ## Last verified
 2026-08-15 against artificer-mcp — schema from \`src/catalog/fal-specs/eleven-music/llms.md\`; vocals/lyrics behavior re-verified against the ElevenLabs Music API reference (composition-plan \`lines\` field). Output format list matches committed spec.
