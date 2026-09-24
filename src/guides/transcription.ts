@@ -130,6 +130,23 @@ All seven models route through \`fal_transcribe\` with \`FAL_KEY\` in env. Catal
 | NVIDIA Nemotron ASR (multilingual) | \`nvidia/nemotron-asr-multilingual/asr\` |
 
 **Nemotron ASR** (slug \`nemotron-asr-multilingual\`, added 2026-09-24, $0.008 per minute) returns \`{ output, partial }\`, the same shape as fal STT: \`text\` only, with no word or segment timing. Use Scribe v2 when you need timing.
+
+## When you already know the words: forced alignment
+If you have the exact text (lyrics, a TTS script, a voiceover script), don't transcribe it; **align** it with \`align_text_to_audio\` (catalog \`transcription.alignment\`, slug \`elevenlabs-forced-alignment\`). ASR can mishear proper nouns, technical terms and sung lyrics. Forced alignment times *your* words, so the text is always right, and only the timing comes from the audio.
+
+\`\`\`
+align_text_to_audio({
+  audio: "./stems/song-vocals.wav",
+  text: "First line of the verse\\nSecond line of the verse\\nChorus line",
+  output: "./song.lrc"
+})
+\`\`\`
+
+- **Lines come from your line breaks**: each non-empty line of \`text\` gets a start/end, which is exactly what a lyric sheet or caption track needs. Word-level times and each word's alignment \`loss\` are in the result too.
+- **Outputs**: \`.lrc\` (synced lyrics), \`.srt\` (subtitles) or \`.json\` (full detail), chosen by \`format\` or the output extension. The JSON summary is always returned.
+- **Low-confidence words** are flagged when their loss stands far above the rest of the clip (mean + 2σ). The loss has no documented absolute scale, so the flag is relative. Lines with no timed word are marked \`interpolated\`.
+- **Songs**: align the isolated vocal stem (\`fal_separate_audio\` with \`stems: ["vocals"]\`); drums and guitars under the voice hurt the timing.
+- **Cost**: $0.22 per hour of audio, **rounded up to a whole hour**, so a 3-minute song costs the same as an hour. Batch short clips if cost matters, and use Scribe v2 via \`fal_transcribe\` when you don't have the text.
 | Cohere Transcribe | \`fal-ai/cohere-transcribe\` |
 
 ## Last verified

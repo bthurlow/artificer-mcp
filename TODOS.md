@@ -246,7 +246,16 @@ Also unlocks the simpler cases — generic transcription for content moderation,
 
 ---
 
-## 7. Forced alignment (`align_text_to_audio`) — PLAN CHANGED 2026-09-24, in progress
+## 7. Forced alignment (`align_text_to_audio`) — DONE 2026-09-24
+
+**Shipped:** `align_text_to_audio({ audio, text, model?, output?, format? })`, seeding `transcription.alignment` (slug `elevenlabs-forced-alignment`). It defaults to fal's ElevenLabs forced aligner, the only one fal hosts, so unlike the fal transports it has a default model; the default is overridable for a future aligner with the same `words[]` shape. On top of the aligner it adds:
+- **line timings** from the script's own line breaks, via an in-order exact match with a small lookahead. It drops punctuation tokens and rejoins split contractions ("don" + "t"), but never prefix-matches, so "a" can't claim "and". Lines with no timed word are interpolated and marked.
+- **low-confidence words**, flagged when their `loss` sits above the clip's mean + 2σ. The loss has no documented absolute scale, so the flag is relative, like `video_make_loop`'s seam check.
+- **LRC / SRT / JSON output**, chosen by `format` or the extension.
+
+**Not verified live** (no `FAL_KEY` in the dev shell). In particular, how the aligner tokenizes punctuation and contractions is inferred from the spec, and the matcher is written to tolerate either behavior. The first real call should confirm lines come back fully matched rather than interpolated.
+
+### Plan-change note (kept for history)
 
 **The premise below is out of date: fal now hosts a real forced aligner.** `fal-ai/elevenlabs/forced-alignment` (listed 2026-09-08) takes `audio_url` + `text` and returns `words[]` and `characters[]`, each with `start` / `end` seconds, plus a per-word and overall alignment `loss`. That is true acoustic alignment against the known script, so the ASR-wrapper and Needleman-Wunsch plan below is no longer needed. Price: $0.22 per hour of input, **rounded up to a whole hour**, so every call costs at least $0.22.
 

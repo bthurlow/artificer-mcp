@@ -7,13 +7,14 @@ import { registerFalMusicTools } from './music.js';
 import { registerFalTranscriptionTools } from './transcription.js';
 import { registerFalUploadTool } from './upload.js';
 import { registerFalSeparationTools } from './separation.js';
+import { registerAlignmentTools } from './alignment.js';
 
 /**
  * Register all fal.ai generation tools with the MCP server.
  *
  * Covers: fal_generate_video, fal_generate_image, fal_classify_text,
  * fal_generate_speech, fal_generate_music, fal_transcribe,
- * fal_separate_audio, fal_upload.
+ * fal_separate_audio, align_text_to_audio, fal_upload.
  */
 export function registerFalGenerationTools(server: McpServer): void {
   registerFalVideoTools(server);
@@ -23,5 +24,6 @@ export function registerFalGenerationTools(server: McpServer): void {
   registerFalMusicTools(server);
   registerFalTranscriptionTools(server);
   registerFalSeparationTools(server);
+  registerAlignmentTools(server);
   registerFalUploadTool(server);
 }
