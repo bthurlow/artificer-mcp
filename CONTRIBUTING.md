@@ -10,6 +10,12 @@ yarn dev      # stdio MCP server against src/
 yarn ci       # lint + format + typecheck + build + unit tests (runs in CI)
 ```
 
+The repo uses Yarn 4 (`node-modules` linker), and the release is committed at `.yarn/releases/`. Any globally installed `yarn` (Classic 1.22+, Volta, or corepack) reads `yarnPath` from `.yarnrc.yml` and hands off to that pinned version, so there is nothing to install. To upgrade, run `yarn set version <x.y.z>` and commit the result.
+
+### Dependency security alerts
+
+Fix alerts on **direct** dependencies by bumping them. Don't pin transitive dependencies (no `resolutions` entries). A transitive alert gets fixed by bumping the direct dependency that pulls it in, or by refreshing the lockfile within existing ranges.
+
 ## Generation tool providers
 
 Artificer wraps multiple generative-media providers behind MCP tools. Each provider has its own SDK pin and bake-off expectations.
