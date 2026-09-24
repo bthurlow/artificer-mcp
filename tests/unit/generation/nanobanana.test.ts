@@ -20,6 +20,16 @@ vi.mock('node:fs/promises', async () => {
   };
 });
 
+// vi.hoisted: the vi.mock factory below runs before normal top-level code.
+const { mockMagick } = vi.hoisted(() => ({ mockMagick: vi.fn(async (_args: string[]) => '') }));
+vi.mock('../../../src/utils/exec.js', async () => {
+  const actual = await vi.importActual<typeof import('../../../src/utils/exec.js')>(
+    '../../../src/utils/exec.js',
+  );
+  return { ...actual, magick: mockMagick };
+});
+
+import { readFile } from 'node:fs/promises';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -219,5 +229,105 @@ describe('gemini_nanobanana_generate_image', () => {
     const content = result.content as Array<{ type: string; text: string }>;
     expect(content[0].text).toContain('saved to /tmp/variant.png');
     expect(content[0].text).toContain('saved to /tmp/variant_2.png');
+  });
+
+  // ── TODO #25: output format + image_size ───────────────────────────────
+
+  /** Real magic bytes: JPEG SOI + SOF0 (896×1200), as the model actually returns. */
+  const JPEG_896x1200 = Buffer.from([
+    0xff, 0xd8, 0xff, 0xc0, 0x00, 0x11, 0x08, 0x04, 0xb0, 0x03, 0x80, 0x03, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  ]);
+
+  function respondWith(bytes: Buffer, mimeType: string): void {
+    mockGenerateContent.mockResolvedValue({
+      candidates: [{ content: { parts: [{ inlineData: { mimeType, data: bytes.toString('base64') } }] } }],
+    });
+  }
+
+  it('converts JPEG bytes to PNG when the output is .png, and reports it', async () => {
+    respondWith(JPEG_896x1200, 'image/jpeg');
+    const result = await client.callTool({
+      name: 'gemini_nanobanana_generate_image',
+      arguments: { prompt: 'a bust', output: '/tmp/bust.png' },
+    });
+
+    expect(mockMagick).toHaveBeenCalledOnce();
+    const args = mockMagick.mock.calls[0][0] as unknown as string[];
+    expect(args[0]).toMatch(/\.jpg$/);
+    expect(args[1]).toMatch(/^PNG:.*\.png$/);
+    const text = (result.content as Array<{ text: string }>)[0].text;
+    expect(text).toContain('saved to /tmp/bust.png (896×1200, converted from JPEG to PNG)');
+  });
+
+  it('leaves bytes alone when they already match the extension', async () => {
+    respondWith(JPEG_896x1200, 'image/jpeg');
+    const result = await client.callTool({
+      name: 'gemini_nanobanana_generate_image',
+      arguments: { prompt: 'a bust', output: '/tmp/bust.jpg' },
+    });
+
+    expect(mockMagick).not.toHaveBeenCalled();
+    expect((result.content as Array<{ text: string }>)[0].text).toContain(
+      'saved to /tmp/bust.jpg (896×1200)',
+    );
+  });
+
+  it('notes an extension it cannot convert to instead of silently mislabeling', async () => {
+    respondWith(JPEG_896x1200, 'image/jpeg');
+    const result = await client.callTool({
+      name: 'gemini_nanobanana_generate_image',
+      arguments: { prompt: 'a bust', output: '/tmp/bust.tiff' },
+    });
+
+    expect(mockMagick).not.toHaveBeenCalled();
+    expect((result.content as Array<{ text: string }>)[0].text).toContain(
+      'JPEG bytes; .tiff is not a format this tool converts to',
+    );
+  });
+
+  it('passes image_size through to imageConfig alongside aspect_ratio', async () => {
+    respondWith(Buffer.from('png'), 'image/png');
+    await client.callTool({
+      name: 'gemini_nanobanana_generate_image',
+      arguments: { prompt: 'a bust', output: '/tmp/bust.png', image_size: '2K', aspect_ratio: '3:4' },
+    });
+
+    expect(mockGenerateContent.mock.calls[0][0].config.imageConfig).toEqual({
+      aspectRatio: '3:4',
+      imageSize: '2K',
+    });
+  });
+
+  it('sends no imageConfig when neither knob is set (unchanged default)', async () => {
+    respondWith(Buffer.from('png'), 'image/png');
+    await client.callTool({
+      name: 'gemini_nanobanana_generate_image',
+      arguments: { prompt: 'a bust', output: '/tmp/bust.png' },
+    });
+
+    expect(mockGenerateContent.mock.calls[0][0].config.imageConfig).toBeUndefined();
+  });
+
+  it('rejects an unknown image_size', async () => {
+    const result = await client.callTool({
+      name: 'gemini_nanobanana_generate_image',
+      arguments: { prompt: 'a bust', output: '/tmp/bust.png', image_size: '8K' },
+    });
+    expect(result.isError).toBe(true);
+    expect(mockGenerateContent).not.toHaveBeenCalled();
+  });
+
+  it('sends a reference image with the MIME type of its bytes, not its extension', async () => {
+    respondWith(Buffer.from('png'), 'image/png');
+    // A previous output: JPEG bytes in a .png file.
+    vi.mocked(readFile).mockResolvedValueOnce(JPEG_896x1200 as never);
+    await client.callTool({
+      name: 'gemini_nanobanana_generate_image',
+      arguments: { prompt: 'same singer', output: '/tmp/next.png', reference_images: ['/tmp/bust.png'] },
+    });
+
+    expect(mockGenerateContent.mock.calls[0][0].contents[0].parts[1].inlineData.mimeType).toBe(
+      'image/jpeg',
+    );
   });
 });
