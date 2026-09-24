@@ -172,7 +172,6 @@ const EXPECTED_TOOLS = {
     'nvidia_cosmos_prompt_guide',
     'longcat_prompt_guide',
     'magi_prompt_guide',
-    'sana_prompt_guide',
     'specialized_video_prompt_guide',
     'legacy_video_prompt_guide',
     'happy_horse_prompt_guide',
@@ -228,8 +227,8 @@ describe('MCP Protocol — artificer-mcp Server', () => {
   // ── 2. Tool discovery ─────────────────────────────────────────────────────
 
   describe('tool discovery', () => {
-    it('should return exactly 167 tools', () => {
-      expect(tools).toHaveLength(167);
+    it('should return exactly 166 tools', () => {
+      expect(tools).toHaveLength(166);
     });
   });
 

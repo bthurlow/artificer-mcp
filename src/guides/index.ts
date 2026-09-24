@@ -41,7 +41,6 @@ import { registerMochiPromptGuide } from './mochi.js';
 import { registerNvidiaCosmosPromptGuide } from './nvidia-cosmos.js';
 import { registerLongcatPromptGuide } from './longcat-video.js';
 import { registerMagiPromptGuide } from './magi.js';
-import { registerSanaPromptGuide } from './sana-video.js';
 import { registerSpecializedVideoPromptGuide } from './specialized-video.js';
 import { registerLegacyVideoPromptGuide } from './legacy-video.js';
 import { registerHappyHorsePromptGuide } from './happy-horse.js';
@@ -117,7 +116,6 @@ export function registerGuideTools(server: McpServer): void {
   registerNvidiaCosmosPromptGuide(server);
   registerLongcatPromptGuide(server);
   registerMagiPromptGuide(server);
-  registerSanaPromptGuide(server);
   registerSpecializedVideoPromptGuide(server);
   registerLegacyVideoPromptGuide(server);
 

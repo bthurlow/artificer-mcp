@@ -116,8 +116,13 @@ jobs:
           git commit -m "chore(catalog): weekly fal spec sync"
           git push -f origin chore/fal-spec-drift
 
-          if gh pr view chore/fal-spec-drift --json number >/dev/null 2>&1; then
-            gh pr edit chore/fal-spec-drift \
+          # Match OPEN PRs only. `gh pr view <branch>` also resolves a
+          # merged or closed PR on the same head, so once the first drift
+          # PR merged, every later run "updated" that closed PR and never
+          # opened a new one — five weeks of drift went unreviewed.
+          open_pr=$(gh pr list --head chore/fal-spec-drift --state open --json number --jq '.[0].number // empty')
+          if [ -n "$open_pr" ]; then
+            gh pr edit "$open_pr" \
               --title "chore(catalog): fal spec drift sync" \
               --body-file "$RUNNER_TEMP/pr-body.md"
             echo "Updated existing PR."
