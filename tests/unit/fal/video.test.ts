@@ -317,6 +317,41 @@ describe('fal_generate_video (MCP)', () => {
     );
   });
 
+  it('video-to-video: uploads a local `video` and sends it as video_url', async () => {
+    mockUpload.mockResolvedValue('https://v3.fal.media/uploaded/clip.mp4');
+    mockSubscribe.mockResolvedValue({
+      data: { video: { url: 'https://v3.fal.media/up.mp4' } },
+      requestId: 'req-v2v',
+    });
+    stubFetch();
+
+    await client.callTool({
+      name: 'fal_generate_video',
+      arguments: {
+        model: 'fal-ai/sync-lipsync/v3',
+        output: '/tmp/out.mp4',
+        video: './take.mp4',
+        audio: 'https://storage.googleapis.com/b/vocal.wav',
+      },
+    });
+
+    expect(mockUpload).toHaveBeenCalledTimes(1);
+    expect(mockUpload.mock.calls[0][0].type).toBe('video/mp4');
+    const input = mockSubscribe.mock.calls[0][1].input;
+    expect(input.video_url).toBe('https://v3.fal.media/uploaded/clip.mp4');
+    expect(input.audio_url).toBe('https://storage.googleapis.com/b/vocal.wav');
+    expect(input).not.toHaveProperty('prompt');
+  });
+
+  it('structural `video` overrides extra_params.video_url with a collision', () => {
+    const { input, collisions } = buildFalInput(
+      { videoUrl: 'https://structural.mp4' },
+      { video_url: 'https://extra.mp4' },
+    );
+    expect(input.video_url).toBe('https://structural.mp4');
+    expect(collisions).toEqual(['video_url']);
+  });
+
   it('spreads extra_params into the fal input', async () => {
     mockSubscribe.mockResolvedValue({
       data: { video: { url: 'https://v3.fal.media/out.mp4' } },
