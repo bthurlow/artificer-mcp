@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.12.0](https://github.com/bthurlow/artificer-mcp/compare/v0.11.0...v0.12.0) (2026-09-24)
+
+
+### Features
+
+* align_text_to_audio forced alignment, with LRC/SRT output (TODO [#7](https://github.com/bthurlow/artificer-mcp/issues/7)) ([#57](https://github.com/bthurlow/artificer-mcp/issues/57)) ([f3835bf](https://github.com/bthurlow/artificer-mcp/commit/f3835bfa88f641b070f128c4774088f4a648f75a))
+* **fal:** fal_generate_image + image catalog (t2i, edit, upscale, cutout) ([#56](https://github.com/bthurlow/artificer-mcp/issues/56)) ([969532c](https://github.com/bthurlow/artificer-mcp/commit/969532c719ef6ab1a92196eb226430b9dbafe210))
+* **fal:** stem separation + audio catalog refresh (music, SFX, TTS, dialogue, ASR) ([#54](https://github.com/bthurlow/artificer-mcp/issues/54)) ([abb4ed6](https://github.com/bthurlow/artificer-mcp/commit/abb4ed6a1bbe354b5565be4f8eac012996961e3f))
+* **fal:** video-to-video input + video catalog refresh (upscale, edit, lip-sync, new flagships) ([#55](https://github.com/bthurlow/artificer-mcp/issues/55)) ([4e10709](https://github.com/bthurlow/artificer-mcp/commit/4e10709630097d251fe967d9347120f56478cb81))
+* **video:** add video_make_loop for seamless loops and seam checks ([#51](https://github.com/bthurlow/artificer-mcp/issues/51)) ([f80747c](https://github.com/bthurlow/artificer-mcp/commit/f80747c424e2a2e88742663cf35444642d1c0a70))
+
+
+### Bug Fixes
+
+* **nanobanana:** write the format the extension promises, and add image_size ([#53](https://github.com/bthurlow/artificer-mcp/issues/53)) ([19d985f](https://github.com/bthurlow/artificer-mcp/commit/19d985fa3536102cb6df4a68cc6a5c1959d2fe49))
+
 ## [0.11.0](https://github.com/bthurlow/artificer-mcp/compare/v0.10.1...v0.11.0) (2026-09-24)
 
 
