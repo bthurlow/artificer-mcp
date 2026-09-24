@@ -1,0 +1,458 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/ltx-2.3-quality/inpaint",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/ltx-2.3-quality/inpaint queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/ltx-2.3-quality/inpaint",
+      "category": "video-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a9ecd3d/7azLYGxLaKMGc-hFuaNi-_16b4824b15554f9ab8604903510749a4.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/ltx-2.3-quality/inpaint",
+      "documentationUrl": "https://fal.ai/models/fal-ai/ltx-2.3-quality/inpaint/api",
+      "about": "Inpaint masked regions of a source video."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "Ltx23QualityInpaintInput": {
+        "required": [
+          "prompt",
+          "video_url",
+          "mask_video_url"
+        ],
+        "properties": {
+          "video_strength": {
+            "minimum": 0,
+            "description": "Strength of the IC-LoRA video guide for the preserved content. Higher values keep the source video structure more strongly.",
+            "type": "number",
+            "default": 1,
+            "maximum": 1,
+            "title": "Video Strength"
+          },
+          "seed": {
+            "title": "Seed",
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "guidance_scale": {
+            "minimum": 1,
+            "description": "Classifier-free guidance scale. The default is tuned for fast, high-quality generation.",
+            "type": "number",
+            "default": 1,
+            "maximum": 20,
+            "title": "Guidance Scale"
+          },
+          "generate_audio": {
+            "description": "Whether to include audio in the returned video. When disabled, the final MP4 is returned without an audio track.",
+            "type": "boolean",
+            "default": true,
+            "title": "Generate Audio"
+          },
+          "mask_video_url": {
+            "description": "The mask video. White regions are regenerated; black regions are preserved from the source video.",
+            "type": "string",
+            "title": "Mask Video URL"
+          },
+          "num_inference_steps": {
+            "minimum": 8,
+            "description": "Number of inference steps. Defaults to 15 and can be increased up to 30.",
+            "type": "integer",
+            "default": 15,
+            "maximum": 30,
+            "title": "Number of Inference Steps"
+          },
+          "frames_per_second": {
+            "minimum": 1,
+            "description": "Frames per second of the generated video.",
+            "type": "number",
+            "default": 24,
+            "maximum": 60,
+            "title": "FPS"
+          },
+          "video_write_mode": {
+            "description": "The write mode of the generated video.",
+            "type": "string",
+            "enum": [
+              "fast",
+              "balanced",
+              "small"
+            ],
+            "default": "balanced",
+            "title": "Video Write Mode"
+          },
+          "enable_safety_checker": {
+            "description": "Whether to enable the safety checker.",
+            "type": "boolean",
+            "default": true,
+            "title": "Enable Safety Checker"
+          },
+          "num_frames": {
+            "minimum": 9,
+            "description": "The number of frames to generate.",
+            "type": "integer",
+            "default": 121,
+            "maximum": 481,
+            "title": "Number of Frames"
+          },
+          "enable_prompt_expansion": {
+            "description": "Whether to enable prompt expansion.",
+            "type": "boolean",
+            "default": true,
+            "title": "Enable Prompt Expansion"
+          },
+          "sync_mode": {
+            "description": "If True, the media is returned as a data URI inline in the response. Useful for short-lived requests and tests.",
+            "type": "boolean",
+            "default": false,
+            "title": "Sync Mode"
+          },
+          "video_url": {
+            "description": "The source video to inpaint.",
+            "type": "string",
+            "title": "Video URL"
+          },
+          "video_quality": {
+            "description": "The quality preset of the generated video.",
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "maximum"
+            ],
+            "default": "high",
+            "title": "Video Quality"
+          },
+          "negative_prompt": {
+            "description": "The negative prompt to steer generation away from.",
+            "type": "string",
+            "default": "color distortion, overexposure, static, blurry details, subtitles, style, artwork, painting, frame, still, dim overall tone, worst quality, low quality, JPEG compression artifacts, ugly, mutilated, extra fingers, poorly drawn hands, poorly drawn face, deformed, disfigured, malformed limbs, fused fingers, motionless frame, cluttered background, three legs, crowded background, walking backwards",
+            "title": "Negative Prompt"
+          },
+          "prompt": {
+            "examples": [
+              "Replace the masked region with matching cinematic background detail."
+            ],
+            "description": "The prompt describing what to generate inside the masked area.",
+            "type": "string",
+            "title": "Prompt"
+          }
+        },
+        "x-fal-order-properties": [
+          "prompt",
+          "video_url",
+          "mask_video_url",
+          "video_strength",
+          "num_frames",
+          "frames_per_second",
+          "num_inference_steps",
+          "guidance_scale",
+          "generate_audio",
+          "negative_prompt",
+          "seed",
+          "enable_prompt_expansion",
+          "enable_safety_checker",
+          "video_quality",
+          "video_write_mode",
+          "sync_mode"
+        ],
+        "description": "Video inpainting: regenerate masked regions of a source video.",
+        "type": "object",
+        "title": "LTX23QualityInpaintInput"
+      },
+      "Ltx23QualityInpaintOutput": {
+        "required": [
+          "video",
+          "seed",
+          "prompt"
+        ],
+        "properties": {
+          "seed": {
+            "description": "The seed actually used for generation.",
+            "type": "integer",
+            "title": "Seed"
+          },
+          "video": {
+            "description": "The generated video.",
+            "$ref": "#/components/schemas/File"
+          },
+          "prompt": {
+            "description": "The prompt used for generation (after any expansion).",
+            "type": "string",
+            "title": "Prompt"
+          }
+        },
+        "x-fal-order-properties": [
+          "video",
+          "seed",
+          "prompt"
+        ],
+        "description": "Standard output for every endpoint on this app.",
+        "type": "object",
+        "title": "LTX23QualityOutput"
+      },
+      "File": {
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "file_size": {
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "content_type": {
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object",
+        "title": "File"
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/ltx-2.3-quality/inpaint/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/ltx-2.3-quality/inpaint/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/ltx-2.3-quality/inpaint": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Ltx23QualityInpaintInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/ltx-2.3-quality/inpaint/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ltx23QualityInpaintOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

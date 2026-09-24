@@ -1,0 +1,375 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for topaz/upscale/video/generative",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the topaz/upscale/video/generative queue.",
+    "x-fal-metadata": {
+      "endpointId": "topaz/upscale/video/generative",
+      "category": "video-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aa5f2fc/fH7-Krw-QX8aqm9aPXcgU.jpg",
+      "playgroundUrl": "https://fal.ai/models/topaz/upscale/video/generative",
+      "documentationUrl": "https://fal.ai/models/topaz/upscale/video/generative/api",
+      "about": "# Topaz Generative Video Upscale (Starlight)\n\nDiffusion-based restoration and upscaling that regenerates detail\nthe source no longer has.\n\n## Models\n- **Starlight Precise 2.6** — realism pass for AI-generated video.\n- **Starlight HQ** — maximum quality on high-resolution sources.\n- **Starlight Mini** — diffusion restoration for archival footage.\n- **Starlight Sharp** — fast restoration with sharper detail.\n- **Starlight Fast 2** — the fastest, cheapest diffusion upscaler.\n\nVideos are limited to 5 minutes. `target_fps` enables Apollo frame\ninterpolation only when it differs from the source FPS."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "UpscaleVideoGenerativeInput": {
+        "type": "object",
+        "properties": {
+          "upscale_factor": {
+            "type": "number",
+            "minimum": 1,
+            "description": "Factor to upscale the video by (e.g. 2.0 doubles width and height)",
+            "maximum": 4,
+            "default": 2,
+            "title": "Upscale Factor"
+          },
+          "model": {
+            "enum": [
+              "Starlight Precise 2.6",
+              "Starlight HQ",
+              "Starlight Mini",
+              "Starlight Sharp",
+              "Starlight Fast 2"
+            ],
+            "type": "string",
+            "description": "Generative diffusion enhancement model. Starlight Precise 2.6 adds realism to AI-generated video; Starlight HQ maximizes quality on high-resolution sources; Starlight Mini restores archival footage; Starlight Sharp is fast restoration with sharper detail; Starlight Fast 2 is the fastest, cheapest diffusion upscaler.",
+            "title": "Model",
+            "default": "Starlight Precise 2.6"
+          },
+          "video_url": {
+            "type": "string",
+            "description": "URL of the video to upscale",
+            "examples": [
+              "https://v3.fal.media/files/kangaroo/y5-1YTGpun17eSeggZMzX_video-1733468228.mp4"
+            ],
+            "title": "Video Url"
+          },
+          "target_fps": {
+            "description": "Target FPS for the output. Frame interpolation is enabled only when this differs from the source FPS.",
+            "title": "Target Fps",
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 16,
+                "maximum": 60
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "softness": {
+            "description": "How much softening the model applies to the output, from 1 (sharpest) to 5 (softest). Starlight Precise 2.6 only; leave unset for Topaz's default.",
+            "title": "Softness",
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 5
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "H264_output": {
+            "type": "boolean",
+            "description": "Whether to use H264 codec for output video. Default is H265.",
+            "title": "H264 Output",
+            "default": false
+          }
+        },
+        "x-fal-order-properties": [
+          "video_url",
+          "model",
+          "upscale_factor",
+          "target_fps",
+          "softness",
+          "H264_output"
+        ],
+        "title": "VideoGenerativeUpscaleRequest",
+        "required": [
+          "video_url"
+        ]
+      },
+      "UpscaleVideoGenerativeOutput": {
+        "type": "object",
+        "properties": {
+          "video": {
+            "description": "The upscaled video file",
+            "$ref": "#/components/schemas/File",
+            "examples": [
+              {
+                "url": "https://v3.fal.media/files/penguin/ztj_LB4gQlW6HIfVs8zX4_upscaled.mp4"
+              }
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "title": "VideoUpscaleOutput",
+        "required": [
+          "video"
+        ]
+      },
+      "File": {
+        "type": "object",
+        "properties": {
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "title": "File",
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/topaz/upscale/video/generative/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/topaz/upscale/video/generative/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/topaz/upscale/video/generative": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpscaleVideoGenerativeInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/topaz/upscale/video/generative/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpscaleVideoGenerativeOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

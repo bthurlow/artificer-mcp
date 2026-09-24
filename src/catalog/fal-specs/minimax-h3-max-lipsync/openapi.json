@@ -1,0 +1,386 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for minimax/h3-max/lip-sync/image-to-video",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the minimax/h3-max/lip-sync/image-to-video queue.",
+    "x-fal-metadata": {
+      "endpointId": "minimax/h3-max/lip-sync/image-to-video",
+      "category": "image-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aaac3b8/AFRNL61Lm2CQntBtg88Hv.jpg",
+      "playgroundUrl": "https://fal.ai/models/minimax/h3-max/lip-sync/image-to-video",
+      "documentationUrl": "https://fal.ai/models/minimax/h3-max/lip-sync/image-to-video/api",
+      "about": "Lip Sync Image To Video"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "H3MaxLipSyncImageToVideoInput": {
+        "properties": {
+          "audio_url": {
+            "type": "string",
+            "description": "Audio to synchronize the mouth movements to, at least 5 seconds long. Audio over 14.8 seconds is automatically clipped to its first 14.8 seconds. The output video matches the clipped audio duration in a single generation.",
+            "title": "Audio Url"
+          },
+          "image_url": {
+            "type": "string",
+            "description": "Image to animate. The aspect ratio must be between 0.4 and 2.5.",
+            "title": "Image Url"
+          },
+          "enable_transcription": {
+            "default": false,
+            "type": "boolean",
+            "description": "Transcribe the supplied audio to guide lip synchronization. When disabled, synchronize to the audio without a transcript.",
+            "title": "Enable Transcription"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "maximum": 2147483647,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "Random seed; selected randomly if omitted."
+          },
+          "resolution": {
+            "enum": [
+              "480P",
+              "768P",
+              "1080P",
+              "2K"
+            ],
+            "default": "768P",
+            "type": "string",
+            "description": "Output resolution. Uses the supported aspect ratio nearest the image.",
+            "title": "Resolution"
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "type": "boolean",
+            "description": "Enable content safety checks.",
+            "title": "Enable Safety Checker"
+          }
+        },
+        "title": "LipSyncImageInput",
+        "type": "object",
+        "x-fal-order-properties": [
+          "image_url",
+          "audio_url",
+          "resolution",
+          "enable_transcription",
+          "seed",
+          "enable_safety_checker"
+        ],
+        "required": [
+          "image_url",
+          "audio_url"
+        ]
+      },
+      "H3MaxLipSyncImageToVideoOutput": {
+        "properties": {
+          "seed": {
+            "type": "integer",
+            "description": "Random seed used for generation.",
+            "title": "Seed"
+          },
+          "timings": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timings",
+            "description": "Timing breakdown in seconds. 'inference' is the DiT denoising time on the GPU backend, summed over every window this request generated. Null on routes that do not report backend timings."
+          },
+          "duration": {
+            "type": "number",
+            "description": "Output duration in seconds.",
+            "title": "Duration"
+          },
+          "video": {
+            "description": "Lip-synced video with the supplied soundtrack.",
+            "$ref": "#/components/schemas/File"
+          }
+        },
+        "title": "LipSyncOutput",
+        "type": "object",
+        "x-fal-order-properties": [
+          "video",
+          "seed",
+          "duration",
+          "timings"
+        ],
+        "required": [
+          "video",
+          "seed",
+          "duration"
+        ]
+      },
+      "File": {
+        "properties": {
+          "content_type": {
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type"
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "title": "File Size"
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name"
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          }
+        },
+        "title": "File",
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/minimax/h3-max/lip-sync/image-to-video/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/minimax/h3-max/lip-sync/image-to-video/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/minimax/h3-max/lip-sync/image-to-video": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/H3MaxLipSyncImageToVideoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/minimax/h3-max/lip-sync/image-to-video/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/H3MaxLipSyncImageToVideoOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

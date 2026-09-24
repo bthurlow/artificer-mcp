@@ -1,0 +1,578 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/wan-vace-apps/video-edit",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/wan-vace-apps/video-edit queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/wan-vace-apps/video-edit",
+      "category": "video-to-video",
+      "thumbnailUrl": "https://v3.fal.media/files/elephant/STesgR1tPPvf0dornjZou_377f4dd48d49425198c3396e86328a8b.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/wan-vace-apps/video-edit",
+      "documentationUrl": "https://fal.ai/models/fal-ai/wan-vace-apps/video-edit/api",
+      "about": "Edits a video using plain language and the Wan 2.2 VACE Fun model."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "WanVaceAppsVideoEditInput": {
+        "type": "object",
+        "required": [
+          "prompt",
+          "video_url"
+        ],
+        "title": "WanVACEVideoEditRequest",
+        "properties": {
+          "acceleration": {
+            "examples": [
+              "regular"
+            ],
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "low",
+                  "regular"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Acceleration to use for inference. Options are 'none' or 'regular'. Accelerated inference will very slightly affect output, but will be significantly faster.",
+            "default": "regular",
+            "title": "Acceleration"
+          },
+          "enable_auto_downsample": {
+            "type": "boolean",
+            "description": "Whether to enable automatic downsampling. If your video has a high frame rate or is long, enabling longer sequences to be generated. The video will be interpolated back to the original frame rate after generation.",
+            "default": true,
+            "title": "Enable Auto Downsampling"
+          },
+          "aspect_ratio": {
+            "examples": [
+              "auto"
+            ],
+            "type": "string",
+            "description": "Aspect ratio of the edited video.",
+            "enum": [
+              "auto",
+              "16:9",
+              "9:16",
+              "1:1"
+            ],
+            "default": "auto",
+            "title": "Aspect Ratio"
+          },
+          "resolution": {
+            "examples": [
+              "auto"
+            ],
+            "type": "string",
+            "description": "Resolution of the edited video.",
+            "title": "Resolution",
+            "enum": [
+              "auto",
+              "240p",
+              "360p",
+              "480p",
+              "580p",
+              "720p"
+            ],
+            "default": "auto"
+          },
+          "video_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/vace-video-edit-input.mp4"
+            ],
+            "type": "string",
+            "description": "URL of the input video.",
+            "title": "Video URL"
+          },
+          "enable_safety_checker": {
+            "type": "boolean",
+            "description": "Whether to enable the safety checker.",
+            "default": true,
+            "title": "Enable Safety Checker"
+          },
+          "image_urls": {
+            "type": "array",
+            "description": "URLs of the input images to use as a reference for the generation.",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "title": "Image URLs"
+          },
+          "return_frames_zip": {
+            "type": "boolean",
+            "description": "Whether to include a ZIP archive containing all generated frames.",
+            "default": false,
+            "title": "Return Frames ZIP"
+          },
+          "prompt": {
+            "examples": [
+              "replace him with a large anthropomorphic polar bear"
+            ],
+            "type": "string",
+            "description": "Prompt to edit the video.",
+            "title": "Prompt"
+          },
+          "auto_downsample_min_fps": {
+            "minimum": 1,
+            "type": "number",
+            "maximum": 60,
+            "description": "The minimum frames per second to downsample the video to.",
+            "default": 15,
+            "title": "Auto Downsample Min FPS"
+          },
+          "video_type": {
+            "examples": [
+              "auto"
+            ],
+            "type": "string",
+            "description": "The type of video you're editing. Use 'general' for most videos, and 'human' for videos emphasizing human subjects and motions. The default value 'auto' means the model will guess based on the first frame of the video.",
+            "enum": [
+              "auto",
+              "general",
+              "human"
+            ],
+            "default": "auto",
+            "title": "Video Type"
+          }
+        },
+        "x-fal-order-properties": [
+          "prompt",
+          "video_url",
+          "video_type",
+          "image_urls",
+          "resolution",
+          "acceleration",
+          "enable_auto_downsample",
+          "aspect_ratio",
+          "auto_downsample_min_fps",
+          "enable_safety_checker",
+          "return_frames_zip"
+        ]
+      },
+      "WanVaceAppsVideoEditOutput": {
+        "type": "object",
+        "required": [
+          "video"
+        ],
+        "title": "WanVACEVideoEditResponse",
+        "properties": {
+          "video": {
+            "examples": [
+              {
+                "url": "https://storage.googleapis.com/falserverless/example_outputs/vace-video-edit-output.mp4"
+              }
+            ],
+            "description": "The edited video.",
+            "$ref": "#/components/schemas/VideoFile"
+          },
+          "frames_zip": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/File"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ZIP archive of generated frames if requested."
+          }
+        },
+        "x-fal-order-properties": [
+          "video",
+          "frames_zip"
+        ]
+      },
+      "VideoFile": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "VideoFile",
+        "properties": {
+          "duration": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The duration of the video",
+            "title": "Duration"
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The width of the video",
+            "title": "Width"
+          },
+          "num_frames": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The number of frames in the video",
+            "title": "Num Frames"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The height of the video",
+            "title": "Height"
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size"
+          },
+          "fps": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The FPS of the video",
+            "title": "Fps"
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height",
+          "fps",
+          "duration",
+          "num_frames"
+        ]
+      },
+      "File": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "File",
+        "properties": {
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type"
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size"
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/wan-vace-apps/video-edit/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/wan-vace-apps/video-edit/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/wan-vace-apps/video-edit": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WanVaceAppsVideoEditInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/wan-vace-apps/video-edit/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WanVaceAppsVideoEditOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

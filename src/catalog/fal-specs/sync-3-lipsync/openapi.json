@@ -1,0 +1,592 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/sync-lipsync/v3",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/sync-lipsync/v3 queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/sync-lipsync/v3",
+      "category": "video-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a9460ff/hUjOvIu-6_JSEZr9SeFN5_8f82f538ee3246f3942ba081b0e28d3c.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/sync-lipsync/v3",
+      "documentationUrl": "https://fal.ai/models/fal-ai/sync-lipsync/v3/api",
+      "about": "Lipsync Request V3"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "SyncLipsyncV3Input": {
+        "type": "object",
+        "properties": {
+          "audio_url": {
+            "type": "string",
+            "title": "Audio Url",
+            "examples": [
+              "https://fal.media/files/lion/vyFWygmZsIZlUO4s0nr2n.wav"
+            ],
+            "description": "URL of the input audio"
+          },
+          "options": {
+            "description": "Additional Sync.so generation options. If options.sync_mode is set, it overrides the top-level sync_mode field.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Sync3GenerationOptions"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sync_mode": {
+            "type": "string",
+            "enum": [
+              "cut_off",
+              "loop",
+              "bounce",
+              "silence",
+              "remap"
+            ],
+            "default": "cut_off",
+            "description": "Lipsync mode when audio and video durations are out of sync.",
+            "title": "Sync Mode"
+          },
+          "video_url": {
+            "type": "string",
+            "title": "Video Url",
+            "examples": [
+              "https://v3.fal.media/files/tiger/IugLCDJRIoGqvqTa-EJTr_3wg74vCqyNuQ-IiBd77MM_output.mp4"
+            ],
+            "description": "URL of the input video"
+          }
+        },
+        "title": "Sync3Input",
+        "x-fal-order-properties": [
+          "video_url",
+          "audio_url",
+          "sync_mode",
+          "options"
+        ],
+        "required": [
+          "video_url",
+          "audio_url"
+        ]
+      },
+      "SyncLipsyncV3Output": {
+        "type": "object",
+        "properties": {
+          "video": {
+            "examples": [
+              {
+                "url": "https://v3b.fal.media/files/b/0a93c312/TqKMiLtCcTKWSeAWXJRD0_output.mp4"
+              }
+            ],
+            "description": "The generated video",
+            "$ref": "#/components/schemas/File"
+          }
+        },
+        "title": "Sync3Output",
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "required": [
+          "video"
+        ]
+      },
+      "Sync3GenerationOptions": {
+        "type": "object",
+        "properties": {
+          "temperature": {
+            "title": "Temperature",
+            "description": "Controls how expressive lipsync can be; 0 is least expressive, 1 is most expressive. Sync.so handles this natively for sync-3, so this option is ignored by sync-3.",
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number",
+                "maximum": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "occlusion_detection_enabled": {
+            "title": "Occlusion Detection Enabled",
+            "description": "Whether to detect occlusion during generation. Sync.so handles this automatically for sync-3, so this option is ignored by sync-3.",
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "model_mode": {
+            "title": "Model Mode",
+            "description": "Edit region for the model. This is a Sync.so option primarily used by react-1.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "lips",
+                  "face",
+                  "head",
+                  "lipsync",
+                  "emotion",
+                  "talking_head"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "prompt": {
+            "title": "Prompt",
+            "description": "Emotion prompt for generation. This is a Sync.so option primarily used by react-1.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "happy",
+                  "sad",
+                  "angry",
+                  "disgusted",
+                  "surprised",
+                  "neutral"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "active_speaker_detection": {
+            "description": "Active speaker detection configuration for videos with multiple people.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Sync3ActiveSpeakerDetection"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sync_mode": {
+            "title": "Sync Mode",
+            "description": "Defines how to handle duration mismatches between video and audio inputs. Overrides the top-level sync_mode when provided.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "cut_off",
+                  "loop",
+                  "bounce",
+                  "silence",
+                  "remap"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "Sync3GenerationOptions",
+        "x-fal-order-properties": [
+          "sync_mode",
+          "model_mode",
+          "prompt",
+          "temperature",
+          "active_speaker_detection",
+          "occlusion_detection_enabled"
+        ]
+      },
+      "File": {
+        "type": "object",
+        "properties": {
+          "content_type": {
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          }
+        },
+        "title": "File",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "required": [
+          "url"
+        ]
+      },
+      "Sync3ActiveSpeakerDetection": {
+        "type": "object",
+        "properties": {
+          "auto_detect": {
+            "title": "Auto Detect",
+            "description": "Whether to automatically detect and apply generation to the active speaker.",
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "v3": {
+            "title": "V3",
+            "description": "Whether to use Sync.so's active speaker detection v3.",
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bounding_boxes_url": {
+            "title": "Bounding Boxes Url",
+            "description": "URL to a JSON file containing per-frame bounding boxes.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "use_v2": {
+            "title": "Use V2",
+            "description": "Deprecated Sync.so option for active speaker detection v2.",
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "coordinates": {
+            "title": "Coordinates",
+            "description": "Reference point [x, y] on the speaker's face in frame_number.",
+            "anyOf": [
+              {
+                "minItems": 2,
+                "type": "array",
+                "maxItems": 2,
+                "items": {
+                  "type": "integer"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "frame_number": {
+            "title": "Frame Number",
+            "description": "Frame index for manual speaker selection coordinates.",
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "face_image": {
+            "title": "Face Image",
+            "description": "Base64 encoded face image for manual speaker selection.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "bounding_boxes": {
+            "title": "Bounding Boxes",
+            "description": "Per-frame bounding boxes [x1, y1, x2, y2] for the detected face.",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "integer"
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "Sync3ActiveSpeakerDetection",
+        "x-fal-order-properties": [
+          "auto_detect",
+          "v3",
+          "use_v2",
+          "frame_number",
+          "coordinates",
+          "bounding_boxes",
+          "bounding_boxes_url",
+          "face_image"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/sync-lipsync/v3/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/sync-lipsync/v3/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/sync-lipsync/v3": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncLipsyncV3Input"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/sync-lipsync/v3/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncLipsyncV3Output"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

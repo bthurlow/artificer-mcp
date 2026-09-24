@@ -1,0 +1,526 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/ltx-2.3-quality/audio-to-video",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/ltx-2.3-quality/audio-to-video queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/ltx-2.3-quality/audio-to-video",
+      "category": "audio-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a9c98bb/iw0BzMm847Vjzh0MWLarh_25gBsW6V.png",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/ltx-2.3-quality/audio-to-video",
+      "documentationUrl": "https://fal.ai/models/fal-ai/ltx-2.3-quality/audio-to-video/api",
+      "about": "Generate an audio-driven video from audio and optional first frame."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "Ltx23QualityAudioToVideoInput": {
+        "required": [
+          "prompt",
+          "audio_url"
+        ],
+        "properties": {
+          "seed": {
+            "title": "Seed",
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "guidance_scale": {
+            "minimum": 1,
+            "description": "Classifier-free guidance scale. The default is tuned for fast, high-quality generation.",
+            "type": "number",
+            "default": 1,
+            "maximum": 20,
+            "title": "Guidance Scale"
+          },
+          "generate_audio": {
+            "description": "Whether to include audio in the returned video. When disabled, the final MP4 is returned without an audio track.",
+            "type": "boolean",
+            "default": true,
+            "title": "Generate Audio"
+          },
+          "num_inference_steps": {
+            "minimum": 8,
+            "description": "Number of inference steps. Defaults to 15 and can be increased up to 30.",
+            "type": "integer",
+            "default": 15,
+            "maximum": 30,
+            "title": "Number of Inference Steps"
+          },
+          "frames_per_second": {
+            "minimum": 1,
+            "description": "Frames per second of the generated video.",
+            "type": "number",
+            "default": 24,
+            "maximum": 60,
+            "title": "FPS"
+          },
+          "video_write_mode": {
+            "description": "The write mode of the generated video.",
+            "type": "string",
+            "enum": [
+              "fast",
+              "balanced",
+              "small"
+            ],
+            "default": "balanced",
+            "title": "Video Write Mode"
+          },
+          "image_url": {
+            "title": "Image URL",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/ltx-2-a2v-input-image.png"
+            ],
+            "description": "Optional URL of an image to use as the first frame. When omitted, generation runs from text and audio only.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "num_frames": {
+            "minimum": 9,
+            "description": "The number of frames to generate.",
+            "type": "integer",
+            "default": 121,
+            "maximum": 481,
+            "title": "Number of Frames"
+          },
+          "enable_safety_checker": {
+            "description": "Whether to enable the safety checker.",
+            "type": "boolean",
+            "default": true,
+            "title": "Enable Safety Checker"
+          },
+          "enable_prompt_expansion": {
+            "description": "Whether to enable prompt expansion.",
+            "type": "boolean",
+            "default": true,
+            "title": "Enable Prompt Expansion"
+          },
+          "sync_mode": {
+            "description": "If True, the media is returned as a data URI inline in the response. Useful for short-lived requests and tests.",
+            "type": "boolean",
+            "default": false,
+            "title": "Sync Mode"
+          },
+          "match_audio_length": {
+            "description": "When enabled, derives the number of frames from the audio duration and frames_per_second. When disabled, uses num_frames.",
+            "type": "boolean",
+            "default": true,
+            "title": "Match Audio Length"
+          },
+          "video_quality": {
+            "description": "The quality preset of the generated video.",
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "maximum"
+            ],
+            "default": "high",
+            "title": "Video Quality"
+          },
+          "image_strength": {
+            "minimum": 0,
+            "description": "Conditioning strength for the optional first frame. 1.0 keeps the image more strictly; lower values give the model more freedom.",
+            "type": "number",
+            "default": 0.7,
+            "maximum": 1,
+            "title": "Image Strength"
+          },
+          "resolution": {
+            "title": "Resolution",
+            "description": "Final output size. 'auto' matches the input image aspect ratio when image_url is provided; otherwise it uses a landscape fallback.",
+            "default": "auto",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageSize"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "auto",
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9"
+                ]
+              }
+            ]
+          },
+          "negative_prompt": {
+            "description": "The negative prompt to steer generation away from.",
+            "type": "string",
+            "default": "color distortion, overexposure, static, blurry details, subtitles, style, artwork, painting, frame, still, dim overall tone, worst quality, low quality, JPEG compression artifacts, ugly, mutilated, extra fingers, poorly drawn hands, poorly drawn face, deformed, disfigured, malformed limbs, fused fingers, motionless frame, cluttered background, three legs, crowded background, walking backwards",
+            "title": "Negative Prompt"
+          },
+          "prompt": {
+            "examples": [
+              "A person facing the camera sings with expressive natural motion, cinematic portrait lighting, realistic facial performance."
+            ],
+            "description": "The prompt to guide the audio-driven video generation.",
+            "type": "string",
+            "title": "Prompt"
+          },
+          "audio_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/ltx-2-a2v-input-audio.mp3"
+            ],
+            "description": "The URL of the audio track that drives generation.",
+            "type": "string",
+            "title": "Audio URL"
+          }
+        },
+        "x-fal-order-properties": [
+          "prompt",
+          "audio_url",
+          "image_url",
+          "match_audio_length",
+          "num_frames",
+          "resolution",
+          "frames_per_second",
+          "num_inference_steps",
+          "guidance_scale",
+          "generate_audio",
+          "image_strength",
+          "negative_prompt",
+          "seed",
+          "enable_prompt_expansion",
+          "enable_safety_checker",
+          "video_quality",
+          "video_write_mode",
+          "sync_mode"
+        ],
+        "description": "Audio-to-video generation driven by an uploaded audio track.",
+        "type": "object",
+        "title": "LTX23QualityAudioToVideoInput"
+      },
+      "Ltx23QualityAudioToVideoOutput": {
+        "required": [
+          "video",
+          "seed",
+          "prompt"
+        ],
+        "properties": {
+          "seed": {
+            "description": "The seed actually used for generation.",
+            "type": "integer",
+            "title": "Seed"
+          },
+          "video": {
+            "description": "The generated video.",
+            "$ref": "#/components/schemas/File"
+          },
+          "prompt": {
+            "description": "The prompt used for generation (after any expansion).",
+            "type": "string",
+            "title": "Prompt"
+          }
+        },
+        "x-fal-order-properties": [
+          "video",
+          "seed",
+          "prompt"
+        ],
+        "description": "Standard output for every endpoint on this app.",
+        "type": "object",
+        "title": "LTX23QualityOutput"
+      },
+      "ImageSize": {
+        "x-fal-order-properties": [
+          "width",
+          "height"
+        ],
+        "properties": {
+          "height": {
+            "exclusiveMinimum": 0,
+            "description": "The height of the generated image.",
+            "type": "integer",
+            "default": 512,
+            "maximum": 14142,
+            "title": "Height"
+          },
+          "width": {
+            "exclusiveMinimum": 0,
+            "description": "The width of the generated image.",
+            "type": "integer",
+            "default": 512,
+            "maximum": 14142,
+            "title": "Width"
+          }
+        },
+        "type": "object",
+        "title": "ImageSize"
+      },
+      "File": {
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "file_size": {
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "content_type": {
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object",
+        "title": "File"
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/ltx-2.3-quality/audio-to-video/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/ltx-2.3-quality/audio-to-video/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/ltx-2.3-quality/audio-to-video": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Ltx23QualityAudioToVideoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/ltx-2.3-quality/audio-to-video/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ltx23QualityAudioToVideoOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

@@ -1,0 +1,383 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/infinitalk/video-to-video",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/infinitalk/video-to-video queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/infinitalk/video-to-video",
+      "category": "video-to-video",
+      "thumbnailUrl": "https://v3.fal.media/files/lion/CKSKBDtMz0kao3Ege3oAj_0b61adf1742146f2b743efc7921003f3.jpg",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/infinitalk/video-to-video",
+      "documentationUrl": "https://fal.ai/models/fal-ai/infinitalk/video-to-video/api",
+      "about": "MultiTalk model generates a talking avatar video from an image and audio file.\nThe avatar lip-syncs to the provided audio with natural facial expressions."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "InfinitalkVideoToVideoInput": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "video_url",
+          "audio_url",
+          "prompt",
+          "num_frames",
+          "resolution",
+          "seed",
+          "acceleration"
+        ],
+        "properties": {
+          "seed": {
+            "type": "integer",
+            "default": 42,
+            "maximum": 4294967295,
+            "title": "Seed",
+            "minimum": 0,
+            "description": "Random seed for reproducibility. If None, a random seed is chosen."
+          },
+          "resolution": {
+            "enum": [
+              "480p",
+              "720p"
+            ],
+            "type": "string",
+            "default": "480p",
+            "title": "Resolution",
+            "description": "Resolution of the video to generate. Must be either 480p or 720p."
+          },
+          "video_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/model_tests/video_models/ref_video.mp4"
+            ],
+            "type": "string",
+            "title": "Video Url",
+            "description": "URL of the input video."
+          },
+          "prompt": {
+            "examples": [
+              "A woman with colorful hair talking on a podcast."
+            ],
+            "type": "string",
+            "title": "Prompt",
+            "description": "The text prompt to guide video generation."
+          },
+          "num_frames": {
+            "type": "integer",
+            "default": 145,
+            "maximum": 241,
+            "title": "Number of Frames",
+            "minimum": 41,
+            "description": "Number of frames to generate. Must be between 81 to 129 (inclusive). If the number of frames is greater than 81, the video will be generated with 1.25x more billing units."
+          },
+          "acceleration": {
+            "enum": [
+              "none",
+              "regular",
+              "high"
+            ],
+            "type": "string",
+            "default": "regular",
+            "title": "Acceleration",
+            "description": "The acceleration level to use for generation."
+          },
+          "audio_url": {
+            "examples": [
+              "https://v3.fal.media/files/penguin/PtiCYda53E9Dav25QmQYI_output.mp3"
+            ],
+            "type": "string",
+            "title": "Audio URL",
+            "description": "The URL of the audio file."
+          }
+        },
+        "title": "InfiniTalkVid2VidAudioRequest",
+        "required": [
+          "video_url",
+          "audio_url",
+          "prompt"
+        ]
+      },
+      "InfinitalkVideoToVideoOutput": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "video",
+          "seed"
+        ],
+        "properties": {
+          "video": {
+            "examples": [
+              {
+                "url": "https://storage.googleapis.com/falserverless/model_tests/video_models/mk7Ar5IvTtyNjWLRMb-re_dbe605004b664258b38528615afd7e0f.mp4"
+              }
+            ],
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video file."
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed",
+            "description": "The seed used for generation."
+          }
+        },
+        "title": "InfinitalkVid2VidResponse",
+        "required": [
+          "video",
+          "seed"
+        ]
+      },
+      "File": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "properties": {
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "File",
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/fal-ai/infinitalk/video-to-video/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/infinitalk/video-to-video/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/infinitalk/video-to-video": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InfinitalkVideoToVideoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fal-ai/infinitalk/video-to-video/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InfinitalkVideoToVideoOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

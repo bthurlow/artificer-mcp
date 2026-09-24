@@ -1,0 +1,348 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for veed/video-background-removal",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the veed/video-background-removal queue.",
+    "x-fal-metadata": {
+      "endpointId": "veed/video-background-removal",
+      "category": "video-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0a8493a9/Oi0ou1tpONWDl5MQg1Ior_04bb265985a24a558bc3adae79407610.jpg",
+      "playgroundUrl": "https://fal.ai/models/veed/video-background-removal",
+      "documentationUrl": "https://fal.ai/models/veed/video-background-removal/api",
+      "about": "Infer"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "VideoBackgroundRemovalInput": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "video_url",
+          "output_codec",
+          "refine_foreground_edges",
+          "subject_is_person"
+        ],
+        "properties": {
+          "output_codec": {
+            "type": "string",
+            "enum": [
+              "vp9",
+              "h264"
+            ],
+            "default": "vp9",
+            "title": "Output Codec",
+            "description": "Single VP9 video with alpha channel or two videos (rgb and alpha) in H264 format. H264 is recommended for better RGB quality."
+          },
+          "video_url": {
+            "format": "uri",
+            "maxLength": 2083,
+            "examples": [
+              "https://v3b.fal.media/files/b/0a847700/NYnvFeP13ehgSgqMDV_PL_stock.mp4"
+            ],
+            "title": "Video Url",
+            "type": "string",
+            "minLength": 1
+          },
+          "refine_foreground_edges": {
+            "type": "boolean",
+            "default": true,
+            "title": "Refine Foreground Edges",
+            "description": "Improves the quality of the extracted object's edges."
+          },
+          "subject_is_person": {
+            "type": "boolean",
+            "default": true,
+            "title": "Subject Is Person",
+            "description": "Set to False if the subject is not a person."
+          }
+        },
+        "required": [
+          "video_url"
+        ],
+        "title": "GeneralRembgInput"
+      },
+      "VideoBackgroundRemovalOutput": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "properties": {
+          "video": {
+            "examples": [
+              [
+                {
+                  "content_type": "video/webm",
+                  "url": "https://v3b.fal.media/files/b/0a847713/C7g1UaT46yKhOPt6KRrgg_output.webm"
+                }
+              ]
+            ],
+            "type": "array",
+            "title": "Video",
+            "items": {
+              "$ref": "#/components/schemas/File"
+            }
+          }
+        },
+        "required": [
+          "video"
+        ],
+        "title": "GeneralRembgOutput"
+      },
+      "File": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "properties": {
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "File"
+      }
+    }
+  },
+  "paths": {
+    "/veed/video-background-removal/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/veed/video-background-removal/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/veed/video-background-removal": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VideoBackgroundRemovalInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/veed/video-background-removal/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoBackgroundRemovalOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

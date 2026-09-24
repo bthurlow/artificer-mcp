@@ -1,0 +1,488 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Queue OpenAPI for alibaba/wan-3.0/text-to-video",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the alibaba/wan-3.0/text-to-video queue.",
+    "x-fal-metadata": {
+      "endpointId": "alibaba/wan-3.0/text-to-video",
+      "category": "text-to-video",
+      "thumbnailUrl": "https://v3b.fal.media/files/b/0aa4e92e/GZJ8RhOR3CRLj5vpHI2ah.jpg",
+      "playgroundUrl": "https://fal.ai/models/alibaba/wan-3.0/text-to-video",
+      "documentationUrl": "https://fal.ai/models/alibaba/wan-3.0/text-to-video/api",
+      "about": "Generate a video from a text prompt with Wan 3.0."
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "IN_QUEUE",
+              "IN_PROGRESS",
+              "COMPLETED"
+            ]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": [
+          "status",
+          "request_id"
+        ]
+      },
+      "Wan30TextToVideoInput": {
+        "title": "Wan30TextToVideoInput",
+        "x-fal-order-properties": [
+          "prompt",
+          "resolution",
+          "aspect_ratio",
+          "duration",
+          "audio",
+          "enable_prompt_expansion",
+          "enable_thinking",
+          "seed",
+          "enable_safety_checker"
+        ],
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "A red panda walking through a bamboo forest at sunrise"
+            ],
+            "description": "Text prompt for the generated video.",
+            "maxLength": 20000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "enable_thinking": {
+            "title": "Enable Thinking",
+            "type": "boolean",
+            "default": false,
+            "description": "Enable enhanced reasoning before generation."
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "default": true,
+            "type": "boolean",
+            "description": "Enable content moderation for input and output. Disabling it requires account authorization; unauthorized requests are always checked."
+          },
+          "audio": {
+            "title": "Audio",
+            "type": "boolean",
+            "default": true,
+            "description": "Include generated audio."
+          },
+          "aspect_ratio": {
+            "title": "Aspect Ratio",
+            "enum": [
+              "adaptive",
+              "16:9",
+              "4:3",
+              "1:1",
+              "3:4",
+              "9:16"
+            ],
+            "type": "string",
+            "default": "adaptive",
+            "description": "Output aspect ratio, or adaptive selection."
+          },
+          "duration": {
+            "anyOf": [
+              {
+                "maximum": 30,
+                "type": "integer",
+                "minimum": 2
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration",
+            "default": 5,
+            "description": "Output duration in seconds. Set to null for smart duration, which lets the model pick a length from the prompt and reference media."
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "maximum": 2147483647,
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "resolution": {
+            "title": "Resolution",
+            "enum": [
+              "480p",
+              "720p",
+              "1080p"
+            ],
+            "type": "string",
+            "default": "1080p",
+            "description": "Output video resolution tier."
+          },
+          "enable_prompt_expansion": {
+            "title": "Enable Prompt Expansion",
+            "default": true,
+            "type": "boolean",
+            "description": "Enable intelligent prompt rewriting. Disabling it can save roughly 20-60 seconds of latency but is likely to degrade generation quality."
+          }
+        },
+        "required": [
+          "prompt"
+        ]
+      },
+      "Wan30TextToVideoOutput": {
+        "title": "Wan30Output",
+        "x-fal-order-properties": [
+          "video",
+          "seed",
+          "duration",
+          "actual_prompt"
+        ],
+        "type": "object",
+        "properties": {
+          "duration": {
+            "title": "Duration",
+            "type": "number",
+            "description": "Generated video duration in seconds."
+          },
+          "actual_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Prompt"
+          },
+          "video": {
+            "description": "The generated video file.",
+            "$ref": "#/components/schemas/VideoFile"
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "integer",
+            "description": "The seed used for generation."
+          }
+        },
+        "required": [
+          "video",
+          "seed",
+          "duration"
+        ]
+      },
+      "VideoFile": {
+        "title": "VideoFile",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height",
+          "fps",
+          "duration",
+          "num_frames"
+        ],
+        "type": "object",
+        "properties": {
+          "num_frames": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Num Frames",
+            "description": "The number of frames in the video"
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size"
+          },
+          "fps": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fps",
+            "description": "The FPS of the video"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "The height of the video"
+          },
+          "duration": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration",
+            "description": "The duration of the video"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "description": "The width of the video"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/alibaba/wan-3.0/text-to-video/requests/{request_id}/status": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          },
+          {
+            "name": "logs",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "description": "Whether to include logs (`1`) in the response or not (`0`)."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alibaba/wan-3.0/text-to-video/requests/{request_id}/cancel": {
+      "put": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The request was cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Whether the request was cancelled successfully."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alibaba/wan-3.0/text-to-video": {
+      "post": {
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Wan30TextToVideoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QueueStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/alibaba/wan-3.0/text-to-video/requests/{request_id}": {
+      "get": {
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Request ID"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result of the request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Wan30TextToVideoOutput"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

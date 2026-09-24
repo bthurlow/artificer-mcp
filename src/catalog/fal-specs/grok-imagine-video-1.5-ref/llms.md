@@ -1,0 +1,212 @@
+# Grok Imagine Video 1.5 Reference to Video
+
+> Generate videos from images and audio references using xAI's Grok Imagine 1.5 Video model.
+
+
+
+## Overview
+
+- **Endpoint**: `https://fal.run/xai/grok-imagine-video/v1.5/reference-to-video`
+- **Model ID**: `xai/grok-imagine-video/v1.5/reference-to-video`
+- **Category**: image-to-video
+- **Kind**: inference
+**Tags**: stylized, transform, lipsync
+
+
+
+## Pricing
+
+Priced per second of output video, by resolution: **480p** at **$0.08**/sec, **720p** at **$0.14**/sec. A 5-second 480p clip costs **$0.40**; 720p costs **$0.70**. Cost scales linearly with duration. Each reference image adds **$0.01** (1–7 supported). A reference audio clip, if provided, is included
+
+For more details, see [fal.ai pricing](https://fal.ai/pricing).
+
+## API Information
+
+This model can be used via our HTTP API or more conveniently via our client libraries.
+See the input and output schema below, as well as the usage examples.
+
+
+### Input Schema
+
+The API accepts the following input parameters:
+
+
+- **`prompt`** (`string`, _required_):
+  Text prompt describing the video. Tag references as <IMAGE_0>, <IMAGE_1>, etc.
+  - Examples: "The person from <IMAGE_0> walks through a rainy neon-lit street."
+
+- **`reference_image_urls`** (`list<string>`, _required_):
+  One or more reference image URLs to guide the video generation as style and content references. Reference in prompt as <IMAGE_0>, <IMAGE_1>, etc. Maximum 7 images.
+  - Array of string
+  - Examples: ["https://v3b.fal.media/files/b/0a8b90e0/BFLE9VDlZqsryU-UA3BoD_image_004.png"]
+
+- **`duration`** (`integer`, _optional_):
+  Video duration in seconds. Default value: `8`
+  - Default: `8`
+  - Range: `1` to `15`
+
+- **`resolution`** (`ResolutionEnum`, _optional_):
+  Resolution of the output video. Default value: `"480p"`
+  - Default: `"480p"`
+  - Options: `"480p"`, `"720p"`
+
+- **`aspect_ratio`** (`AspectRatioEnum`, _optional_):
+  Aspect ratio of the generated video. Default value: `"16:9"`
+  - Default: `"16:9"`
+  - Options: `"16:9"`, `"4:3"`, `"3:2"`, `"1:1"`, `"2:3"`, `"3:4"`, `"9:16"`
+
+
+
+**Required Parameters Example**:
+
+```json
+{
+  "prompt": "The person from <IMAGE_0> walks through a rainy neon-lit street.",
+  "reference_image_urls": [
+    "https://v3b.fal.media/files/b/0a8b90e0/BFLE9VDlZqsryU-UA3BoD_image_004.png"
+  ]
+}
+```
+
+**Full Example**:
+
+```json
+{
+  "prompt": "The person from <IMAGE_0> walks through a rainy neon-lit street.",
+  "reference_image_urls": [
+    "https://v3b.fal.media/files/b/0a8b90e0/BFLE9VDlZqsryU-UA3BoD_image_004.png"
+  ],
+  "duration": 8,
+  "resolution": "480p",
+  "aspect_ratio": "16:9"
+}
+```
+
+
+### Output Schema
+
+The API returns the following output format:
+
+- **`video`** (`VideoFile`, _required_):
+  The generated video.
+  - Examples: {"fps":24,"num_frames":192,"file_name":"r2v_output.mp4","width":1280,"duration":8,"content_type":"video/mp4","height":720,"url":"https://v3b.fal.media/files/b/0a8b90e4/r2v_output.mp4"}
+
+
+
+**Example Response**:
+
+```json
+{
+  "video": {
+    "fps": 24,
+    "num_frames": 192,
+    "file_name": "r2v_output.mp4",
+    "width": 1280,
+    "duration": 8,
+    "content_type": "video/mp4",
+    "height": 720,
+    "url": "https://v3b.fal.media/files/b/0a8b90e4/r2v_output.mp4"
+  }
+}
+```
+
+
+## Usage Examples
+
+### cURL
+
+```bash
+curl --request POST \
+  --url https://fal.run/xai/grok-imagine-video/v1.5/reference-to-video \
+  --header "Authorization: Key $FAL_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{
+     "prompt": "The person from <IMAGE_0> walks through a rainy neon-lit street.",
+     "reference_image_urls": [
+       "https://v3b.fal.media/files/b/0a8b90e0/BFLE9VDlZqsryU-UA3BoD_image_004.png"
+     ]
+   }'
+```
+
+### Python
+
+Ensure you have the Python client installed:
+
+```bash
+pip install fal-client
+```
+
+Then use the API client to make requests:
+
+```python
+import fal_client
+
+def on_queue_update(update):
+    if isinstance(update, fal_client.InProgress):
+        for log in update.logs:
+           print(log["message"])
+
+result = fal_client.subscribe(
+    "xai/grok-imagine-video/v1.5/reference-to-video",
+    arguments={
+        "prompt": "The person from <IMAGE_0> walks through a rainy neon-lit street.",
+        "reference_image_urls": ["https://v3b.fal.media/files/b/0a8b90e0/BFLE9VDlZqsryU-UA3BoD_image_004.png"]
+    },
+    with_logs=True,
+    on_queue_update=on_queue_update,
+)
+print(result)
+```
+
+### JavaScript
+
+Ensure you have the JavaScript client installed:
+
+```bash
+npm install --save @fal-ai/client
+```
+
+Then use the API client to make requests:
+
+```javascript
+import { fal } from "@fal-ai/client";
+
+const result = await fal.subscribe("xai/grok-imagine-video/v1.5/reference-to-video", {
+  input: {
+    prompt: "The person from <IMAGE_0> walks through a rainy neon-lit street.",
+    reference_image_urls: ["https://v3b.fal.media/files/b/0a8b90e0/BFLE9VDlZqsryU-UA3BoD_image_004.png"]
+  },
+  logs: true,
+  onQueueUpdate: (update) => {
+    if (update.status === "IN_PROGRESS") {
+      update.logs.map((log) => log.message).forEach(console.log);
+    }
+  },
+});
+console.log(result.data);
+console.log(result.requestId);
+```
+
+
+## Additional Resources
+
+### Documentation
+
+- [Model Playground](https://fal.ai/models/xai/grok-imagine-video/v1.5/reference-to-video)
+- [API Documentation](https://fal.ai/models/xai/grok-imagine-video/v1.5/reference-to-video/api)
+- [OpenAPI Schema](https://fal.ai/api/openapi/queue/openapi.json?endpoint_id=xai/grok-imagine-video/v1.5/reference-to-video)
+
+### fal.ai Platform
+
+- [Platform Documentation](https://fal.ai/docs/documentation)
+- [Python Client](https://fal.ai/docs/api-reference/client-libraries/python)
+- [JavaScript Client](https://fal.ai/docs/api-reference/client-libraries/javascript)
+
+### Other agent-readable surfaces
+
+This file covers one model. To find anything else:
+
+- [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
+- [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
+- [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`
