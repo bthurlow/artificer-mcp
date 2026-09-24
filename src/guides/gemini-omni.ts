@@ -93,6 +93,15 @@ Omni uses Google's **Interactions API**, not the \`generateVideos\` call Veo use
 
 **Veo is not deprecated.** Google has published no sunset date. "Replaces Veo" is strategic direction, not an API removal — keep using Veo where audio or resolution matter.
 
+## Newer routes (added 2026-09-24)
+Added in the 2026-09-24 fal catalog refresh. Model descriptions are fal's own; inputs come from each route's committed spec (\`src/catalog/fal-specs/<slug>/openapi.json\`). The sections above predate these routes and were not re-verified against them, so check a newer model's spec before assuming it matches.
+
+| Slug | Model (fal's description) | Inputs (**required**, then notable) |
+|------|----------------------------|--------------------------------------|
+| \`gemini-omni-flash-1.1-t2v\` | Gemini Omni Flash 1.1 is Google's multimodal video model. This endpoint generates video with synchronized native audio from a text prompt, grounded in Gemini… | **\`prompt\`**, \`aspect_ratio\`, \`duration\`, \`resolution\` |
+| \`gemini-omni-flash-1.1-i2v\` | Gemini Omni Flash 1.1 is Google's multimodal video model. This endpoint animates a still image into video with synchronized audio, extending a single frame i… | **\`prompt\`**, **\`image_url\`**, \`aspect_ratio\`, \`duration\`, \`end_image_url\`, \`resolution\` |
+| \`gemini-omni-flash-1.1-ref\` | Gemini Omni Flash 1.1 is Google's multimodal video model. This endpoint generates video from combined multimodal references, images, videos and text together… | **\`prompt\`**, \`duration\`, \`aspect_ratio\`, \`resolution\`, \`image_urls\` (+1 more) |
+
 ## Last verified
 2026-08-15 — **corrected**: an earlier revision of this guide claimed Omni output was silent. That was wrong. It came from reading \`ai.google.dev/gemini-api/docs/video\`, which is the **Veo** page, instead of \`/docs/omni\`. Native audio is confirmed against the Omni page and the Vertex model card. Capabilities, the unsupported-features list, Interactions-API usage, and the ~$0.10/s rate re-verified in the same pass. Duration/resolution ceilings are preview-era limits Google has said will lift; re-check before assuming 720p and 10s still bind.
 

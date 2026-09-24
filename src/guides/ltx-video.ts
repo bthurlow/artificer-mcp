@@ -102,6 +102,19 @@ LTX accepts standard scene + camera + style prompts. Open-weights variants respo
 ## Access routes
 See per-lineage tables above. Total: 31 routes spanning 5 lineages. (\`ltx-video-lora-i2v\` was dropped on 2026-08-15 — fal removed the endpoint and it now 404s.)
 
+## Newer routes (added 2026-09-24)
+Added in the 2026-09-24 fal catalog refresh. Model descriptions are fal's own; inputs come from each route's committed spec (\`src/catalog/fal-specs/<slug>/openapi.json\`). The sections above predate these routes and were not re-verified against them, so check a newer model's spec before assuming it matches.
+
+| Slug | Model (fal's description) | Inputs (**required**, then notable) |
+|------|----------------------------|--------------------------------------|
+| \`ltx-2.5-pro-t2v\` | LTX-2.5 is Lightricks' open-source audio-video model. This endpoint generates synchronized video and audio from a text prompt in a single pass, in a quality-… | **\`prompt\`**, \`aspect_ratio\`, \`duration\`, \`resolution\` (+3 more) |
+| \`ltx-2.5-pro-i2v\` | LTX-2.5 is Lightricks' open-source audio-video model. This endpoint animates a still image into video with synchronized audio in a single pass, in a quality-… | **\`prompt\`**, **\`image_url\`**, \`end_image_url\`, \`duration\`, \`aspect_ratio\`, \`resolution\` (+3 more) |
+| \`ltx-2.5-fast-t2v\` | LTX-2.5 is Lightricks' open-source audio-video model. This endpoint generates synchronized video and audio from a text prompt in a single pass, in a speed-op… | **\`prompt\`**, \`aspect_ratio\`, \`duration\`, \`resolution\` (+3 more) |
+| \`ltx-2.5-fast-i2v\` | LTX-2.5 is Lightricks' open-source audio-video model. This endpoint animates a still image into video with synchronized audio in a single pass, in a speed-op… | **\`prompt\`**, **\`image_url\`**, \`end_image_url\`, \`duration\`, \`aspect_ratio\`, \`resolution\` (+3 more) |
+| \`ltx-2.5-pro-a2v\` | LTX-2.5 is Lightricks' open-source audio-video model. This endpoint generates video timed to a supplied audio clip in a quality-optimized mode, for final vis… | **\`audio_url\`**, \`prompt\`, \`image_url\`, \`aspect_ratio\` (+1 more) |
+| \`ltx-2.5-fast-a2v\` | LTX-2.5 is Lightricks' open-source audio-video model. This endpoint generates video timed to a supplied audio clip in a speed-optimized mode — useful for mus… | **\`audio_url\`**, \`prompt\`, \`image_url\`, \`aspect_ratio\` (+1 more) |
+| \`ltx-2.3-quality-a2v\` | Generate high-quality video with audio from audio, text and images using LTX-2.3 | **\`prompt\`**, **\`audio_url\`**, \`image_url\`, \`sync_mode\`, \`resolution\` (+13 more) |
+
 ## Last verified
 2026-08-15 — pricing re-synced from fal for the LTX-2.3 closed tier and the legacy 13B distilled routes; \`ltx-video-lora-i2v\` retired. Lineage tables and prompt guidance are unchanged since the 2026-04-28 initial seed and were not re-verified in this pass.
 

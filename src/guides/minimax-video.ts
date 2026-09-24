@@ -52,6 +52,17 @@ Director variant: lead with camera direction, then subject. Example: "Slow dolly
 | \`minimax-video-01-i2v\` | \`fal-ai/minimax/video-01/image-to-video\` |
 | \`minimax-video-01-subject-ref-i2v\` | \`fal-ai/minimax/video-01-subject-reference\` |
 
+## Newer routes (added 2026-09-24)
+Added in the 2026-09-24 fal catalog refresh. Model descriptions are fal's own; inputs come from each route's committed spec (\`src/catalog/fal-specs/<slug>/openapi.json\`). The sections above predate these routes and were not re-verified against them, so check a newer model's spec before assuming it matches.
+
+| Slug | Model (fal's description) | Inputs (**required**, then notable) |
+|------|----------------------------|--------------------------------------|
+| \`minimax-h3-max-t2v\` | fal's H3 Max is a post-trained variant of MiniMax H3, tuned for stronger prompt adherence and better aesthetics while co-optimized with our custom inference… | **\`prompt\`**, **\`prompt_expansion_mode\`**, \`duration\`, \`aspect_ratio\`, \`sync_mode\`, \`resolution\` (+3 more) |
+| \`minimax-h3-max-i2v\` | fal's H3 Max is a post-trained variant of MiniMax H3, tuned for stronger prompt adherence and better aesthetics while co-optimized with our custom inference… | **\`prompt\`**, **\`prompt_expansion_mode\`**, \`duration\`, \`image_url\`, \`end_image_url\`, \`sync_mode\`, \`resolution\` (+3 more) |
+| \`minimax-h3-max-ref\` | fal's H3 Max is a post-trained variant of MiniMax H3, tuned for stronger prompt adherence and better aesthetics while co-optimized with our custom inference… | **\`prompt\`**, **\`prompt_expansion_mode\`**, \`duration\`, \`aspect_ratio\`, \`sync_mode\`, \`reference_image_urls\`, \`resolution\` (+4 more) |
+| \`minimax-h3-max-turbo-t2v\` | fal's H3 Max Turbo is a post-trained variant of MiniMax H3, tuned for stronger prompt adherence and better aesthetics while co-optimized with our custom infe… | **\`prompt\`**, **\`prompt_expansion_mode\`**, \`duration\`, \`aspect_ratio\`, \`sync_mode\`, \`resolution\` (+3 more) |
+| \`minimax-h3-max-turbo-i2v\` | fal's H3 Max Turbo is a post-trained variant of MiniMax H3, tuned for stronger prompt adherence and better aesthetics while co-optimized with our custom infe… | **\`prompt\`**, **\`prompt_expansion_mode\`**, \`duration\`, \`image_url\`, \`end_image_url\`, \`sync_mode\`, \`resolution\` (+3 more) |
+
 ## Last verified
 2026-04-28 — initial seed of full fal video catalog.
 

@@ -50,6 +50,10 @@ import { registerFalTtsPromptGuide } from './fal-tts.js';
 import { registerFalSfxPromptGuide } from './fal-sfx.js';
 import { registerFalDialoguePromptGuide } from './fal-dialogue.js';
 import { registerFalStemSeparationPromptGuide } from './fal-stem-separation.js';
+import { registerFalLipsyncPromptGuide } from './fal-lipsync.js';
+import { registerFalVideoUpscalePromptGuide } from './fal-video-upscale.js';
+import { registerFalVideoEditPromptGuide } from './fal-video-edit.js';
+import { registerFluxVideoPromptGuide } from './flux-video.js';
 import { registerBrandSpecTool } from './brand-spec.js';
 
 /**
@@ -133,6 +137,11 @@ export function registerGuideTools(server: McpServer): void {
   registerFalSfxPromptGuide(server);
   registerFalDialoguePromptGuide(server);
   registerFalStemSeparationPromptGuide(server);
+  // Grouped guides for the 2026-09-24 fal video catalog refresh.
+  registerFalLipsyncPromptGuide(server);
+  registerFalVideoUpscalePromptGuide(server);
+  registerFalVideoEditPromptGuide(server);
+  registerFluxVideoPromptGuide(server);
 
   // Branding
   registerBrandSpecTool(server);

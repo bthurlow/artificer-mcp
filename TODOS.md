@@ -198,7 +198,11 @@ Also unlocks the simpler cases — generic transcription for content moderation,
 
 ---
 
-## 6. fal video-to-video transport (`fal_edit_video`)
+## 6. fal video-to-video transport (`fal_edit_video`) — DONE 2026-09-24 (without a new transport)
+
+**Shipped** by giving `fal_generate_video` a structural `video` input (→ `video_url`) rather than building a separate `fal_edit_video`. Every v2v endpoint picked in the 2026-09-24 refresh returns the same `{ video: { url } }` shape, so the existing transport and downloader handle them unchanged, and the open question in the addendum below is answered. New catalog groups: `video.upscale` (Topaz upscale / interpolate / denoise / deblur / SDR→HDR / colorize, SeedVR2, FlashVSR, ByteDance, Crystal, Bria, FLUX video upscale), `video.edit` (Luma Ray 3.2 v2v and reframe, Kling O3 4K v2v, LTX 2.3 extend / inpaint, Lucy edit / restyle, Wan VACE, Bria erase, video background removal) and `video.lipsync` (#20). Guides: `fal_video_upscale_prompt_guide`, `fal_video_edit_prompt_guide`. The video-sync scope question below was settled by #20 going ahead.
+
+### Original filing (kept for history)
 
 **What:** Add a `fal_edit_video` transport for any fal video→video model — upscaling (Topaz, ESRGAN-video), frame interpolation (RIFE, FILM), style transfer, denoising, video extend, video-to-anime. Seeded catalog entries land under `video.edit` (with sub-classes `video.upscale` / `video.interpolate` / `video.style` if the model surface argues for it).
 
@@ -634,7 +638,11 @@ Authoritative now:
 
 ---
 
-## 20. Lip-sync / singing-performance video routes (catalog + guides) (NEW, filed 2026-09-24)
+## 20. Lip-sync / singing-performance video routes (catalog + guides) — DONE 2026-09-24
+
+**Shipped:** 13 routes under `video.lipsync`, covering every candidate below plus Heygen v3 lipsync (precision / speed) and InfiniteTalk v2v: OmniHuman 1.5, MiniMax H3 Max lip-sync, Sync-3 (v2v and avatar), Sync React-1, Kling lipsync, VEED lipsync v2, InfiniteTalk, AI Avatar Multi, Wan 2.2 speech-to-video. All go through `fal_generate_video` with its new `video` input, and each endpoint was checked to return `{ video }`. The singing guidance below (isolated vocal stem via `fal_separate_audio`, phrase chunking, duets, 720p ceilings) is in `fal_lipsync_prompt_guide`. **Still open:** the singing test run in "Not verified" below, and a live call per route (no `FAL_KEY` in the dev shell).
+
+### Original filing (kept for history)
 
 **What:** Seed catalog routes + a prompt guide for fal's audio-driven performance models, so a music video can put a character on camera *singing the real vocal*. Two families:
 
@@ -688,7 +696,11 @@ Skip: `fal-ai/bytedance/omnihuman` (1.0, $0.14/s, superseded by 1.5), `fal-ai/sy
 
 ---
 
-## 22. Luma Ray 3.2 routes (multi-keyframe i2v, v2v modify, reframe) (NEW, filed 2026-09-24)
+## 22. Luma Ray 3.2 routes (multi-keyframe i2v, v2v modify, reframe) — DONE 2026-09-24
+
+**Shipped:** `luma-ray-3.2-t2v`, `-i2v` (under `video.cinematic`, rows added to `luma_ray_prompt_guide`), plus `luma-ray-3.2-v2v` and `-reframe` (under `video.edit`, in `fal_video_edit_prompt_guide`). Multi-keyframe input goes through `extra_files: { keyframes: [...] }` and `extra_params: { keyframe_indexes: [...] }`. **Not yet written up:** the keyframe-index math (frame positions at 24 fps, not seconds) that this item says the guide must spell out. The `luma_ray_prompt_guide` body still describes Ray 2, so extending it properly is a follow-up.
+
+### Original filing (kept for history)
 
 **What:** Seed `luma/agent/ray/v3.2/*` (note: **no `fal-ai/` prefix**, like H3), verified live 2026-09-24:
 - `.../image-to-video`: first/last frame (`image_url` + `end_image_url`) **or** `keyframes` (1-64 image URLs) + `keyframe_indexes` (output-frame positions at 24fps: 5s → 0-120, 10s → 0-240). The two modes are mutually exclusive. **10s and HDR only unlock with multi-keyframe input.** Price per 5s: $0.15 (540p) / $0.30 (720p) / **$1.20 (1080p) ≈ $0.24/s**; HDR 1080p $2.40/5s.

@@ -45,6 +45,15 @@ Standard scene-action prompts work. For ref-to-video, use \`@Image1\` / \`@Image
 | \`grok-imagine-i2v\` | \`xai/grok-imagine-video/image-to-video\` |
 | \`grok-imagine-ref-i2v\` | \`xai/grok-imagine-video/reference-to-video\` |
 
+## Newer routes (added 2026-09-24)
+Added in the 2026-09-24 fal catalog refresh. Model descriptions are fal's own; inputs come from each route's committed spec (\`src/catalog/fal-specs/<slug>/openapi.json\`). The sections above predate these routes and were not re-verified against them, so check a newer model's spec before assuming it matches.
+
+| Slug | Model (fal's description) | Inputs (**required**, then notable) |
+|------|----------------------------|--------------------------------------|
+| \`grok-imagine-video-1.5-t2v\` | Generate videos from prompts with audio using xAI's Grok Imagine 1.5 Video model. | **\`prompt\`**, \`duration\`, \`aspect_ratio\`, \`resolution\` |
+| \`grok-imagine-video-1.5-i2v\` | Generate videos from images with audio using xAI's Grok Imagine 1.5 Video model. | **\`image_url\`**, **\`prompt\`**, \`duration\`, \`resolution\` |
+| \`grok-imagine-video-1.5-ref\` | Generate videos from images and audio references using xAI's Grok Imagine 1.5 Video model. | **\`reference_image_urls\`**, **\`prompt\`**, \`duration\`, \`aspect_ratio\`, \`resolution\` |
+
 ## Last verified
 2026-04-28 — initial seed of full fal video catalog.
 

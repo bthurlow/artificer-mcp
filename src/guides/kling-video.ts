@@ -200,6 +200,17 @@ For older Kling tiers (1.x / 2.x non-v3): no audio in schema; treat as silent ci
 
 All slugs route through \`fal_generate_video\` with \`FAL_KEY\`. Avatar / talking-head models are out of scope here — see \`kling_avatar_prompt_guide\`.
 
+## Newer routes (added 2026-09-24)
+Added in the 2026-09-24 fal catalog refresh. Model descriptions are fal's own; inputs come from each route's committed spec (\`src/catalog/fal-specs/<slug>/openapi.json\`). The sections above predate these routes and were not re-verified against them, so check a newer model's spec before assuming it matches.
+
+| Slug | Model (fal's description) | Inputs (**required**, then notable) |
+|------|----------------------------|--------------------------------------|
+| \`kling-o3-4k-t2v\` | Kling's Native 4K is a video generation model that directly outputs professional-grade 4K video in one step, eliminating the need for post-production upscaling | \`aspect_ratio\`, \`prompt\`, \`duration\` (+3 more) |
+| \`kling-3-turbo-pro-t2v\` | Generate high quality 1080p videos using Kling's Turbo 3.0 model, with improved lipsync and multishot generation capabilities. | \`aspect_ratio\`, \`duration\`, \`prompt\` (+1 more) |
+| \`kling-3-turbo-pro-i2v\` | Generate high quality 1080p videos from images using Kling's Turbo 3.0 model, with improved lipsync and multishot generation capabilities. | **\`image_url\`**, \`prompt\`, \`duration\` (+1 more) |
+| \`kling-3-turbo-standard-t2v\` | Kling 3.0 Turbo Standard is a fast, cost-efficient video generation model that turns text prompts directly into 720P video with native audio, optimized for r… | \`aspect_ratio\`, \`duration\`, \`prompt\` (+1 more) |
+| \`kling-3-turbo-standard-i2v\` | Kling 3.0 Turbo Standard animates a first and last frame reference image into 720P video with native audio, delivering quick, affordable image-driven motion… | **\`image_url\`**, \`prompt\`, \`duration\` (+1 more) |
+
 ## Last verified
 2026-04-28 — initial seed of full fal video catalog. Pricing and input schemas grounded in committed fal-specs (kling-3-pro-t2v, kling-3-pro-i2v, kling-3-std-t2v, kling-3-4k-i2v, kling-o3-pro-ref, kling-2.5-turbo-pro-i2v, kling-2.1-master-t2v, kling-2-master-t2v). v1.x, v1.6, v2.6, and O1 specs are not currently in the local \`fal-specs\` sync — defer to the live fal.ai listing for those slugs' exact wire keys, durations, and pricing.
 
