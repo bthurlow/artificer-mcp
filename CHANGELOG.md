@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.11.0](https://github.com/bthurlow/artificer-mcp/compare/v0.10.1...v0.11.0) (2026-09-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* **catalog:** the hunyuan-video-lora-t2v, sana-video-t2v and lyra-2-zoom-i2v catalog slugs and the sana_prompt_guide tool are removed. See UPGRADING.md (0.10.x -> 0.11.0) for replacements.
+
+### Bug Fixes
+
+* **catalog:** retire 3 dead fal routes, and open a fresh drift PR once the last one merged ([#46](https://github.com/bthurlow/artificer-mcp/issues/46)) ([5f75a10](https://github.com/bthurlow/artificer-mcp/commit/5f75a10e01a386bbe626060248e59269bdc47f37))
+* **catalog:** stable input-key order, and report schema drift the cron missed ([#42](https://github.com/bthurlow/artificer-mcp/issues/42)) ([9cc520f](https://github.com/bthurlow/artificer-mcp/commit/9cc520faad0b1a78642daee518428737fbc7c510))
+* **ci:** run release-please in manifest mode so bump-minor-pre-major applies ([#48](https://github.com/bthurlow/artificer-mcp/issues/48)) ([1e79836](https://github.com/bthurlow/artificer-mcp/commit/1e798361d1e25668fd35db631ad150aebb4e9281))
+
 ## [0.10.1](https://github.com/bthurlow/artificer-mcp/compare/v0.10.0...v0.10.1) (2026-08-16)
 
 
