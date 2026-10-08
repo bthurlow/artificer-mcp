@@ -93,7 +93,7 @@ Add to your MCP config:
 | `ARTIFICER_IMAGEN_EDIT_MODEL` | Sets a default model for `gemini_edit_image`. There is **no built-in default** since 0.10.0. |
 | `ARTIFICER_IMAGEN_UPSCALE_MODEL` | Override default model for `gemini_upscale_image` (fallback: `imagen-4.0-upscale-preview`). |
 | `ARTIFICER_VEO_MODEL` | Override default model for `gemini_generate_video` (fallback: `veo-2.0-generate-001`). |
-| `ARTIFICER_OMNI_VIDEO_MODEL` | Override default model for `gemini_omni_generate_video` (fallback: `gemini-omni-flash-preview`). |
+| `ARTIFICER_OMNI_VIDEO_MODEL` | Override default model for `gemini_omni_generate_video` (fallback: `gemini-omni-1.1-flash`). |
 | `ARTIFICER_NANOBANANA_MODEL` | Override default model for `gemini_nanobanana_generate_image` (fallback: `gemini-3.1-flash-image`). |
 | `ARTIFICER_TTS_MODEL` | Override default model for `gemini_generate_speech` (fallback: `gemini-2.5-flash-preview-tts`). |
 | `ARTIFICER_LYRIA_MODEL` | Override default model for `gemini_generate_music` (fallback: `lyria-3-clip-preview`). Also valid: `lyria-3-pro-preview`. |

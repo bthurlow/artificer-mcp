@@ -136,15 +136,16 @@ From btmusic's first live run of `video.lipsync` routes (marble-statue bust + is
 - `veo-3.1-fast-generate-preview`
 - `veo-3.1-lite-generate-preview`
 
-The notice names no replacement IDs. Find the successors on Google's deprecations and models pages (ai.google.dev) before changing anything. Do not guess an ID.
+**Omni: done 2026-10-08.** Google's migration target is `gemini-omni-1.1-flash`. The default, the `gemini-omni-flash` catalog route, the guide, the README and UPGRADING.md all use it now. Still to do: one live call in the consuming project. Also, the 1.1 API adds `response_format.resolution` (`360p` / `720p` / `1080p` / `4k` upscaled) and an `extend` task (up to 40s total). The tool sends neither yet, and the guide says so. Expose them if a caller needs above-720p or longer Omni clips.
 
-**What references them here:**
-- **`gemini-omni-flash-preview` is a baked default.** `src/generation/types.ts:424` (`ARTIFICER_OMNI_VIDEO_MODEL` fallback), the `gemini-omni-flash` google route (`src/catalog/models.json`), `src/guides/gemini-omni.ts` (access-routes table), the README env-var table and `tests/unit/generation/gemini-omni.test.ts`. After the 22nd, every `gemini_omni_generate_video` call without a `model` fails. This is the urgent one.
+**Veo: open.** The notice names no Veo replacement IDs. Find the successors on Google's deprecations and models pages (ai.google.dev) before changing anything. Do not guess an ID.
+
+**What still references them here:**
 - **`veo-3.1-lite-generate-preview`:** the google route on `veo-3.1-lite-t2v` (`models.json`), two lines in `src/guides/veo.ts`, `scripts/seed-video-catalog.mjs` and the `tests/unit/catalog/catalog.test.ts` fixture (a fixture string, so it can stay or move).
 - **`veo-3.1-generate-preview` / `veo-3.1-fast-generate-preview`:** not referenced. Callers may still pass them by hand, so the Veo guide should name the successors.
 - **Not affected:** the fal routes (`fal-ai/veo3.1*`, `google/gemini-omni-flash/v1.1/*`), which fal versions separately. The `gemini_generate_video` default is `veo-2.0-generate-001`, which isn't on this list. Check while you're there whether it's on a separate notice.
 
-**Fix shape:** repoint the Omni default and the Lite route to the GA or successor IDs. If Google ships no direct successor for Omni, retire the google route the #18b way, point callers at the fal Omni Flash 1.1 routes, and decide whether the default becomes required (`retiredDefault`, as Imagen did in #10). Changing a baked default is a behavior change, so record it in UPGRADING.md. Make one live call per repointed ID in the consuming project; nothing here has a key.
+**Fix shape:** repoint the Lite route to its successor ID, or retire it the #18b way if there is none (the fal `fal-ai/veo3.1/lite` route stays). Name the successors in `veo_video_prompt_guide`. Make one live call per repointed ID in the consuming project; nothing here has a key.
 
 **Trigger:** now. The deadline is 2026-10-22.
 

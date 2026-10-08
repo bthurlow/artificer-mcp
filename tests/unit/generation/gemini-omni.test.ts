@@ -79,7 +79,7 @@ describe('gemini_omni_generate_video', () => {
 
     expect(mockCreate).toHaveBeenCalledOnce();
     const req = mockCreate.mock.calls[0][0];
-    expect(req.model).toBe('gemini-omni-flash-preview');
+    expect(req.model).toBe('gemini-omni-1.1-flash');
     expect(req.response_format).toMatchObject({ type: 'video', delivery: 'uri', duration: '8s' });
     expect(req.input[0]).toEqual({ type: 'text', text: 'a neon alley' });
 

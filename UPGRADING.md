@@ -9,6 +9,20 @@ because they landed under a commit type it hides.
 
 ---
 
+## 0.11.x → 0.12.0
+
+### `gemini_omni_generate_video` defaults to `gemini-omni-1.1-flash`
+
+Google deprecates `gemini-omni-flash-preview` effective **2026-10-22**, and its
+migration target is `gemini-omni-1.1-flash`. The tool's default and the
+`gemini-omni-flash` catalog route now use the new ID.
+
+**Action:** if `ARTIFICER_OMNI_VIDEO_MODEL` is set to `gemini-omni-flash-preview`,
+or a caller passes it as `model`, change it to `gemini-omni-1.1-flash` (or unset
+the env var). Calls that rely on the default need no change.
+
+---
+
 ## 0.10.x → 0.11.0
 
 ### Catalog routes retired, and `sana_prompt_guide` removed
