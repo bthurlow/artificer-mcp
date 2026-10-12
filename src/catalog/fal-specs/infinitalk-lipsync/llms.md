@@ -62,6 +62,10 @@ The API accepts the following input parameters:
   - Default: `"regular"`
   - Options: `"none"`, `"regular"`, `"high"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -84,7 +88,8 @@ The API accepts the following input parameters:
   "num_frames": 145,
   "resolution": "480p",
   "seed": 42,
-  "acceleration": "regular"
+  "acceleration": "regular",
+  "enable_safety_checker": true
 }
 ```
 
@@ -95,7 +100,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video file.
-  - Examples: {"file_size":515275,"file_name":"74af6c0bdd6041c3b1130d54885e3eee.mp4","url":"https://v3.fal.media/files/kangaroo/z6VqUwNTwzuWa6YE1g7In_74af6c0bdd6041c3b1130d54885e3eee.mp4","content_type":"application/octet-stream"}
+  - Examples: {"url":"https://v3.fal.media/files/kangaroo/z6VqUwNTwzuWa6YE1g7In_74af6c0bdd6041c3b1130d54885e3eee.mp4","file_size":515275,"file_name":"74af6c0bdd6041c3b1130d54885e3eee.mp4","content_type":"application/octet-stream"}
 
 - **`seed`** (`integer`, _required_):
   The seed used for generation.
@@ -107,9 +112,9 @@ The API returns the following output format:
 ```json
 {
   "video": {
+    "url": "https://v3.fal.media/files/kangaroo/z6VqUwNTwzuWa6YE1g7In_74af6c0bdd6041c3b1130d54885e3eee.mp4",
     "file_size": 515275,
     "file_name": "74af6c0bdd6041c3b1130d54885e3eee.mp4",
-    "url": "https://v3.fal.media/files/kangaroo/z6VqUwNTwzuWa6YE1g7In_74af6c0bdd6041c3b1130d54885e3eee.mp4",
     "content_type": "application/octet-stream"
   }
 }

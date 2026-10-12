@@ -75,47 +75,81 @@
           "prompt",
           "video_url"
         ],
-        "x-fal-order-properties": [
-          "prompt",
-          "video_url",
-          "image_urls",
-          "keep_audio",
-          "elements",
-          "shot_type"
-        ],
-        "title": "O3_4kEditVideoV2VInput",
-        "description": "Input for O3 4K video editing.",
         "type": "object",
         "properties": {
-          "keep_audio": {
-            "default": true,
-            "description": "Whether to keep the original audio from the reference video. ",
-            "title": "Keep Audio",
-            "type": "boolean"
-          },
           "video_url": {
             "examples": [
               "https://storage.googleapis.com/falserverless/example_inputs/kling-o3/pro-v2v-edit/video_reference.mp4"
             ],
-            "description": "Reference video URL. Only .mp4/.mov formats, 3-15s duration, 720-3840px resolution, max 200MB.",
-            "x-fal": {
-              "max_height": 3840,
-              "max_file_size": 209715200,
-              "min_width": 720,
-              "timeout": 30,
-              "max_width": 3840,
-              "max_duration": 15.05,
-              "min_height": 720,
-              "min_fps": 24,
-              "min_duration": 3,
-              "max_fps": 60
-            },
             "title": "Video Url",
             "_fal_ui_field": "video",
-            "limit_description": "Max file size: 200.0MB, Min width: 720px, Min height: 720px, Max width: 3840px, Max height: 3840px, Min duration: 3.0s, Max duration: 15.05s, Min FPS: 24.0, Max FPS: 60.0, Timeout: 30.0s",
-            "type": "string"
+            "type": "string",
+            "limit_description": "Max file size: 200.0MB, Min width: 720px, Min height: 720px, Max width: 3840px, Max height: 3840px, Min duration: 3.0s, Max duration: 15.05s, Min FPS: 23.0, Max FPS: 60.0, Timeout: 30.0s",
+            "x-fal": {
+              "max_height": 3840,
+              "min_height": 720,
+              "max_file_size": 209715200,
+              "min_width": 720,
+              "min_fps": 23,
+              "max_fps": 60,
+              "max_width": 3840,
+              "timeout": 30,
+              "min_duration": 3,
+              "max_duration": 15.05
+            },
+            "description": "Reference video URL. Only .mp4/.mov formats, 3-15s duration, 720-3840px resolution, max 200MB."
+          },
+          "keep_audio": {
+            "description": "Whether to keep the original audio from the reference video. ",
+            "type": "boolean",
+            "title": "Keep Audio",
+            "default": true
+          },
+          "image_urls": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "limit_description": "Max file size: 50.0MB, Min width: 300px, Min height: 300px, Min aspect ratio: 0.40, Max aspect ratio: 2.50, Timeout: 20.0s",
+                  "type": "string",
+                  "ui": {
+                    "field": "image"
+                  },
+                  "x-fal": {
+                    "min_height": 300,
+                    "max_file_size": 52428800,
+                    "min_width": 300,
+                    "timeout": 20,
+                    "min_aspect_ratio": 0.4,
+                    "max_aspect_ratio": 2.5
+                  },
+                  "_fal_ui_field": "image"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/example_inputs/kling-o3/pro-v2v-edit/image_url1.jpg"
+              ]
+            ],
+            "title": "Image Urls",
+            "description": "Reference images for style/appearance. Reference in prompt as @Image1, @Image2, etc. Maximum 4 total (elements + reference images) when using video."
           },
           "elements": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/KlingV3ImageElementInput"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
             "examples": [
               [
                 {
@@ -126,162 +160,129 @@
                 }
               ]
             ],
-            "description": "Elements (characters/objects) to include. Reference in prompt as @Element1, @Element2.",
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/KlingV3ImageElementInput"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Elements"
-          },
-          "shot_type": {
-            "default": "customize",
-            "const": "customize",
-            "description": "The type of multi-shot video generation.",
-            "title": "Shot Type",
-            "type": "string"
+            "title": "Elements",
+            "description": "Elements (characters/objects) to include. Reference in prompt as @Element1, @Element2."
           },
           "prompt": {
+            "type": "string",
             "examples": [
               "Change environment to be fully snow as @Image1. Replace animal with @Element1"
             ],
-            "description": "Text prompt for video generation. Reference video as @Video1.",
-            "maxLength": 2500,
             "title": "Prompt",
-            "type": "string"
+            "maxLength": 2500,
+            "description": "Text prompt for video generation. Reference video as @Video1."
           },
-          "image_urls": {
-            "examples": [
-              [
-                "https://storage.googleapis.com/falserverless/example_inputs/kling-o3/pro-v2v-edit/image_url1.jpg"
-              ]
-            ],
-            "description": "Reference images for style/appearance. Reference in prompt as @Image1, @Image2, etc. Maximum 4 total (elements + reference images) when using video.",
-            "anyOf": [
-              {
-                "items": {
-                  "_fal_ui_field": "image",
-                  "x-fal": {
-                    "max_aspect_ratio": 2.5,
-                    "min_height": 300,
-                    "min_aspect_ratio": 0.4,
-                    "timeout": 20,
-                    "min_width": 300,
-                    "max_file_size": 52428800
-                  },
-                  "limit_description": "Max file size: 50.0MB, Min width: 300px, Min height: 300px, Min aspect ratio: 0.40, Max aspect ratio: 2.50, Timeout: 20.0s",
-                  "type": "string",
-                  "ui": {
-                    "field": "image"
-                  }
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Image Urls"
+          "shot_type": {
+            "const": "customize",
+            "type": "string",
+            "description": "The type of multi-shot video generation.",
+            "title": "Shot Type",
+            "default": "customize"
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "prompt",
+          "video_url",
+          "image_urls",
+          "keep_audio",
+          "elements",
+          "shot_type"
+        ],
+        "title": "O3_4kEditVideoV2VInput",
+        "description": "Input for O3 4K video editing."
       },
       "KlingVideoO34kVideoToVideoEditOutput": {
         "required": [
           "video"
         ],
+        "type": "object",
+        "properties": {
+          "video": {
+            "$ref": "#/components/schemas/File",
+            "examples": [
+              {
+                "file_size": 4322769,
+                "url": "https://storage.googleapis.com/falserverless/example_outputs/kling-o3/pro-v2v-edit/output.mp4",
+                "content_type": "video/mp4",
+                "file_name": "output.mp4"
+              }
+            ],
+            "description": "The generated video."
+          }
+        },
         "x-fal-order-properties": [
           "video"
         ],
         "title": "O3_4kEditV2VOutput",
-        "description": "Output for the O3 4K video-edit endpoint.",
-        "type": "object",
-        "properties": {
-          "video": {
-            "examples": [
-              {
-                "file_size": 4322769,
-                "file_name": "output.mp4",
-                "content_type": "video/mp4",
-                "url": "https://storage.googleapis.com/falserverless/example_outputs/kling-o3/pro-v2v-edit/output.mp4"
-              }
-            ],
-            "description": "The generated video.",
-            "$ref": "#/components/schemas/File"
-          }
-        }
+        "description": "Output for the O3 4K video-edit endpoint."
       },
       "KlingV3ImageElementInput": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "frontal_image_url",
+          "reference_image_urls"
+        ],
+        "title": "KlingV3ImageElementInput",
         "properties": {
           "frontal_image_url": {
-            "description": "The frontal image of the element (main view).",
             "anyOf": [
               {
-                "x-fal": {
-                  "max_aspect_ratio": 2.5,
-                  "min_height": 300,
-                  "min_aspect_ratio": 0.4,
-                  "timeout": 20,
-                  "min_width": 300,
-                  "max_file_size": 52428800
-                },
                 "limit_description": "Max file size: 50.0MB, Min width: 300px, Min height: 300px, Min aspect ratio: 0.40, Max aspect ratio: 2.50, Timeout: 20.0s",
                 "type": "string",
                 "ui": {
                   "field": "image"
+                },
+                "x-fal": {
+                  "min_height": 300,
+                  "max_file_size": 52428800,
+                  "min_width": 300,
+                  "timeout": 20,
+                  "min_aspect_ratio": 0.4,
+                  "max_aspect_ratio": 2.5
                 }
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Frontal Image Url"
+            "title": "Frontal Image Url",
+            "description": "The frontal image of the element (main view)."
           },
           "reference_image_urls": {
-            "description": "Additional reference images from different angles. 1-3 images supported. At least one image is required.",
             "anyOf": [
               {
+                "type": "array",
                 "items": {
-                  "_fal_ui_field": "image",
-                  "x-fal": {
-                    "max_aspect_ratio": 2.5,
-                    "min_height": 300,
-                    "min_aspect_ratio": 0.4,
-                    "timeout": 20,
-                    "min_width": 300,
-                    "max_file_size": 52428800
-                  },
                   "limit_description": "Max file size: 50.0MB, Min width: 300px, Min height: 300px, Min aspect ratio: 0.40, Max aspect ratio: 2.50, Timeout: 20.0s",
                   "type": "string",
                   "ui": {
                     "field": "image"
-                  }
-                },
-                "type": "array"
+                  },
+                  "x-fal": {
+                    "min_height": 300,
+                    "max_file_size": 52428800,
+                    "min_width": 300,
+                    "timeout": 20,
+                    "min_aspect_ratio": 0.4,
+                    "max_aspect_ratio": 2.5
+                  },
+                  "_fal_ui_field": "image"
+                }
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Reference Image Urls"
+            "title": "Reference Image Urls",
+            "description": "Additional reference images from different angles. 1-3 images supported. At least one image is required."
           }
-        },
-        "x-fal-order-properties": [
-          "frontal_image_url",
-          "reference_image_urls"
-        ],
-        "title": "KlingV3ImageElementInput",
-        "type": "object"
+        }
       },
       "File": {
         "required": [
           "url"
         ],
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -291,10 +292,6 @@
         "title": "File",
         "properties": {
           "file_size": {
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -303,13 +300,18 @@
                 "type": "null"
               }
             ],
-            "title": "File Size"
-          },
-          "file_name": {
             "examples": [
-              "z9RV14K95DvU.png"
+              4404019
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Size",
+            "description": "The size of the file in bytes."
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "content_type": {
             "anyOf": [
               {
                 "type": "string"
@@ -318,13 +320,13 @@
                 "type": "null"
               }
             ],
-            "title": "File Name"
-          },
-          "content_type": {
             "examples": [
               "image/png"
             ],
-            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "description": "The mime type of the file."
+          },
+          "file_name": {
             "anyOf": [
               {
                 "type": "string"
@@ -333,15 +335,13 @@
                 "type": "null"
               }
             ],
-            "title": "Content Type"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
           }
-        },
-        "type": "object"
+        }
       }
     }
   },

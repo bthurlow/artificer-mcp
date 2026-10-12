@@ -95,6 +95,10 @@ The API accepts the following input parameters:
   - Default: `200`
   - Range: `1` to `8192`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -121,7 +125,8 @@ The API accepts the following input parameters:
   "subtalker_top_k": 50,
   "subtalker_top_p": 1,
   "subtalker_temperature": 0.9,
-  "max_new_tokens": 200
+  "max_new_tokens": 200,
+  "enable_safety_checker": true
 }
 ```
 
@@ -132,7 +137,7 @@ The API returns the following output format:
 
 - **`audio`** (`AudioFile`, _required_):
   The generated speech audio file.
-  - Examples: {"sample_rate":24000,"channels":1,"duration":9.816875,"file_name":"n6Av3SeD5dFENf9-VmQ1v_is3jLh5h.mp3","content_type":"audio/mpeg","url":"https://storage.googleapis.com/falserverless/example_outputs/example_outputs/qwen3-tts/tts_out_06b.mp3"}
+  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/example_outputs/qwen3-tts/tts_out_06b.mp3","channels":1,"file_name":"n6Av3SeD5dFENf9-VmQ1v_is3jLh5h.mp3","sample_rate":24000,"content_type":"audio/mpeg","duration":9.816875}
 
 
 
@@ -141,12 +146,12 @@ The API returns the following output format:
 ```json
 {
   "audio": {
-    "sample_rate": 24000,
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/example_outputs/qwen3-tts/tts_out_06b.mp3",
     "channels": 1,
-    "duration": 9.816875,
     "file_name": "n6Av3SeD5dFENf9-VmQ1v_is3jLh5h.mp3",
+    "sample_rate": 24000,
     "content_type": "audio/mpeg",
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/example_outputs/qwen3-tts/tts_out_06b.mp3"
+    "duration": 9.816875
   }
 }
 ```

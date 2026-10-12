@@ -50,6 +50,10 @@ The API accepts the following input parameters:
   URL of the input image for video generation.
   - Examples: "https://v3b.fal.media/files/b/0a8b90e0/BFLE9VDlZqsryU-UA3BoD_image_004.png"
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -68,7 +72,8 @@ The API accepts the following input parameters:
   "prompt": "Medieval knight in ornate armor walking through a mystical forest, bioluminescent plants pulsing with light, ancient stone ruins overgrown with glowing vines, over-the-shoulder camera, dark fantasy aesthetic, volumetric fog and Lumen lighting",
   "duration": 6,
   "resolution": "720p",
-  "image_url": "https://v3b.fal.media/files/b/0a8b90e0/BFLE9VDlZqsryU-UA3BoD_image_004.png"
+  "image_url": "https://v3b.fal.media/files/b/0a8b90e0/BFLE9VDlZqsryU-UA3BoD_image_004.png",
+  "enable_safety_checker": true
 }
 ```
 
@@ -79,7 +84,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video.
-  - Examples: {"fps":24,"num_frames":145,"file_name":"0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","width":1280,"duration":6.041667,"content_type":"video/mp4","height":720,"url":"https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4"}
+  - Examples: {"duration":6.041667,"width":1280,"url":"https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","fps":24,"num_frames":145,"content_type":"video/mp4","file_name":"0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","height":720}
 
 
 
@@ -88,14 +93,14 @@ The API returns the following output format:
 ```json
 {
   "video": {
+    "duration": 6.041667,
+    "width": 1280,
+    "url": "https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4",
     "fps": 24,
     "num_frames": 145,
-    "file_name": "0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4",
-    "width": 1280,
-    "duration": 6.041667,
     "content_type": "video/mp4",
-    "height": 720,
-    "url": "https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4"
+    "file_name": "0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4",
+    "height": 720
   }
 }
 ```

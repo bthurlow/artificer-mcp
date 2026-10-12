@@ -57,6 +57,10 @@ The API accepts the following input parameters:
   Enable audio generation (BGM, SFX, dialogue)
   - Default: `false`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -74,7 +78,8 @@ The API accepts the following input parameters:
   "prompt": "Epic low-cut camera capture of a girl clad in ultraviolet threads, luminous diamond skin glistening under a vast moon's radiance, hyper-detailed",
   "aspect_ratio": "16:9",
   "resolution": "720p",
-  "duration": 5
+  "duration": 5,
+  "enable_safety_checker": true
 }
 ```
 

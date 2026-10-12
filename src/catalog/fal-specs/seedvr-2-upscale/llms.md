@@ -96,7 +96,7 @@ The API returns the following output format:
 
 - **`image`** (`ImageFile`, _required_):
   Upscaled image file after processing
-  - Examples: {"content_type":"image/png","url":"https://storage.googleapis.com/falserverless/example_outputs/seedvr2/image_out.png"}
+  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/seedvr2/image_out.png","content_type":"image/png"}
 
 - **`seed`** (`integer`, _required_):
   The random seed used for the generation process.
@@ -108,8 +108,8 @@ The API returns the following output format:
 ```json
 {
   "image": {
-    "content_type": "image/png",
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/seedvr2/image_out.png"
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/seedvr2/image_out.png",
+    "content_type": "image/png"
   }
 }
 ```

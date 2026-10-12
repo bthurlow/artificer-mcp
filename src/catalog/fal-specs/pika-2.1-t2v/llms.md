@@ -54,6 +54,10 @@ The API accepts the following input parameters:
   The duration of the generated video in seconds Default value: `5`
   - Default: `5`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -71,7 +75,8 @@ The API accepts the following input parameters:
   "prompt": "A woman styled in a high-fashion brand editorial. the woman stands confidently in a whimsical outdoor setting against a soft, cloudy sky. She wears a bright yellow luxury brand monogram jacket over a crisp striped shirt, paired with flowing pink trousers, accessorized with oversized sunglasses, a golden chain necklace, and a bold luxury brand belt. Delicate flowers in the foreground add a dreamy and artistic touch, evoking a retro yet luxurious high fashion campaign aesthetic. the camera crane up from the flowers to the woman",
   "aspect_ratio": "16:9",
   "resolution": "720p",
-  "duration": 5
+  "duration": 5,
+  "enable_safety_checker": true
 }
 ```
 

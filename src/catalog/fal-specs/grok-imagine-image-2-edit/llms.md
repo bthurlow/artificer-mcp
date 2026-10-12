@@ -58,6 +58,10 @@ The API accepts the following input parameters:
   If `True`, the media will be returned as a data URI and the output data won't be available in the request history.
   - Default: `false`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 - **`image_urls`** (`list<string>`, _optional_):
   List of URLs of the images to edit. A maximum of 5 images are supported.
   - Array of string
@@ -87,6 +91,7 @@ The API accepts the following input parameters:
   "aspect_ratio": "auto",
   "resolution": "1k",
   "output_format": "jpeg",
+  "enable_safety_checker": true,
   "image_urls": [
     "https://v3b.fal.media/files/b/0a8b911d/Abk8vStrvmSPlzUqI_NN3_image_043.png"
   ],

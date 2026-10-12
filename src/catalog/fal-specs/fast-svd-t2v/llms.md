@@ -71,6 +71,10 @@ The API accepts the following input parameters:
   - Default: `"landscape_16_9"`
   - One of: ImageSize | Enum
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -91,7 +95,8 @@ The API accepts the following input parameters:
   "steps": 20,
   "fps": 10,
   "negative_prompt": "unrealistic, saturated, high contrast, big nose, painting, drawing, sketch, cartoon, anime, manga, render, CG, 3d, watermark, signature, label",
-  "video_size": "landscape_16_9"
+  "video_size": "landscape_16_9",
+  "enable_safety_checker": true
 }
 ```
 

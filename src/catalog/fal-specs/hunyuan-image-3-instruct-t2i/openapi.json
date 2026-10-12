@@ -82,30 +82,16 @@
           "sync_mode",
           "output_format"
         ],
+        "type": "object",
         "properties": {
-          "output_format": {
-            "enum": [
-              "jpeg",
-              "png"
-            ],
-            "default": "png",
-            "type": "string",
-            "description": "The format of the generated image.",
-            "title": "Output Format"
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "type": "boolean",
-            "description": "If set to true, the safety checker will be enabled.",
-            "title": "Enable Safety Checker"
-          },
           "image_size": {
-            "default": "auto",
+            "description": "The desired size of the generated image. If auto, image size will be determined by the model.",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
               },
               {
+                "type": "string",
                 "enum": [
                   "auto",
                   "square_hd",
@@ -114,22 +100,22 @@
                   "portrait_16_9",
                   "landscape_4_3",
                   "landscape_16_9"
-                ],
-                "type": "string"
+                ]
               }
             ],
-            "title": "Image Size",
-            "description": "The desired size of the generated image. If auto, image size will be determined by the model."
+            "default": "auto",
+            "title": "Image Size"
           },
-          "num_images": {
-            "maximum": 4,
-            "default": 1,
-            "type": "integer",
-            "description": "The number of images to generate.",
-            "title": "Num Images",
-            "minimum": 1
+          "prompt": {
+            "description": "The text prompt to generate an image from.",
+            "type": "string",
+            "examples": [
+              "Macro photograph of a peacock feather showing individual barbs, barbules, and the iridescent microstructure creating color."
+            ],
+            "title": "Prompt"
           },
           "seed": {
+            "description": "Random seed for reproducible results. If None, a random seed is used.",
             "anyOf": [
               {
                 "type": "integer"
@@ -138,178 +124,137 @@
                 "type": "null"
               }
             ],
-            "title": "Seed",
-            "description": "Random seed for reproducible results. If None, a random seed is used."
+            "title": "Seed"
           },
-          "prompt": {
-            "type": "string",
-            "description": "The text prompt to generate an image from.",
-            "title": "Prompt",
-            "examples": [
-              "Macro photograph of a peacock feather showing individual barbs, barbules, and the iridescent microstructure creating color."
-            ]
+          "enable_prompt_expansion": {
+            "description": "If set to true, the prompt will be expanded through the model's internal recaptioning step.",
+            "type": "boolean",
+            "default": true,
+            "title": "Enable Prompt Expansion"
           },
           "sync_mode": {
-            "default": false,
-            "type": "boolean",
             "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "type": "boolean",
+            "default": false,
             "title": "Sync Mode"
+          },
+          "num_images": {
+            "maximum": 4,
+            "description": "The number of images to generate.",
+            "type": "integer",
+            "minimum": 1,
+            "default": 1,
+            "title": "Num Images"
           },
           "guidance_scale": {
             "maximum": 20,
-            "default": 3.5,
-            "exclusiveMinimum": 1,
-            "type": "number",
             "description": "Controls how much the model adheres to the prompt. Higher values mean stricter adherence.",
+            "type": "number",
+            "exclusiveMinimum": 1,
+            "default": 3.5,
             "title": "Guidance Scale"
           },
-          "enable_prompt_expansion": {
-            "default": true,
+          "enable_safety_checker": {
+            "description": "If set to true, the safety checker will be enabled.",
             "type": "boolean",
-            "description": "If set to true, the prompt will be expanded through the model's internal recaptioning step.",
-            "title": "Enable Prompt Expansion"
+            "default": true,
+            "title": "Enable Safety Checker"
+          },
+          "output_format": {
+            "description": "The format of the generated image.",
+            "type": "string",
+            "enum": [
+              "jpeg",
+              "png"
+            ],
+            "default": "png",
+            "title": "Output Format"
           }
         },
-        "type": "object",
-        "title": "HunyuanImageRequest",
         "required": [
           "prompt"
-        ]
+        ],
+        "title": "HunyuanImageRequest"
       },
       "HunyuanImageV3InstructTextToImageOutput": {
         "x-fal-order-properties": [
           "images",
           "seed"
         ],
+        "type": "object",
         "properties": {
           "images": {
-            "items": {
-              "$ref": "#/components/schemas/Image"
-            },
-            "type": "array",
             "description": "A list of the generated images.",
-            "title": "Images",
+            "type": "array",
             "examples": [
               [
                 {
-                  "height": 1024,
-                  "content_type": "image/png",
                   "url": "https://v3b.fal.media/files/b/0a8c37ef/niSZAZpVwwixexdtx1AAf.png",
-                  "width": 1024
+                  "content_type": "image/png",
+                  "width": 1024,
+                  "height": 1024
                 }
               ]
-            ]
+            ],
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            },
+            "title": "Images"
           },
           "seed": {
-            "type": "integer",
             "description": "The base seed used for the generation process.",
+            "type": "integer",
             "title": "Seed"
           }
         },
-        "type": "object",
-        "title": "HunyuanImageTextToImageResponse",
         "required": [
           "images",
           "seed"
-        ]
+        ],
+        "title": "HunyuanImageTextToImageResponse"
       },
       "ImageSize": {
-        "type": "object",
         "x-fal-order-properties": [
           "width",
           "height"
         ],
         "properties": {
-          "height": {
-            "exclusiveMinimum": 0,
-            "type": "integer",
+          "width": {
+            "description": "The width of the generated image.",
             "maximum": 14142,
-            "description": "The height of the generated image.",
-            "title": "Height",
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "title": "Width",
             "default": 512
           },
-          "width": {
-            "exclusiveMinimum": 0,
-            "type": "integer",
+          "height": {
+            "description": "The height of the generated image.",
             "maximum": 14142,
-            "description": "The width of the generated image.",
-            "title": "Width",
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "title": "Height",
             "default": 512
           }
         },
+        "type": "object",
         "title": "ImageSize"
       },
       "Image": {
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
         "properties": {
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
-          },
-          "height": {
-            "examples": [
-              1024
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The height of the image in pixels.",
-            "title": "Height"
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
-          },
           "url": {
-            "type": "string",
             "description": "The URL where the file can be downloaded from.",
+            "type": "string",
             "title": "Url"
           },
-          "width": {
-            "examples": [
-              1024
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The width of the image in pixels.",
-            "title": "Width"
-          },
           "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
             "anyOf": [
               {
                 "type": "string"
@@ -319,21 +264,76 @@
               }
             ],
             "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
             "title": "File Name"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The width of the image in pixels.",
+            "examples": [
+              1024
+            ],
+            "title": "Width"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The height of the image in pixels.",
+            "examples": [
+              1024
+            ],
+            "title": "Height"
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size"
           }
         },
-        "type": "object",
         "description": "Represents an image file.",
+        "type": "object",
         "required": [
           "url"
-        ],
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size",
-          "width",
-          "height"
         ],
         "title": "Image"
       }

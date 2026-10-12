@@ -44,6 +44,10 @@ The API accepts the following input parameters:
   - Default: `"Normal"`
   - Options: `"Normal"`, `"Strong"`, `"Extreme"`, `"Denoise Max"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -60,7 +64,8 @@ The API accepts the following input parameters:
 {
   "image_url": "https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_poor_1.jpeg",
   "output_format": "jpeg",
-  "model": "Normal"
+  "model": "Normal",
+  "enable_safety_checker": true
 }
 ```
 

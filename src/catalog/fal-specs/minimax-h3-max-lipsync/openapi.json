@@ -72,57 +72,60 @@
       },
       "H3MaxLipSyncImageToVideoInput": {
         "properties": {
-          "audio_url": {
-            "type": "string",
-            "description": "Audio to synchronize the mouth movements to, at least 5 seconds long. Audio over 14.8 seconds is automatically clipped to its first 14.8 seconds. The output video matches the clipped audio duration in a single generation.",
-            "title": "Audio Url"
-          },
-          "image_url": {
-            "type": "string",
-            "description": "Image to animate. The aspect ratio must be between 0.4 and 2.5.",
-            "title": "Image Url"
-          },
           "enable_transcription": {
-            "default": false,
-            "type": "boolean",
             "description": "Transcribe the supplied audio to guide lip synchronization. When disabled, synchronize to the audio without a transcript.",
+            "type": "boolean",
+            "default": false,
             "title": "Enable Transcription"
           },
+          "image_url": {
+            "description": "Image to animate. The aspect ratio must be between 0.4 and 2.5.",
+            "type": "string",
+            "title": "Image Url"
+          },
           "seed": {
+            "description": "Random seed; selected randomly if omitted.",
             "anyOf": [
               {
+                "type": "integer",
                 "minimum": 0,
-                "maximum": 2147483647,
-                "type": "integer"
+                "maximum": 2147483647
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Seed",
-            "description": "Random seed; selected randomly if omitted."
+            "title": "Seed"
+          },
+          "audio_url": {
+            "description": "Audio to synchronize the mouth movements to, at least 5 seconds long. Supports up to 15 minutes. The output video matches the supplied audio duration.",
+            "type": "string",
+            "title": "Audio Url"
           },
           "resolution": {
+            "description": "Output resolution. Uses the supported aspect ratio nearest the image.",
+            "type": "string",
+            "default": "768P",
             "enum": [
               "480P",
               "768P",
               "1080P",
               "2K"
             ],
-            "default": "768P",
-            "type": "string",
-            "description": "Output resolution. Uses the supported aspect ratio nearest the image.",
             "title": "Resolution"
           },
           "enable_safety_checker": {
-            "default": true,
-            "type": "boolean",
             "description": "Enable content safety checks.",
+            "type": "boolean",
+            "default": true,
             "title": "Enable Safety Checker"
           }
         },
-        "title": "LipSyncImageInput",
         "type": "object",
+        "required": [
+          "image_url",
+          "audio_url"
+        ],
         "x-fal-order-properties": [
           "image_url",
           "audio_url",
@@ -131,19 +134,16 @@
           "seed",
           "enable_safety_checker"
         ],
-        "required": [
-          "image_url",
-          "audio_url"
-        ]
+        "title": "LipSyncImageInput"
       },
       "H3MaxLipSyncImageToVideoOutput": {
         "properties": {
-          "seed": {
-            "type": "integer",
-            "description": "Random seed used for generation.",
-            "title": "Seed"
+          "video": {
+            "description": "Lip-synced video with the supplied soundtrack.",
+            "$ref": "#/components/schemas/File"
           },
           "timings": {
+            "description": "Timing breakdown in seconds. 'inference' is the DiT denoising time on the GPU backend, summed over every window this request generated. Null on routes that do not report backend timings.",
             "anyOf": [
               {
                 "type": "object",
@@ -155,32 +155,32 @@
                 "type": "null"
               }
             ],
-            "title": "Timings",
-            "description": "Timing breakdown in seconds. 'inference' is the DiT denoising time on the GPU backend, summed over every window this request generated. Null on routes that do not report backend timings."
+            "title": "Timings"
+          },
+          "seed": {
+            "description": "Random seed used for generation.",
+            "type": "integer",
+            "title": "Seed"
           },
           "duration": {
-            "type": "number",
             "description": "Output duration in seconds.",
+            "type": "number",
             "title": "Duration"
-          },
-          "video": {
-            "description": "Lip-synced video with the supplied soundtrack.",
-            "$ref": "#/components/schemas/File"
           }
         },
-        "title": "LipSyncOutput",
         "type": "object",
+        "required": [
+          "video",
+          "seed",
+          "duration"
+        ],
         "x-fal-order-properties": [
           "video",
           "seed",
           "duration",
           "timings"
         ],
-        "required": [
-          "video",
-          "seed",
-          "duration"
-        ]
+        "title": "LipSyncOutput"
       },
       "File": {
         "properties": {
@@ -198,6 +198,11 @@
               "image/png"
             ],
             "title": "Content Type"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
           },
           "file_size": {
             "description": "The size of the file in bytes.",
@@ -228,24 +233,19 @@
               "z9RV14K95DvU.png"
             ],
             "title": "File Name"
-          },
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
           }
         },
-        "title": "File",
         "type": "object",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "required": [
-          "url"
-        ]
+        "title": "File"
       }
     }
   },

@@ -58,6 +58,10 @@ The API accepts the following input parameters:
   Turning on I2V Stability reduces hallucination but also reduces motion.
   - Default: `false`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -77,7 +81,8 @@ The API accepts the following input parameters:
   "image_url": "https://storage.googleapis.com/falserverless/example_inputs/hunyuan_i2v.jpg",
   "aspect_ratio": "16:9",
   "resolution": "720p",
-  "num_frames": 129
+  "num_frames": 129,
+  "enable_safety_checker": true
 }
 ```
 

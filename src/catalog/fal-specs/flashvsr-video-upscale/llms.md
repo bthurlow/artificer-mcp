@@ -80,6 +80,10 @@ The API accepts the following input parameters:
   - Default: `"balanced"`
   - Options: `"fast"`, `"balanced"`, `"small"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -101,7 +105,8 @@ The API accepts the following input parameters:
   "quality": 70,
   "output_format": "X264 (.mp4)",
   "output_quality": "high",
-  "output_write_mode": "balanced"
+  "output_write_mode": "balanced",
+  "enable_safety_checker": true
 }
 ```
 

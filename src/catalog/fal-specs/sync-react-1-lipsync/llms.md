@@ -93,7 +93,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video with synchronized lip and facial movements.
-  - Examples: {"content_type":"video/mp4","file_name":"output.mp4","width":1920,"num_frames":169,"fps":24,"duration":7.041667,"height":1088,"url":"https://storage.googleapis.com/falserverless/example_outputs/react_1/output.mp4"}
+  - Examples: {"width":1920,"url":"https://storage.googleapis.com/falserverless/example_outputs/react_1/output.mp4","file_name":"output.mp4","num_frames":169,"content_type":"video/mp4","fps":24,"height":1088,"duration":7.041667}
 
 
 
@@ -102,14 +102,14 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "video/mp4",
-    "file_name": "output.mp4",
     "width": 1920,
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/react_1/output.mp4",
+    "file_name": "output.mp4",
     "num_frames": 169,
+    "content_type": "video/mp4",
     "fps": 24,
-    "duration": 7.041667,
     "height": 1088,
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/react_1/output.mp4"
+    "duration": 7.041667
   }
 }
 ```

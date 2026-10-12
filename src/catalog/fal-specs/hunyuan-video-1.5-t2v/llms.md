@@ -64,6 +64,10 @@ The API accepts the following input parameters:
   Enable prompt expansion to enhance the input prompt. Default value: `true`
   - Default: `true`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -83,7 +87,8 @@ The API accepts the following input parameters:
   "aspect_ratio": "16:9",
   "resolution": "480p",
   "num_frames": 121,
-  "enable_prompt_expansion": true
+  "enable_prompt_expansion": true,
+  "enable_safety_checker": true
 }
 ```
 

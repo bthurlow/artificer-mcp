@@ -73,7 +73,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   URL to the upscaled video
-  - Examples: {"fps":23.130193905817176,"num_frames":302,"url":"https://storage.googleapis.com/falserverless/example_outputs/crystal_upscaler/video_upscaling/video_out.mp4","height":2160,"duration":13.056527,"width":4096,"content_type":"video/mp4","file_name":"w0VQQvPdwvV2GSCtRTMzh_hDH8SPrB.mp4"}
+  - Examples: {"height":2160,"file_name":"w0VQQvPdwvV2GSCtRTMzh_hDH8SPrB.mp4","duration":13.056527,"fps":23.130193905817176,"content_type":"video/mp4","width":4096,"url":"https://storage.googleapis.com/falserverless/example_outputs/crystal_upscaler/video_upscaling/video_out.mp4","num_frames":302}
 
 
 
@@ -82,14 +82,14 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "fps": 23.130193905817176,
-    "num_frames": 302,
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/crystal_upscaler/video_upscaling/video_out.mp4",
     "height": 2160,
+    "file_name": "w0VQQvPdwvV2GSCtRTMzh_hDH8SPrB.mp4",
     "duration": 13.056527,
-    "width": 4096,
+    "fps": 23.130193905817176,
     "content_type": "video/mp4",
-    "file_name": "w0VQQvPdwvV2GSCtRTMzh_hDH8SPrB.mp4"
+    "width": 4096,
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/crystal_upscaler/video_upscaling/video_out.mp4",
+    "num_frames": 302
   }
 }
 ```

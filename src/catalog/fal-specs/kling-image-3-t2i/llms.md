@@ -32,7 +32,7 @@ The API accepts the following input parameters:
 
 - **`prompt`** (`string`, _required_):
   Text prompt for image generation. Max 2500 characters.
-  - Examples: "Extremely realistic image of a hobbit's study filled with maps and curiosities, roaring fireplace, rain against round windows, stacks of handwritten journals, warm tungsten lighting, inviting atmosphere. Hobbit is sitting on the chair."
+  - Examples: "Extremely realistic image of a scholar's study filled with maps and curiosities, roaring fireplace, rain against round windows, stacks of handwritten journals, warm tungsten lighting, inviting atmosphere. The scholar is sitting on a chair."
 
 - **`negative_prompt`** (`string`, _optional_):
   Negative text prompt. It is recommended to supplement negative prompt information through negative sentences directly within positive prompts.
@@ -65,13 +65,17 @@ The API accepts the following input parameters:
   If `True`, the media will be returned as a data URI.
   - Default: `false`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
 
 ```json
 {
-  "prompt": "Extremely realistic image of a hobbit's study filled with maps and curiosities, roaring fireplace, rain against round windows, stacks of handwritten journals, warm tungsten lighting, inviting atmosphere. Hobbit is sitting on the chair."
+  "prompt": "Extremely realistic image of a scholar's study filled with maps and curiosities, roaring fireplace, rain against round windows, stacks of handwritten journals, warm tungsten lighting, inviting atmosphere. The scholar is sitting on a chair."
 }
 ```
 
@@ -79,14 +83,15 @@ The API accepts the following input parameters:
 
 ```json
 {
-  "prompt": "Extremely realistic image of a hobbit's study filled with maps and curiosities, roaring fireplace, rain against round windows, stacks of handwritten journals, warm tungsten lighting, inviting atmosphere. Hobbit is sitting on the chair.",
+  "prompt": "Extremely realistic image of a scholar's study filled with maps and curiosities, roaring fireplace, rain against round windows, stacks of handwritten journals, warm tungsten lighting, inviting atmosphere. The scholar is sitting on a chair.",
   "elements": [
     {}
   ],
   "resolution": "1K",
   "num_images": 1,
   "aspect_ratio": "16:9",
-  "output_format": "png"
+  "output_format": "png",
+  "enable_safety_checker": true
 }
 ```
 
@@ -98,7 +103,7 @@ The API returns the following output format:
 - **`images`** (`list<Image>`, _required_):
   Generated images
   - Array of Image
-  - Examples: [{"url":"https://v3b.fal.media/files/b/0a8d0681/Qos5QbCS93YpsPzZ3i8zT_a889cacced76430d85d08c60ca3d023d.png","file_name":"a889cacced76430d85d08c60ca3d023d.png","content_type":"image/png","file_size":1637946}]
+  - Examples: [{"content_type":"image/png","file_name":"a889cacced76430d85d08c60ca3d023d.png","url":"https://v3b.fal.media/files/b/0a8d0681/Qos5QbCS93YpsPzZ3i8zT_a889cacced76430d85d08c60ca3d023d.png","file_size":1637946}]
 
 
 
@@ -108,9 +113,9 @@ The API returns the following output format:
 {
   "images": [
     {
-      "url": "https://v3b.fal.media/files/b/0a8d0681/Qos5QbCS93YpsPzZ3i8zT_a889cacced76430d85d08c60ca3d023d.png",
-      "file_name": "a889cacced76430d85d08c60ca3d023d.png",
       "content_type": "image/png",
+      "file_name": "a889cacced76430d85d08c60ca3d023d.png",
+      "url": "https://v3b.fal.media/files/b/0a8d0681/Qos5QbCS93YpsPzZ3i8zT_a889cacced76430d85d08c60ca3d023d.png",
       "file_size": 1637946
     }
   ]
@@ -128,7 +133,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "Extremely realistic image of a hobbit's study filled with maps and curiosities, roaring fireplace, rain against round windows, stacks of handwritten journals, warm tungsten lighting, inviting atmosphere. Hobbit is sitting on the chair."
+     "prompt": "Extremely realistic image of a scholar's study filled with maps and curiosities, roaring fireplace, rain against round windows, stacks of handwritten journals, warm tungsten lighting, inviting atmosphere. The scholar is sitting on a chair."
    }'
 ```
 
@@ -153,7 +158,7 @@ def on_queue_update(update):
 result = fal_client.subscribe(
     "fal-ai/kling-image/v3/text-to-image",
     arguments={
-        "prompt": "Extremely realistic image of a hobbit's study filled with maps and curiosities, roaring fireplace, rain against round windows, stacks of handwritten journals, warm tungsten lighting, inviting atmosphere. Hobbit is sitting on the chair."
+        "prompt": "Extremely realistic image of a scholar's study filled with maps and curiosities, roaring fireplace, rain against round windows, stacks of handwritten journals, warm tungsten lighting, inviting atmosphere. The scholar is sitting on a chair."
     },
     with_logs=True,
     on_queue_update=on_queue_update,
@@ -176,7 +181,7 @@ import { fal } from "@fal-ai/client";
 
 const result = await fal.subscribe("fal-ai/kling-image/v3/text-to-image", {
   input: {
-    prompt: "Extremely realistic image of a hobbit's study filled with maps and curiosities, roaring fireplace, rain against round windows, stacks of handwritten journals, warm tungsten lighting, inviting atmosphere. Hobbit is sitting on the chair."
+    prompt: "Extremely realistic image of a scholar's study filled with maps and curiosities, roaring fireplace, rain against round windows, stacks of handwritten journals, warm tungsten lighting, inviting atmosphere. The scholar is sitting on a chair."
   },
   logs: true,
   onQueueUpdate: (update) => {

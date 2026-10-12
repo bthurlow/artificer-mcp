@@ -54,6 +54,10 @@ The API accepts the following input parameters:
   The duration of the generated video in seconds Default value: `5`
   - Default: `5`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -71,7 +75,8 @@ The API accepts the following input parameters:
   "prompt": "A luxurious tea scene where a luxury brand teapot pours tea into an oversized luxury cup. Steam rises, creating an ethereal moment. camera dolly in",
   "aspect_ratio": "16:9",
   "resolution": "720p",
-  "duration": 5
+  "duration": 5,
+  "enable_safety_checker": true
 }
 ```
 

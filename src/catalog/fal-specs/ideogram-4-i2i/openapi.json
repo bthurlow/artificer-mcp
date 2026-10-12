@@ -71,16 +71,54 @@
         ]
       },
       "V4ImageToImageInput": {
+        "x-fal-order-properties": [
+          "prompt",
+          "expansion_model",
+          "image_size",
+          "rendering_speed",
+          "acceleration",
+          "num_images",
+          "seed",
+          "sync_mode",
+          "enable_safety_checker",
+          "output_format",
+          "image_url",
+          "strength"
+        ],
         "properties": {
-          "image_url": {
-            "type": "string",
-            "description": "URL of the input image for image-to-image generation.",
-            "title": "Image URL",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/model_tests/svd/rocket.png"
+          "num_images": {
+            "type": "integer",
+            "description": "Number of images to generate.",
+            "minimum": 1,
+            "title": "Number of Images",
+            "default": 1,
+            "maximum": 4
+          },
+          "seed": {
+            "description": "The seed to use for generation. If not provided, a random seed will be used.",
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
             ]
           },
+          "rendering_speed": {
+            "enum": [
+              "TURBO",
+              "BALANCED",
+              "QUALITY"
+            ],
+            "description": "The rendering speed to use. Faster speeds use fewer denoising steps.",
+            "title": "Rendering Speed",
+            "default": "BALANCED",
+            "type": "string"
+          },
           "image_size": {
+            "description": "The output image size. Use 'auto' to match the input image size (capped at ~25MP, up to 8192px per side).",
             "title": "Image Size",
             "default": "auto",
             "anyOf": [
@@ -99,50 +137,31 @@
                 ],
                 "type": "string"
               }
+            ]
+          },
+          "output_format": {
+            "enum": [
+              "jpeg",
+              "png"
             ],
-            "description": "The output image size. Use 'auto' to match the input image size (capped at ~25MP, up to 8192px per side)."
+            "description": "The format of the generated image.",
+            "title": "Output Format",
+            "default": "jpeg",
+            "type": "string"
           },
-          "num_images": {
-            "minimum": 1,
-            "maximum": 4,
-            "type": "integer",
-            "description": "Number of images to generate.",
-            "title": "Number of Images",
-            "default": 1
-          },
-          "strength": {
-            "minimum": 0,
-            "default": 0.8,
-            "maximum": 1,
-            "type": "number",
-            "description": "How much to transform the input image. 1.0 ignores the input image entirely; lower values stay closer to it.",
-            "title": "Strength"
+          "sync_mode": {
+            "description": "If `True`, the image is returned as a data URI and is not stored.",
+            "title": "Sync Mode",
+            "default": false,
+            "type": "boolean"
           },
           "prompt": {
-            "type": "string",
             "description": "The prompt to generate an image from.",
             "title": "Prompt",
             "examples": [
               "A red panda perched on a mossy branch in a misty forest at sunrise"
-            ]
-          },
-          "seed": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
             ],
-            "title": "Seed",
-            "description": "The seed to use for generation. If not provided, a random seed will be used."
-          },
-          "sync_mode": {
-            "default": false,
-            "type": "boolean",
-            "description": "If `True`, the image is returned as a data URI and is not stored.",
-            "title": "Sync Mode"
+            "type": "string"
           },
           "acceleration": {
             "enum": [
@@ -151,40 +170,13 @@
               "regular",
               "high"
             ],
-            "default": "none",
-            "type": "string",
             "description": "The acceleration level to use for the image generation.",
             "title": "Acceleration",
+            "default": "none",
             "examples": [
               "none"
-            ]
-          },
-          "rendering_speed": {
-            "enum": [
-              "TURBO",
-              "BALANCED",
-              "QUALITY"
             ],
-            "default": "BALANCED",
-            "type": "string",
-            "description": "The rendering speed to use. Faster speeds use fewer denoising steps.",
-            "title": "Rendering Speed"
-          },
-          "output_format": {
-            "enum": [
-              "jpeg",
-              "png"
-            ],
-            "default": "jpeg",
-            "type": "string",
-            "description": "The format of the generated image.",
-            "title": "Output Format"
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "type": "boolean",
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "title": "Enable Safety Checker"
+            "type": "string"
           },
           "expansion_model": {
             "enum": [
@@ -192,64 +184,70 @@
               "Medium",
               "Large"
             ],
+            "description": "Which model expands the prompt. 'None' disables prompt expansion and skips its fee; 'Medium' is fast; 'Large' uses Ideogram's Magic Prompt for the highest quality.",
             "examples": [
               "Large"
             ],
+            "title": "Expansion Model",
             "default": "Medium",
-            "type": "string",
-            "description": "Which model expands the prompt. 'None' disables prompt expansion and skips its fee; 'Medium' is fast; 'Large' uses Ideogram's Magic Prompt for the highest quality.",
-            "title": "Expansion Model"
+            "type": "string"
+          },
+          "strength": {
+            "type": "number",
+            "description": "How much to transform the input image. 1.0 ignores the input image entirely; lower values stay closer to it.",
+            "minimum": 0,
+            "title": "Strength",
+            "default": 0.8,
+            "maximum": 1
+          },
+          "image_url": {
+            "description": "URL of the input image for image-to-image generation.",
+            "title": "Image URL",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/model_tests/svd/rocket.png"
+            ],
+            "type": "string"
+          },
+          "enable_safety_checker": {
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "title": "Enable Safety Checker",
+            "default": true,
+            "type": "boolean"
           }
         },
-        "x-fal-order-properties": [
-          "prompt",
-          "expansion_model",
-          "image_size",
-          "rendering_speed",
-          "acceleration",
-          "num_images",
-          "seed",
-          "sync_mode",
-          "enable_safety_checker",
-          "output_format",
-          "image_url",
-          "strength"
-        ],
-        "type": "object",
-        "title": "ImageToImageInput",
         "required": [
           "prompt",
           "image_url"
-        ]
+        ],
+        "title": "ImageToImageInput",
+        "type": "object"
       },
       "V4ImageToImageOutput": {
+        "x-fal-order-properties": [
+          "images",
+          "timings",
+          "seed",
+          "has_nsfw_concepts",
+          "prompt"
+        ],
         "properties": {
-          "seed": {
-            "type": "integer",
-            "description": "\n            Seed of the generated Image. It will be the same value of the one passed in the\n            input or the randomly generated that was used in case none was passed.\n        ",
-            "title": "Seed"
-          },
           "timings": {
-            "type": "object",
             "title": "Timings",
             "additionalProperties": {
               "type": "number"
-            }
-          },
-          "has_nsfw_concepts": {
-            "items": {
-              "type": "boolean"
             },
-            "type": "array",
-            "description": "Whether the generated images contain NSFW concepts.",
-            "title": "Has Nsfw Concepts"
+            "type": "object"
+          },
+          "seed": {
+            "description": "\n            Seed of the generated Image. It will be the same value of the one passed in the\n            input or the randomly generated that was used in case none was passed.\n        ",
+            "title": "Seed",
+            "type": "integer"
           },
           "images": {
+            "description": "The generated images.",
             "items": {
               "$ref": "#/components/schemas/ImageFile"
             },
-            "type": "array",
-            "description": "The generated images.",
             "title": "Images",
             "examples": [
               [
@@ -257,60 +255,101 @@
                   "url": "https://v3b.fal.media/files/b/0a9c92b2/JLDtkHeeec2BL7ZX3PyvI_KzumHcSa.jpg"
                 }
               ]
-            ]
+            ],
+            "type": "array"
+          },
+          "has_nsfw_concepts": {
+            "description": "Whether the generated images contain NSFW concepts.",
+            "items": {
+              "type": "boolean"
+            },
+            "title": "Has Nsfw Concepts",
+            "type": "array"
           },
           "prompt": {
-            "type": "string",
             "description": "The prompt used for generating the image.",
-            "title": "Prompt"
+            "title": "Prompt",
+            "type": "string"
           }
         },
-        "x-fal-order-properties": [
-          "images",
-          "timings",
-          "seed",
-          "has_nsfw_concepts",
-          "prompt"
-        ],
-        "type": "object",
-        "title": "IdeogramV4Output",
         "required": [
           "images",
           "timings",
           "seed",
           "has_nsfw_concepts",
           "prompt"
-        ]
+        ],
+        "title": "IdeogramV4Output",
+        "type": "object"
       },
       "ImageSize": {
-        "properties": {
-          "height": {
-            "default": 512,
-            "maximum": 14142,
-            "type": "integer",
-            "description": "The height of the generated image.",
-            "exclusiveMinimum": 0,
-            "title": "Height"
-          },
-          "width": {
-            "default": 512,
-            "maximum": 14142,
-            "type": "integer",
-            "description": "The width of the generated image.",
-            "exclusiveMinimum": 0,
-            "title": "Width"
-          }
-        },
-        "type": "object",
-        "title": "ImageSize",
         "x-fal-order-properties": [
           "width",
           "height"
-        ]
+        ],
+        "properties": {
+          "height": {
+            "type": "integer",
+            "description": "The height of the generated image.",
+            "exclusiveMinimum": 0,
+            "title": "Height",
+            "default": 512,
+            "maximum": 14142
+          },
+          "width": {
+            "type": "integer",
+            "description": "The width of the generated image.",
+            "exclusiveMinimum": 0,
+            "title": "Width",
+            "default": 512,
+            "maximum": 14142
+          }
+        },
+        "title": "ImageSize",
+        "type": "object"
       },
       "ImageFile": {
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
         "properties": {
+          "width": {
+            "description": "The width of the image",
+            "title": "Width",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "height": {
+            "description": "The height of the image",
+            "title": "Height",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "content_type": {
+            "description": "The mime type of the file.",
+            "title": "Content Type",
             "examples": [
               "image/png"
             ],
@@ -321,50 +360,11 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Content Type",
-            "description": "The mime type of the file."
-          },
-          "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Height",
-            "description": "The height of the image"
-          },
-          "width": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Width",
-            "description": "The width of the image"
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
+            ]
           },
           "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
             ],
@@ -375,29 +375,29 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
+            ]
           },
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size",
-          "width",
-          "height"
-        ],
-        "type": "object",
-        "title": "ImageFile",
         "required": [
           "url"
-        ]
+        ],
+        "title": "ImageFile",
+        "type": "object"
       }
     }
   },

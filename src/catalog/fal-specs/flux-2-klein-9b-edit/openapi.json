@@ -83,22 +83,66 @@
           "image_urls"
         ],
         "properties": {
-          "output_format": {
-            "enum": [
-              "jpeg",
-              "png",
-              "webp"
-            ],
-            "default": "png",
+          "sync_mode": {
+            "description": "If `True`, the media will be returned as a data URI. Output is not stored when this is True.",
+            "type": "boolean",
+            "default": false,
+            "title": "Sync Mode"
+          },
+          "prompt": {
+            "description": "The prompt to edit the image.",
             "type": "string",
-            "description": "The format of the generated image.",
-            "title": "Output Format"
+            "examples": [
+              "Turn this into a realistic image"
+            ],
+            "title": "Prompt"
           },
           "enable_safety_checker": {
-            "default": true,
-            "title": "Enable Safety Checker",
             "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked, and images flagged as unsafe are returned as black images.",
-            "type": "boolean"
+            "type": "boolean",
+            "default": true,
+            "title": "Enable Safety Checker"
+          },
+          "num_inference_steps": {
+            "minimum": 4,
+            "description": "The number of inference steps to perform.",
+            "maximum": 8,
+            "type": "integer",
+            "default": 4,
+            "title": "Number of Inference Steps"
+          },
+          "num_images": {
+            "minimum": 1,
+            "description": "The number of images to generate.",
+            "maximum": 4,
+            "type": "integer",
+            "default": 1,
+            "title": "Number of Images"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The seed to use for the generation. If not provided, a random seed will be used.",
+            "title": "Seed"
+          },
+          "image_urls": {
+            "description": "The URLs of the images for editing. A maximum of 4 images are allowed.",
+            "type": "array",
+            "examples": [
+              [
+                "https://v3b.fal.media/files/b/0a8a69d5/kkXxFfj1QeVtw35kxy5Py_1a7e3511-bd2c-46be-923a-8e6be2496f12.png"
+              ]
+            ],
+            "title": "Image URLs",
+            "items": {
+              "type": "string"
+            }
           },
           "image_size": {
             "anyOf": [
@@ -120,77 +164,33 @@
                 "type": "null"
               }
             ],
-            "title": "Image Size",
             "description": "The size of the generated image. If not provided, uses the input image size.",
             "examples": [
               {
-                "height": 1152,
-                "width": 2016
-              }
-            ]
-          },
-          "num_images": {
-            "maximum": 4,
-            "default": 1,
-            "title": "Number of Images",
-            "description": "The number of images to generate.",
-            "type": "integer",
-            "minimum": 1
-          },
-          "seed": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
+                "width": 2016,
+                "height": 1152
               }
             ],
-            "title": "Seed",
-            "description": "The seed to use for the generation. If not provided, a random seed will be used."
+            "title": "Image Size"
           },
-          "num_inference_steps": {
-            "maximum": 8,
-            "default": 4,
-            "title": "Number of Inference Steps",
-            "description": "The number of inference steps to perform.",
-            "type": "integer",
-            "minimum": 4
-          },
-          "prompt": {
-            "title": "Prompt",
-            "description": "The prompt to edit the image.",
+          "output_format": {
+            "description": "The format of the generated image.",
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
+            ],
             "type": "string",
-            "examples": [
-              "Turn this into a realistic image"
-            ]
-          },
-          "sync_mode": {
-            "default": false,
-            "title": "Sync Mode",
-            "description": "If `True`, the media will be returned as a data URI. Output is not stored when this is True.",
-            "type": "boolean"
-          },
-          "image_urls": {
-            "type": "array",
-            "title": "Image URLs",
-            "description": "The URLs of the images for editing. A maximum of 4 images are allowed.",
-            "items": {
-              "type": "string"
-            },
-            "examples": [
-              [
-                "https://v3b.fal.media/files/b/0a8a69d5/kkXxFfj1QeVtw35kxy5Py_1a7e3511-bd2c-46be-923a-8e6be2496f12.png"
-              ]
-            ]
+            "default": "png",
+            "title": "Output Format"
           }
         },
-        "title": "KleinDistilledEditInput",
         "type": "object",
         "required": [
           "prompt",
           "image_urls"
-        ]
+        ],
+        "title": "KleinDistilledEditInput"
       },
       "Flux2Klein9bEditOutput": {
         "x-fal-order-properties": [
@@ -201,41 +201,40 @@
           "prompt"
         ],
         "properties": {
+          "seed": {
+            "description": "\n            Seed of the generated Image. It will be the same value of the one passed in the\n            input or the randomly generated that was used in case none was passed.\n        ",
+            "type": "integer",
+            "title": "Seed"
+          },
+          "prompt": {
+            "description": "The prompt used for generating the image.",
+            "type": "string",
+            "title": "Prompt"
+          },
+          "has_nsfw_concepts": {
+            "description": "Whether the generated images contain NSFW concepts.",
+            "type": "array",
+            "items": {
+              "type": "boolean"
+            },
+            "title": "Has Nsfw Concepts"
+          },
           "timings": {
             "additionalProperties": {
               "type": "number"
             },
-            "title": "Timings",
-            "type": "object"
+            "type": "object",
+            "title": "Timings"
           },
           "images": {
-            "title": "Images",
             "description": "The generated images",
+            "type": "array",
             "items": {
               "$ref": "#/components/schemas/ImageFile"
             },
-            "type": "array"
-          },
-          "has_nsfw_concepts": {
-            "title": "Has Nsfw Concepts",
-            "description": "Whether the generated images contain NSFW concepts.",
-            "items": {
-              "type": "boolean"
-            },
-            "type": "array"
-          },
-          "seed": {
-            "title": "Seed",
-            "description": "\n            Seed of the generated Image. It will be the same value of the one passed in the\n            input or the randomly generated that was used in case none was passed.\n        ",
-            "type": "integer"
-          },
-          "prompt": {
-            "title": "Prompt",
-            "description": "The prompt used for generating the image.",
-            "type": "string"
+            "title": "Images"
           }
         },
-        "title": "KleinT2IOutput",
         "type": "object",
         "required": [
           "images",
@@ -243,7 +242,8 @@
           "seed",
           "has_nsfw_concepts",
           "prompt"
-        ]
+        ],
+        "title": "KleinT2IOutput"
       },
       "ImageSize": {
         "properties": {

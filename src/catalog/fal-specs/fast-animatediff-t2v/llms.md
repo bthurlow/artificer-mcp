@@ -74,6 +74,10 @@ The API accepts the following input parameters:
   - Default: `"square"`
   - One of: ImageSize | Enum
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -94,7 +98,8 @@ The API accepts the following input parameters:
   "num_inference_steps": 25,
   "guidance_scale": 7.5,
   "fps": 8,
-  "video_size": "square"
+  "video_size": "square",
+  "enable_safety_checker": true
 }
 ```
 

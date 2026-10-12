@@ -71,70 +71,69 @@
         ]
       },
       "SeedreamV5ProLayerizeInput": {
-        "required": [
-          "image_url"
-        ],
         "properties": {
-          "enhance_prompt_mode": {
-            "description": "Prompt optimization mode. `standard` prioritizes image quality; `fast` reduces generation time.",
-            "type": "string",
-            "enum": [
-              "standard",
-              "fast"
-            ],
-            "default": "standard",
-            "title": "Enhance Prompt Mode"
+          "enable_safety_checker": {
+            "type": "boolean",
+            "default": true,
+            "title": "Enable Safety Checker",
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "examples": [
+              true
+            ]
           },
           "image_size": {
-            "examples": [
-              "auto"
-            ],
-            "description": "Resolution tier for the output base image and layers. `auto` adapts to the input image while preserving each element's aspect ratio.",
             "type": "string",
-            "default": "auto",
             "enum": [
               "auto",
               "auto_1K",
               "auto_1.5K",
               "auto_2K"
             ],
-            "title": "Image Size"
+            "default": "auto",
+            "title": "Image Size",
+            "description": "Resolution tier for the output base image and layers. `auto` adapts to the input image while preserving each element's aspect ratio.",
+            "examples": [
+              "auto"
+            ]
           },
           "sync_mode": {
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "type": "boolean",
             "default": false,
-            "title": "Sync Mode"
+            "title": "Sync Mode",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "type": "boolean"
           },
           "prompt": {
-            "examples": [
-              "Return name and description in english."
-            ],
-            "description": "Optional instructions describing which elements to separate. When empty, the model automatically separates the major elements. Normalized `<bbox>left top right bottom</bbox>` tags may be used for precise coordinate targeting.",
             "type": "string",
             "default": "",
-            "title": "Prompt"
-          },
-          "enable_safety_checker": {
+            "title": "Prompt",
+            "description": "Optional instructions describing which elements to separate. When empty, the model automatically separates the major elements. Normalized `<bbox>left top right bottom</bbox>` tags may be used for precise coordinate targeting.",
             "examples": [
-              true
-            ],
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "type": "boolean",
-            "default": true,
-            "title": "Enable Safety Checker"
+              "Return name and description in english."
+            ]
           },
           "image_url": {
+            "type": "string",
+            "title": "Image Url",
+            "description": "URL of the image to decompose into a base image and independently editable layers. The image must contain between 512x512 and 6000x6000 total pixels, have an aspect ratio between 1/16 and 16, and be no larger than 30 MB.",
             "examples": [
               "https://storage.googleapis.com/falserverless/example_inputs/kontext_example_input.webp"
+            ]
+          },
+          "enhance_prompt_mode": {
+            "enum": [
+              "standard",
+              "fast"
             ],
-            "description": "URL of the image to decompose into a base image and independently editable layers. The image must contain between 512x512 and 6000x6000 total pixels, have an aspect ratio between 1/16 and 16, and be no larger than 30 MB.",
-            "type": "string",
-            "title": "Image Url"
+            "default": "standard",
+            "title": "Enhance Prompt Mode",
+            "description": "Prompt optimization mode. `standard` prioritizes image quality; `fast` reduces generation time.",
+            "type": "string"
           }
         },
+        "required": [
+          "image_url"
+        ],
         "title": "SeedDream50ProLayerizeInput",
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "image_url",
@@ -142,53 +141,49 @@
           "sync_mode",
           "enable_safety_checker",
           "enhance_prompt_mode"
-        ]
+        ],
+        "type": "object"
       },
       "SeedreamV5ProLayerizeOutput": {
-        "required": [
-          "images",
-          "layers"
-        ],
         "properties": {
           "layers": {
             "items": {
               "$ref": "#/components/schemas/SeedDream50ProLayer"
             },
+            "title": "Layers",
             "description": "The base image followed by up to 16 separated layers, ordered by increasing z_index.",
-            "type": "array",
-            "title": "Layers"
+            "type": "array"
           },
           "images": {
             "items": {
               "$ref": "#/components/schemas/Image"
             },
+            "type": "array",
+            "title": "Images",
+            "description": "The same images as `layers`, in the same order, flattened for gallery rendering.",
             "examples": [
               [
                 {
                   "url": "https://v3b.fal.media/files/b/0aa54c02/95ZvKubW63JnC9ubRbDo2_74290e95fb6d4bd4bac756f3e2667317.png"
                 }
               ]
-            ],
-            "description": "The same images as `layers`, in the same order, flattened for gallery rendering.",
-            "type": "array",
-            "title": "Images"
+            ]
           }
         },
+        "required": [
+          "images",
+          "layers"
+        ],
         "title": "SeedDream50ProLayerizeOutput",
-        "type": "object",
         "x-fal-order-properties": [
           "images",
           "layers"
-        ]
+        ],
+        "type": "object"
       },
       "SeedDream50ProLayer": {
-        "required": [
-          "image",
-          "z_index"
-        ],
         "properties": {
           "bounding_box": {
-            "description": "The layer's position in the base image coordinate system. Omitted for the base image.",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/SeedDream50ProLayerBoundingBox"
@@ -196,30 +191,10 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "z_index": {
-            "title": "Z Index",
-            "description": "Stacking order from bottom to top. The base image always has z_index 0.",
-            "type": "integer",
-            "maximum": 16,
-            "minimum": 0
-          },
-          "description": {
-            "title": "Description",
-            "description": "Detailed model-generated description of the layer. Omitted for the base image.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            ],
+            "description": "The layer's position in the base image coordinate system. Omitted for the base image."
           },
           "name": {
-            "title": "Name",
-            "description": "Model-generated label for the layer. Omitted for the base image.",
             "anyOf": [
               {
                 "type": "string"
@@ -227,112 +202,49 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Name",
+            "description": "Model-generated label for the layer. Omitted for the base image."
+          },
+          "z_index": {
+            "maximum": 16,
+            "minimum": 0,
+            "title": "Z Index",
+            "description": "Stacking order from bottom to top. The base image always has z_index 0.",
+            "type": "integer"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Detailed model-generated description of the layer. Omitted for the base image."
           },
           "image": {
-            "description": "The generated base image or separated layer.",
-            "$ref": "#/components/schemas/Image"
+            "$ref": "#/components/schemas/Image",
+            "description": "The generated base image or separated layer."
           }
         },
+        "required": [
+          "image",
+          "z_index"
+        ],
         "title": "SeedDream50ProLayer",
-        "type": "object",
         "x-fal-order-properties": [
           "image",
           "z_index",
           "bounding_box",
           "name",
           "description"
-        ]
+        ],
+        "type": "object"
       },
       "Image": {
-        "required": [
-          "url"
-        ],
-        "properties": {
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
-          },
-          "file_size": {
-            "title": "File Size",
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "file_name": {
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "content_type": {
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "height": {
-            "title": "Height",
-            "examples": [
-              1024
-            ],
-            "description": "The height of the image in pixels.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "width": {
-            "title": "Width",
-            "examples": [
-              1024
-            ],
-            "description": "The width of the image in pixels.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "title": "Image",
-        "description": "Represents an image file.",
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -340,41 +252,129 @@
           "file_size",
           "width",
           "height"
-        ]
+        ],
+        "properties": {
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ]
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "description": "The width of the image in pixels.",
+            "examples": [
+              1024
+            ]
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "The height of the image in pixels.",
+            "examples": [
+              1024
+            ]
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ]
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "Image",
+        "description": "Represents an image file.",
+        "type": "object"
       },
       "SeedDream50ProLayerBoundingBox": {
-        "required": [
-          "absolute",
-          "normalized"
-        ],
         "properties": {
           "normalized": {
             "items": {
               "type": "integer"
             },
             "maxItems": 4,
-            "description": "Layer bounds as [left, top, right, bottom] coordinates normalized to the integer range [0, 1000].",
-            "type": "array",
             "minItems": 4,
-            "title": "Normalized"
+            "title": "Normalized",
+            "description": "Layer bounds as [left, top, right, bottom] coordinates normalized to the integer range [0, 1000].",
+            "type": "array"
           },
           "absolute": {
             "items": {
               "type": "integer"
             },
             "maxItems": 4,
-            "description": "Layer bounds as [left, top, right, bottom] pixel coordinates in the output base image coordinate system.",
-            "type": "array",
             "minItems": 4,
-            "title": "Absolute"
+            "title": "Absolute",
+            "description": "Layer bounds as [left, top, right, bottom] pixel coordinates in the output base image coordinate system.",
+            "type": "array"
           }
         },
+        "required": [
+          "absolute",
+          "normalized"
+        ],
         "title": "SeedDream50ProLayerBoundingBox",
-        "type": "object",
         "x-fal-order-properties": [
           "absolute",
           "normalized"
-        ]
+        ],
+        "type": "object"
       }
     }
   },

@@ -42,6 +42,10 @@ The API accepts the following input parameters:
   - Default: `"6"`
   - Options: `"6"`, `"10"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -58,7 +62,8 @@ The API accepts the following input parameters:
 {
   "prompt": "An intense electrical storm rages over a modern city skyline at night. Multiple lightning bolts strike simultaneously, illuminating the towering skyscrapers in brilliant white flashes. Thunder clouds roil and churn overhead while constant lightning creates a strobe effect. Rain pours in heavy sheets, visible in the glow of city lights. The camera captures the drama from across a river as lightning reflects in the water. Lightning branches across the sky in intricate patterns. Atmosphere: dramatic, powerful, electrifying urban storm.",
   "prompt_optimizer": true,
-  "duration": "6"
+  "duration": "6",
+  "enable_safety_checker": true
 }
 ```
 

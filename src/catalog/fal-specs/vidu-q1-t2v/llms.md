@@ -52,6 +52,10 @@ The API accepts the following input parameters:
   - Default: `"auto"`
   - Options: `"auto"`, `"small"`, `"medium"`, `"large"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -69,7 +73,8 @@ The API accepts the following input parameters:
   "prompt": "In an ultra-realistic fashion photography style featuring light blue and pale amber tones, an astronaut in a spacesuit walks through the fog. The background consists of enchanting white and golden lights, creating a minimalist still life and an impressive panoramic scene.",
   "style": "general",
   "aspect_ratio": "16:9",
-  "movement_amplitude": "auto"
+  "movement_amplitude": "auto",
+  "enable_safety_checker": true
 }
 ```
 

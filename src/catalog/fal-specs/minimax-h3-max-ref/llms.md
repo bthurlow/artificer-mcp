@@ -34,10 +34,36 @@ The API accepts the following input parameters:
   Text prompt for video generation. Refer to reference assets by their modality and order in the reference lists: Image 1, Image 2, Video 1, Audio 1, and so on.
   - Examples: "Image 1 is the female protagonist. Image 2 is her small dog. Keep the woman and dog consistent with their respective reference images while they walk together through a sunlit garden."
 
-- **`duration`** (`integer`, _optional_):
-  The duration of the video in seconds. Default value: `5`
+- **`reference_image_urls`** (`list<string>`, _optional_):
+  URLs of subject/style reference images, referenced in the prompt as Image 1, Image 2, and so on. Reference images, videos, and audio clips must add up to at most 12 files.
+  - Array of string
+  - Examples: ["https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg"]
+
+- **`reference_video_urls`** (`list<string>`, _optional_):
+  URLs of motion/reference video clips (2-15 seconds each, combined duration at most 15 seconds), referenced in the prompt as Video 1, Video 2, and so on. Reference images, videos, and audio clips must add up to at most 12 files.
+  - Array of string
+
+- **`reference_audio_urls`** (`list<string>`, _optional_):
+  URLs of reference audio clips (2-15 seconds each, combined duration at most 15 seconds), referenced in the prompt as Audio 1, Audio 2, and so on. Images, videos, and audio can be provided individually or together. Reference images, videos, and audio clips must add up to at most 12 files.
+  - Array of string
+
+- **`image_url`** (`string`, _optional_):
+  Optional URL of the image to use as the first frame. The video opens exactly on this image while the references keep the subjects consistent; the output canvas follows this image.
+
+- **`middle_image_url`** (`string`, _optional_):
+  Optional image to guide the video at middle_frame_time. Requires start and end images and native 480P or 768P resolution.
+
+- **`middle_frame_time`** (`float`, _optional_):
+  Target time for the middle image, in seconds from the start. Rounded to the nearest frame at 24 fps; it must fall strictly between the first and last frames of the requested duration. Requires middle_image_url.
+  - Examples: 2.5
+
+- **`end_image_url`** (`string`, _optional_):
+  Optional URL of the image to use as the last frame. The video ends exactly on this image.
+
+- **`duration`** (`float`, _optional_):
+  Video length in seconds. The output can run up to about 0.7 s longer than requested. Default value: `5`
   - Default: `5`
-  - Range: `5` to `15`
+  - Range: `0.92` to `15`
 
 - **`resolution`** (`ResolutionEnum`, _optional_):
   The native generation resolution, or 1080P latent refinement from a native 768P source. Default value: `"768P"`
@@ -65,18 +91,9 @@ The API accepts the following input parameters:
   - Default: `"adaptive"`
   - Options: `"adaptive"`, `"21:9"`, `"16:9"`, `"4:3"`, `"1:1"`, `"3:4"`, `"9:16"`
 
-- **`reference_image_urls`** (`list<string>`, _optional_):
-  URLs of subject/style reference images, referenced in the prompt as Image 1, Image 2, and so on. Reference images, videos, and audio clips must add up to at most 12 files.
-  - Array of string
-  - Examples: ["https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg"]
-
-- **`reference_video_urls`** (`list<string>`, _optional_):
-  URLs of motion/reference video clips (2-15 seconds each, combined duration at most 15 seconds), referenced in the prompt as Video 1, Video 2, and so on. Reference images, videos, and audio clips must add up to at most 12 files.
-  - Array of string
-
-- **`reference_audio_urls`** (`list<string>`, _optional_):
-  URLs of reference audio clips (2-15 seconds each, combined duration at most 15 seconds), referenced in the prompt as Audio 1, Audio 2, and so on. Images, videos, and audio can be provided individually or together. Reference images, videos, and audio clips must add up to at most 12 files.
-  - Array of string
+- **`reference_conditions`** (`list<ReferenceCondition>`, _optional_):
+  Ordered reference list; cross-modality order is semantic and is preserved end-to-end. Do not combine with reference_*_urls.
+  - Array of ReferenceCondition
 
 
 
@@ -94,13 +111,20 @@ The API accepts the following input parameters:
 ```json
 {
   "prompt": "Image 1 is the female protagonist. Image 2 is her small dog. Keep the woman and dog consistent with their respective reference images while they walk together through a sunlit garden.",
+  "reference_image_urls": [
+    "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg"
+  ],
+  "middle_frame_time": 2.5,
   "duration": 5,
   "resolution": "768P",
   "enable_safety_checker": true,
   "prompt_expansion_mode": "disabled",
   "aspect_ratio": "adaptive",
-  "reference_image_urls": [
-    "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg"
+  "reference_conditions": [
+    {
+      "type": "image",
+      "url": ""
+    }
   ]
 }
 ```

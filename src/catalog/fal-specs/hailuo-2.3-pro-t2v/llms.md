@@ -38,6 +38,10 @@ The API accepts the following input parameters:
   Whether to use the model's prompt optimizer Default value: `true`
   - Default: `true`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -53,7 +57,8 @@ The API accepts the following input parameters:
 ```json
 {
   "prompt": "The camera follows the snowboarder as they carve down the mountain through deep powder, each turn sending up huge rooster tails of snow. They navigate between trees, floating through the powder with smooth, flowing movements. The rider launches off a natural jump, grabbing the board mid-air before landing softly in deep snow and continuing down. Powder sprays continuously as they link turns together. The atmosphere is exhilarating and free. Audio: Board cutting through snow, powder spraying, wind rushing, the rider's excited shouts, and the soft thuds of landing in deep snow.",
-  "prompt_optimizer": true
+  "prompt_optimizer": true,
+  "enable_safety_checker": true
 }
 ```
 

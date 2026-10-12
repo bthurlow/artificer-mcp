@@ -52,6 +52,10 @@ The API accepts the following input parameters:
   - Default: `"5s"`
   - Options: `"5s"`, `"9s"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -69,7 +73,8 @@ The API accepts the following input parameters:
   "prompt": "A herd of wild horses galloping across a dusty desert plain under a blazing midday sun, their manes flying in the wind; filmed in a wide tracking shot with dynamic motion, warm natural lighting, and an epic.",
   "aspect_ratio": "16:9",
   "resolution": "540p",
-  "duration": "5s"
+  "duration": "5s",
+  "enable_safety_checker": true
 }
 ```
 

@@ -84,16 +84,16 @@ The API accepts the following input parameters:
 The API returns the following output format:
 
 - **`image`** (`Image`, _required_):
-  Generated image.
+  The edited image, in the source aspect ratio unless aspect_ratio was set.
 
 - **`images`** (`list<Image>`, _optional_):
-  Generated images.
+  Single-element list holding the same image, kept for callers of the earlier Fibo Edit endpoint.
   - Default: `[]`
   - Array of Image
   - Examples: [{"url":"https://v3b.fal.media/files/b/0aa6910f/ie5dAn55wDh7Y1adCFGyE_85a45d82c6d141c2a28d92367596dfac.png"}]
 
 - **`structured_instruction`** (`Structured Instruction`, _required_):
-  Current instruction.
+  The structured instruction the model ran, expanded from the built-in instruction plus anything passed in `instruction`. Returned so you can see how the brief was interpreted.
 
 
 

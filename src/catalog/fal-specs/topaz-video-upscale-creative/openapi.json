@@ -71,75 +71,86 @@
         ]
       },
       "UpscaleVideoCreativeInput": {
+        "required": [
+          "video_url"
+        ],
         "type": "object",
         "properties": {
-          "video_url": {
-            "type": "string",
-            "description": "URL of the video to upscale",
-            "examples": [
-              "https://v3.fal.media/files/kangaroo/y5-1YTGpun17eSeggZMzX_video-1733468228.mp4"
-            ],
-            "title": "Video Url"
-          },
-          "target_fps": {
-            "description": "Target FPS for the output. Frame interpolation is enabled only when this differs from the source FPS.",
-            "title": "Target Fps",
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": 16,
-                "maximum": 60
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "sharp": {
-            "description": "Output sharpness. 0.0 softens, 0.5 is neutral passthrough, 1.0 applies strong sharpening. Defaults to Topaz's neutral 0.5.",
-            "title": "Sharp",
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 1
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "H264_output": {
             "type": "boolean",
             "description": "Whether to use H264 codec for output video. Default is H265.",
-            "title": "H264 Output",
-            "default": false
+            "default": false,
+            "title": "H264 Output"
           },
-          "upscale_factor": {
+          "creativity": {
+            "maximum": 1,
             "type": "number",
-            "minimum": 1,
-            "description": "Requested upscale factor (e.g. 2.0 doubles width and height). Note: Astra 2 snaps to its own supported output resolutions (typically 4K when upscaling) and may override the requested target. Billing is based on the delivered resolution.",
-            "maximum": 4,
-            "default": 2,
-            "title": "Upscale Factor"
+            "default": 0.5,
+            "minimum": 0,
+            "description": "How much new detail and texture Astra 2 invents. 0.0 stays faithful to the source, 1.0 is maximally creative.",
+            "title": "Creativity"
           },
-          "realism": {
-            "description": "Bias generated detail toward photorealism (0.0-1.0).",
-            "title": "Realism",
+          "target_fps": {
+            "title": "Target Fps",
+            "description": "Target FPS for the output. Frame interpolation is enabled only when this differs from the source FPS.",
             "anyOf": [
               {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 1
+                "maximum": 60,
+                "type": "integer",
+                "minimum": 16
               },
               {
                 "type": "null"
               }
             ]
           },
+          "realism": {
+            "title": "Realism",
+            "description": "Bias generated detail toward photorealism (0.0-1.0).",
+            "anyOf": [
+              {
+                "maximum": 1,
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "upscale_factor": {
+            "maximum": 4,
+            "type": "number",
+            "default": 2,
+            "minimum": 1,
+            "description": "Requested upscale factor (e.g. 2.0 doubles width and height). Note: Astra 2 snaps to its own supported output resolutions (typically 4K when upscaling) and may override the requested target. Billing is based on the delivered resolution.",
+            "title": "Upscale Factor"
+          },
+          "sharp": {
+            "title": "Sharp",
+            "description": "Output sharpness. 0.0 softens, 0.5 is neutral passthrough, 1.0 applies strong sharpening. Defaults to Topaz's neutral 0.5.",
+            "anyOf": [
+              {
+                "maximum": 1,
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "video_url": {
+            "examples": [
+              "https://v3.fal.media/files/kangaroo/y5-1YTGpun17eSeggZMzX_video-1733468228.mp4"
+            ],
+            "type": "string",
+            "description": "URL of the video to upscale",
+            "title": "Video Url"
+          },
           "prompt": {
-            "description": "Optional text prompt guiding the detail Astra 2 generates. When set, the input video is limited to 450 frames.",
             "title": "Prompt",
+            "description": "Optional text prompt guiding the detail Astra 2 generates. When set, the input video is limited to 450 frames.",
             "anyOf": [
               {
                 "type": "string",
@@ -149,14 +160,6 @@
                 "type": "null"
               }
             ]
-          },
-          "creativity": {
-            "type": "number",
-            "minimum": 0,
-            "description": "How much new detail and texture Astra 2 invents. 0.0 stays faithful to the source, 1.0 is maximally creative.",
-            "maximum": 1,
-            "default": 0.5,
-            "title": "Creativity"
           }
         },
         "x-fal-order-properties": [
@@ -169,17 +172,17 @@
           "target_fps",
           "H264_output"
         ],
-        "title": "VideoCreativeUpscaleRequest",
-        "required": [
-          "video_url"
-        ]
+        "title": "VideoCreativeUpscaleRequest"
       },
       "UpscaleVideoCreativeOutput": {
+        "required": [
+          "video"
+        ],
         "type": "object",
         "properties": {
           "video": {
-            "description": "The upscaled video file",
             "$ref": "#/components/schemas/File",
+            "description": "The upscaled video file",
             "examples": [
               {
                 "url": "https://v3.fal.media/files/penguin/ztj_LB4gQlW6HIfVs8zX4_upscaled.mp4"
@@ -190,20 +193,20 @@
         "x-fal-order-properties": [
           "video"
         ],
-        "title": "VideoUpscaleOutput",
-        "required": [
-          "video"
-        ]
+        "title": "VideoUpscaleOutput"
       },
       "File": {
+        "required": [
+          "url"
+        ],
         "type": "object",
         "properties": {
           "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -214,11 +217,11 @@
             ]
           },
           "file_size": {
-            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "examples": [
               4404019
             ],
-            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -234,11 +237,11 @@
             "title": "Url"
           },
           "content_type": {
-            "description": "The mime type of the file.",
+            "title": "Content Type",
             "examples": [
               "image/png"
             ],
-            "title": "Content Type",
+            "description": "The mime type of the file.",
             "anyOf": [
               {
                 "type": "string"
@@ -255,10 +258,7 @@
           "file_name",
           "file_size"
         ],
-        "title": "File",
-        "required": [
-          "url"
-        ]
+        "title": "File"
       }
     }
   },

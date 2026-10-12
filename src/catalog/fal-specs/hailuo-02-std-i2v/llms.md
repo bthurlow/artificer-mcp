@@ -51,6 +51,10 @@ The API accepts the following input parameters:
 - **`end_image_url`** (`string`, _optional_):
   Optional URL of the image to use as the last frame of the video
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -70,7 +74,8 @@ The API accepts the following input parameters:
   "image_url": "https://storage.googleapis.com/falserverless/model_tests/minimax/1749891352437225630-389852416840474630_1749891352.png",
   "duration": "6",
   "prompt_optimizer": true,
-  "resolution": "768P"
+  "resolution": "768P",
+  "enable_safety_checker": true
 }
 ```
 

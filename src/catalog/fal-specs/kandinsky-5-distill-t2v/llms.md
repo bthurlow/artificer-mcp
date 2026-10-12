@@ -47,6 +47,10 @@ The API accepts the following input parameters:
   - Options: `"5s"`, `"10s"`
   - Examples: "5s", "10s"
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -64,7 +68,8 @@ The API accepts the following input parameters:
   "prompt": "A dog in red hat",
   "resolution": "768x512",
   "aspect_ratio": "3:2",
-  "duration": "5s"
+  "duration": "5s",
+  "enable_safety_checker": true
 }
 ```
 
@@ -75,7 +80,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _optional_):
   The generated video file.
-  - Examples: {"file_size":5797172,"url":"https://v3b.fal.media/files/b/tiger/5d-CATfsfPrBaXAK38hy6_output.mp4","file_name":"output.mp4","content_type":"application/octet-stream"}
+  - Examples: {"content_type":"application/octet-stream","file_size":5797172,"url":"https://v3b.fal.media/files/b/tiger/5d-CATfsfPrBaXAK38hy6_output.mp4","file_name":"output.mp4"}
 
 
 
@@ -84,10 +89,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
+    "content_type": "application/octet-stream",
     "file_size": 5797172,
     "url": "https://v3b.fal.media/files/b/tiger/5d-CATfsfPrBaXAK38hy6_output.mp4",
-    "file_name": "output.mp4",
-    "content_type": "application/octet-stream"
+    "file_name": "output.mp4"
   }
 }
 ```

@@ -73,6 +73,10 @@ The API accepts the following input parameters:
   URL of the image to use as the first frame
   - Examples: "https://v3.fal.media/files/zebra/qL93Je8ezvzQgDOEzTjKF_KhGKZTEebZcDw6T5rwQPK_output.png"
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -92,7 +96,8 @@ The API accepts the following input parameters:
   "resolution": "720p",
   "duration": 5,
   "negative_prompt": "blurry, low quality, low resolution, pixelated, noisy, grainy, out of focus, poorly lit, poorly exposed, poorly composed, poorly framed, poorly cropped, poorly color corrected, poorly color graded",
-  "image_url": "https://v3.fal.media/files/zebra/qL93Je8ezvzQgDOEzTjKF_KhGKZTEebZcDw6T5rwQPK_output.png"
+  "image_url": "https://v3.fal.media/files/zebra/qL93Je8ezvzQgDOEzTjKF_KhGKZTEebZcDw6T5rwQPK_output.png",
+  "enable_safety_checker": true
 }
 ```
 
@@ -103,7 +108,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"content_type":"video/mp4","file_name":"output.mp4","file_size":6420765,"url":"https://storage.googleapis.com/falserverless/model_tests/video_models/output-3.mp4"}
+  - Examples: {"content_type":"video/mp4","file_name":"output.mp4","url":"https://storage.googleapis.com/falserverless/model_tests/video_models/output-3.mp4","file_size":6420765}
 
 
 
@@ -114,8 +119,8 @@ The API returns the following output format:
   "video": {
     "content_type": "video/mp4",
     "file_name": "output.mp4",
-    "file_size": 6420765,
-    "url": "https://storage.googleapis.com/falserverless/model_tests/video_models/output-3.mp4"
+    "url": "https://storage.googleapis.com/falserverless/model_tests/video_models/output-3.mp4",
+    "file_size": 6420765
   }
 }
 ```

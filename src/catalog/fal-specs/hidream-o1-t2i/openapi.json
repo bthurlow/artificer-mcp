@@ -72,13 +72,25 @@
       },
       "HidreamO1ImageInput": {
         "properties": {
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "Random seed for reproducible generation."
+          },
+          "sync_mode": {
+            "title": "Sync Mode",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "type": "boolean",
+            "default": false
+          },
           "image_size": {
-            "default": {
-              "height": 1024,
-              "width": 1024
-            },
-            "description": "Requested output image size. Dimensions are rounded down to a multiple of 32, up to about 2048x2048 pixels.",
-            "title": "Image Size",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
@@ -94,52 +106,35 @@
                 ],
                 "type": "string"
               }
-            ]
+            ],
+            "title": "Image Size",
+            "description": "Requested output image size. Dimensions are rounded down to a multiple of 32, up to about 2048x2048 pixels.",
+            "default": {
+              "height": 1024,
+              "width": 1024
+            }
+          },
+          "keep_original_aspect": {
+            "title": "Keep Original Aspect",
+            "description": "When exactly one reference image is provided, preserve its aspect ratio for the output image.",
+            "type": "boolean",
+            "default": false
           },
           "num_images": {
+            "default": 1,
             "minimum": 1,
-            "maximum": 4,
-            "type": "integer",
-            "description": "Number of images to generate.",
             "title": "Num Images",
-            "default": 1
+            "description": "Number of images to generate.",
+            "type": "integer",
+            "maximum": 4
           },
-          "prompt": {
-            "minLength": 1,
-            "type": "string",
-            "description": "Text prompt for image generation, editing, or subject-driven personalization.",
-            "examples": [
-              "A cinematic product photo of a ceramic mug on a marble counter, soft window light, shallow depth of field."
-            ],
-            "title": "Prompt"
-          },
-          "guidance_scale": {
-            "minimum": 0,
-            "maximum": 20,
-            "type": "number",
-            "description": "Classifier-free guidance scale. The full model uses 5.0 by default.",
-            "title": "Guidance Scale",
-            "default": 5
-          },
-          "sync_mode": {
-            "default": false,
-            "type": "boolean",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "title": "Sync Mode"
-          },
-          "reference_image_urls": {
-            "items": {
-              "type": "string"
-            },
-            "default": [],
-            "type": "array",
-            "description": "Optional reference images. Use none for text-to-image, one for image editing, or multiple for subject-driven personalization.",
-            "examples": [
-              [
-                "https://storage.googleapis.com/falserverless/model_tests/hidream/woman.png"
-              ]
-            ],
-            "title": "Reference Image Urls"
+          "num_inference_steps": {
+            "default": 50,
+            "minimum": 1,
+            "title": "Num Inference Steps",
+            "description": "Number of denoising steps.",
+            "type": "integer",
+            "maximum": 50
           },
           "output_format": {
             "enum": [
@@ -147,44 +142,50 @@
               "png",
               "webp"
             ],
-            "default": "png",
-            "type": "string",
+            "title": "Output Format",
             "description": "The format of the generated image.",
-            "title": "Output Format"
+            "type": "string",
+            "default": "png"
           },
-          "seed": {
-            "description": "Random seed for reproducible generation.",
-            "title": "Seed",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
+          "guidance_scale": {
+            "default": 5,
+            "minimum": 0,
+            "title": "Guidance Scale",
+            "description": "Classifier-free guidance scale. The full model uses 5.0 by default.",
+            "type": "number",
+            "maximum": 20
           },
-          "num_inference_steps": {
-            "minimum": 1,
-            "maximum": 50,
-            "type": "integer",
-            "description": "Number of denoising steps.",
-            "title": "Num Inference Steps",
-            "default": 50
+          "prompt": {
+            "minLength": 1,
+            "title": "Prompt",
+            "examples": [
+              "A cinematic product photo of a ceramic mug on a marble counter, soft window light, shallow depth of field."
+            ],
+            "type": "string",
+            "description": "Text prompt for image generation, editing, or subject-driven personalization."
+          },
+          "reference_image_urls": {
+            "description": "Optional reference images. Use none for text-to-image, one for image editing, or multiple for subject-driven personalization.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Reference Image Urls",
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/model_tests/hidream/woman.png"
+              ]
+            ],
+            "type": "array",
+            "default": []
           },
           "enable_safety_checker": {
-            "default": true,
-            "type": "boolean",
+            "title": "Enable Safety Checker",
             "description": "Enable the safety checker on generated images.",
-            "title": "Enable Safety Checker"
-          },
-          "keep_original_aspect": {
-            "default": false,
             "type": "boolean",
-            "description": "When exactly one reference image is provided, preserve its aspect ratio for the output image.",
-            "title": "Keep Original Aspect"
+            "default": true
           }
         },
+        "title": "HiDreamO1ImageInput",
         "x-fal-order-properties": [
           "prompt",
           "reference_image_urls",
@@ -199,7 +200,6 @@
           "keep_original_aspect"
         ],
         "type": "object",
-        "title": "HiDreamO1ImageInput",
         "required": [
           "prompt"
         ]
@@ -207,40 +207,41 @@
       "HidreamO1ImageOutput": {
         "properties": {
           "seed": {
-            "type": "integer",
+            "title": "Seed",
             "description": "The seed used for generation.",
-            "title": "Seed"
-          },
-          "timings": {
-            "type": "object",
-            "description": "Generation timings.",
-            "title": "Timings",
-            "additionalProperties": {
-              "type": "number"
-            }
+            "type": "integer"
           },
           "has_nsfw_concepts": {
             "items": {
               "type": "boolean"
             },
-            "type": "array",
+            "title": "Has Nsfw Concepts",
             "description": "Whether each generated image was flagged by the safety checker.",
-            "title": "Has Nsfw Concepts"
+            "type": "array"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "description": "The prompt used for generation.",
+            "type": "string"
           },
           "images": {
             "items": {
               "$ref": "#/components/schemas/ImageFile"
             },
-            "type": "array",
+            "title": "Images",
             "description": "Generated images.",
-            "title": "Images"
+            "type": "array"
           },
-          "prompt": {
-            "type": "string",
-            "description": "The prompt used for generation.",
-            "title": "Prompt"
+          "timings": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Timings",
+            "description": "Generation timings.",
+            "type": "object"
           }
         },
+        "title": "HiDreamO1ImageOutput",
         "x-fal-order-properties": [
           "images",
           "seed",
@@ -249,7 +250,6 @@
           "timings"
         ],
         "type": "object",
-        "title": "HiDreamO1ImageOutput",
         "required": [
           "images",
           "seed",
@@ -261,70 +261,31 @@
       "ImageSize": {
         "properties": {
           "height": {
+            "default": 512,
             "exclusiveMinimum": 0,
-            "maximum": 14142,
-            "type": "integer",
-            "description": "The height of the generated image.",
             "title": "Height",
-            "default": 512
+            "description": "The height of the generated image.",
+            "type": "integer",
+            "maximum": 14142
           },
           "width": {
+            "default": 512,
             "exclusiveMinimum": 0,
-            "maximum": 14142,
-            "type": "integer",
-            "description": "The width of the generated image.",
             "title": "Width",
-            "default": 512
+            "description": "The width of the generated image.",
+            "type": "integer",
+            "maximum": 14142
           }
         },
-        "type": "object",
         "title": "ImageSize",
         "x-fal-order-properties": [
           "width",
           "height"
-        ]
+        ],
+        "type": "object"
       },
       "ImageFile": {
         "properties": {
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type"
-          },
-          "height": {
-            "description": "The height of the image",
-            "title": "Height",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "width": {
-            "description": "The width of the image",
-            "title": "Width",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "file_size": {
             "anyOf": [
               {
@@ -334,11 +295,16 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "examples": [
               4404019
             ],
-            "title": "File Size"
+            "description": "The size of the file in bytes."
+          },
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
           },
           "file_name": {
             "anyOf": [
@@ -349,18 +315,53 @@
                 "type": "null"
               }
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "title": "File Name"
+            "description": "The name of the file. It will be auto-generated if not provided."
           },
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "The height of the image"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "description": "The width of the image"
           }
         },
+        "title": "ImageFile",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -370,7 +371,6 @@
           "height"
         ],
         "type": "object",
-        "title": "ImageFile",
         "required": [
           "url"
         ]

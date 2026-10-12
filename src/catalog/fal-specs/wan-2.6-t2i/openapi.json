@@ -71,33 +71,83 @@
         ]
       },
       "V26TextToImageInput": {
-        "title": "TextToImageWanInput",
-        "required": [
-          "prompt"
+        "x-fal-order-properties": [
+          "prompt",
+          "image_url",
+          "negative_prompt",
+          "image_size",
+          "max_images",
+          "seed",
+          "enable_safety_checker"
         ],
         "properties": {
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "ui": {
+                  "field": "image"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional reference image (0 or 1). When provided, can be used for style guidance. Resolution: 384-5000px each dimension. Max size: 10MB. Formats: JPEG, JPG, PNG (no alpha), BMP, WEBP.",
+            "title": "Image Url"
+          },
+          "negative_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Content to avoid in the generated image. Max 500 characters.",
+            "default": "",
+            "title": "Negative Prompt",
+            "examples": [
+              "low resolution, error, worst quality, low quality, deformed"
+            ]
+          },
+          "max_images": {
+            "minimum": 1,
+            "description": "Maximum number of images to generate (1-5). Actual count may be less depending on model inference.",
+            "maximum": 5,
+            "type": "integer",
+            "default": 1,
+            "title": "Max Images"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Random seed for reproducibility (0-2147483647).",
+            "title": "Seed"
+          },
           "prompt": {
-            "minLength": 1,
-            "title": "Prompt",
             "description": "Text prompt describing the desired image. Supports Chinese and English. Max 2000 characters.",
+            "type": "string",
             "examples": [
               "An ancient library floating among clouds, golden hour light streaming through massive windows, photorealistic"
             ],
-            "type": "string"
+            "title": "Prompt",
+            "minLength": 1
           },
           "enable_safety_checker": {
-            "title": "Enable Safety Checker",
-            "default": true,
             "description": "Enable content moderation for input and output. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "type": "boolean"
+            "type": "boolean",
+            "default": true,
+            "title": "Enable Safety Checker"
           },
           "image_size": {
-            "title": "Image Size",
-            "description": "Output image size. If not set: matches input image size (up to 1280*1280). Use presets like 'square_hd', 'landscape_16_9', or specify exact dimensions.",
-            "examples": [
-              "square_hd",
-              "landscape_16_9"
-            ],
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
@@ -116,163 +166,30 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "seed": {
-            "title": "Seed",
-            "description": "Random seed for reproducibility (0-2147483647).",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "max_images": {
-            "title": "Max Images",
-            "default": 1,
-            "description": "Maximum number of images to generate (1-5). Actual count may be less depending on model inference.",
-            "minimum": 1,
-            "type": "integer",
-            "maximum": 5
-          },
-          "negative_prompt": {
-            "title": "Negative Prompt",
-            "default": "",
-            "description": "Content to avoid in the generated image. Max 500 characters.",
-            "examples": [
-              "low resolution, error, worst quality, low quality, deformed"
             ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "image_url": {
-            "title": "Image Url",
-            "description": "Optional reference image (0 or 1). When provided, can be used for style guidance. Resolution: 384-5000px each dimension. Max size: 10MB. Formats: JPEG, JPG, PNG (no alpha), BMP, WEBP.",
-            "anyOf": [
-              {
-                "type": "string",
-                "ui": {
-                  "field": "image"
-                }
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "description": "Output image size. If not set: matches input image size (up to 1280*1280). Use presets like 'square_hd', 'landscape_16_9', or specify exact dimensions.",
+            "examples": [
+              "square_hd",
+              "landscape_16_9"
+            ],
+            "title": "Image Size"
           }
         },
+        "description": "Input for Wan 2.6 text-to-image or mixed text-and-image generation (enable_interleave=true)",
         "type": "object",
-        "x-fal-order-properties": [
-          "prompt",
-          "image_url",
-          "negative_prompt",
-          "image_size",
-          "max_images",
-          "seed",
-          "enable_safety_checker"
+        "required": [
+          "prompt"
         ],
-        "description": "Input for Wan 2.6 text-to-image or mixed text-and-image generation (enable_interleave=true)"
+        "title": "TextToImageWanInput"
       },
       "V26TextToImageOutput": {
-        "title": "TextToImageWanOutput",
-        "required": [
-          "images",
-          "seed"
-        ],
-        "properties": {
-          "seed": {
-            "title": "Seed",
-            "description": "The seed used for generation",
-            "examples": [
-              175932751
-            ],
-            "type": "integer"
-          },
-          "generated_text": {
-            "title": "Generated Text",
-            "description": "Generated text content (in mixed text-and-image mode). May be None if only images were generated.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "images": {
-            "items": {
-              "$ref": "#/components/schemas/File"
-            },
-            "title": "Images",
-            "description": "Generated images in PNG format",
-            "examples": [
-              [
-                {
-                  "content_type": "image/png",
-                  "url": "https://v3b.fal.media/files/b/0a86d6b0/cBXGSUEl3DkTcBnf9IEM0_output_1.png",
-                  "file_name": "output_1.png"
-                }
-              ]
-            ],
-            "type": "array"
-          }
-        },
-        "type": "object",
         "x-fal-order-properties": [
           "images",
           "generated_text",
           "seed"
         ],
-        "description": "Output for Wan 2.6 text-to-image (can include generated text in mixed mode)"
-      },
-      "ImageSize": {
-        "title": "ImageSize",
         "properties": {
-          "width": {
-            "title": "Width",
-            "default": 512,
-            "description": "The width of the generated image.",
-            "exclusiveMinimum": 0,
-            "type": "integer",
-            "maximum": 14142
-          },
-          "height": {
-            "title": "Height",
-            "default": 512,
-            "description": "The height of the generated image.",
-            "exclusiveMinimum": 0,
-            "type": "integer",
-            "maximum": 14142
-          }
-        },
-        "type": "object",
-        "x-fal-order-properties": [
-          "width",
-          "height"
-        ]
-      },
-      "File": {
-        "title": "File",
-        "required": [
-          "url"
-        ],
-        "properties": {
-          "content_type": {
-            "title": "Content Type",
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
+          "generated_text": {
             "anyOf": [
               {
                 "type": "string"
@@ -280,34 +197,99 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Generated text content (in mixed text-and-image mode). May be None if only images were generated.",
+            "title": "Generated Text"
           },
+          "seed": {
+            "description": "The seed used for generation",
+            "type": "integer",
+            "examples": [
+              175932751
+            ],
+            "title": "Seed"
+          },
+          "images": {
+            "description": "Generated images in PNG format",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/File"
+            },
+            "title": "Images",
+            "examples": [
+              [
+                {
+                  "url": "https://v3b.fal.media/files/b/0a86d6b0/cBXGSUEl3DkTcBnf9IEM0_output_1.png",
+                  "file_name": "output_1.png",
+                  "content_type": "image/png"
+                }
+              ]
+            ]
+          }
+        },
+        "description": "Output for Wan 2.6 text-to-image (can include generated text in mixed mode)",
+        "type": "object",
+        "required": [
+          "images",
+          "seed"
+        ],
+        "title": "TextToImageWanOutput"
+      },
+      "ImageSize": {
+        "x-fal-order-properties": [
+          "width",
+          "height"
+        ],
+        "properties": {
+          "width": {
+            "description": "The width of the generated image.",
+            "maximum": 14142,
+            "type": "integer",
+            "default": 512,
+            "title": "Width",
+            "exclusiveMinimum": 0
+          },
+          "height": {
+            "description": "The height of the generated image.",
+            "maximum": 14142,
+            "type": "integer",
+            "default": 512,
+            "title": "Height",
+            "exclusiveMinimum": 0
+          }
+        },
+        "type": "object",
+        "title": "ImageSize"
+      },
+      "File": {
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "properties": {
           "url": {
-            "title": "Url",
             "description": "The URL where the file can be downloaded from.",
-            "type": "string"
+            "type": "string",
+            "title": "Url"
           },
           "file_name": {
-            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "title": "File Name"
           },
           "file_size": {
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
             "anyOf": [
               {
                 "type": "integer"
@@ -315,16 +297,34 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type"
           }
         },
         "type": "object",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ]
+        "required": [
+          "url"
+        ],
+        "title": "File"
       }
     }
   },

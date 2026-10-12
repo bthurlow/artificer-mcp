@@ -71,14 +71,29 @@
         ]
       },
       "FastSvdLcmTextToVideoInput": {
-        "title": "FastSVDTextInput",
+        "required": [
+          "prompt"
+        ],
+        "type": "object",
         "properties": {
+          "motion_bucket_id": {
+            "maximum": 255,
+            "type": "integer",
+            "description": "\n            The motion bucket id determines the motion of the generated video. The\n            higher the number, the more motion there will be.\n        ",
+            "default": 127,
+            "minimum": 1,
+            "title": "Motion Bucket Id"
+          },
           "video_size": {
+            "title": "Video Size",
+            "description": "The size of the generated video.",
+            "default": "landscape_16_9",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
               },
               {
+                "type": "string",
                 "enum": [
                   "square_hd",
                   "square",
@@ -86,55 +101,19 @@
                   "portrait_16_9",
                   "landscape_4_3",
                   "landscape_16_9"
-                ],
-                "type": "string"
+                ]
               }
-            ],
-            "default": "landscape_16_9",
-            "title": "Video Size",
-            "description": "The size of the generated video."
+            ]
           },
-          "steps": {
-            "maximum": 20,
-            "minimum": 1,
-            "default": 4,
-            "title": "Steps",
-            "description": "\n            The number of steps to run the model for. The higher the number the better\n            the quality and longer it will take to generate.\n        ",
-            "type": "integer"
-          },
-          "prompt": {
-            "title": "Prompt",
-            "examples": [
-              "A rocket flying that is about to take off"
-            ],
-            "description": "The prompt to use as a starting point for the generation.",
-            "type": "string"
-          },
-          "fps": {
-            "maximum": 25,
-            "minimum": 1,
-            "default": 10,
-            "title": "Fps",
-            "description": "\n            The FPS of the generated video. The higher the number, the faster the video will\n            play. Total video length is 25 frames.\n        ",
-            "type": "integer"
-          },
-          "motion_bucket_id": {
-            "maximum": 255,
-            "minimum": 1,
-            "default": 127,
-            "title": "Motion Bucket Id",
-            "description": "\n            The motion bucket id determines the motion of the generated video. The\n            higher the number, the more motion there will be.\n        ",
-            "type": "integer"
-          },
-          "cond_aug": {
-            "maximum": 10,
-            "minimum": 0,
-            "default": 0.02,
-            "title": "Cond Aug",
-            "description": "\n            The conditoning augmentation determines the amount of noise that will be\n            added to the conditioning frame. The higher the number, the more noise\n            there will be, and the less the video will look like the initial image.\n            Increase it for more motion.\n        ",
-            "type": "number"
+          "enable_safety_checker": {
+            "type": "boolean",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "default": true,
+            "title": "Enable Safety Checker"
           },
           "seed": {
+            "title": "Seed",
+            "description": "\n            The same seed and the same prompt given to the same version of Stable Diffusion\n            will output the same image every time.\n        ",
             "anyOf": [
               {
                 "type": "integer"
@@ -142,12 +121,41 @@
               {
                 "type": "null"
               }
+            ]
+          },
+          "steps": {
+            "maximum": 20,
+            "type": "integer",
+            "description": "\n            The number of steps to run the model for. The higher the number the better\n            the quality and longer it will take to generate.\n        ",
+            "default": 4,
+            "minimum": 1,
+            "title": "Steps"
+          },
+          "cond_aug": {
+            "maximum": 10,
+            "type": "number",
+            "description": "\n            The conditoning augmentation determines the amount of noise that will be\n            added to the conditioning frame. The higher the number, the more noise\n            there will be, and the less the video will look like the initial image.\n            Increase it for more motion.\n        ",
+            "default": 0.02,
+            "minimum": 0,
+            "title": "Cond Aug"
+          },
+          "prompt": {
+            "examples": [
+              "A rocket flying that is about to take off"
             ],
-            "title": "Seed",
-            "description": "\n            The same seed and the same prompt given to the same version of Stable Diffusion\n            will output the same image every time.\n        "
+            "type": "string",
+            "description": "The prompt to use as a starting point for the generation.",
+            "title": "Prompt"
+          },
+          "fps": {
+            "maximum": 25,
+            "type": "integer",
+            "description": "\n            The FPS of the generated video. The higher the number, the faster the video will\n            play. Total video length is 25 frames.\n        ",
+            "default": 10,
+            "minimum": 1,
+            "title": "Fps"
           }
         },
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "motion_bucket_id",
@@ -155,65 +163,87 @@
           "seed",
           "steps",
           "fps",
-          "video_size"
+          "video_size",
+          "enable_safety_checker"
         ],
-        "required": [
-          "prompt"
-        ]
+        "title": "FastSVDTextInput"
       },
       "FastSvdLcmTextToVideoOutput": {
-        "title": "FastSVDOutput",
+        "required": [
+          "video",
+          "seed"
+        ],
+        "type": "object",
         "properties": {
           "video": {
             "$ref": "#/components/schemas/File",
             "description": "The generated video file."
           },
           "seed": {
-            "title": "Seed",
+            "type": "integer",
             "description": "\n            Seed of the generated Image. It will be the same value of the one passed in the\n            input or the randomly generated that was used in case none was passed.\n\n        ",
-            "type": "integer"
+            "title": "Seed"
           }
         },
-        "type": "object",
         "x-fal-order-properties": [
           "video",
           "seed"
         ],
-        "required": [
-          "video",
-          "seed"
-        ]
+        "title": "FastSVDOutput"
       },
       "ImageSize": {
-        "title": "ImageSize",
+        "type": "object",
         "properties": {
           "width": {
             "maximum": 14142,
+            "type": "integer",
             "exclusiveMinimum": 0,
             "default": 512,
-            "title": "Width",
             "description": "The width of the generated image.",
-            "type": "integer"
+            "title": "Width"
           },
           "height": {
             "maximum": 14142,
+            "type": "integer",
             "exclusiveMinimum": 0,
             "default": 512,
-            "title": "Height",
             "description": "The height of the generated image.",
-            "type": "integer"
+            "title": "Height"
           }
         },
-        "type": "object",
         "x-fal-order-properties": [
           "width",
           "height"
-        ]
+        ],
+        "title": "ImageSize"
       },
       "File": {
-        "title": "File",
+        "required": [
+          "url"
+        ],
+        "type": "object",
         "properties": {
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "file_size": {
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -221,34 +251,19 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Size",
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes."
+            ]
           },
           "url": {
-            "title": "Url",
+            "type": "string",
             "description": "The URL where the file can be downloaded from.",
-            "type": "string"
+            "title": "Url"
           },
           "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "content_type": {
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -256,24 +271,16 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file."
+            ]
           }
         },
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "required": [
-          "url"
-        ]
+        "title": "File"
       }
     }
   },

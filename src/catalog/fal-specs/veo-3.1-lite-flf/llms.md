@@ -39,9 +39,10 @@ The API accepts the following input parameters:
   - Default: `"auto"`
   - Options: `"auto"`, `"16:9"`, `"9:16"`
 
-- **`duration`** (`string`, _optional_):
+- **`duration`** (`DurationEnum`, _optional_):
   The duration of the generated video. Default value: `"8s"`
   - Default: `"8s"`
+  - Options: `"4s"`, `"6s"`, `"8s"`
 
 - **`negative_prompt`** (`string`, _optional_):
   A negative prompt to guide the video generation.

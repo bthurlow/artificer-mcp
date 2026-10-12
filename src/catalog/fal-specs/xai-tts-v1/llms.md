@@ -45,6 +45,10 @@ The API accepts the following input parameters:
 - **`output_format`** (`OutputFormat`, _optional_):
   Output format configuration. Defaults to MP3 at 24 kHz / 128 kbps.
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -61,7 +65,8 @@ The API accepts the following input parameters:
 {
   "text": "Hello! This is xAI text to speech, brought to you by Fal AI.",
   "voice": "eve",
-  "language": "auto"
+  "language": "auto",
+  "enable_safety_checker": true
 }
 ```
 
