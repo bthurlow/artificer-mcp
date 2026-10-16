@@ -28,8 +28,8 @@ Both are true at once. The technical-specs row settles it by listing *"Maximum v
 ## Capabilities and limits
 | | |
 |---|---|
-| Duration | **3–10 seconds**. No native extend — concatenate with \`video_concatenate\` for longer pieces. |
-| Resolution | **720p** |
+| Duration | **3–10 seconds** per call. The 1.1 API adds an \`extend\` task (3–10s continuations, up to 40s total), but \`gemini_omni_generate_video\` does not expose it yet, so concatenate with \`video_concatenate\` for longer pieces. |
+| Resolution | **720p** (the API default). The 1.1 API also accepts \`360p\`, \`1080p\` and \`4k\` (upscaled) via \`response_format.resolution\`, but the tool does not send it yet. Google publishes a price for 720p only. |
 | Frame rate | 24 fps |
 | Aspect ratios | **16:9 and 9:16** (9:16 makes it viable for vertical short-form) |
 | Audio | **Native, always on** — speech, music, and sound effects. No off switch. |
@@ -87,7 +87,9 @@ For **edits**, describe only the change and what to preserve — "same framing a
 ## Access routes
 | Provider | Tool | Model ID | Cost | Notes |
 |----------|------|----------|------|-------|
-| google | \`gemini_omni_generate_video\` | \`gemini-omni-flash-preview\` | ~$0.10/second | Interactions API. Native audio, always on. Override the model via \`ARTIFICER_OMNI_VIDEO_MODEL\`. |
+| google | \`gemini_omni_generate_video\` | \`gemini-omni-1.1-flash\` | ~$0.10/second (720p) | Interactions API. Native audio, always on. Override the model via \`ARTIFICER_OMNI_VIDEO_MODEL\`. |
+
+**\`gemini-omni-flash-preview\` is deprecated as of 2026-10-22.** Google's migration target is \`gemini-omni-1.1-flash\`, which is now the default. If \`ARTIFICER_OMNI_VIDEO_MODEL\` or a per-call \`model\` still names the preview ID, change it.
 
 Omni uses Google's **Interactions API**, not the \`generateVideos\` call Veo uses — which is why it is a separate tool rather than another model id on \`gemini_generate_video\`. Both work off \`GOOGLE_API_KEY\`; neither requires Vertex.
 
@@ -103,6 +105,7 @@ Added in the 2026-09-24 fal catalog refresh. Model descriptions are fal's own; i
 | \`gemini-omni-flash-1.1-ref\` | Gemini Omni Flash 1.1 is Google's multimodal video model. This endpoint generates video from combined multimodal references, images, videos and text together… | **\`prompt\`**, \`duration\`, \`aspect_ratio\`, \`resolution\`, \`image_urls\` (+1 more) |
 
 ## Last verified
+2026-10-08: default moved from \`gemini-omni-flash-preview\` (deprecated 2026-10-22) to \`gemini-omni-1.1-flash\`. Model ID, the \`resolution\` values, the \`extend\` task and the ~$0.10/s 720p price were checked against ai.google.dev's Omni and pricing pages. The rest of this guide (task modes, editing, audio behavior, unsupported features) was verified on the preview model, and 1.1 has not been called live yet.
 2026-08-15 — **corrected**: an earlier revision of this guide claimed Omni output was silent. That was wrong. It came from reading \`ai.google.dev/gemini-api/docs/video\`, which is the **Veo** page, instead of \`/docs/omni\`. Native audio is confirmed against the Omni page and the Vertex model card. Capabilities, the unsupported-features list, Interactions-API usage, and the ~$0.10/s rate re-verified in the same pass. Duration/resolution ceilings are preview-era limits Google has said will lift; re-check before assuming 720p and 10s still bind.
 
 ## Official references
