@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _required_)
   - Examples: "Fine grains of salt drift across the flats in a slow, low wind, streaming past the figure's feet. The figure's robe ripples. Light crawls down the face of the monolith as the sun rises millimeter by millimeter — a slow wash of coral replacing indigo. The figure tilts their head upward. Camera creeps forward almost imperceptibly. Monumental, spiritual, glacial."
 
@@ -67,6 +71,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "Fine grains of salt drift across the flats in a slow, low wind, streaming past the figure's feet. The figure's robe ripples. Light crawls down the face of the monolith as the sun rises millimeter by millimeter — a slow wash of coral replacing indigo. The figure tilts their head upward. Camera creeps forward almost imperceptibly. Monumental, spiritual, glacial.",
   "image_url": "https://v3b.fal.media/files/b/0a975417/w4qtfMTu-mh_KUgHIZNAH__4BUACOxwlMAEVXDfeYbj_2UxyAg3W.jpg",
   "duration": "5",
@@ -82,7 +87,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"file_size":16536912,"file_name":"output.mp4","content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0a97541e/EiyjY6_Fjf7XPgR7nUli5_output.mp4"}
+  - Examples: {"url":"https://v3b.fal.media/files/b/0a97541e/EiyjY6_Fjf7XPgR7nUli5_output.mp4","content_type":"video/mp4","file_size":16536912,"file_name":"output.mp4"}
 
 
 
@@ -91,10 +96,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_size": 16536912,
-    "file_name": "output.mp4",
+    "url": "https://v3b.fal.media/files/b/0a97541e/EiyjY6_Fjf7XPgR7nUli5_output.mp4",
     "content_type": "video/mp4",
-    "url": "https://v3b.fal.media/files/b/0a97541e/EiyjY6_Fjf7XPgR7nUli5_output.mp4"
+    "file_size": 16536912,
+    "file_name": "output.mp4"
   }
 }
 ```

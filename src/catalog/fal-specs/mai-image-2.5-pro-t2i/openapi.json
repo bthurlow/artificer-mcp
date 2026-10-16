@@ -71,19 +71,29 @@
         ]
       },
       "MaiImage25ProInput": {
-        "type": "object",
+        "title": "MaiImage25ProTextToImageInput",
         "required": [
           "prompt"
         ],
-        "title": "MaiImage25ProTextToImageInput",
+        "type": "object",
+        "x-fal-order-properties": [
+          "prompt",
+          "num_images",
+          "aspect_ratio",
+          "output_format",
+          "sync_mode"
+        ],
         "properties": {
-          "num_images": {
-            "minimum": 1,
-            "type": "integer",
-            "maximum": 4,
-            "description": "The number of images to generate.",
-            "default": 1,
-            "title": "Number of Images"
+          "output_format": {
+            "title": "Output Format",
+            "description": "The format of the generated image.",
+            "type": "string",
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
+            ],
+            "default": "png"
           },
           "aspect_ratio": {
             "title": "Aspect Ratio",
@@ -101,107 +111,82 @@
             ],
             "default": "auto"
           },
-          "output_format": {
-            "type": "string",
-            "description": "The format of the generated image.",
-            "enum": [
-              "jpeg",
-              "png",
-              "webp"
-            ],
-            "default": "png",
-            "title": "Output Format"
+          "num_images": {
+            "title": "Number of Images",
+            "minimum": 1,
+            "type": "integer",
+            "maximum": 4,
+            "description": "The number of images to generate.",
+            "default": 1
+          },
+          "sync_mode": {
+            "title": "Sync Mode",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "type": "boolean",
+            "default": false
           },
           "prompt": {
+            "title": "Prompt",
+            "description": "The text prompt to generate an image from.",
             "examples": [
               "A photorealistic concept-art poster of a university campus at sunset, cinematic lighting, a banner reading \"LOUISVILLE\" in bold serif type."
             ],
-            "description": "The text prompt to generate an image from.",
-            "type": "string",
+            "maxLength": 5000,
             "minLength": 3,
-            "title": "Prompt",
-            "maxLength": 5000
-          },
-          "sync_mode": {
-            "type": "boolean",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "default": false,
-            "title": "Sync Mode"
+            "type": "string"
           }
-        },
-        "x-fal-order-properties": [
-          "prompt",
-          "num_images",
-          "aspect_ratio",
-          "output_format",
-          "sync_mode"
-        ]
+        }
       },
       "MaiImage25ProOutput": {
-        "type": "object",
+        "title": "MaiImage25ProTextToImageOutput",
         "required": [
           "images",
           "description"
         ],
-        "title": "MaiImage25ProTextToImageOutput",
+        "type": "object",
+        "x-fal-order-properties": [
+          "images",
+          "description"
+        ],
         "properties": {
+          "description": {
+            "title": "Description",
+            "description": "The description of the generated images.",
+            "type": "string"
+          },
           "images": {
+            "title": "Images",
             "description": "The generated images.",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ImageFile"
-            },
-            "title": "Images"
-          },
-          "description": {
-            "description": "The description of the generated images.",
-            "type": "string",
-            "title": "Description"
+            }
           }
-        },
-        "x-fal-order-properties": [
-          "images",
-          "description"
-        ]
+        }
       },
       "ImageFile": {
-        "type": "object",
+        "title": "ImageFile",
         "required": [
           "url"
         ],
-        "title": "ImageFile",
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
         "properties": {
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
           },
           "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "title": "Height",
             "description": "The height of the image",
-            "title": "Height"
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
             "anyOf": [
               {
                 "type": "integer"
@@ -209,28 +194,11 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
-          },
-          "width": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The width of the image",
-            "title": "Width"
+            ]
           },
           "file_name": {
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
@@ -241,19 +209,51 @@
               {
                 "type": "null"
               }
+            ]
+          },
+          "file_size": {
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "width": {
+            "title": "Width",
+            "description": "The width of the image",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
-        },
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size",
-          "width",
-          "height"
-        ]
+        }
       }
     }
   },

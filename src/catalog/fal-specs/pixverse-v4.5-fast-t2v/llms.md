@@ -57,6 +57,10 @@ The API accepts the following input parameters:
   The same seed and the same prompt given to the same version of the model
   will output the same video every time.
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -74,7 +78,8 @@ The API accepts the following input parameters:
   "prompt": "Epic low-cut camera capture of a girl clad in ultraviolet threads, Peter Max art style depiction, luminous diamond skin glistening under a vast moon's radiance, embodied in a superhuman flight among mystical ruins, symbolizing a deity's ritual ascent, hyper-detailed",
   "aspect_ratio": "16:9",
   "resolution": "720p",
-  "negative_prompt": "blurry, low quality, low resolution, pixelated, noisy, grainy, out of focus, poorly lit, poorly exposed, poorly composed, poorly framed, poorly cropped, poorly color corrected, poorly color graded"
+  "negative_prompt": "blurry, low quality, low resolution, pixelated, noisy, grainy, out of focus, poorly lit, poorly exposed, poorly composed, poorly framed, poorly cropped, poorly color corrected, poorly color graded",
+  "enable_safety_checker": true
 }
 ```
 
@@ -85,7 +90,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"content_type":"video/mp4","file_name":"output.mp4","file_size":5485412,"url":"https://fal.media/files/lion/_fVEU5nzHND_fHGQUhXEm_output.mp4"}
+  - Examples: {"content_type":"video/mp4","file_size":5485412,"url":"https://fal.media/files/lion/_fVEU5nzHND_fHGQUhXEm_output.mp4","file_name":"output.mp4"}
 
 
 
@@ -95,9 +100,9 @@ The API returns the following output format:
 {
   "video": {
     "content_type": "video/mp4",
-    "file_name": "output.mp4",
     "file_size": 5485412,
-    "url": "https://fal.media/files/lion/_fVEU5nzHND_fHGQUhXEm_output.mp4"
+    "url": "https://fal.media/files/lion/_fVEU5nzHND_fHGQUhXEm_output.mp4",
+    "file_name": "output.mp4"
   }
 }
 ```

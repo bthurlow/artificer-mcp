@@ -63,6 +63,10 @@ The API accepts the following input parameters:
   - Default: `[]`
   - Array of Moodboard
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -82,7 +86,8 @@ The API accepts the following input parameters:
   "creativity": "medium",
   "image_style_references": [],
   "styles": [],
-  "moodboards": []
+  "moodboards": [],
+  "enable_safety_checker": true
 }
 ```
 

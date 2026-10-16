@@ -29,7 +29,7 @@ The API accepts the following input parameters:
 
 
 - **`image_url`** (`string`, _optional_):
-  Source image as a public URL or raw base64-encoded image bytes (no data-URI prefix). Default value: `"https://bria-datasets.s3.amazonaws.com/object-extraction/tools_construction_flatlay.jpg"`
+  Source image as a public URL, a base64 data URI (data:image/png;base64,...) or raw base64-encoded image bytes. Default value: `"https://bria-datasets.s3.amazonaws.com/object-extraction/tools_construction_flatlay.jpg"`
   - Default: `"https://bria-datasets.s3.amazonaws.com/object-extraction/tools_construction_flatlay.jpg"`
   - Examples: "https://bria-datasets.s3.amazonaws.com/object-extraction/tools_construction_flatlay.jpg"
 
@@ -74,10 +74,10 @@ The API accepts the following input parameters:
 The API returns the following output format:
 
 - **`image`** (`Image`, _required_):
-  Extracted object on a transparent background (RGBA).
+  Extracted object on a transparent background (RGBA). The full input image when nothing matches the prompt.
 
 - **`mask`** (`Image`, _required_):
-  Segmentation mask used for the extraction.
+  Segmentation mask used for the extraction. When nothing matches the prompt: an RGBA input's alpha, fully white for any other input.
 
 
 

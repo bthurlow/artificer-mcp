@@ -68,6 +68,10 @@ The API accepts the following input parameters:
   URL of the reference image for image-to-video generation.
   - Examples: "https://v3.fal.media/files/panda/HnY2yf-BbzlrVQxR-qP6m_9912d0932988453aadf3912fc1901f52.jpg"
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -89,7 +93,8 @@ The API accepts the following input parameters:
   "resolution": "480p",
   "num_frames": 121,
   "enable_prompt_expansion": true,
-  "image_url": "https://v3.fal.media/files/panda/HnY2yf-BbzlrVQxR-qP6m_9912d0932988453aadf3912fc1901f52.jpg"
+  "image_url": "https://v3.fal.media/files/panda/HnY2yf-BbzlrVQxR-qP6m_9912d0932988453aadf3912fc1901f52.jpg",
+  "enable_safety_checker": true
 }
 ```
 

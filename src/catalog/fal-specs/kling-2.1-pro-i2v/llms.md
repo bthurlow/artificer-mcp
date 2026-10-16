@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Disabling safety checks requires account authorization; unauthorized requests are always checked. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _required_)
   - Examples: "Warm, incandescent streetlights paint the rain-slicked cobblestones in pools of amber light as a couple walks hand-in-hand, their silhouettes stark against the blurry backdrop of a city shrouded in a gentle downpour; the camera lingers on the subtle textures of their rain-soaked coats and the glistening reflections dancing on the wet pavement, creating a sense of intimate vulnerability and shared quietude."
 
@@ -70,6 +74,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "Warm, incandescent streetlights paint the rain-slicked cobblestones in pools of amber light as a couple walks hand-in-hand, their silhouettes stark against the blurry backdrop of a city shrouded in a gentle downpour; the camera lingers on the subtle textures of their rain-soaked coats and the glistening reflections dancing on the wet pavement, creating a sense of intimate vulnerability and shared quietude.",
   "image_url": "https://v3.fal.media/files/lion/_I_io6Gtk83c72d-afXf8_image.webp",
   "duration": "5",

@@ -101,6 +101,10 @@ The API accepts the following input parameters:
   Detail recovery level (0.0-1.0). Applies to Recovery V2 model only.
   - Range: `0` to `1`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -121,7 +125,8 @@ The API accepts the following input parameters:
   "output_format": "jpeg",
   "subject_detection": "All",
   "face_enhancement": true,
-  "face_enhancement_strength": 0.8
+  "face_enhancement_strength": 0.8,
+  "enable_safety_checker": true
 }
 ```
 

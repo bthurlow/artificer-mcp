@@ -58,6 +58,10 @@ The API accepts the following input parameters:
   - Range: `0` to `20`
   - Examples: 1.7
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -77,7 +81,8 @@ The API accepts the following input parameters:
   "lyrics": "[verse]\nMorning light filtering through the pine\nEvery quiet street is yours and mine\n[chorus]\nSoftly the world begins to breathe",
   "duration": 60,
   "num_inference_steps": 30,
-  "guidance_scale": 1.7
+  "guidance_scale": 1.7,
+  "enable_safety_checker": true
 }
 ```
 

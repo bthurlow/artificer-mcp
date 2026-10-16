@@ -47,6 +47,10 @@ The API accepts the following input parameters:
 - **`seed`** (`integer`, _optional_):
   Seed for the video-to-video generation.
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -63,7 +67,8 @@ The API accepts the following input parameters:
 {
   "prompt": "A powerful, matte black jeep, its robust frame contrasting with the lush green surroundings, navigates a winding jungle road, kicking up small clouds of dust and loose earth from its tires.",
   "num_frames": 78,
-  "enable_prompt_expansion": true
+  "enable_prompt_expansion": true,
+  "enable_safety_checker": true
 }
 ```
 

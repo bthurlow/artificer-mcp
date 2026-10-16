@@ -79,7 +79,7 @@ The API returns the following output format:
 
 - **`images`** (`list<File>`, _required_)
   - Array of File
-  - Examples: [{"file_size":1949504,"content_type":"image/webp","file_name":"image.webp","url":"https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/pro-output.webp"}]
+  - Examples: [{"file_size":1949504,"file_name":"image.webp","content_type":"image/webp","url":"https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/pro-output.webp"}]
 
 
 
@@ -90,8 +90,8 @@ The API returns the following output format:
   "images": [
     {
       "file_size": 1949504,
-      "content_type": "image/webp",
       "file_name": "image.webp",
+      "content_type": "image/webp",
       "url": "https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/pro-output.webp"
     }
   ]

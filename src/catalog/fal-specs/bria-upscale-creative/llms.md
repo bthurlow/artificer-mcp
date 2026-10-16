@@ -69,24 +69,7 @@ The API accepts the following input parameters:
 
 The API returns the following output format:
 
-- **`image`** (`Image`, _required_):
-  Generated image.
-  - Examples: {"height":1792,"content_type":"image/png","url":"https://bria-datasets.s3.us-east-1.amazonaws.com/upscale/wilder-west.png","width":2304}
 
-
-
-**Example Response**:
-
-```json
-{
-  "image": {
-    "height": 1792,
-    "content_type": "image/png",
-    "url": "https://bria-datasets.s3.us-east-1.amazonaws.com/upscale/wilder-west.png",
-    "width": 2304
-  }
-}
-```
 
 
 ## Usage Examples

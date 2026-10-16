@@ -71,39 +71,32 @@
         ]
       },
       "Kandinsky5ProImageToVideoInput": {
-        "required": [
-          "prompt",
-          "image_url"
-        ],
         "properties": {
-          "num_inference_steps": {
-            "title": "Num Inference Steps",
-            "maximum": 40,
-            "default": 28,
-            "type": "integer",
-            "minimum": 1
-          },
-          "resolution": {
-            "description": "Video resolution: 512p or 1024p.",
-            "type": "string",
-            "default": "512P",
-            "enum": [
-              "512P",
-              "1024P"
+          "prompt": {
+            "description": "The prompt to generate the video from.",
+            "examples": [
+              "The white dragon warrior stands still, eyes full of determination and strength. The camera slowly moves closer or circles around the warrior, highlighting the powerful presence and heroic spirit of the character."
             ],
-            "title": "Resolution"
+            "title": "Prompt",
+            "type": "string"
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "title": "Enable Safety Checker",
+            "type": "boolean"
           },
           "acceleration": {
-            "title": "Acceleration",
-            "description": "Acceleration level for faster generation.",
             "default": "regular",
+            "description": "Acceleration level for faster generation.",
+            "title": "Acceleration",
             "anyOf": [
               {
-                "type": "string",
                 "enum": [
                   "none",
                   "regular"
-                ]
+                ],
+                "type": "string"
               },
               {
                 "type": "null"
@@ -111,11 +104,11 @@
             ]
           },
           "seed": {
-            "title": "Seed",
+            "description": "The seed to use for generation. If not provided, a random seed will be used.",
             "examples": [
               42
             ],
-            "description": "The seed to use for generation. If not provided, a random seed will be used.",
+            "title": "Seed",
             "anyOf": [
               {
                 "type": "integer"
@@ -125,32 +118,42 @@
               }
             ]
           },
-          "duration": {
-            "description": "Video duration.",
-            "type": "string",
-            "default": "5s",
-            "const": "5s",
-            "title": "Duration"
-          },
-          "prompt": {
-            "examples": [
-              "The white dragon warrior stands still, eyes full of determination and strength. The camera slowly moves closer or circles around the warrior, highlighting the powerful presence and heroic spirit of the character."
-            ],
-            "description": "The prompt to generate the video from.",
-            "type": "string",
-            "title": "Prompt"
-          },
           "image_url": {
+            "description": "The URL of the image to use as a reference for the video generation.",
             "examples": [
               "https://storage.googleapis.com/falserverless/model_tests/wan/dragon-warrior.jpg"
             ],
-            "description": "The URL of the image to use as a reference for the video generation.",
-            "type": "string",
-            "title": "Image Url"
+            "title": "Image Url",
+            "type": "string"
+          },
+          "resolution": {
+            "enum": [
+              "512P",
+              "1024P"
+            ],
+            "description": "Video resolution: 512p or 1024p.",
+            "default": "512P",
+            "title": "Resolution",
+            "type": "string"
+          },
+          "duration": {
+            "const": "5s",
+            "description": "Video duration.",
+            "default": "5s",
+            "title": "Duration",
+            "type": "string"
+          },
+          "num_inference_steps": {
+            "default": 28,
+            "maximum": 40,
+            "minimum": 1,
+            "title": "Num Inference Steps",
+            "type": "integer"
           }
         },
         "x-fal-order-properties": [
           "prompt",
+          "enable_safety_checker",
           "image_url",
           "resolution",
           "duration",
@@ -158,29 +161,25 @@
           "acceleration",
           "seed"
         ],
-        "type": "object",
-        "title": "KandinskyI2VRequest"
+        "title": "KandinskyI2VRequest",
+        "required": [
+          "prompt",
+          "image_url"
+        ],
+        "type": "object"
       },
       "Kandinsky5ProImageToVideoOutput": {
-        "required": [
-          "seed"
-        ],
         "properties": {
-          "seed": {
-            "description": "The seed used for generation.",
-            "type": "integer",
-            "title": "Seed"
-          },
           "video": {
+            "description": "The generated video file.",
             "examples": [
               {
-                "file_size": 22253751,
                 "file_name": "output.mp4",
-                "url": "https://v3b.fal.media/files/b/0a877276/Bg24FK_awlNAYKn962Vm0_output.mp4",
-                "content_type": "application/octet-stream"
+                "content_type": "application/octet-stream",
+                "file_size": 22253751,
+                "url": "https://v3b.fal.media/files/b/0a877276/Bg24FK_awlNAYKn962Vm0_output.mp4"
               }
             ],
-            "description": "The generated video file.",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/File"
@@ -189,26 +188,61 @@
                 "type": "null"
               }
             ]
+          },
+          "seed": {
+            "description": "The seed used for generation.",
+            "title": "Seed",
+            "type": "integer"
           }
         },
         "x-fal-order-properties": [
           "video",
           "seed"
         ],
-        "type": "object",
-        "title": "KandinskyI2VResponse"
+        "title": "KandinskyI2VResponse",
+        "required": [
+          "seed"
+        ],
+        "type": "object"
       },
       "File": {
-        "required": [
-          "url"
-        ],
         "properties": {
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "file_size": {
-            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ],
-            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -218,40 +252,10 @@
               }
             ]
           },
-          "file_name": {
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "url": {
             "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
-          },
-          "content_type": {
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "title": "Url",
+            "type": "string"
           }
         },
         "x-fal-order-properties": [
@@ -260,8 +264,11 @@
           "file_name",
           "file_size"
         ],
-        "type": "object",
-        "title": "File"
+        "title": "File",
+        "required": [
+          "url"
+        ],
+        "type": "object"
       }
     }
   },

@@ -53,6 +53,10 @@ The API accepts the following input parameters:
   - Default: `"auto"`
   - Options: `"auto"`, `"16:9"`, `"4:3"`, `"3:2"`, `"1:1"`, `"2:3"`, `"3:4"`, `"9:16"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -72,7 +76,8 @@ The API accepts the following input parameters:
   "duration": 6,
   "resolution": "720p",
   "image_url": "https://v3b.fal.media/files/b/0a8b90e0/BFLE9VDlZqsryU-UA3BoD_image_004.png",
-  "aspect_ratio": "auto"
+  "aspect_ratio": "auto",
+  "enable_safety_checker": true
 }
 ```
 
@@ -83,7 +88,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video.
-  - Examples: {"duration":6.041667,"height":720,"width":1280,"url":"https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","fps":24,"content_type":"video/mp4","num_frames":145,"file_name":"0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4"}
+  - Examples: {"url":"https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","duration":6.041667,"num_frames":145,"height":720,"content_type":"video/mp4","width":1280,"fps":24,"file_name":"0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4"}
 
 
 
@@ -92,13 +97,13 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "duration": 6.041667,
-    "height": 720,
-    "width": 1280,
     "url": "https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4",
-    "fps": 24,
-    "content_type": "video/mp4",
+    "duration": 6.041667,
     "num_frames": 145,
+    "height": 720,
+    "content_type": "video/mp4",
+    "width": 1280,
+    "fps": 24,
     "file_name": "0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4"
   }
 }

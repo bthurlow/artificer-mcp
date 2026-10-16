@@ -55,6 +55,10 @@ The API accepts the following input parameters:
 
 - **`seed`** (`integer`, _optional_)
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -72,7 +76,8 @@ The API accepts the following input parameters:
   "prompt": "A beautiful piano arpeggio grows into a grand orchestral climax",
   "seconds_total": 190,
   "num_inference_steps": 8,
-  "guidance_scale": 1
+  "guidance_scale": 1,
+  "enable_safety_checker": true
 }
 ```
 

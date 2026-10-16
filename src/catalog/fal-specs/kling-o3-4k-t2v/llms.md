@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Disabling safety checks requires account authorization; unauthorized requests are always checked. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _optional_):
   Text prompt for video generation. Required unless multi_prompt is provided.
   - Examples: "A mecha lands on the ground to save the city, and says \"I'm here\", in anime style"
@@ -70,6 +74,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "A mecha lands on the ground to save the city, and says \"I'm here\", in anime style",
   "duration": "5",
   "aspect_ratio": "16:9",
@@ -85,7 +90,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video.
-  - Examples: {"file_size":13096952,"file_name":"output.mp4","content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0a8d04e2/idOb9V-Q9ujlggPSKqsfS_output.mp4"}
+  - Examples: {"url":"https://v3b.fal.media/files/b/0a8d04e2/idOb9V-Q9ujlggPSKqsfS_output.mp4","content_type":"video/mp4","file_size":13096952,"file_name":"output.mp4"}
 
 
 
@@ -94,10 +99,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_size": 13096952,
-    "file_name": "output.mp4",
+    "url": "https://v3b.fal.media/files/b/0a8d04e2/idOb9V-Q9ujlggPSKqsfS_output.mp4",
     "content_type": "video/mp4",
-    "url": "https://v3b.fal.media/files/b/0a8d04e2/idOb9V-Q9ujlggPSKqsfS_output.mp4"
+    "file_size": 13096952,
+    "file_name": "output.mp4"
   }
 }
 ```

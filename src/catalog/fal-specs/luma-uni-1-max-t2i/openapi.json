@@ -71,8 +71,6 @@
         ]
       },
       "AgentUni1V1MaxInput": {
-        "type": "object",
-        "title": "TextToImageRequest",
         "required": [
           "prompt"
         ],
@@ -82,48 +80,46 @@
           "style",
           "output_format",
           "enable_web_search",
-          "reference_image_urls"
+          "reference_image_urls",
+          "enable_safety_checker"
         ],
+        "title": "TextToImageRequest",
+        "type": "object",
         "properties": {
-          "prompt": {
-            "type": "string",
-            "minLength": 1,
-            "examples": [
-              "A manga panel of a stoic samurai overlooking a neon cyberpunk city at dusk."
-            ],
-            "maxLength": 6000,
-            "title": "Prompt",
-            "description": "Text prompt describing the image to generate."
-          },
-          "enable_web_search": {
-            "type": "boolean",
-            "description": "When true, the model may consult the web for references.",
-            "title": "Enable Web Search",
-            "default": false
-          },
           "reference_image_urls": {
             "description": "Optional list of reference image URLs used to guide the generation.",
+            "title": "Reference Image Urls",
             "anyOf": [
               {
-                "type": "array",
+                "maxItems": 9,
                 "items": {
                   "type": "string"
                 },
-                "maxItems": 9
+                "type": "array"
               },
               {
                 "type": "null"
               }
+            ]
+          },
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "A manga panel of a stoic samurai overlooking a neon cyberpunk city at dusk."
             ],
-            "title": "Reference Image Urls"
+            "description": "Text prompt describing the image to generate.",
+            "minLength": 1,
+            "type": "string",
+            "maxLength": 6000
           },
           "aspect_ratio": {
             "examples": [
               "16:9"
             ],
+            "description": "Aspect ratio of the generated image.",
+            "title": "Aspect Ratio",
             "anyOf": [
               {
-                "type": "string",
                 "enum": [
                   "3:1",
                   "2:1",
@@ -134,66 +130,75 @@
                   "9:16",
                   "1:2",
                   "1:3"
-                ]
+                ],
+                "type": "string"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Aspect Ratio",
-            "description": "Aspect ratio of the generated image."
-          },
-          "output_format": {
-            "description": "Encoding format of the generated image.",
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "png",
-                  "jpeg"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Output Format"
+            ]
           },
           "style": {
-            "type": "string",
+            "default": "auto",
             "enum": [
               "auto",
               "manga"
             ],
             "description": "Visual style of the generated image.",
             "title": "Style",
-            "default": "auto"
+            "type": "string"
+          },
+          "output_format": {
+            "description": "Encoding format of the generated image.",
+            "title": "Output Format",
+            "anyOf": [
+              {
+                "enum": [
+                  "png",
+                  "jpeg"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "title": "Enable Safety Checker",
+            "type": "boolean"
+          },
+          "enable_web_search": {
+            "default": false,
+            "description": "When true, the model may consult the web for references.",
+            "title": "Enable Web Search",
+            "type": "boolean"
           }
         }
       },
       "AgentUni1V1MaxOutput": {
-        "type": "object",
-        "title": "ImageOutput",
         "required": [
           "images"
         ],
         "x-fal-order-properties": [
           "images"
         ],
+        "title": "ImageOutput",
+        "type": "object",
         "properties": {
           "images": {
-            "type": "array",
-            "description": "The generated image(s).",
-            "title": "Images",
             "items": {
               "$ref": "#/components/schemas/File"
-            }
+            },
+            "description": "The generated image(s).",
+            "title": "Images",
+            "type": "array"
           }
         }
       },
       "File": {
-        "type": "object",
-        "title": "File",
         "required": [
           "url"
         ],
@@ -203,16 +208,35 @@
           "file_name",
           "file_size"
         ],
+        "title": "File",
+        "type": "object",
         "properties": {
           "url": {
-            "type": "string",
             "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
+            "title": "Url",
+            "type": "string"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "file_size": {
             "examples": [
               4404019
             ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -220,29 +244,14 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
+            ]
           },
           "content_type": {
             "examples": [
               "image/png"
             ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "description": "The mime type of the file.",
             "title": "Content Type",
-            "description": "The mime type of the file."
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
             "anyOf": [
               {
                 "type": "string"
@@ -250,9 +259,7 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
+            ]
           }
         }
       }

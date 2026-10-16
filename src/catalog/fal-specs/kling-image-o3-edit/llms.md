@@ -76,6 +76,10 @@ The API accepts the following input parameters:
   If `True`, the media will be returned as a data URI.
   - Default: `false`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -104,7 +108,8 @@ The API accepts the following input parameters:
   "result_type": "single",
   "num_images": 1,
   "aspect_ratio": "auto",
-  "output_format": "png"
+  "output_format": "png",
+  "enable_safety_checker": true
 }
 ```
 
@@ -116,7 +121,7 @@ The API returns the following output format:
 - **`images`** (`list<Image>`, _required_):
   Generated images
   - Array of Image
-  - Examples: [{"url":"https://v3b.fal.media/files/b/0a8d06d1/FTrwBsV9WI5twqMPkqvRh_19db9852c5ed4a109d81c52d27c9e433.png","file_name":"19db9852c5ed4a109d81c52d27c9e433.png","content_type":"image/png","file_size":793847}]
+  - Examples: [{"file_size":793847,"content_type":"image/png","file_name":"19db9852c5ed4a109d81c52d27c9e433.png","url":"https://v3b.fal.media/files/b/0a8d06d1/FTrwBsV9WI5twqMPkqvRh_19db9852c5ed4a109d81c52d27c9e433.png"}]
 
 
 
@@ -126,10 +131,10 @@ The API returns the following output format:
 {
   "images": [
     {
-      "url": "https://v3b.fal.media/files/b/0a8d06d1/FTrwBsV9WI5twqMPkqvRh_19db9852c5ed4a109d81c52d27c9e433.png",
-      "file_name": "19db9852c5ed4a109d81c52d27c9e433.png",
+      "file_size": 793847,
       "content_type": "image/png",
-      "file_size": 793847
+      "file_name": "19db9852c5ed4a109d81c52d27c9e433.png",
+      "url": "https://v3b.fal.media/files/b/0a8d06d1/FTrwBsV9WI5twqMPkqvRh_19db9852c5ed4a109d81c52d27c9e433.png"
     }
   ]
 }

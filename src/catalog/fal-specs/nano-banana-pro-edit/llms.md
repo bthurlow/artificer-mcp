@@ -123,7 +123,7 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The edited images.
   - Array of ImageFile
-  - Examples: [{"file_name":"nano-banana-pro-edit-output.png","url":"https://storage.googleapis.com/falserverless/example_outputs/nano-banana-pro-edit-output.png","content_type":"image/png"}]
+  - Examples: [{"file_name":"nano-banana-pro-edit-output.png","content_type":"image/png","url":"https://storage.googleapis.com/falserverless/example_outputs/nano-banana-pro-edit-output.png"}]
 
 - **`description`** (`string`, _required_):
   The description of the generated images.
@@ -137,8 +137,8 @@ The API returns the following output format:
   "images": [
     {
       "file_name": "nano-banana-pro-edit-output.png",
-      "url": "https://storage.googleapis.com/falserverless/example_outputs/nano-banana-pro-edit-output.png",
-      "content_type": "image/png"
+      "content_type": "image/png",
+      "url": "https://storage.googleapis.com/falserverless/example_outputs/nano-banana-pro-edit-output.png"
     }
   ],
   "description": ""

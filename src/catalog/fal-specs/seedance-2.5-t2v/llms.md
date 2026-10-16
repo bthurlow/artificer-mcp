@@ -39,6 +39,10 @@ The API accepts the following input parameters:
   - Default: `"720p"`
   - Options: `"480p"`, `"720p"`, `"1080p"`
 
+- **`draft`** (`boolean`, _optional_):
+  Generate a draft preview at 480p, overriding resolution. Returns a draft_id for completing the draft at 1080p within seven days.
+  - Default: `false`
+
 - **`duration`** (`DurationEnum`, _optional_):
   Duration of the video in seconds. Supports 4 to 30 seconds, or auto to let the model decide based on the prompt. Default value: `"auto"`
   - Default: `"auto"`
@@ -104,6 +108,9 @@ The API returns the following output format:
 - **`seed`** (`integer`, _required_):
   The seed used for generation.
   - Examples: 42
+
+- **`draft_id`** (`string`, _optional_):
+  The draft ID, or null when draft mode is disabled. Complete this draft within seven days using the same account.
 
 
 

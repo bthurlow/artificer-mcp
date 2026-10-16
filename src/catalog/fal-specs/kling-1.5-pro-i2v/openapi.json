@@ -76,6 +76,7 @@
           "image_url"
         ],
         "x-fal-order-properties": [
+          "enable_safety_checker",
           "prompt",
           "image_url",
           "duration",
@@ -86,65 +87,20 @@
           "static_mask_url",
           "dynamic_masks"
         ],
-        "title": "KlingV15ProImageToVideoRequest",
         "properties": {
-          "aspect_ratio": {
-            "default": "16:9",
-            "enum": [
-              "16:9",
-              "9:16",
-              "1:1"
-            ],
-            "description": "The aspect ratio of the generated video frame",
-            "title": "Aspect Ratio",
-            "type": "string"
-          },
-          "cfg_scale": {
-            "default": 0.5,
-            "maximum": 1,
-            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
-            "title": "Cfg Scale",
-            "minimum": 0,
-            "type": "number"
-          },
-          "dynamic_masks": {
-            "description": "List of dynamic masks",
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/DynamicMask"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Dynamic Masks"
-          },
-          "duration": {
-            "default": "5",
-            "enum": [
-              "5",
-              "10"
-            ],
-            "description": "The duration of the generated video in seconds",
-            "title": "Duration",
-            "type": "string"
-          },
-          "prompt": {
-            "examples": [
-              "Snowflakes fall as a car moves along the road."
-            ],
-            "maxLength": 2500,
-            "title": "Prompt",
-            "type": "string"
-          },
           "negative_prompt": {
             "default": "blur, distort, and low quality",
             "maxLength": 2500,
             "title": "Negative Prompt",
             "type": "string"
+          },
+          "cfg_scale": {
+            "maximum": 1,
+            "default": 0.5,
+            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
+            "minimum": 0,
+            "title": "Cfg Scale",
+            "type": "number"
           },
           "static_mask_url": {
             "examples": [
@@ -153,11 +109,11 @@
             "description": "URL of the image for Static Brush Application Area (Mask image created by users using the motion brush)",
             "anyOf": [
               {
-                "_fal_ui_field": "image_mask",
-                "type": "string",
                 "ui": {
                   "field": "image_mask"
-                }
+                },
+                "_fal_ui_field": "image_mask",
+                "type": "string"
               },
               {
                 "type": "null"
@@ -177,19 +133,70 @@
             "description": "URL of the image to be used for the end of the video",
             "anyOf": [
               {
-                "_fal_ui_field": "image",
-                "type": "string",
                 "ui": {
                   "field": "image"
-                }
+                },
+                "_fal_ui_field": "image",
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
             "title": "Tail Image Url"
+          },
+          "prompt": {
+            "examples": [
+              "Snowflakes fall as a car moves along the road."
+            ],
+            "maxLength": 2500,
+            "title": "Prompt",
+            "type": "string"
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Disabling safety checks requires account authorization; unauthorized requests are always checked.",
+            "title": "Enable Safety Checker",
+            "type": "boolean"
+          },
+          "aspect_ratio": {
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1"
+            ],
+            "default": "16:9",
+            "description": "The aspect ratio of the generated video frame",
+            "title": "Aspect Ratio",
+            "type": "string"
+          },
+          "dynamic_masks": {
+            "description": "List of dynamic masks",
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/DynamicMask"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dynamic Masks"
+          },
+          "duration": {
+            "enum": [
+              "5",
+              "10"
+            ],
+            "default": "5",
+            "description": "The duration of the generated video in seconds",
+            "title": "Duration",
+            "type": "string"
           }
         },
+        "title": "KlingV15ProImageToVideoRequest",
         "type": "object"
       },
       "KlingVideoV15ProImageToVideoOutput": {
@@ -199,18 +206,18 @@
         "x-fal-order-properties": [
           "video"
         ],
-        "title": "I2VOutput",
         "properties": {
           "video": {
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://storage.googleapis.com/falserverless/kling/kling_i2v_output.mp4"
               }
             ],
-            "description": "The generated video",
-            "$ref": "#/components/schemas/File"
+            "description": "The generated video"
           }
         },
+        "title": "I2VOutput",
         "type": "object"
       },
       "DynamicMask": {
@@ -221,7 +228,6 @@
           "mask_url",
           "trajectories"
         ],
-        "title": "DynamicMask",
         "properties": {
           "mask_url": {
             "_fal_ui_field": "image_mask",
@@ -236,23 +242,24 @@
             "examples": [
               [
                 {
-                  "y": 219,
-                  "x": 279
+                  "x": 279,
+                  "y": 219
                 },
                 {
-                  "y": 65,
-                  "x": 417
+                  "x": 417,
+                  "y": 65
                 }
               ]
             ],
-            "description": "List of trajectories",
-            "title": "Trajectories",
             "items": {
               "$ref": "#/components/schemas/Trajectory"
             },
+            "description": "List of trajectories",
+            "title": "Trajectories",
             "type": "array"
           }
         },
+        "title": "DynamicMask",
         "type": "object"
       },
       "File": {
@@ -265,8 +272,27 @@
           "file_name",
           "file_size"
         ],
-        "title": "File",
         "properties": {
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
+          },
           "file_size": {
             "examples": [
               4404019
@@ -296,28 +322,9 @@
               }
             ],
             "title": "File Name"
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
           }
         },
+        "title": "File",
         "type": "object"
       },
       "Trajectory": {
@@ -329,16 +336,7 @@
           "x",
           "y"
         ],
-        "title": "Trajectory",
         "properties": {
-          "y": {
-            "examples": [
-              219
-            ],
-            "description": "Y coordinate of the motion trajectory",
-            "title": "Y",
-            "type": "integer"
-          },
           "x": {
             "examples": [
               279
@@ -346,8 +344,17 @@
             "description": "X coordinate of the motion trajectory",
             "title": "X",
             "type": "integer"
+          },
+          "y": {
+            "examples": [
+              219
+            ],
+            "description": "Y coordinate of the motion trajectory",
+            "title": "Y",
+            "type": "integer"
           }
         },
+        "title": "Trajectory",
         "type": "object"
       }
     }

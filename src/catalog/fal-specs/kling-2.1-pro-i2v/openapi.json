@@ -76,6 +76,7 @@
           "image_url"
         ],
         "x-fal-order-properties": [
+          "enable_safety_checker",
           "prompt",
           "image_url",
           "duration",
@@ -83,21 +84,12 @@
           "cfg_scale",
           "tail_image_url"
         ],
-        "title": "ImageToVideoV21ProRequest",
         "properties": {
-          "cfg_scale": {
-            "default": 0.5,
-            "maximum": 1,
-            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
-            "title": "Cfg Scale",
-            "minimum": 0,
-            "type": "number"
-          },
-          "negative_prompt": {
-            "default": "blur, distort, and low quality",
-            "maxLength": 2500,
-            "title": "Negative Prompt",
-            "type": "string"
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Disabling safety checks requires account authorization; unauthorized requests are always checked.",
+            "title": "Enable Safety Checker",
+            "type": "boolean"
           },
           "image_url": {
             "examples": [
@@ -107,6 +99,14 @@
             "title": "Image Url",
             "type": "string"
           },
+          "cfg_scale": {
+            "maximum": 1,
+            "default": 0.5,
+            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
+            "minimum": 0,
+            "title": "Cfg Scale",
+            "type": "number"
+          },
           "prompt": {
             "examples": [
               "Warm, incandescent streetlights paint the rain-slicked cobblestones in pools of amber light as a couple walks hand-in-hand, their silhouettes stark against the blurry backdrop of a city shrouded in a gentle downpour; the camera lingers on the subtle textures of their rain-soaked coats and the glistening reflections dancing on the wet pavement, creating a sense of intimate vulnerability and shared quietude."
@@ -115,32 +115,39 @@
             "title": "Prompt",
             "type": "string"
           },
-          "duration": {
-            "default": "5",
-            "enum": [
-              "5",
-              "10"
-            ],
-            "description": "The duration of the generated video in seconds",
-            "title": "Duration",
+          "negative_prompt": {
+            "default": "blur, distort, and low quality",
+            "maxLength": 2500,
+            "title": "Negative Prompt",
             "type": "string"
           },
           "tail_image_url": {
             "description": "URL of the image to be used for the end of the video",
             "anyOf": [
               {
-                "type": "string",
                 "ui": {
                   "field": "image"
-                }
+                },
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
             "title": "Tail Image Url"
+          },
+          "duration": {
+            "enum": [
+              "5",
+              "10"
+            ],
+            "default": "5",
+            "description": "The duration of the generated video in seconds",
+            "title": "Duration",
+            "type": "string"
           }
         },
+        "title": "ImageToVideoV21ProRequest",
         "type": "object"
       },
       "KlingVideoV21ProImageToVideoOutput": {
@@ -150,18 +157,18 @@
         "x-fal-order-properties": [
           "video"
         ],
-        "title": "ImageToVideoV21ProOutput",
         "properties": {
           "video": {
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v3.fal.media/files/rabbit/Y5I8-7u3e7ogVSvPin1TS_output.mp4"
               }
             ],
-            "description": "The generated video",
-            "$ref": "#/components/schemas/File"
+            "description": "The generated video"
           }
         },
+        "title": "ImageToVideoV21ProOutput",
         "type": "object"
       },
       "File": {
@@ -174,8 +181,27 @@
           "file_name",
           "file_size"
         ],
-        "title": "File",
         "properties": {
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
+          },
           "file_size": {
             "examples": [
               4404019
@@ -205,28 +231,9 @@
               }
             ],
             "title": "File Name"
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
           }
         },
+        "title": "File",
         "type": "object"
       }
     }

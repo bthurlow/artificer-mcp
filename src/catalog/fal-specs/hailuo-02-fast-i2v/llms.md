@@ -45,6 +45,10 @@ The API accepts the following input parameters:
   Whether to use the model's prompt optimizer Default value: `true`
   - Default: `true`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -63,7 +67,8 @@ The API accepts the following input parameters:
   "prompt": "Extremely realistic movement An old samurai is breaking a stone in half",
   "image_url": "https://v3.fal.media/files/tiger/U9HN_tm5-3Ls52SbD6CrW_image.webp",
   "duration": "6",
-  "prompt_optimizer": true
+  "prompt_optimizer": true,
+  "enable_safety_checker": true
 }
 ```
 

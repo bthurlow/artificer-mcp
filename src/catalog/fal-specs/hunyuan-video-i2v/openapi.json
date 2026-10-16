@@ -71,6 +71,73 @@
         ]
       },
       "HunyuanVideoImageToVideoInput": {
+        "properties": {
+          "num_frames": {
+            "const": 129,
+            "description": "The number of frames to generate.",
+            "default": 129,
+            "title": "Number of Frames",
+            "type": "integer"
+          },
+          "prompt": {
+            "description": "The prompt to generate the video from.",
+            "examples": [
+              "Two muscular cats boxing in a boxing ring."
+            ],
+            "maxLength": 1000,
+            "title": "Prompt",
+            "type": "string"
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "title": "Enable Safety Checker",
+            "type": "boolean"
+          },
+          "seed": {
+            "description": "The seed to use for generating the video.",
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "i2v_stability": {
+            "default": false,
+            "description": "Turning on I2V Stability reduces hallucination but also reduces motion.",
+            "title": "I2V Stability",
+            "type": "boolean"
+          },
+          "aspect_ratio": {
+            "enum": [
+              "16:9",
+              "9:16"
+            ],
+            "description": "The aspect ratio of the video to generate.",
+            "default": "16:9",
+            "title": "Aspect Ratio (W:H)",
+            "type": "string"
+          },
+          "resolution": {
+            "const": "720p",
+            "description": "The resolution of the video to generate.",
+            "default": "720p",
+            "title": "Resolution",
+            "type": "string"
+          },
+          "image_url": {
+            "description": "URL of the image input.",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/hunyuan_i2v.jpg"
+            ],
+            "title": "Image Url",
+            "type": "string"
+          }
+        },
         "x-fal-order-properties": [
           "prompt",
           "image_url",
@@ -78,59 +145,76 @@
           "aspect_ratio",
           "resolution",
           "num_frames",
-          "i2v_stability"
+          "i2v_stability",
+          "enable_safety_checker"
         ],
         "title": "HunyuanVideoRequest",
-        "type": "object",
+        "required": [
+          "prompt",
+          "image_url"
+        ],
+        "type": "object"
+      },
+      "HunyuanVideoImageToVideoOutput": {
         "properties": {
-          "resolution": {
-            "title": "Resolution",
-            "const": "720p",
-            "type": "string",
-            "description": "The resolution of the video to generate.",
-            "default": "720p"
-          },
-          "prompt": {
-            "title": "Prompt",
-            "examples": [
-              "Two muscular cats boxing in a boxing ring."
-            ],
-            "type": "string",
-            "maxLength": 1000,
-            "description": "The prompt to generate the video from."
-          },
-          "num_frames": {
-            "title": "Number of Frames",
-            "const": 129,
-            "type": "integer",
-            "description": "The number of frames to generate.",
-            "default": 129
-          },
-          "i2v_stability": {
-            "title": "I2V Stability",
-            "type": "boolean",
-            "description": "Turning on I2V Stability reduces hallucination but also reduces motion.",
-            "default": false
-          },
-          "aspect_ratio": {
-            "title": "Aspect Ratio (W:H)",
-            "enum": [
-              "16:9",
-              "9:16"
-            ],
-            "type": "string",
-            "description": "The aspect ratio of the video to generate.",
-            "default": "16:9"
-          },
-          "image_url": {
-            "title": "Image Url",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/hunyuan_i2v.jpg"
-            ],
-            "type": "string",
-            "description": "URL of the image input."
+          "video": {
+            "$ref": "#/components/schemas/File"
           },
           "seed": {
+            "description": "The seed used for generating the video.",
+            "title": "Seed",
+            "type": "integer"
+          }
+        },
+        "x-fal-order-properties": [
+          "video",
+          "seed"
+        ],
+        "title": "HunyuanI2VResponse",
+        "required": [
+          "video",
+          "seed"
+        ],
+        "type": "object"
+      },
+      "File": {
+        "properties": {
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -138,39 +222,14 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Seed",
-            "description": "The seed to use for generating the video."
-          }
-        },
-        "required": [
-          "prompt",
-          "image_url"
-        ]
-      },
-      "HunyuanVideoImageToVideoOutput": {
-        "x-fal-order-properties": [
-          "video",
-          "seed"
-        ],
-        "title": "HunyuanI2VResponse",
-        "type": "object",
-        "properties": {
-          "video": {
-            "$ref": "#/components/schemas/File"
+            ]
           },
-          "seed": {
-            "title": "Seed",
-            "type": "integer",
-            "description": "The seed used for generating the video."
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
           }
         },
-        "required": [
-          "video",
-          "seed"
-        ]
-      },
-      "File": {
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -178,62 +237,10 @@
           "file_size"
         ],
         "title": "File",
-        "type": "object",
-        "properties": {
-          "file_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
-          },
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
-          }
-        },
         "required": [
           "url"
-        ]
+        ],
+        "type": "object"
       }
     }
   },

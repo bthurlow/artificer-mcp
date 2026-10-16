@@ -62,6 +62,10 @@ The API accepts the following input parameters:
   The seed to use for generation. If not provided, a random seed will be used.
   - Examples: 42
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -82,7 +86,8 @@ The API accepts the following input parameters:
   "duration": "5s",
   "num_inference_steps": 28,
   "acceleration": "regular",
-  "seed": 42
+  "seed": 42,
+  "enable_safety_checker": true
 }
 ```
 
@@ -93,7 +98,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _optional_):
   The generated video file.
-  - Examples: {"file_size":14530500,"file_name":"output.mp4","url":"https://v3b.fal.media/files/b/0a87754e/o5FWdz83KTXzq0FB7aG5Q_output.mp4","content_type":"application/octet-stream"}
+  - Examples: {"file_name":"output.mp4","content_type":"application/octet-stream","file_size":14530500,"url":"https://v3b.fal.media/files/b/0a87754e/o5FWdz83KTXzq0FB7aG5Q_output.mp4"}
 
 - **`seed`** (`integer`, _required_):
   The seed used for generation.
@@ -105,10 +110,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_size": 14530500,
     "file_name": "output.mp4",
-    "url": "https://v3b.fal.media/files/b/0a87754e/o5FWdz83KTXzq0FB7aG5Q_output.mp4",
-    "content_type": "application/octet-stream"
+    "content_type": "application/octet-stream",
+    "file_size": 14530500,
+    "url": "https://v3b.fal.media/files/b/0a87754e/o5FWdz83KTXzq0FB7aG5Q_output.mp4"
   }
 }
 ```

@@ -71,29 +71,101 @@
         ]
       },
       "WanI2vLoraInput": {
+        "title": "WanLoRAI2VRequest",
+        "type": "object",
         "properties": {
+          "shift": {
+            "title": "Shift",
+            "type": "number",
+            "default": 5,
+            "description": "Shift parameter for video generation.",
+            "maximum": 10,
+            "minimum": 1
+          },
           "aspect_ratio": {
+            "title": "Aspect Ratio",
+            "type": "string",
+            "default": "16:9",
+            "description": "Aspect ratio of the output video.",
             "enum": [
               "auto",
               "16:9",
               "9:16",
               "1:1"
-            ],
-            "default": "16:9",
-            "type": "string",
-            "description": "Aspect ratio of the output video.",
-            "title": "Aspect Ratio"
-          },
-          "prompt": {
-            "type": "string",
-            "description": "The text prompt to guide video generation.",
-            "title": "Prompt",
-            "examples": [
-              "Cars race in slow motion."
             ]
           },
+          "enable_prompt_expansion": {
+            "title": "Enable Prompt Expansion",
+            "type": "boolean",
+            "examples": [
+              false
+            ],
+            "default": false,
+            "description": "Whether to enable prompt expansion."
+          },
+          "num_inference_steps": {
+            "title": "Num Inference Steps",
+            "type": "integer",
+            "default": 30,
+            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
+            "maximum": 40,
+            "minimum": 2
+          },
+          "resolution": {
+            "title": "Resolution",
+            "type": "string",
+            "default": "720p",
+            "description": "Resolution of the generated video (480p or 720p). 480p is 0.5 billing units, and 720p is 1 billing unit.",
+            "enum": [
+              "480p",
+              "720p"
+            ]
+          },
+          "turbo_mode": {
+            "title": "Turbo Mode",
+            "type": "boolean",
+            "default": true,
+            "description": "If true, the video will be generated faster with no noticeable degradation in the visual quality."
+          },
+          "reverse_video": {
+            "title": "Reverse Video",
+            "type": "boolean",
+            "default": false,
+            "description": "If true, the video will be reversed."
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string",
+            "examples": [
+              "Cars race in slow motion."
+            ],
+            "description": "The text prompt to guide video generation."
+          },
+          "num_frames": {
+            "title": "Num Frames",
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 100,
+                "minimum": 81
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 81,
+            "description": "Number of frames to generate. Must be between 81 to 100 (inclusive). If the number of frames is greater than 81, the video will be generated with 1.25x more billing units."
+          },
+          "loras": {
+            "title": "Loras",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LoraWeight"
+            },
+            "default": [],
+            "description": "LoRA weights to be used in the inference."
+          },
           "seed": {
-            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
             "title": "Seed",
             "anyOf": [
               {
@@ -102,129 +174,63 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "shift": {
-            "minimum": 1,
-            "default": 5,
-            "type": "number",
-            "description": "Shift parameter for video generation.",
-            "title": "Shift",
-            "maximum": 10
-          },
-          "reverse_video": {
-            "default": false,
-            "type": "boolean",
-            "description": "If true, the video will be reversed.",
-            "title": "Reverse Video"
-          },
-          "turbo_mode": {
-            "default": true,
-            "type": "boolean",
-            "description": "If true, the video will be generated faster with no noticeable degradation in the visual quality.",
-            "title": "Turbo Mode"
-          },
-          "resolution": {
-            "enum": [
-              "480p",
-              "720p"
             ],
-            "default": "720p",
-            "type": "string",
-            "description": "Resolution of the generated video (480p or 720p). 480p is 0.5 billing units, and 720p is 1 billing unit.",
-            "title": "Resolution"
+            "description": "Random seed for reproducibility. If None, a random seed is chosen."
+          },
+          "guide_scale": {
+            "title": "Guide Scale",
+            "type": "number",
+            "default": 5,
+            "description": "Classifier-free guidance scale. Higher values give better adherence to the prompt but may decrease quality.",
+            "maximum": 10,
+            "minimum": 1
           },
           "enable_safety_checker": {
-            "default": false,
-            "type": "boolean",
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
             "title": "Enable Safety Checker",
+            "type": "boolean",
             "examples": [
               true
-            ]
-          },
-          "enable_prompt_expansion": {
+            ],
             "default": false,
-            "type": "boolean",
-            "description": "Whether to enable prompt expansion.",
-            "title": "Enable Prompt Expansion",
-            "examples": [
-              false
-            ]
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked."
           },
           "image_url": {
-            "type": "string",
-            "description": "URL of the input image. If the input image does not match the chosen aspect ratio, it is resized and center cropped.",
             "title": "Image Url",
+            "type": "string",
             "examples": [
               "https://storage.googleapis.com/falserverless/gallery/car_720p.png"
-            ]
+            ],
+            "description": "URL of the input image. If the input image does not match the chosen aspect ratio, it is resized and center cropped."
           },
           "frames_per_second": {
-            "default": 16,
-            "description": "Frames per second of the generated video. Must be between 5 to 24.",
             "title": "Frames Per Second",
             "anyOf": [
               {
-                "minimum": 5,
+                "type": "integer",
                 "maximum": 24,
-                "type": "integer"
+                "minimum": 5
               },
               {
                 "type": "null"
               }
-            ]
-          },
-          "guide_scale": {
-            "minimum": 1,
-            "default": 5,
-            "type": "number",
-            "description": "Classifier-free guidance scale. Higher values give better adherence to the prompt but may decrease quality.",
-            "title": "Guide Scale",
-            "maximum": 10
+            ],
+            "default": 16,
+            "description": "Frames per second of the generated video. Must be between 5 to 24."
           },
           "negative_prompt": {
-            "default": "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards",
-            "type": "string",
-            "description": "Negative prompt for video generation.",
             "title": "Negative Prompt",
+            "type": "string",
             "examples": [
               "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards"
-            ]
-          },
-          "num_inference_steps": {
-            "minimum": 2,
-            "default": 30,
-            "type": "integer",
-            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
-            "title": "Num Inference Steps",
-            "maximum": 40
-          },
-          "num_frames": {
-            "default": 81,
-            "description": "Number of frames to generate. Must be between 81 to 100 (inclusive). If the number of frames is greater than 81, the video will be generated with 1.25x more billing units.",
-            "title": "Num Frames",
-            "anyOf": [
-              {
-                "minimum": 81,
-                "maximum": 100,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "loras": {
-            "items": {
-              "$ref": "#/components/schemas/LoraWeight"
-            },
-            "default": [],
-            "type": "array",
-            "description": "LoRA weights to be used in the inference.",
-            "title": "Loras"
+            ],
+            "default": "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards",
+            "description": "Negative prompt for video generation."
           }
         },
+        "required": [
+          "prompt",
+          "image_url"
+        ],
         "x-fal-order-properties": [
           "prompt",
           "negative_prompt",
@@ -242,59 +248,41 @@
           "loras",
           "reverse_video",
           "turbo_mode"
-        ],
-        "type": "object",
-        "title": "WanLoRAI2VRequest",
-        "required": [
-          "prompt",
-          "image_url"
         ]
       },
       "WanI2vLoraOutput": {
+        "title": "WanI2VResponse",
+        "type": "object",
         "properties": {
           "seed": {
+            "title": "Seed",
             "type": "integer",
-            "description": "The seed used for generation.",
-            "title": "Seed"
+            "description": "The seed used for generation."
           },
           "video": {
-            "description": "The generated video file.",
-            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://storage.googleapis.com/falserverless/gallery/wan-i2v-example.mp4"
               }
-            ]
+            ],
+            "description": "The generated video file.",
+            "$ref": "#/components/schemas/File"
           }
         },
-        "x-fal-order-properties": [
+        "required": [
           "video",
           "seed"
         ],
-        "type": "object",
-        "title": "WanI2VResponse",
-        "required": [
+        "x-fal-order-properties": [
           "video",
           "seed"
         ]
       },
       "LoraWeight": {
+        "title": "LoraWeight",
+        "type": "object",
         "properties": {
-          "scale": {
-            "minimum": 0,
-            "default": 1,
-            "type": "number",
-            "description": "\n            The scale of the LoRA weight. This is used to scale the LoRA weight\n            before merging it with the base model.\n        ",
-            "title": "Scale",
-            "maximum": 4
-          },
-          "path": {
-            "type": "string",
-            "description": "URL or the path to the LoRA weights.",
-            "title": "Path"
-          },
           "weight_name": {
-            "description": "Name of the LoRA weight. Used only if `path` is a Hugging Face repository, and required only if you have more than 1 safetensors file in the repo.",
             "title": "Weight Name",
             "anyOf": [
               {
@@ -303,23 +291,38 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Name of the LoRA weight. Used only if `path` is a Hugging Face repository, and required only if you have more than 1 safetensors file in the repo."
+          },
+          "scale": {
+            "title": "Scale",
+            "type": "number",
+            "default": 1,
+            "description": "\n            The scale of the LoRA weight. This is used to scale the LoRA weight\n            before merging it with the base model.\n        ",
+            "maximum": 4,
+            "minimum": 0
+          },
+          "path": {
+            "title": "Path",
+            "type": "string",
+            "description": "URL or the path to the LoRA weights."
           }
         },
+        "required": [
+          "path"
+        ],
         "x-fal-order-properties": [
           "path",
           "weight_name",
           "scale"
-        ],
-        "type": "object",
-        "title": "LoraWeight",
-        "required": [
-          "path"
         ]
       },
       "File": {
+        "title": "File",
+        "type": "object",
         "properties": {
-          "content_type": {
+          "file_name": {
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -328,13 +331,33 @@
                 "type": "null"
               }
             ],
-            "description": "The mime type of the file.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "content_type": {
             "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "examples": [
               "image/png"
-            ]
+            ],
+            "description": "The mime type of the file."
           },
           "file_size": {
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -343,43 +366,20 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
             "examples": [
               4404019
-            ]
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
-          },
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
+            "description": "The size of the file in bytes."
           }
         },
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
-        ],
-        "type": "object",
-        "title": "File",
-        "required": [
-          "url"
         ]
       }
     }

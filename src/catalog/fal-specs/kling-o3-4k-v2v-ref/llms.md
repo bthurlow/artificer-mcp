@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Disabling safety checks requires account authorization; unauthorized requests are always checked. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _required_):
   Text prompt for video generation. Reference video as @Video1.
   - Examples: "Integrate @Element1 in the scene. Style video should be following watercolor style of @Image1"
@@ -83,6 +87,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "Integrate @Element1 in the scene. Style video should be following watercolor style of @Image1",
   "video_url": "https://storage.googleapis.com/falserverless/example_inputs/kling-o3/pro-v2v-reference/video_reference.mp4",
   "image_urls": [
@@ -111,7 +116,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video.
-  - Examples: {"file_size":15809901,"file_name":"output.mp4","content_type":"video/mp4","url":"https://storage.googleapis.com/falserverless/example_outputs/kling-o3/pro-v2v-reference/output.mp4"}
+  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/kling-o3/pro-v2v-reference/output.mp4","content_type":"video/mp4","file_size":15809901,"file_name":"output.mp4"}
 
 
 
@@ -120,10 +125,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_size": 15809901,
-    "file_name": "output.mp4",
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/kling-o3/pro-v2v-reference/output.mp4",
     "content_type": "video/mp4",
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/kling-o3/pro-v2v-reference/output.mp4"
+    "file_size": 15809901,
+    "file_name": "output.mp4"
   }
 }
 ```

@@ -101,7 +101,7 @@ The API returns the following output format:
 - **`images`** (`list<Image>`, _required_):
   A list of the generated images.
   - Array of Image
-  - Examples: [{"height":1024,"content_type":"image/png","url":"https://v3b.fal.media/files/b/0a8c37ef/niSZAZpVwwixexdtx1AAf.png","width":1024}]
+  - Examples: [{"height":1024,"content_type":"image/png","width":1024,"url":"https://v3b.fal.media/files/b/0a8c37ef/niSZAZpVwwixexdtx1AAf.png"}]
 
 - **`seed`** (`integer`, _required_):
   The base seed used for the generation process.
@@ -116,8 +116,8 @@ The API returns the following output format:
     {
       "height": 1024,
       "content_type": "image/png",
-      "url": "https://v3b.fal.media/files/b/0a8c37ef/niSZAZpVwwixexdtx1AAf.png",
-      "width": 1024
+      "width": 1024,
+      "url": "https://v3b.fal.media/files/b/0a8c37ef/niSZAZpVwwixexdtx1AAf.png"
     }
   ]
 }

@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Disabling safety checks requires account authorization; unauthorized requests are always checked. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _optional_):
   Text prompt for video generation. Either prompt or multi_prompt must be provided, but not both.
   - Examples: "Close-up of glowing fireflies dancing in a dark forest at twilight. Soft bioluminescent particles float through the air. Shallow depth of field, bokeh lights in background. Magical atmosphere, gentle movement."
@@ -80,6 +84,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "Close-up of glowing fireflies dancing in a dark forest at twilight. Soft bioluminescent particles float through the air. Shallow depth of field, bokeh lights in background. Magical atmosphere, gentle movement.",
   "duration": "5",
   "multi_prompt": null,
@@ -98,7 +103,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"file_size":8062911,"file_name":"output.mp4","content_type":"video/mp4","url":"https://storage.googleapis.com/falserverless/example_outputs/kling-v3/pro-t2v/out.mp4"}
+  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/kling-v3/pro-t2v/out.mp4","content_type":"video/mp4","file_size":8062911,"file_name":"output.mp4"}
 
 
 
@@ -107,10 +112,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_size": 8062911,
-    "file_name": "output.mp4",
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/kling-v3/pro-t2v/out.mp4",
     "content_type": "video/mp4",
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/kling-v3/pro-t2v/out.mp4"
+    "file_size": 8062911,
+    "file_name": "output.mp4"
   }
 }
 ```

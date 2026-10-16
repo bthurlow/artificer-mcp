@@ -47,6 +47,10 @@ The API accepts the following input parameters:
   - Default: `1.3`
   - Range: `1` to `2`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -78,7 +82,8 @@ The API accepts the following input parameters:
       "preset": "Carter [EN]"
     }
   ],
-  "cfg_scale": 1.3
+  "cfg_scale": 1.3,
+  "enable_safety_checker": true
 }
 ```
 

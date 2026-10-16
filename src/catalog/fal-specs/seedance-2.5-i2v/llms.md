@@ -30,7 +30,7 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
-- **`prompt`** (`string`, _required_):
+- **`prompt`** (`string`, _optional_):
   The text prompt describing the desired motion and action for the video.
   - Examples: "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea."
 
@@ -45,6 +45,10 @@ The API accepts the following input parameters:
   Video resolution - 480p for faster generation, 720p for balance, 1080p for high quality. Default value: `"720p"`
   - Default: `"720p"`
   - Options: `"480p"`, `"720p"`, `"1080p"`
+
+- **`draft`** (`boolean`, _optional_):
+  Generate a draft preview at 480p, overriding resolution. Returns a draft_id for completing the draft at 1080p within seven days.
+  - Default: `false`
 
 - **`duration`** (`DurationEnum`, _optional_):
   Duration of the video in seconds. Supports 4 to 30 seconds, or auto to let the model decide based on the prompt. Default value: `"auto"`
@@ -80,7 +84,6 @@ The API accepts the following input parameters:
 
 ```json
 {
-  "prompt": "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea.",
   "image_url": "https://v3b.fal.media/files/b/0a8eba37/Cqg-4Uwzyz4DELfceT1CF_a17e588773ec45b1a9e6f100a787b80b.jpg"
 }
 ```
@@ -113,6 +116,9 @@ The API returns the following output format:
   The seed used for generation.
   - Examples: 42
 
+- **`draft_id`** (`string`, _optional_):
+  The draft ID, or null when draft mode is disabled. Complete this draft within seven days using the same account.
+
 
 
 **Example Response**:
@@ -137,7 +143,6 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea.",
      "image_url": "https://v3b.fal.media/files/b/0a8eba37/Cqg-4Uwzyz4DELfceT1CF_a17e588773ec45b1a9e6f100a787b80b.jpg"
    }'
 ```
@@ -163,7 +168,6 @@ def on_queue_update(update):
 result = fal_client.subscribe(
     "bytedance/seedance-2.5/image-to-video",
     arguments={
-        "prompt": "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea.",
         "image_url": "https://v3b.fal.media/files/b/0a8eba37/Cqg-4Uwzyz4DELfceT1CF_a17e588773ec45b1a9e6f100a787b80b.jpg"
     },
     with_logs=True,
@@ -187,7 +191,6 @@ import { fal } from "@fal-ai/client";
 
 const result = await fal.subscribe("bytedance/seedance-2.5/image-to-video", {
   input: {
-    prompt: "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea.",
     image_url: "https://v3b.fal.media/files/b/0a8eba37/Cqg-4Uwzyz4DELfceT1CF_a17e588773ec45b1a9e6f100a787b80b.jpg"
   },
   logs: true,

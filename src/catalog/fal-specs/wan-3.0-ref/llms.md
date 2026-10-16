@@ -7,7 +7,7 @@
 
 - **Endpoint**: `https://fal.run/alibaba/wan-3.0/reference-to-video`
 - **Model ID**: `alibaba/wan-3.0/reference-to-video`
-- **Category**: image-to-video
+- **Category**: video-to-video
 - **Kind**: inference
 **Tags**: stylized, transform, lipsync
 
@@ -72,7 +72,7 @@ The API accepts the following input parameters:
   - Array of string
 
 - **`reference_video_urls`** (`list<string>`, _optional_):
-  Up to 5 reference video URLs totaling at most 15 seconds. Each clip must be at least 16 fps.
+  Up to 5 reference video URLs totaling at most 15 seconds. Each clip must be at least 16 fps. Input video duration is billed in addition to output duration.
   - Array of string
 
 - **`reference_audio_urls`** (`list<string>`, _optional_):

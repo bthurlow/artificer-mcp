@@ -53,6 +53,10 @@ The API accepts the following input parameters:
   - Default: `"992x512"`
   - Options: `"512x992"`, `"992x512"`, `"960x512"`, `"512x960"`, `"720x720"`, `"448x1120"`, `"1120x448"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -71,7 +75,8 @@ The API accepts the following input parameters:
   "negative_prompt": "jitter, bad hands, blur, distortion",
   "num_inference_steps": 30,
   "audio_negative_prompt": "robotic, muffled, echo, distorted",
-  "resolution": "992x512"
+  "resolution": "992x512",
+  "enable_safety_checker": true
 }
 ```
 

@@ -89,7 +89,7 @@ The API returns the following output format:
 - **`images`** (`list<File>`, _required_):
   Generated images in PNG format
   - Array of File
-  - Examples: [{"content_type":"image/png","url":"https://v3b.fal.media/files/b/0a86d6b0/cBXGSUEl3DkTcBnf9IEM0_output_1.png","file_name":"output_1.png"}]
+  - Examples: [{"url":"https://v3b.fal.media/files/b/0a86d6b0/cBXGSUEl3DkTcBnf9IEM0_output_1.png","file_name":"output_1.png","content_type":"image/png"}]
 
 - **`generated_text`** (`string`, _optional_):
   Generated text content (in mixed text-and-image mode). May be None if only images were generated.
@@ -106,9 +106,9 @@ The API returns the following output format:
 {
   "images": [
     {
-      "content_type": "image/png",
       "url": "https://v3b.fal.media/files/b/0a86d6b0/cBXGSUEl3DkTcBnf9IEM0_output_1.png",
-      "file_name": "output_1.png"
+      "file_name": "output_1.png",
+      "content_type": "image/png"
     }
   ],
   "seed": 175932751

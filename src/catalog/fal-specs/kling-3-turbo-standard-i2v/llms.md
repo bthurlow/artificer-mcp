@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Disabling safety checks requires account authorization; unauthorized requests are always checked. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _optional_):
   Optional text prompt. For best results keep the prompt under 2500 characters. Mutually exclusive with `multi_prompt`.
   - Examples: "He sways gently into the note, cheeks pressing, sweat glistening, smoke drifting through the warm light. The camera eases in slowly. Photorealistic, soulful, moody."
@@ -62,6 +66,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "He sways gently into the note, cheeks pressing, sweat glistening, smoke drifting through the warm light. The camera eases in slowly. Photorealistic, soulful, moody.",
   "multi_prompt": null,
   "image_url": "https://v3b.fal.media/files/b/0a9ea079/Y8Pn9lNLLpGQtECV5LgX3_d6533d99ec5f45d88923f8e2bc41ad8d.png",
@@ -76,7 +81,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"file_size":9274380,"file_name":"output.mp4","content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0a9ea0a1/Ayb-2fiZBthFQp-kLrw4M_output.mp4"}
+  - Examples: {"url":"https://v3b.fal.media/files/b/0a9ea0a1/Ayb-2fiZBthFQp-kLrw4M_output.mp4","content_type":"video/mp4","file_size":9274380,"file_name":"output.mp4"}
 
 
 
@@ -85,10 +90,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_size": 9274380,
-    "file_name": "output.mp4",
+    "url": "https://v3b.fal.media/files/b/0a9ea0a1/Ayb-2fiZBthFQp-kLrw4M_output.mp4",
     "content_type": "video/mp4",
-    "url": "https://v3b.fal.media/files/b/0a9ea0a1/Ayb-2fiZBthFQp-kLrw4M_output.mp4"
+    "file_size": 9274380,
+    "file_name": "output.mp4"
   }
 }
 ```

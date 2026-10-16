@@ -49,6 +49,10 @@ The API accepts the following input parameters:
   - Options: `"Auto"`, `"Chinese"`, `"English"`, `"Spanish"`, `"Russian"`, `"Italian"`, `"French"`, `"Korean"`, `"Japanese"`, `"German"`, `"Portuguese"`
   - Examples: "English"
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -65,7 +69,8 @@ The API accepts the following input parameters:
 {
   "text": "Hello! This is Qwen Audio 3.0 speaking on fal.",
   "voice": "Cherry",
-  "language": "English"
+  "language": "English",
+  "enable_safety_checker": true
 }
 ```
 
@@ -76,7 +81,7 @@ The API returns the following output format:
 
 - **`audio`** (`AudioFile`, _required_):
   The generated speech audio file.
-  - Examples: {"content_type":"audio/wav","url":"https://v3b.fal.media/files/b/0aa31e93/W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav","duration":3.44,"file_name":"W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav","sample_rate":24000,"channels":1}
+  - Examples: {"url":"https://v3b.fal.media/files/b/0aa31e93/W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav","channels":1,"file_name":"W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav","duration":3.44,"sample_rate":24000,"content_type":"audio/wav"}
 
 
 
@@ -85,12 +90,12 @@ The API returns the following output format:
 ```json
 {
   "audio": {
-    "content_type": "audio/wav",
     "url": "https://v3b.fal.media/files/b/0aa31e93/W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav",
-    "duration": 3.44,
+    "channels": 1,
     "file_name": "W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav",
+    "duration": 3.44,
     "sample_rate": 24000,
-    "channels": 1
+    "content_type": "audio/wav"
   }
 }
 ```

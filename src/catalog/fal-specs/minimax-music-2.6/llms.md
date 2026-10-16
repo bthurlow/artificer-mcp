@@ -51,6 +51,10 @@ The API accepts the following input parameters:
 - **`audio_setting`** (`AudioSetting25`, _optional_):
   Audio configuration settings
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -66,7 +70,8 @@ The API accepts the following input parameters:
 ```json
 {
   "prompt": "City Pop, 80s retro, groovy synth bass, warm female vocal, 104 BPM, nostalgic urban night",
-  "lyrics": "[verse]\nStreetlights flicker, the night breeze sighs\nShadows stretch as I walk alone\n[chorus]\nWandering, longing, where should I go"
+  "lyrics": "[verse]\nStreetlights flicker, the night breeze sighs\nShadows stretch as I walk alone\n[chorus]\nWandering, longing, where should I go",
+  "enable_safety_checker": true
 }
 ```
 

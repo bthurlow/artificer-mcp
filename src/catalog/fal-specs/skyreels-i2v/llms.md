@@ -59,6 +59,10 @@ The API accepts the following input parameters:
   - Default: `"16:9"`
   - Options: `"16:9"`, `"9:16"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -78,7 +82,8 @@ The API accepts the following input parameters:
   "image_url": "https://fal.media/files/panda/TuXlMwArpQcdYNCLAEM8K.webp",
   "guidance_scale": 6,
   "num_inference_steps": 30,
-  "aspect_ratio": "16:9"
+  "aspect_ratio": "16:9",
+  "enable_safety_checker": true
 }
 ```
 

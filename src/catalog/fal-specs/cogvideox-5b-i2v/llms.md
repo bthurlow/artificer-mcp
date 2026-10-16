@@ -71,6 +71,10 @@ The API accepts the following input parameters:
   - Default: `16`
   - Range: `4` to `32`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 - **`image_url`** (`string`, _required_):
   The URL to the image to generate the video from.
   - Examples: "https://d3phaj0sisr2ct.cloudfront.net/research/eugene.jpg"
@@ -100,6 +104,7 @@ The API accepts the following input parameters:
   "guidance_scale": 7,
   "use_rife": true,
   "export_fps": 16,
+  "enable_safety_checker": true,
   "image_url": "https://d3phaj0sisr2ct.cloudfront.net/research/eugene.jpg"
 }
 ```

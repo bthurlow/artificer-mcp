@@ -71,28 +71,26 @@
         ]
       },
       "V11TextToSoundEffectsInput": {
-        "type": "object",
-        "x-fal-order-properties": [
-          "prompt",
-          "duration",
-          "audio_format"
+        "required": [
+          "prompt"
         ],
+        "type": "object",
         "properties": {
+          "duration": {
+            "maximum": 180,
+            "title": "Duration",
+            "type": "number",
+            "default": 8,
+            "description": "How long the audio should be, in seconds (0.5 to 180).",
+            "minimum": 0.5
+          },
           "prompt": {
             "type": "string",
+            "title": "Prompt",
             "examples": [
               "Heavy rain on a tin roof with distant rolling thunder"
             ],
-            "title": "Prompt",
             "description": "Describe the sound you want to create."
-          },
-          "duration": {
-            "type": "number",
-            "maximum": 180,
-            "default": 8,
-            "title": "Duration",
-            "minimum": 0.5,
-            "description": "How long the audio should be, in seconds (0.5 to 180)."
           },
           "audio_format": {
             "enum": [
@@ -103,68 +101,87 @@
             ],
             "type": "string",
             "default": "aac",
-            "title": "Audio Format",
-            "description": "Audio file format: aac (default), mp3, wav, or flac."
+            "description": "Audio file format: aac (default), mp3, wav, or flac.",
+            "title": "Audio Format"
           }
         },
         "title": "Sfxv1TextToAudioInput",
-        "description": "sfx-v1.0 /text-to-audio schema: plain-language field help for the product\nPlayground. Duration accepts fractional seconds; flash and seed are hidden.",
-        "required": [
-          "prompt"
-        ]
+        "x-fal-order-properties": [
+          "prompt",
+          "duration",
+          "audio_format"
+        ],
+        "description": "sfx-v1.0 /text-to-audio schema: plain-language field help for the product\nPlayground. Duration accepts fractional seconds; flash and seed are hidden."
       },
       "V11TextToSoundEffectsOutput": {
-        "type": "object",
-        "x-fal-order-properties": [
+        "required": [
           "audio",
-          "audios",
-          "watermark"
+          "audios"
         ],
+        "type": "object",
         "properties": {
           "audios": {
-            "type": "array",
             "items": {
               "$ref": "#/components/schemas/Audio"
             },
+            "type": "array",
             "title": "Audios",
             "description": "All generated sounds, one per sample."
           },
           "audio": {
-            "$ref": "#/components/schemas/Audio",
-            "description": "The generated sound, in your chosen audio format."
-          },
-          "watermark": {
-            "description": "Present when the audio carries the inaudible provenance watermark.",
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/WatermarkInfo"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "description": "The generated sound, in your chosen audio format.",
+            "$ref": "#/components/schemas/Audio"
           }
         },
         "title": "TrioAudioOutput",
-        "required": [
+        "x-fal-order-properties": [
           "audio",
           "audios"
         ]
       },
       "Audio": {
-        "type": "object",
+        "required": [
+          "url"
+        ],
         "title": "Audio",
+        "type": "object",
         "properties": {
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ]
+          },
           "url": {
-            "type": "string",
             "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
+            "title": "Url",
+            "type": "string"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
           },
           "file_size": {
-            "examples": [
-              4404019
-            ],
-            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -173,71 +190,18 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes."
-          },
-          "content_type": {
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "examples": [
-              "image/png"
-            ],
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file."
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+              4404019
+            ]
           }
         },
-        "required": [
-          "url"
-        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
-        ]
-      },
-      "WatermarkInfo": {
-        "type": "object",
-        "x-fal-order-properties": [
-          "scheme",
-          "message_hex"
-        ],
-        "properties": {
-          "message_hex": {
-            "type": "string",
-            "title": "Message Hex",
-            "description": "The 40-bit message embedded in the audio, hex."
-          },
-          "scheme": {
-            "type": "string",
-            "default": "sc44k-1",
-            "title": "Scheme",
-            "description": "Watermark scheme identifier."
-          }
-        },
-        "title": "WatermarkInfo",
-        "required": [
-          "message_hex"
         ]
       }
     }

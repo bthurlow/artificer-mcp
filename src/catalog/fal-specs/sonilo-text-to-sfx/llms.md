@@ -76,9 +76,6 @@ The API returns the following output format:
   All generated sounds, one per sample.
   - Array of Audio
 
-- **`watermark`** (`WatermarkInfo`, _optional_):
-  Present when the audio carries the inaudible provenance watermark.
-
 
 
 **Example Response**:

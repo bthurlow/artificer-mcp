@@ -71,6 +71,10 @@ The API accepts the following input parameters:
   If `True`, the media will be returned as a data URI and the output data won't be available in the request history.
   - Default: `false`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 - **`mask_url`** (`string`, _optional_):
   The URL of the mask image to use for the generation. This indicates what part of the image to edit.
 
@@ -99,7 +103,8 @@ The API accepts the following input parameters:
   "background": "auto",
   "quality": "high",
   "num_images": 1,
-  "output_format": "png"
+  "output_format": "png",
+  "enable_safety_checker": true
 }
 ```
 
@@ -111,7 +116,7 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated images.
   - Array of ImageFile
-  - Examples: [{"url":"https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png","file_name":"yUt7tifLSbg1WzWWgfj2o.png","width":1024,"content_type":"image/png","height":1024}]
+  - Examples: [{"url":"https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png","file_name":"yUt7tifLSbg1WzWWgfj2o.png","height":1024,"content_type":"image/png","width":1024}]
 
 
 
@@ -123,9 +128,9 @@ The API returns the following output format:
     {
       "url": "https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png",
       "file_name": "yUt7tifLSbg1WzWWgfj2o.png",
-      "width": 1024,
+      "height": 1024,
       "content_type": "image/png",
-      "height": 1024
+      "width": 1024
     }
   ]
 }

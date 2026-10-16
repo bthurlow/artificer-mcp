@@ -72,6 +72,10 @@ The API accepts the following input parameters:
   Use the multilingual model variant, which handles non-English and mixed-language prompts better.
   - Default: `false`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -91,7 +95,8 @@ The API accepts the following input parameters:
   "output_format": "mp3",
   "sample_rate": 24000,
   "speed": 1,
-  "volume": 1
+  "volume": 1,
+  "enable_safety_checker": true
 }
 ```
 

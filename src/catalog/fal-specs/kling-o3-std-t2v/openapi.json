@@ -71,17 +71,21 @@
         ]
       },
       "KlingVideoO3StandardTextToVideoInput": {
+        "x-fal-order-properties": [
+          "enable_safety_checker",
+          "prompt",
+          "duration",
+          "aspect_ratio",
+          "generate_audio",
+          "multi_prompt",
+          "shot_type"
+        ],
         "properties": {
-          "aspect_ratio": {
-            "default": "16:9",
-            "enum": [
-              "16:9",
-              "9:16",
-              "1:1"
-            ],
-            "description": "Aspect ratio of the generated video.",
-            "title": "Aspect Ratio",
-            "type": "string"
+          "generate_audio": {
+            "default": false,
+            "description": "Whether to generate native audio for the video.",
+            "title": "Generate Audio",
+            "type": "boolean"
           },
           "prompt": {
             "examples": [
@@ -99,8 +103,34 @@
             ],
             "title": "Prompt"
           },
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Disabling safety checks requires account authorization; unauthorized requests are always checked.",
+            "title": "Enable Safety Checker",
+            "type": "boolean"
+          },
+          "aspect_ratio": {
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1"
+            ],
+            "default": "16:9",
+            "description": "Aspect ratio of the generated video.",
+            "title": "Aspect Ratio",
+            "type": "string"
+          },
+          "shot_type": {
+            "enum": [
+              "customize",
+              "intelligent"
+            ],
+            "default": "customize",
+            "description": "The type of multi-shot video generation. 'intelligent' lets the model automatically determine shot structure.",
+            "title": "Shot Type",
+            "type": "string"
+          },
           "duration": {
-            "default": "5",
             "enum": [
               "3",
               "4",
@@ -116,6 +146,7 @@
               "14",
               "15"
             ],
+            "default": "5",
             "description": "Video duration in seconds (3-15s).",
             "title": "Duration",
             "type": "string"
@@ -137,32 +168,8 @@
               }
             ],
             "title": "Multi Prompt"
-          },
-          "generate_audio": {
-            "default": false,
-            "description": "Whether to generate native audio for the video.",
-            "title": "Generate Audio",
-            "type": "boolean"
-          },
-          "shot_type": {
-            "default": "customize",
-            "enum": [
-              "customize",
-              "intelligent"
-            ],
-            "description": "The type of multi-shot video generation. 'intelligent' lets the model automatically determine shot structure.",
-            "title": "Shot Type",
-            "type": "string"
           }
         },
-        "x-fal-order-properties": [
-          "prompt",
-          "duration",
-          "aspect_ratio",
-          "generate_audio",
-          "multi_prompt",
-          "shot_type"
-        ],
         "title": "O3StandardTextToVideoInput",
         "type": "object"
       },
@@ -173,23 +180,23 @@
         "x-fal-order-properties": [
           "video"
         ],
-        "title": "O3StandardTextToVideoOutput",
         "description": "Output for O3 video generation endpoints.",
-        "type": "object",
         "properties": {
           "video": {
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
-                "file_size": 13096952,
-                "file_name": "output.mp4",
+                "url": "https://v3b.fal.media/files/b/0a8d04e2/idOb9V-Q9ujlggPSKqsfS_output.mp4",
                 "content_type": "video/mp4",
-                "url": "https://v3b.fal.media/files/b/0a8d04e2/idOb9V-Q9ujlggPSKqsfS_output.mp4"
+                "file_size": 13096952,
+                "file_name": "output.mp4"
               }
             ],
-            "description": "The generated video.",
-            "$ref": "#/components/schemas/File"
+            "description": "The generated video."
           }
-        }
+        },
+        "title": "O3StandardTextToVideoOutput",
+        "type": "object"
       },
       "KlingV3MultiPromptElement": {
         "required": [
@@ -199,10 +206,13 @@
           "prompt",
           "duration"
         ],
-        "title": "KlingV3MultiPromptElement",
         "properties": {
+          "prompt": {
+            "description": "The prompt for this shot.",
+            "title": "Prompt",
+            "type": "string"
+          },
           "duration": {
-            "default": "5",
             "enum": [
               "1",
               "2",
@@ -220,16 +230,13 @@
               "14",
               "15"
             ],
+            "default": "5",
             "description": "The duration of this shot in seconds",
             "title": "Duration",
             "type": "string"
-          },
-          "prompt": {
-            "description": "The prompt for this shot.",
-            "title": "Prompt",
-            "type": "string"
           }
         },
+        "title": "KlingV3MultiPromptElement",
         "type": "object"
       },
       "File": {
@@ -242,8 +249,27 @@
           "file_name",
           "file_size"
         ],
-        "title": "File",
         "properties": {
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
+          },
           "file_size": {
             "examples": [
               4404019
@@ -273,28 +299,9 @@
               }
             ],
             "title": "File Name"
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
           }
         },
+        "title": "File",
         "type": "object"
       }
     }

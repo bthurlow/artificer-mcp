@@ -71,8 +71,6 @@
         ]
       },
       "AgentUni1V1EditInput": {
-        "type": "object",
-        "title": "ImageEditRequest",
         "required": [
           "prompt",
           "image_url"
@@ -82,94 +80,101 @@
           "image_url",
           "style",
           "output_format",
-          "reference_image_urls"
+          "reference_image_urls",
+          "enable_safety_checker"
         ],
+        "title": "ImageEditRequest",
+        "type": "object",
         "properties": {
-          "image_url": {
-            "type": "string",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/gallery/example_inputs_liuyifei.png"
-            ],
-            "title": "Image Url",
-            "description": "URL of the source image to edit."
-          },
           "reference_image_urls": {
             "description": "Optional list of reference image URLs used to guide the edit.",
+            "title": "Reference Image Urls",
             "anyOf": [
               {
-                "type": "array",
+                "maxItems": 8,
                 "items": {
                   "type": "string"
                 },
-                "maxItems": 8
+                "type": "array"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Reference Image Urls"
+            ]
           },
-          "output_format": {
-            "description": "Encoding format of the edited image.",
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "png",
-                  "jpeg"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Output Format"
-          },
-          "prompt": {
-            "type": "string",
-            "minLength": 1,
-            "examples": [
-              "Replace the background with a sunset over the ocean."
-            ],
-            "maxLength": 6000,
-            "title": "Prompt",
-            "description": "Text prompt describing the edit to apply."
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "title": "Enable Safety Checker",
+            "type": "boolean"
           },
           "style": {
-            "type": "string",
+            "default": "auto",
             "enum": [
               "auto",
               "manga"
             ],
             "description": "Visual style of the edited image.",
             "title": "Style",
-            "default": "auto"
+            "type": "string"
+          },
+          "image_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/gallery/example_inputs_liuyifei.png"
+            ],
+            "description": "URL of the source image to edit.",
+            "title": "Image Url",
+            "type": "string"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "Replace the background with a sunset over the ocean."
+            ],
+            "description": "Text prompt describing the edit to apply.",
+            "minLength": 1,
+            "type": "string",
+            "maxLength": 6000
+          },
+          "output_format": {
+            "description": "Encoding format of the edited image.",
+            "title": "Output Format",
+            "anyOf": [
+              {
+                "enum": [
+                  "png",
+                  "jpeg"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         }
       },
       "AgentUni1V1EditOutput": {
-        "type": "object",
-        "title": "ImageOutput",
         "required": [
           "images"
         ],
         "x-fal-order-properties": [
           "images"
         ],
+        "title": "ImageOutput",
+        "type": "object",
         "properties": {
           "images": {
-            "type": "array",
-            "description": "The generated image(s).",
-            "title": "Images",
             "items": {
               "$ref": "#/components/schemas/File"
-            }
+            },
+            "description": "The generated image(s).",
+            "title": "Images",
+            "type": "array"
           }
         }
       },
       "File": {
-        "type": "object",
-        "title": "File",
         "required": [
           "url"
         ],
@@ -179,16 +184,35 @@
           "file_name",
           "file_size"
         ],
+        "title": "File",
+        "type": "object",
         "properties": {
           "url": {
-            "type": "string",
             "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
+            "title": "Url",
+            "type": "string"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "file_size": {
             "examples": [
               4404019
             ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -196,29 +220,14 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
+            ]
           },
           "content_type": {
             "examples": [
               "image/png"
             ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "description": "The mime type of the file.",
             "title": "Content Type",
-            "description": "The mime type of the file."
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
             "anyOf": [
               {
                 "type": "string"
@@ -226,9 +235,7 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
+            ]
           }
         }
       }

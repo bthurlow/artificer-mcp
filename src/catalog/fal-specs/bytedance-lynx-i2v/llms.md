@@ -90,6 +90,10 @@ The API accepts the following input parameters:
   - Default: `81`
   - Range: `9` to `81`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -116,7 +120,8 @@ The API accepts the following input parameters:
   "frames_per_second": 16,
   "guidance_scale": 5,
   "guidance_scale_2": 2,
-  "num_frames": 81
+  "num_frames": 81,
+  "enable_safety_checker": true
 }
 ```
 
@@ -127,7 +132,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video file
-  - Examples: {"content_type":"video/mp4","url":"https://storage.googleapis.com/falserverless/example_outputs/lynx/example_out.mp4"}
+  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/lynx/example_out.mp4","content_type":"video/mp4"}
 
 - **`seed`** (`integer`, _required_):
   The seed used for generation
@@ -139,8 +144,8 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "video/mp4",
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/lynx/example_out.mp4"
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/lynx/example_out.mp4",
+    "content_type": "video/mp4"
   }
 }
 ```

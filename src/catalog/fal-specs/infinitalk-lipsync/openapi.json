@@ -71,6 +71,12 @@
         ]
       },
       "InfinitalkInput": {
+        "title": "InfiniTalkSingleAudioRequest",
+        "required": [
+          "image_url",
+          "audio_url",
+          "prompt"
+        ],
         "type": "object",
         "x-fal-order-properties": [
           "image_url",
@@ -79,79 +85,85 @@
           "num_frames",
           "resolution",
           "seed",
-          "acceleration"
+          "acceleration",
+          "enable_safety_checker"
         ],
         "properties": {
+          "image_url": {
+            "title": "Image URL",
+            "description": "URL of the input image. If the input image does not match the chosen aspect ratio, it is resized and center cropped.",
+            "type": "string",
+            "examples": [
+              "https://v3.fal.media/files/koala/gmpc0QevDF9bBsL1EAYVF_1c637094161147559f0910a68275dc34.png"
+            ]
+          },
           "acceleration": {
+            "title": "Acceleration",
+            "description": "The acceleration level to use for generation.",
+            "default": "regular",
+            "type": "string",
             "enum": [
               "none",
               "regular",
               "high"
-            ],
-            "type": "string",
-            "default": "regular",
-            "title": "Acceleration",
-            "description": "The acceleration level to use for generation."
+            ]
+          },
+          "num_frames": {
+            "maximum": 721,
+            "description": "Number of frames to generate. Must be between 41 to 721.",
+            "type": "integer",
+            "title": "Number of Frames",
+            "minimum": 41,
+            "default": 145
           },
           "resolution": {
+            "title": "Resolution",
+            "description": "Resolution of the video to generate. Must be either 480p or 720p.",
+            "default": "480p",
+            "type": "string",
             "enum": [
               "480p",
               "720p"
-            ],
-            "type": "string",
-            "default": "480p",
-            "title": "Resolution",
-            "description": "Resolution of the video to generate. Must be either 480p or 720p."
-          },
-          "num_frames": {
-            "type": "integer",
-            "default": 145,
-            "maximum": 721,
-            "title": "Number of Frames",
-            "minimum": 41,
-            "description": "Number of frames to generate. Must be between 41 to 721."
-          },
-          "prompt": {
-            "examples": [
-              "A woman with colorful hair talking on a podcast."
-            ],
-            "type": "string",
-            "title": "Prompt",
-            "description": "The text prompt to guide video generation."
+            ]
           },
           "seed": {
-            "type": "integer",
-            "default": 42,
             "maximum": 4294967295,
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "type": "integer",
             "title": "Seed",
             "minimum": 0,
-            "description": "Random seed for reproducibility. If None, a random seed is chosen."
+            "default": 42
           },
-          "image_url": {
-            "examples": [
-              "https://v3.fal.media/files/koala/gmpc0QevDF9bBsL1EAYVF_1c637094161147559f0910a68275dc34.png"
-            ],
+          "prompt": {
+            "title": "Prompt",
+            "description": "The text prompt to guide video generation.",
             "type": "string",
-            "title": "Image URL",
-            "description": "URL of the input image. If the input image does not match the chosen aspect ratio, it is resized and center cropped."
+            "examples": [
+              "A woman with colorful hair talking on a podcast."
+            ]
           },
           "audio_url": {
+            "title": "Audio URL",
+            "description": "The URL of the audio file.",
+            "type": "string",
             "examples": [
               "https://v3.fal.media/files/penguin/PtiCYda53E9Dav25QmQYI_output.mp3"
-            ],
-            "type": "string",
-            "title": "Audio URL",
-            "description": "The URL of the audio file."
+            ]
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "type": "boolean",
+            "default": true
           }
-        },
-        "title": "InfiniTalkSingleAudioRequest",
-        "required": [
-          "image_url",
-          "audio_url",
-          "prompt"
-        ]
+        }
       },
       "InfinitalkOutput": {
+        "title": "AvatarSingleAudioResponse",
+        "required": [
+          "video",
+          "seed"
+        ],
         "type": "object",
         "x-fal-order-properties": [
           "video",
@@ -159,30 +171,29 @@
         ],
         "properties": {
           "video": {
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video file.",
             "examples": [
               {
+                "url": "https://v3.fal.media/files/kangaroo/z6VqUwNTwzuWa6YE1g7In_74af6c0bdd6041c3b1130d54885e3eee.mp4",
                 "file_size": 515275,
                 "file_name": "74af6c0bdd6041c3b1130d54885e3eee.mp4",
-                "url": "https://v3.fal.media/files/kangaroo/z6VqUwNTwzuWa6YE1g7In_74af6c0bdd6041c3b1130d54885e3eee.mp4",
                 "content_type": "application/octet-stream"
               }
-            ],
-            "$ref": "#/components/schemas/File",
-            "description": "The generated video file."
+            ]
           },
           "seed": {
-            "type": "integer",
             "title": "Seed",
-            "description": "The seed used for generation."
+            "description": "The seed used for generation.",
+            "type": "integer"
           }
-        },
-        "title": "AvatarSingleAudioResponse",
-        "required": [
-          "video",
-          "seed"
-        ]
+        }
       },
       "File": {
+        "title": "File",
+        "required": [
+          "url"
+        ],
         "type": "object",
         "x-fal-order-properties": [
           "url",
@@ -191,12 +202,17 @@
           "file_size"
         ],
         "properties": {
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
           "file_size": {
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ],
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -207,11 +223,11 @@
             ]
           },
           "file_name": {
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -221,17 +237,12 @@
               }
             ]
           },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
           "content_type": {
+            "title": "Content Type",
+            "description": "The mime type of the file.",
             "examples": [
               "image/png"
             ],
-            "title": "Content Type",
-            "description": "The mime type of the file.",
             "anyOf": [
               {
                 "type": "string"
@@ -241,11 +252,7 @@
               }
             ]
           }
-        },
-        "title": "File",
-        "required": [
-          "url"
-        ]
+        }
       }
     }
   },

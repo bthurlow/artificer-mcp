@@ -51,6 +51,10 @@ The API accepts the following input parameters:
   Optional list of reference image URLs used to guide the edit.
   - Array of string
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -68,7 +72,8 @@ The API accepts the following input parameters:
 {
   "prompt": "Replace the background with a sunset over the ocean.",
   "image_url": "https://storage.googleapis.com/falserverless/gallery/example_inputs_liuyifei.png",
-  "style": "auto"
+  "style": "auto",
+  "enable_safety_checker": true
 }
 ```
 

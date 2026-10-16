@@ -55,6 +55,10 @@ The API accepts the following input parameters:
 - **`source_position`** (`RayReframeSourcePosition`, _optional_):
   Optional normalized source rectangle controlling where the source video sits in the output canvas.
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -74,7 +78,8 @@ The API accepts the following input parameters:
   "prompt": "Extend the scene into cinematic widescreen with matching lighting and background detail.",
   "video_url": "https://storage.googleapis.com/falserverless/example_inputs/birefnet-video-input.mp4",
   "aspect_ratio": "21:9",
-  "resolution": "540p"
+  "resolution": "540p",
+  "enable_safety_checker": true
 }
 ```
 

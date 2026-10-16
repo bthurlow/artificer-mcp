@@ -63,6 +63,10 @@ The API accepts the following input parameters:
   The type of camera movement to apply to the video
   - Options: `"horizontal_left"`, `"horizontal_right"`, `"vertical_up"`, `"vertical_down"`, `"zoom_in"`, `"zoom_out"`, `"crane_up"`, `"quickly_zoom_in"`, `"quickly_zoom_out"`, `"smooth_zoom_in"`, `"camera_rotation"`, `"robo_arm"`, `"super_dolly_out"`, `"whip_pan"`, `"hitchcock"`, `"left_follow"`, `"right_follow"`, `"pan_left"`, `"pan_right"`, `"fix_bg"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -82,7 +86,8 @@ The API accepts the following input parameters:
   "resolution": "720p",
   "duration": "5",
   "negative_prompt": "blurry, low quality, low resolution, pixelated, noisy, grainy, out of focus, poorly lit, poorly exposed, poorly composed, poorly framed, poorly cropped, poorly color corrected, poorly color graded",
-  "image_url": "https://v3.fal.media/files/zebra/qL93Je8ezvzQgDOEzTjKF_KhGKZTEebZcDw6T5rwQPK_output.png"
+  "image_url": "https://v3.fal.media/files/zebra/qL93Je8ezvzQgDOEzTjKF_KhGKZTEebZcDw6T5rwQPK_output.png",
+  "enable_safety_checker": true
 }
 ```
 
@@ -93,7 +98,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"content_type":"video/mp4","file_name":"output.mp4","file_size":6420765,"url":"https://fal.media/files/koala/HEWK7BBwqWrz7F5nAZzp7_output.mp4"}
+  - Examples: {"content_type":"video/mp4","file_size":6420765,"url":"https://fal.media/files/koala/HEWK7BBwqWrz7F5nAZzp7_output.mp4","file_name":"output.mp4"}
 
 
 
@@ -103,9 +108,9 @@ The API returns the following output format:
 {
   "video": {
     "content_type": "video/mp4",
-    "file_name": "output.mp4",
     "file_size": 6420765,
-    "url": "https://fal.media/files/koala/HEWK7BBwqWrz7F5nAZzp7_output.mp4"
+    "url": "https://fal.media/files/koala/HEWK7BBwqWrz7F5nAZzp7_output.mp4",
+    "file_name": "output.mp4"
   }
 }
 ```

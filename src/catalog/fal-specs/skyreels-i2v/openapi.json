@@ -71,7 +71,7 @@
         ]
       },
       "SkyreelsI2vInput": {
-        "type": "object",
+        "title": "SkyreelsI2VRequest",
         "required": [
           "prompt",
           "image_url"
@@ -83,36 +83,29 @@
           "guidance_scale",
           "num_inference_steps",
           "negative_prompt",
-          "aspect_ratio"
+          "aspect_ratio",
+          "enable_safety_checker"
         ],
+        "type": "object",
         "properties": {
-          "image_url": {
-            "examples": [
-              "https://fal.media/files/panda/TuXlMwArpQcdYNCLAEM8K.webp"
-            ],
-            "type": "string",
-            "description": "URL of the image input.",
-            "title": "Image Url"
-          },
-          "aspect_ratio": {
-            "type": "string",
-            "description": "Aspect ratio of the output video",
-            "default": "16:9",
-            "enum": [
-              "16:9",
-              "9:16"
-            ],
-            "title": "Aspect Ratio"
-          },
           "num_inference_steps": {
-            "minimum": 1,
+            "title": "Num Inference Steps",
+            "default": 30,
             "type": "integer",
             "maximum": 50,
             "description": "Number of denoising steps (between 1 and 50). Higher values give better quality but take longer.",
-            "default": 30,
-            "title": "Num Inference Steps"
+            "minimum": 1
+          },
+          "guidance_scale": {
+            "title": "Guidance Scale",
+            "default": 6,
+            "type": "number",
+            "maximum": 20,
+            "description": "Guidance scale for generation (between 1.0 and 20.0)",
+            "minimum": 1
           },
           "seed": {
+            "title": "Seed",
             "anyOf": [
               {
                 "type": "integer"
@@ -121,18 +114,20 @@
                 "type": "null"
               }
             ],
-            "description": "Random seed for generation. If not provided, a random seed will be used.",
-            "title": "Seed"
+            "description": "Random seed for generation. If not provided, a random seed will be used."
           },
-          "prompt": {
-            "examples": [
-              "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage. She wears a black leather jacket, a long red dress, and black boots, and carries a black purse."
+          "aspect_ratio": {
+            "title": "Aspect Ratio",
+            "default": "16:9",
+            "description": "Aspect ratio of the output video",
+            "enum": [
+              "16:9",
+              "9:16"
             ],
-            "type": "string",
-            "description": "The prompt to generate the video from.",
-            "title": "Prompt"
+            "type": "string"
           },
           "negative_prompt": {
+            "title": "Negative Prompt",
             "anyOf": [
               {
                 "type": "string"
@@ -141,22 +136,34 @@
                 "type": "null"
               }
             ],
-            "description": "Negative prompt to guide generation away from certain attributes.",
-            "title": "Negative Prompt"
+            "description": "Negative prompt to guide generation away from certain attributes."
           },
-          "guidance_scale": {
-            "minimum": 1,
-            "type": "number",
-            "maximum": 20,
-            "description": "Guidance scale for generation (between 1.0 and 20.0)",
-            "default": 6,
-            "title": "Guidance Scale"
+          "image_url": {
+            "title": "Image Url",
+            "examples": [
+              "https://fal.media/files/panda/TuXlMwArpQcdYNCLAEM8K.webp"
+            ],
+            "description": "URL of the image input.",
+            "type": "string"
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "type": "boolean"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage. She wears a black leather jacket, a long red dress, and black boots, and carries a black purse."
+            ],
+            "description": "The prompt to generate the video from.",
+            "type": "string"
           }
-        },
-        "title": "SkyreelsI2VRequest"
+        }
       },
       "SkyreelsI2vOutput": {
-        "type": "object",
+        "title": "SkyreelsI2VResponse",
         "required": [
           "video",
           "seed"
@@ -165,28 +172,28 @@
           "video",
           "seed"
         ],
+        "type": "object",
         "properties": {
           "video": {
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://fal.media/files/elephant/yOOdaiC5clkH9K_5TTD32_video.mp4"
               }
-            ],
-            "$ref": "#/components/schemas/File"
+            ]
           },
           "seed": {
+            "title": "Seed",
             "examples": [
               42
             ],
-            "type": "integer",
             "description": "The seed used for generation",
-            "title": "Seed"
+            "type": "integer"
           }
-        },
-        "title": "SkyreelsI2VResponse"
+        }
       },
       "File": {
-        "type": "object",
+        "title": "File",
         "required": [
           "url"
         ],
@@ -196,46 +203,10 @@
           "file_name",
           "file_size"
         ],
+        "type": "object",
         "properties": {
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
-          },
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
-          },
           "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -245,10 +216,46 @@
               }
             ],
             "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "content_type": {
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "file_size": {
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ]
           }
-        },
-        "title": "File"
+        }
       }
     }
   },

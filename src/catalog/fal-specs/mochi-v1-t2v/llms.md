@@ -49,6 +49,10 @@ The API accepts the following input parameters:
   - Default: `163`
   - Range: `43` to `163`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -66,7 +70,8 @@ The API accepts the following input parameters:
   "prompt": "A dog running in a field.",
   "negative_prompt": "Blurry, shaky footage",
   "enable_prompt_expansion": true,
-  "num_frames": 163
+  "num_frames": 163,
+  "enable_safety_checker": true
 }
 ```
 

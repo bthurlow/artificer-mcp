@@ -78,7 +78,7 @@ The API returns the following output format:
 - **`images`** (`list<Image>`, _required_):
   The generated images with objects removed.
   - Array of Image
-  - Examples: [{"file_name":"85a2309b2c954c85a75120e664adbe17.png","content_type":"image/png","url":"https://v3.fal.media/files/lion/arYSoJeqWjhbcA8o4budv_85a2309b2c954c85a75120e664adbe17.png","file_size":730703,"width":1024,"height":768}]
+  - Examples: [{"file_name":"85a2309b2c954c85a75120e664adbe17.png","url":"https://v3.fal.media/files/lion/arYSoJeqWjhbcA8o4budv_85a2309b2c954c85a75120e664adbe17.png","content_type":"image/png","file_size":730703,"height":768,"width":1024}]
 
 
 
@@ -89,11 +89,11 @@ The API returns the following output format:
   "images": [
     {
       "file_name": "85a2309b2c954c85a75120e664adbe17.png",
-      "content_type": "image/png",
       "url": "https://v3.fal.media/files/lion/arYSoJeqWjhbcA8o4budv_85a2309b2c954c85a75120e664adbe17.png",
+      "content_type": "image/png",
       "file_size": 730703,
-      "width": 1024,
-      "height": 768
+      "height": 768,
+      "width": 1024
     }
   ]
 }

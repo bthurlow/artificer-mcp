@@ -54,6 +54,10 @@ The API accepts the following input parameters:
   - Default: `"16:9"`
   - Options: `"16:9"`, `"4:3"`, `"3:2"`, `"1:1"`, `"2:3"`, `"3:4"`, `"9:16"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -77,7 +81,8 @@ The API accepts the following input parameters:
   ],
   "duration": 8,
   "resolution": "480p",
-  "aspect_ratio": "16:9"
+  "aspect_ratio": "16:9",
+  "enable_safety_checker": true
 }
 ```
 
@@ -88,7 +93,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video.
-  - Examples: {"fps":24,"num_frames":192,"file_name":"r2v_output.mp4","width":1280,"duration":8,"content_type":"video/mp4","height":720,"url":"https://v3b.fal.media/files/b/0a8b90e4/r2v_output.mp4"}
+  - Examples: {"url":"https://v3b.fal.media/files/b/0a8b90e4/r2v_output.mp4","duration":8,"num_frames":192,"height":720,"content_type":"video/mp4","width":1280,"fps":24,"file_name":"r2v_output.mp4"}
 
 
 
@@ -97,14 +102,14 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "fps": 24,
-    "num_frames": 192,
-    "file_name": "r2v_output.mp4",
-    "width": 1280,
+    "url": "https://v3b.fal.media/files/b/0a8b90e4/r2v_output.mp4",
     "duration": 8,
-    "content_type": "video/mp4",
+    "num_frames": 192,
     "height": 720,
-    "url": "https://v3b.fal.media/files/b/0a8b90e4/r2v_output.mp4"
+    "content_type": "video/mp4",
+    "width": 1280,
+    "fps": 24,
+    "file_name": "r2v_output.mp4"
   }
 }
 ```

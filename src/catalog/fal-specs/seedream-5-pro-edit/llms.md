@@ -60,6 +60,11 @@ The API accepts the following input parameters:
   - Default: `true`
   - Examples: true
 
+- **`enhance_prompt_mode`** (`EnhancePromptModeEnum`, _optional_):
+  Prompt optimization mode. `standard` prioritizes image quality; `fast` reduces generation time. Default value: `"standard"`
+  - Default: `"standard"`
+  - Options: `"standard"`, `"fast"`
+
 - **`image_urls`** (`list<string>`, _required_):
   List of URLs of input reference images. Up to 10 images are supported; if more are sent, only the last 10 are used.
   - Array of string
@@ -89,6 +94,7 @@ The API accepts the following input parameters:
   "num_images": 1,
   "output_format": "jpeg",
   "enable_safety_checker": true,
+  "enhance_prompt_mode": "standard",
   "image_urls": [
     "https://storage.googleapis.com/falserverless/example_inputs/seedreamv45/seedream_v45_edit_input_1.png",
     "https://storage.googleapis.com/falserverless/example_inputs/seedreamv45/seedream_v45_edit_input_2.png",

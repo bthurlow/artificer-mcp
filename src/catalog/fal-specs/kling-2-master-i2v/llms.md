@@ -28,6 +28,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Disabling safety checks requires account authorization; unauthorized requests are always checked. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _required_)
   - Examples: "slow-motion sequence captures the catastrophic implosion of a skyscraper, dust and debris billowing outwards in a chaotic ballet of destruction, while a haunting, orchestral score underscores the sheer power and finality of the event."
 
@@ -65,6 +69,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "slow-motion sequence captures the catastrophic implosion of a skyscraper, dust and debris billowing outwards in a chaotic ballet of destruction, while a haunting, orchestral score underscores the sheer power and finality of the event.",
   "image_url": "https://v3.fal.media/files/elephant/rkH-9qoXtXu3rAYTsx9V5_image.webp",
   "duration": "5",

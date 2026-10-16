@@ -62,6 +62,10 @@ The API accepts the following input parameters:
   - Default: `"regular"`
   - Options: `"none"`, `"regular"`, `"high"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -84,7 +88,8 @@ The API accepts the following input parameters:
   "num_frames": 145,
   "resolution": "480p",
   "seed": 42,
-  "acceleration": "regular"
+  "acceleration": "regular",
+  "enable_safety_checker": true
 }
 ```
 

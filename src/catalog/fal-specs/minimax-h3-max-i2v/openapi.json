@@ -71,115 +71,6 @@
         ]
       },
       "H3MaxImageToVideoInput": {
-        "properties": {
-          "duration": {
-            "minimum": 5,
-            "default": 5,
-            "maximum": 15,
-            "type": "integer",
-            "description": "The duration of the video in seconds.",
-            "title": "Duration"
-          },
-          "image_url": {
-            "title": "Image URL",
-            "description": "Optional URL of the image to use as the first frame. When provided, the output canvas follows this image. If only end_image_url is provided, the canvas follows that last frame instead. If both images are omitted, the request is handled as text-to-video (16:9 by default).",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg"
-            ]
-          },
-          "target_audio_url": {
-            "anyOf": [
-              {
-                "minLength": 1,
-                "pattern": "\\S",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Target Audio Url",
-            "description": "Optional URL of an audio clip at least 2 seconds long (maximum 15 MB) to pin to the generated soundtrack. Longer clips are trimmed to the requested video duration, keeping the beginning. The original audio replaces the output soundtrack, padded with silence if shorter than the video, without changing playback speed. Exceptionally high sample rates may be resampled to 96 kHz. Accepts an HTTP(S) URL or a base64 data URI."
-          },
-          "end_image_url": {
-            "description": "Optional URL of the image to use as the last frame. It may be provided alone for end-only keyframe generation; in that case the output canvas follows this image.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "End Image URL"
-          },
-          "prompt": {
-            "minLength": 1,
-            "maxLength": 50000,
-            "type": "string",
-            "description": "Text prompt for video generation",
-            "examples": [
-              "The camera slowly pulls back from the scene, revealing the full landscape as clouds drift overhead and light shifts across the terrain."
-            ],
-            "title": "Prompt"
-          },
-          "seed": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Seed",
-            "description": "Random seed. A random seed is selected when omitted."
-          },
-          "sync_mode": {
-            "default": false,
-            "type": "boolean",
-            "description": "Return the generated video as base64 instead of a CDN URL.",
-            "title": "Sync Mode"
-          },
-          "resolution": {
-            "enum": [
-              "480P",
-              "768P",
-              "1080P"
-            ],
-            "default": "768P",
-            "type": "string",
-            "description": "The native generation resolution, or 1080P latent refinement from a native 768P source.",
-            "title": "Resolution"
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "type": "boolean",
-            "description": "If set to true, the safety checker will be enabled.",
-            "title": "Enable Safety Checker"
-          },
-          "prompt_expansion_mode": {
-            "title": "Prompt Expansion Mode",
-            "default": "balanced",
-            "type": "string",
-            "description": "How much effort to spend rewriting the prompt before generation. 'disabled' skips prompt expansion. 'balanced' returns in about a second. 'quality' spends up to ~30s on a richer prompt.",
-            "examples": [
-              "disabled",
-              "balanced",
-              "quality"
-            ]
-          }
-        },
-        "title": "TurboImageToVideoHailuo03Input",
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "duration",
@@ -192,13 +83,136 @@
           "image_url",
           "end_image_url"
         ],
+        "type": "object",
+        "title": "TurboImageToVideoHailuo03Input",
         "required": [
           "prompt",
           "prompt_expansion_mode"
-        ]
+        ],
+        "properties": {
+          "end_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional URL of the image to use as the last frame. It may be provided alone for end-only keyframe generation; in that case the output canvas follows this image.",
+            "title": "End Image URL"
+          },
+          "prompt_expansion_mode": {
+            "default": "balanced",
+            "examples": [
+              "disabled",
+              "balanced",
+              "quality"
+            ],
+            "type": "string",
+            "title": "Prompt Expansion Mode",
+            "description": "How much effort to spend rewriting the prompt before generation. 'disabled' skips prompt expansion. 'balanced' returns in about a second. 'quality' spends up to ~30s on a richer prompt."
+          },
+          "resolution": {
+            "default": "768P",
+            "description": "The native generation resolution, or 1080P latent refinement from a native 768P source.",
+            "enum": [
+              "480P",
+              "768P",
+              "1080P"
+            ],
+            "title": "Resolution",
+            "type": "string"
+          },
+          "duration": {
+            "default": 5,
+            "description": "Video length in seconds. The output can run up to about 0.7 s longer than requested. Use at least 2 s with target_audio_url.",
+            "type": "number",
+            "title": "Duration",
+            "maximum": 15,
+            "minimum": 0.92
+          },
+          "target_audio_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional URL of an audio clip at least 2 seconds long (maximum 15 MB) to pin to the generated soundtrack. Longer clips are trimmed to the generated video's length, keeping the beginning. The original audio replaces the output soundtrack, padded with silence if shorter than the video, without changing playback speed. Exceptionally high sample rates may be resampled to 96 kHz. Accepts an HTTP(S) URL or a base64 data URI.",
+            "title": "Target Audio Url"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional URL of the image to use as the first frame. When provided, the output canvas follows this image. If only end_image_url is provided, the canvas follows that last frame instead. If both images are omitted, the request is handled as text-to-video (16:9 by default).",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg"
+            ],
+            "title": "Image URL"
+          },
+          "prompt": {
+            "maxLength": 50000,
+            "examples": [
+              "The camera slowly pulls back from the scene, revealing the full landscape as clouds drift overhead and light shifts across the terrain."
+            ],
+            "type": "string",
+            "title": "Prompt",
+            "description": "Text prompt for video generation",
+            "minLength": 1
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "description": "If set to true, the safety checker will be enabled.",
+            "type": "boolean",
+            "title": "Enable Safety Checker"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Random seed. A random seed is selected when omitted.",
+            "title": "Seed"
+          },
+          "sync_mode": {
+            "default": false,
+            "description": "Return the generated video as base64 instead of a CDN URL.",
+            "type": "boolean",
+            "title": "Sync Mode"
+          }
+        }
       },
       "H3MaxImageToVideoOutput": {
+        "x-fal-order-properties": [
+          "video",
+          "expanded_prompt",
+          "timings"
+        ],
+        "type": "object",
+        "title": "TurboImageToVideoHailuo03Output",
+        "required": [
+          "video"
+        ],
         "properties": {
+          "video": {
+            "description": "The generated video",
+            "$ref": "#/components/schemas/File"
+          },
           "timings": {
             "anyOf": [
               {
@@ -211,8 +225,8 @@
                 "type": "null"
               }
             ],
-            "title": "Timings",
-            "description": "Timing breakdown in seconds. 'inference' is the DiT denoising time on the GPU backend. Null on routes that do not report backend timings."
+            "description": "Timing breakdown in seconds. 'inference' is the DiT denoising time on the GPU backend. Null on routes that do not report backend timings.",
+            "title": "Timings"
           },
           "expanded_prompt": {
             "anyOf": [
@@ -223,44 +237,25 @@
                 "type": "null"
               }
             ],
-            "title": "Expanded Prompt",
-            "description": "The prompt after expansion, as sent to the model. Null when prompt expansion was disabled, left the prompt unchanged, or was performed internally by MiniMax's hosted API."
-          },
-          "video": {
-            "description": "The generated video",
-            "$ref": "#/components/schemas/File"
+            "description": "The prompt after expansion, as sent to the model. Null when prompt expansion was disabled, left the prompt unchanged, or was performed internally by MiniMax's hosted API.",
+            "title": "Expanded Prompt"
           }
-        },
-        "title": "TurboImageToVideoHailuo03Output",
-        "type": "object",
-        "x-fal-order-properties": [
-          "video",
-          "expanded_prompt",
-          "timings"
-        ],
-        "required": [
-          "video"
-        ]
+        }
       },
       "File": {
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object",
+        "title": "File",
+        "required": [
+          "url"
+        ],
         "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type"
-          },
           "file_size": {
-            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -269,13 +264,13 @@
                 "type": "null"
               }
             ],
+            "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ],
             "title": "File Size"
           },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
+          "content_type": {
             "anyOf": [
               {
                 "type": "string"
@@ -284,28 +279,33 @@
                 "type": "null"
               }
             ],
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
             "title": "File Name"
-          },
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
           }
-        },
-        "title": "File",
-        "type": "object",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
-        "required": [
-          "url"
-        ]
+        }
       }
     }
   },

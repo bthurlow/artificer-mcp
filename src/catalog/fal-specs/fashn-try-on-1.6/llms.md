@@ -79,6 +79,10 @@ The API accepts the following input parameters:
   - Default: `"png"`
   - Options: `"png"`, `"jpeg"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -102,7 +106,8 @@ The API accepts the following input parameters:
   "moderation_level": "permissive",
   "num_samples": 1,
   "segmentation_free": true,
-  "output_format": "png"
+  "output_format": "png",
+  "enable_safety_checker": true
 }
 ```
 

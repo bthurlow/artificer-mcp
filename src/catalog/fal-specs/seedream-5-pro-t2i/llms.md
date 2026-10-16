@@ -60,6 +60,11 @@ The API accepts the following input parameters:
   - Default: `true`
   - Examples: true
 
+- **`enhance_prompt_mode`** (`EnhancePromptModeEnum`, _optional_):
+  Prompt optimization mode. `standard` prioritizes image quality; `fast` reduces generation time. Default value: `"standard"`
+  - Default: `"standard"`
+  - Options: `"standard"`, `"fast"`
+
 
 
 **Required Parameters Example**:
@@ -78,7 +83,8 @@ The API accepts the following input parameters:
   "image_size": "auto_2K",
   "num_images": 1,
   "output_format": "jpeg",
-  "enable_safety_checker": true
+  "enable_safety_checker": true,
+  "enhance_prompt_mode": "standard"
 }
 ```
 

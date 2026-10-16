@@ -71,20 +71,21 @@
         ]
       },
       "Vibevoice7bInput": {
+        "title": "VibeVoice7bInput",
+        "type": "object",
+        "description": "Input schema for VibeVoice-7b TTS generation",
         "properties": {
-          "cfg_scale": {
-            "default": 1.3,
-            "type": "number",
-            "minimum": 1,
-            "description": "CFG (Classifier-Free Guidance) scale for generation. Higher values increase adherence to text.",
-            "title": "CFG Scale",
-            "maximum": 2
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "type": "boolean"
           },
           "speakers": {
             "items": {
               "$ref": "#/components/schemas/VibeVoiceSpeaker"
             },
-            "type": "array",
+            "title": "Speakers",
             "examples": [
               [
                 {
@@ -96,16 +97,7 @@
               ]
             ],
             "description": "List of speakers to use for the script. If not provided, will be inferred from the script or voice samples.",
-            "title": "Speakers"
-          },
-          "script": {
-            "type": "string",
-            "maxLength": 30000,
-            "examples": [
-              "Speaker 0: VibeVoice is now available on Fal. Isn't that right, Carter?\nSpeaker 1: That's right Frank, and it supports up to four speakers at once. Try it now!"
-            ],
-            "title": "Script",
-            "description": "The script to convert to speech. Can be formatted with 'Speaker X:' prefixes for multi-speaker dialogues."
+            "type": "array"
           },
           "seed": {
             "anyOf": [
@@ -116,11 +108,27 @@
                 "type": "null"
               }
             ],
-            "description": "Random seed for reproducible generation.",
-            "title": "Seed"
+            "title": "Seed",
+            "description": "Random seed for reproducible generation."
+          },
+          "script": {
+            "maxLength": 30000,
+            "examples": [
+              "Speaker 0: VibeVoice is now available on Fal. Isn't that right, Carter?\nSpeaker 1: That's right Frank, and it supports up to four speakers at once. Try it now!"
+            ],
+            "description": "The script to convert to speech. Can be formatted with 'Speaker X:' prefixes for multi-speaker dialogues.",
+            "title": "Script",
+            "type": "string"
+          },
+          "cfg_scale": {
+            "maximum": 2,
+            "default": 1.3,
+            "minimum": 1,
+            "description": "CFG (Classifier-Free Guidance) scale for generation. Higher values increase adherence to text.",
+            "title": "CFG Scale",
+            "type": "number"
           }
         },
-        "type": "object",
         "required": [
           "script",
           "speakers"
@@ -129,56 +137,57 @@
           "script",
           "speakers",
           "seed",
-          "cfg_scale"
-        ],
-        "description": "Input schema for VibeVoice-7b TTS generation",
-        "title": "VibeVoice7bInput"
+          "cfg_scale",
+          "enable_safety_checker"
+        ]
       },
       "Vibevoice7bOutput": {
+        "title": "VibeVoiceOutput",
+        "type": "object",
+        "description": "Output schema for VibeVoice TTS generation",
         "properties": {
-          "rtf": {
-            "type": "number",
-            "examples": [
-              0.53
-            ],
-            "description": "Real-time factor (generation_time / audio_duration). Lower is better.",
-            "title": "Rtf"
-          },
           "generation_time": {
-            "type": "number",
+            "title": "Generation Time",
             "examples": [
               5.6
             ],
             "description": "Time taken to generate the audio in seconds",
-            "title": "Generation Time"
+            "type": "number"
           },
           "sample_rate": {
-            "type": "integer",
+            "title": "Sample Rate",
             "examples": [
               24000
             ],
             "description": "Sample rate of the generated audio",
-            "title": "Sample Rate"
+            "type": "integer"
+          },
+          "duration": {
+            "title": "Duration",
+            "examples": [
+              9.46
+            ],
+            "description": "Duration of the generated audio in seconds",
+            "type": "number"
           },
           "audio": {
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://storage.googleapis.com/falserverless/example_outputs/vibevoice.mp3"
               }
             ],
-            "$ref": "#/components/schemas/File",
             "description": "The generated audio file containing the speech"
           },
-          "duration": {
-            "type": "number",
+          "rtf": {
+            "title": "Rtf",
             "examples": [
-              9.46
+              0.53
             ],
-            "description": "Duration of the generated audio in seconds",
-            "title": "Duration"
+            "description": "Real-time factor (generation_time / audio_duration). Lower is better.",
+            "type": "number"
           }
         },
-        "type": "object",
         "required": [
           "audio",
           "duration",
@@ -192,15 +201,18 @@
           "sample_rate",
           "generation_time",
           "rtf"
-        ],
-        "description": "Output schema for VibeVoice TTS generation",
-        "title": "VibeVoiceOutput"
+        ]
       },
       "VibeVoiceSpeaker": {
+        "title": "VibeVoiceSpeaker",
+        "type": "object",
         "properties": {
           "preset": {
-            "default": "Alice [EN]",
-            "type": "string",
+            "title": "Preset",
+            "examples": [
+              "Alice [EN]"
+            ],
+            "description": "Default voice preset to use for the speaker. Not used if `audio_url` is provided.",
             "enum": [
               "Alice [EN]",
               "Carter [EN]",
@@ -211,11 +223,8 @@
               "Bowen [ZH]",
               "Xinran [ZH]"
             ],
-            "examples": [
-              "Alice [EN]"
-            ],
-            "description": "Default voice preset to use for the speaker. Not used if `audio_url` is provided.",
-            "title": "Preset"
+            "default": "Alice [EN]",
+            "type": "string"
           },
           "audio_url": {
             "anyOf": [
@@ -226,28 +235,20 @@
                 "type": "null"
               }
             ],
-            "description": "URL to a voice sample audio file. If provided, `preset` will be ignored.",
-            "title": "Audio URL"
+            "title": "Audio URL",
+            "description": "URL to a voice sample audio file. If provided, `preset` will be ignored."
           }
         },
-        "type": "object",
         "x-fal-order-properties": [
           "preset",
           "audio_url"
-        ],
-        "title": "VibeVoiceSpeaker"
+        ]
       },
       "File": {
+        "title": "File",
+        "type": "object",
         "properties": {
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
+          "file_name": {
             "anyOf": [
               {
                 "type": "string"
@@ -256,13 +257,33 @@
                 "type": "null"
               }
             ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
           },
           "file_size": {
-            "examples": [
-              4404019
-            ],
             "anyOf": [
               {
                 "type": "integer"
@@ -271,26 +292,13 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
-          },
-          "file_name": {
+            "title": "File Size",
             "examples": [
-              "z9RV14K95DvU.png"
+              4404019
             ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
+            "description": "The size of the file in bytes."
           }
         },
-        "type": "object",
         "required": [
           "url"
         ],
@@ -299,8 +307,7 @@
           "content_type",
           "file_name",
           "file_size"
-        ],
-        "title": "File"
+        ]
       }
     }
   },

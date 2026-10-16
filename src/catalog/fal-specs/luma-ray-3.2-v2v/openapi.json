@@ -71,13 +71,11 @@
         ]
       },
       "AgentRayV32VideoToVideoInput": {
-        "type": "object",
-        "additionalProperties": false,
-        "title": "RayVideoToVideoRequest",
         "required": [
           "prompt",
           "video_url"
         ],
+        "additionalProperties": false,
         "x-fal-order-properties": [
           "prompt",
           "video_url",
@@ -91,23 +89,55 @@
           "exr_export",
           "controls",
           "keyframes",
-          "keyframe_indexes"
+          "keyframe_indexes",
+          "enable_safety_checker"
         ],
+        "title": "RayVideoToVideoRequest",
+        "type": "object",
         "properties": {
+          "keyframes": {
+            "description": "Multi-keyframe edit guide frames: up to 64 image URLs pinned at the source-frame positions given by keyframe_indexes. Mutually exclusive with start_image_url. Provide keyframes and keyframe_indexes together (same length).",
+            "title": "Keyframes",
+            "anyOf": [
+              {
+                "maxItems": 64,
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "video_url": {
-            "type": "string",
-            "minLength": 1,
             "examples": [
               "https://storage.googleapis.com/falserverless/example_inputs/birefnet-video-input.mp4"
             ],
-            "title": "Video Url",
-            "description": "URL of the source video to edit."
+            "description": "URL of the source video to edit.",
+            "minLength": 1,
+            "type": "string",
+            "title": "Video Url"
           },
           "hdr": {
-            "type": "boolean",
+            "default": false,
             "description": "Generate an HDR-encoded MP4. Requires HDR access on the account and a resolution of 720p or 1080p.",
             "title": "Hdr",
-            "default": false
+            "type": "boolean"
+          },
+          "user": {
+            "description": "Optional opaque identifier for the end user making the request. Used only for abuse attribution; never interpreted by fal.",
+            "title": "User",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "controls": {
             "description": "Per-signal conditioning controls (pose, depth, normals, trajectory, face) for finer control than edit_strength. Cannot be combined with auto_controls.",
@@ -120,30 +150,8 @@
               }
             ]
           },
-          "prompt": {
-            "type": "string",
-            "minLength": 1,
-            "examples": [
-              "Restyle the footage as a hand-painted watercolor animation with soft pastel colors."
-            ],
-            "maxLength": 6000,
-            "title": "Prompt",
-            "description": "Text prompt describing how to edit the source video."
-          },
-          "auto_controls": {
-            "type": "boolean",
-            "description": "Let the model derive the edit conditioning schedule from the source video. Cannot be combined with edit_strength.",
-            "title": "Auto Controls",
-            "default": false
-          },
-          "exr_export": {
-            "type": "boolean",
-            "description": "Also export an EXR file alongside the MP4. Requires hdr=true and HDR access.",
-            "title": "Exr Export",
-            "default": false
-          },
           "resolution": {
-            "type": "string",
+            "default": "540p",
             "enum": [
               "540p",
               "720p",
@@ -151,30 +159,67 @@
             ],
             "description": "Resolution of the edited video. Higher resolutions cost more.",
             "title": "Resolution",
-            "default": "540p"
+            "type": "string"
           },
-          "keyframes": {
-            "description": "Multi-keyframe edit guide frames: up to 64 image URLs pinned at the source-frame positions given by keyframe_indexes. Mutually exclusive with start_image_url. Provide keyframes and keyframe_indexes together (same length).",
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "title": "Enable Safety Checker",
+            "type": "boolean"
+          },
+          "exr_export": {
+            "default": false,
+            "description": "Also export an EXR file alongside the MP4. Requires hdr=true and HDR access.",
+            "title": "Exr Export",
+            "type": "boolean"
+          },
+          "start_image_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/gallery/example_inputs_liuyifei.png"
+            ],
+            "description": "Optional URL of an image to use as the edited video's first frame — e.g. a restyled version of the source's opening frame to steer the look of the edit. Leave unset to let the model derive the first frame from the source video.",
+            "title": "Start Image Url",
             "anyOf": [
               {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "type": "string"
-                },
-                "maxItems": 64
+                "type": "string"
               },
               {
                 "type": "null"
               }
+            ]
+          },
+          "duration": {
+            "default": "5s",
+            "enum": [
+              "5s",
+              "10s"
             ],
-            "title": "Keyframes"
+            "description": "Duration of the edited video.",
+            "title": "Duration",
+            "type": "string"
+          },
+          "keyframe_indexes": {
+            "description": "Source-video frame positions where each keyframes[i] is anchored. Non-negative, unique, and the same length as keyframes.",
+            "title": "Keyframe Indexes",
+            "anyOf": [
+              {
+                "maxItems": 64,
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "edit_strength": {
             "description": "How closely the edit preserves the source video. 'adhere_*' stays closest to the source, 'flex_*' is balanced, and 'reimagine_*' diverges most. Leave unset to use Luma's default. Cannot be combined with auto_controls.",
+            "title": "Edit Strength",
             "anyOf": [
               {
-                "type": "string",
                 "enum": [
                   "adhere_1",
                   "adhere_2",
@@ -185,73 +230,33 @@
                   "reimagine_1",
                   "reimagine_2",
                   "reimagine_3"
-                ]
+                ],
+                "type": "string"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Edit Strength"
+            ]
           },
-          "duration": {
-            "type": "string",
-            "enum": [
-              "5s",
-              "10s"
-            ],
-            "description": "Duration of the edited video.",
-            "title": "Duration",
-            "default": "5s"
-          },
-          "start_image_url": {
+          "prompt": {
+            "title": "Prompt",
             "examples": [
-              "https://storage.googleapis.com/falserverless/gallery/example_inputs_liuyifei.png"
+              "Restyle the footage as a hand-painted watercolor animation with soft pastel colors."
             ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Start Image Url",
-            "description": "Optional URL of an image to use as the edited video's first frame — e.g. a restyled version of the source's opening frame to steer the look of the edit. Leave unset to let the model derive the first frame from the source video."
+            "description": "Text prompt describing how to edit the source video.",
+            "minLength": 1,
+            "type": "string",
+            "maxLength": 6000
           },
-          "keyframe_indexes": {
-            "description": "Source-video frame positions where each keyframes[i] is anchored. Non-negative, unique, and the same length as keyframes.",
-            "anyOf": [
-              {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "type": "integer"
-                },
-                "maxItems": 64
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Keyframe Indexes"
-          },
-          "user": {
-            "description": "Optional opaque identifier for the end user making the request. Used only for abuse attribution; never interpreted by fal.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "User"
+          "auto_controls": {
+            "default": false,
+            "description": "Let the model derive the edit conditioning schedule from the source video. Cannot be combined with edit_strength.",
+            "title": "Auto Controls",
+            "type": "boolean"
           }
         }
       },
       "AgentRayV32VideoToVideoOutput": {
-        "type": "object",
-        "title": "VideoOutput",
         "required": [
           "video"
         ],
@@ -259,6 +264,8 @@
           "video",
           "exr_file"
         ],
+        "title": "VideoOutput",
+        "type": "object",
         "properties": {
           "exr_file": {
             "description": "The generated EXR sidecar when exr_export is true. This may be a single EXR file or a ZIP package depending on Luma's export shape.",
@@ -272,21 +279,40 @@
             ]
           },
           "video": {
-            "description": "The generated video.",
-            "$ref": "#/components/schemas/File"
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video."
           }
         }
       },
       "RayEditControls": {
-        "type": "object",
         "additionalProperties": false,
+        "x-fal-order-properties": [
+          "pose",
+          "depth",
+          "normals",
+          "trajectory",
+          "face"
+        ],
+        "description": "Per-signal conditioning controls for ray-3.2 video editing.\n\nEach signal is optional; include only the signals you want to tune. Cannot\nbe combined with auto_controls. Mirrors the Luma Agents ``video.edit.controls``\nobject — see https://docs.agents.lumalabs.ai/api/resources/generations.",
         "title": "RayEditControls",
+        "type": "object",
         "properties": {
           "face": {
             "description": "Face-identity conditioning.",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/RayEditFaceControl"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "depth": {
+            "description": "Depth / scene-geometry conditioning.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RayEditDepthControl"
               },
               {
                 "type": "null"
@@ -315,17 +341,6 @@
               }
             ]
           },
-          "depth": {
-            "description": "Depth / scene-geometry conditioning.",
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/RayEditDepthControl"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "trajectory": {
             "description": "Motion-trajectory conditioning.",
             "anyOf": [
@@ -337,19 +352,9 @@
               }
             ]
           }
-        },
-        "x-fal-order-properties": [
-          "pose",
-          "depth",
-          "normals",
-          "trajectory",
-          "face"
-        ],
-        "description": "Per-signal conditioning controls for ray-3.2 video editing.\n\nEach signal is optional; include only the signals you want to tune. Cannot\nbe combined with auto_controls. Mirrors the Luma Agents ``video.edit.controls``\nobject — see https://docs.agents.lumalabs.ai/api/resources/generations."
+        }
       },
       "File": {
-        "type": "object",
-        "title": "File",
         "required": [
           "url"
         ],
@@ -359,16 +364,35 @@
           "file_name",
           "file_size"
         ],
+        "title": "File",
+        "type": "object",
         "properties": {
           "url": {
-            "type": "string",
             "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
+            "title": "Url",
+            "type": "string"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "file_size": {
             "examples": [
               4404019
             ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -376,29 +400,14 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
+            ]
           },
           "content_type": {
             "examples": [
               "image/png"
             ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "description": "The mime type of the file.",
             "title": "Content Type",
-            "description": "The mime type of the file."
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
             "anyOf": [
               {
                 "type": "string"
@@ -406,153 +415,151 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
+            ]
           }
         }
       },
       "RayEditFaceControl": {
-        "type": "object",
         "additionalProperties": false,
-        "title": "RayEditFaceControl",
-        "properties": {
-          "enabled": {
-            "type": "boolean",
-            "description": "Enable face-identity conditioning for the edit.",
-            "title": "Enabled",
-            "default": true
-          }
-        },
         "x-fal-order-properties": [
           "enabled"
-        ]
-      },
-      "RayEditNormalsControl": {
+        ],
+        "title": "RayEditFaceControl",
         "type": "object",
-        "additionalProperties": false,
-        "title": "RayEditNormalsControl",
         "properties": {
           "enabled": {
-            "type": "boolean",
-            "description": "Enable surface-normals conditioning for the edit.",
+            "default": true,
+            "description": "Enable face-identity conditioning for the edit.",
             "title": "Enabled",
-            "default": true
-          },
-          "augmentation": {
-            "description": "Surface-normals augmentation. Higher values allow more reinterpretation of surface geometry. Leave unset for the default.",
-            "anyOf": [
-              {
-                "maximum": 1,
-                "minimum": 0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Augmentation"
+            "type": "boolean"
           }
-        },
-        "x-fal-order-properties": [
-          "enabled",
-          "augmentation"
-        ]
-      },
-      "RayEditPoseControl": {
-        "type": "object",
-        "additionalProperties": false,
-        "title": "RayEditPoseControl",
-        "properties": {
-          "enabled": {
-            "type": "boolean",
-            "description": "Enable pose / skeleton conditioning for the edit.",
-            "title": "Enabled",
-            "default": true
-          },
-          "strength": {
-            "description": "Pose conditioning precision. 'precise' follows the source pose tightly; 'coarse' allows more freedom. Leave unset for the default.",
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "precise",
-                  "coarse"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Strength"
-          }
-        },
-        "x-fal-order-properties": [
-          "enabled",
-          "strength"
-        ]
+        }
       },
       "RayEditDepthControl": {
-        "type": "object",
         "additionalProperties": false,
-        "title": "RayEditDepthControl",
-        "properties": {
-          "enabled": {
-            "type": "boolean",
-            "description": "Enable depth / scene-geometry conditioning for the edit.",
-            "title": "Enabled",
-            "default": true
-          },
-          "blur": {
-            "description": "Depth blur. Higher values allow more geometric freedom. Leave unset for the default.",
-            "anyOf": [
-              {
-                "maximum": 1,
-                "minimum": 0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Blur"
-          }
-        },
         "x-fal-order-properties": [
           "enabled",
           "blur"
-        ]
-      },
-      "RayEditTrajectoryControl": {
+        ],
+        "title": "RayEditDepthControl",
         "type": "object",
-        "additionalProperties": false,
-        "title": "RayEditTrajectoryControl",
         "properties": {
-          "enabled": {
-            "type": "boolean",
-            "description": "Enable motion-trajectory conditioning for the edit.",
-            "title": "Enabled",
-            "default": true
-          },
-          "sparsity": {
-            "description": "Motion-trajectory sparsity. Higher values use fewer motion anchors. Leave unset for the default.",
+          "blur": {
+            "description": "Depth blur. Higher values allow more geometric freedom. Leave unset for the default.",
+            "title": "Blur",
             "anyOf": [
               {
-                "maximum": 1,
                 "minimum": 0,
-                "type": "number"
+                "type": "number",
+                "maximum": 1
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Sparsity"
+            ]
+          },
+          "enabled": {
+            "default": true,
+            "description": "Enable depth / scene-geometry conditioning for the edit.",
+            "title": "Enabled",
+            "type": "boolean"
           }
-        },
+        }
+      },
+      "RayEditNormalsControl": {
+        "additionalProperties": false,
+        "x-fal-order-properties": [
+          "enabled",
+          "augmentation"
+        ],
+        "title": "RayEditNormalsControl",
+        "type": "object",
+        "properties": {
+          "augmentation": {
+            "description": "Surface-normals augmentation. Higher values allow more reinterpretation of surface geometry. Leave unset for the default.",
+            "title": "Augmentation",
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number",
+                "maximum": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "enabled": {
+            "default": true,
+            "description": "Enable surface-normals conditioning for the edit.",
+            "title": "Enabled",
+            "type": "boolean"
+          }
+        }
+      },
+      "RayEditPoseControl": {
+        "additionalProperties": false,
+        "x-fal-order-properties": [
+          "enabled",
+          "strength"
+        ],
+        "title": "RayEditPoseControl",
+        "type": "object",
+        "properties": {
+          "strength": {
+            "description": "Pose conditioning precision. 'precise' follows the source pose tightly; 'coarse' allows more freedom. Leave unset for the default.",
+            "title": "Strength",
+            "anyOf": [
+              {
+                "enum": [
+                  "precise",
+                  "coarse"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "enabled": {
+            "default": true,
+            "description": "Enable pose / skeleton conditioning for the edit.",
+            "title": "Enabled",
+            "type": "boolean"
+          }
+        }
+      },
+      "RayEditTrajectoryControl": {
+        "additionalProperties": false,
         "x-fal-order-properties": [
           "enabled",
           "sparsity"
-        ]
+        ],
+        "title": "RayEditTrajectoryControl",
+        "type": "object",
+        "properties": {
+          "sparsity": {
+            "description": "Motion-trajectory sparsity. Higher values use fewer motion anchors. Leave unset for the default.",
+            "title": "Sparsity",
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number",
+                "maximum": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "enabled": {
+            "default": true,
+            "description": "Enable motion-trajectory conditioning for the edit.",
+            "title": "Enabled",
+            "type": "boolean"
+          }
+        }
       }
     }
   },

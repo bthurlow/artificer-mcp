@@ -68,6 +68,10 @@ The API accepts the following input parameters:
   - Default: `"high"`
   - Options: `"low"`, `"medium"`, `"high"`, `"maximum"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -88,7 +92,8 @@ The API accepts the following input parameters:
   "num_inference_steps": 35,
   "guidance_scale": 7,
   "video_output_type": "X264 (.mp4)",
-  "video_quality": "high"
+  "video_quality": "high",
+  "enable_safety_checker": true
 }
 ```
 

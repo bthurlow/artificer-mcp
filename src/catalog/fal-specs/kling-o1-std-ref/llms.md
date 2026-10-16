@@ -28,6 +28,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Disabling safety checks requires account authorization; unauthorized requests are always checked. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _required_):
   Take @Element1, @Element2 to reference elements and @Image1, @Image2 to reference images in order.
   - Examples: "Take @Image1 as the start frame. Start with a high-angle satellite view of the ancient greenhouse ruin surrounded by nature. The camera swoops down and flies inside the building, revealing the character from @Element1 standing in the sun-drenched center. The camera then seamlessly transitions into a smooth 180-degree orbit around the character, moving to the back view. As the open backpack comes into focus, the camera continues to push forward, zooming deep inside the bag to reveal the glowing stone from @Element2 nestled inside. Cinematic lighting, hopeful atmosphere, 35mm lens. Make sure to keep it as the style of @Image2."
@@ -66,6 +70,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "Take @Image1 as the start frame. Start with a high-angle satellite view of the ancient greenhouse ruin surrounded by nature. The camera swoops down and flies inside the building, revealing the character from @Element1 standing in the sun-drenched center. The camera then seamlessly transitions into a smooth 180-degree orbit around the character, moving to the back view. As the open backpack comes into focus, the camera continues to push forward, zooming deep inside the bag to reveal the glowing stone from @Element2 nestled inside. Cinematic lighting, hopeful atmosphere, 35mm lens. Make sure to keep it as the style of @Image2.",
   "image_urls": [
     "https://v3b.fal.media/files/b/koala/v9COzzH23FGBYdGLgbK3u.png",
@@ -98,7 +103,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video.
-  - Examples: {"file_size":47359974,"file_name":"output.mp4","content_type":"video/mp4","url":"https://v3b.fal.media/files/b/panda/oVdiICFXY03Vbam-08Aj8_output.mp4"}
+  - Examples: {"url":"https://v3b.fal.media/files/b/panda/oVdiICFXY03Vbam-08Aj8_output.mp4","content_type":"video/mp4","file_size":47359974,"file_name":"output.mp4"}
 
 
 
@@ -107,10 +112,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_size": 47359974,
-    "file_name": "output.mp4",
+    "url": "https://v3b.fal.media/files/b/panda/oVdiICFXY03Vbam-08Aj8_output.mp4",
     "content_type": "video/mp4",
-    "url": "https://v3b.fal.media/files/b/panda/oVdiICFXY03Vbam-08Aj8_output.mp4"
+    "file_size": 47359974,
+    "file_name": "output.mp4"
   }
 }
 ```

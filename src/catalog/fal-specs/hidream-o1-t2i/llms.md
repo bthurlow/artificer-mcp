@@ -40,7 +40,7 @@ The API accepts the following input parameters:
 
 - **`image_size`** (`ImageSize | Enum`, _optional_):
   Requested output image size. Dimensions are rounded down to a multiple of 32, up to about 2048x2048 pixels.
-  - Default: `{"height":1024,"width":1024}`
+  - Default: `{"width":1024,"height":1024}`
   - One of: ImageSize | Enum
 
 - **`num_inference_steps`** (`integer`, _optional_):
@@ -97,8 +97,8 @@ The API accepts the following input parameters:
     "https://storage.googleapis.com/falserverless/model_tests/hidream/woman.png"
   ],
   "image_size": {
-    "height": 1024,
-    "width": 1024
+    "width": 1024,
+    "height": 1024
   },
   "num_inference_steps": 50,
   "guidance_scale": 5,

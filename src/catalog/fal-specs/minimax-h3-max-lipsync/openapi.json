@@ -71,58 +71,6 @@
         ]
       },
       "H3MaxLipSyncImageToVideoInput": {
-        "properties": {
-          "audio_url": {
-            "type": "string",
-            "description": "Audio to synchronize the mouth movements to, at least 5 seconds long. Audio over 14.8 seconds is automatically clipped to its first 14.8 seconds. The output video matches the clipped audio duration in a single generation.",
-            "title": "Audio Url"
-          },
-          "image_url": {
-            "type": "string",
-            "description": "Image to animate. The aspect ratio must be between 0.4 and 2.5.",
-            "title": "Image Url"
-          },
-          "enable_transcription": {
-            "default": false,
-            "type": "boolean",
-            "description": "Transcribe the supplied audio to guide lip synchronization. When disabled, synchronize to the audio without a transcript.",
-            "title": "Enable Transcription"
-          },
-          "seed": {
-            "anyOf": [
-              {
-                "minimum": 0,
-                "maximum": 2147483647,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Seed",
-            "description": "Random seed; selected randomly if omitted."
-          },
-          "resolution": {
-            "enum": [
-              "480P",
-              "768P",
-              "1080P",
-              "2K"
-            ],
-            "default": "768P",
-            "type": "string",
-            "description": "Output resolution. Uses the supported aspect ratio nearest the image.",
-            "title": "Resolution"
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "type": "boolean",
-            "description": "Enable content safety checks.",
-            "title": "Enable Safety Checker"
-          }
-        },
-        "title": "LipSyncImageInput",
-        "type": "object",
         "x-fal-order-properties": [
           "image_url",
           "audio_url",
@@ -131,17 +79,81 @@
           "seed",
           "enable_safety_checker"
         ],
+        "type": "object",
+        "title": "LipSyncImageInput",
         "required": [
           "image_url",
           "audio_url"
-        ]
+        ],
+        "properties": {
+          "image_url": {
+            "description": "Image to animate. The aspect ratio must be between 0.4 and 2.5.",
+            "type": "string",
+            "title": "Image Url"
+          },
+          "enable_transcription": {
+            "default": false,
+            "description": "Transcribe the supplied audio to guide lip synchronization. When disabled, synchronize to the audio without a transcript.",
+            "type": "boolean",
+            "title": "Enable Transcription"
+          },
+          "resolution": {
+            "default": "768P",
+            "description": "Output resolution. Uses the supported aspect ratio nearest the image.",
+            "enum": [
+              "480P",
+              "768P",
+              "1080P",
+              "2K"
+            ],
+            "title": "Resolution",
+            "type": "string"
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Enable content safety checks.",
+            "type": "boolean",
+            "title": "Enable Safety Checker"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 2147483647,
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Random seed; selected randomly if omitted.",
+            "title": "Seed"
+          },
+          "audio_url": {
+            "description": "Audio to synchronize the mouth movements to, at least 5 seconds long. Supports up to 15 minutes. The output video matches the supplied audio duration.",
+            "type": "string",
+            "title": "Audio Url"
+          }
+        }
       },
       "H3MaxLipSyncImageToVideoOutput": {
+        "x-fal-order-properties": [
+          "video",
+          "seed",
+          "duration",
+          "timings"
+        ],
+        "type": "object",
+        "title": "LipSyncOutput",
+        "required": [
+          "video",
+          "seed",
+          "duration"
+        ],
         "properties": {
-          "seed": {
-            "type": "integer",
-            "description": "Random seed used for generation.",
-            "title": "Seed"
+          "video": {
+            "description": "Lip-synced video with the supplied soundtrack.",
+            "$ref": "#/components/schemas/File"
           },
           "timings": {
             "anyOf": [
@@ -155,52 +167,35 @@
                 "type": "null"
               }
             ],
-            "title": "Timings",
-            "description": "Timing breakdown in seconds. 'inference' is the DiT denoising time on the GPU backend, summed over every window this request generated. Null on routes that do not report backend timings."
+            "description": "Timing breakdown in seconds. 'inference' is the DiT denoising time on the GPU backend, summed over every window this request generated. Null on routes that do not report backend timings.",
+            "title": "Timings"
           },
           "duration": {
-            "type": "number",
             "description": "Output duration in seconds.",
+            "type": "number",
             "title": "Duration"
           },
-          "video": {
-            "description": "Lip-synced video with the supplied soundtrack.",
-            "$ref": "#/components/schemas/File"
+          "seed": {
+            "description": "Random seed used for generation.",
+            "type": "integer",
+            "title": "Seed"
           }
-        },
-        "title": "LipSyncOutput",
-        "type": "object",
-        "x-fal-order-properties": [
-          "video",
-          "seed",
-          "duration",
-          "timings"
-        ],
-        "required": [
-          "video",
-          "seed",
-          "duration"
-        ]
+        }
       },
       "File": {
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object",
+        "title": "File",
+        "required": [
+          "url"
+        ],
         "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type"
-          },
           "file_size": {
-            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -209,13 +204,13 @@
                 "type": "null"
               }
             ],
+            "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ],
             "title": "File Size"
           },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
+          "content_type": {
             "anyOf": [
               {
                 "type": "string"
@@ -224,28 +219,33 @@
                 "type": "null"
               }
             ],
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
             "title": "File Name"
-          },
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
           }
-        },
-        "title": "File",
-        "type": "object",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
-        "required": [
-          "url"
-        ]
+        }
       }
     }
   },
