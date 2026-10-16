@@ -146,7 +146,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video file.
-  - Examples: {"content_type":"application/octet-stream","file_size":4685303,"url":"https://v3.fal.media/files/panda/f7tXRCjvwEcVlmxHuw8kO_2c7ab2540af44eceaf5ffde4e8d094ed.mp4","file_name":"2c7ab2540af44eceaf5ffde4e8d094ed.mp4"}
+  - Examples: {"file_size":4685303,"file_name":"2c7ab2540af44eceaf5ffde4e8d094ed.mp4","content_type":"application/octet-stream","url":"https://v3.fal.media/files/panda/f7tXRCjvwEcVlmxHuw8kO_2c7ab2540af44eceaf5ffde4e8d094ed.mp4"}
 
 
 
@@ -155,10 +155,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "application/octet-stream",
     "file_size": 4685303,
-    "url": "https://v3.fal.media/files/panda/f7tXRCjvwEcVlmxHuw8kO_2c7ab2540af44eceaf5ffde4e8d094ed.mp4",
-    "file_name": "2c7ab2540af44eceaf5ffde4e8d094ed.mp4"
+    "file_name": "2c7ab2540af44eceaf5ffde4e8d094ed.mp4",
+    "content_type": "application/octet-stream",
+    "url": "https://v3.fal.media/files/panda/f7tXRCjvwEcVlmxHuw8kO_2c7ab2540af44eceaf5ffde4e8d094ed.mp4"
   }
 }
 ```

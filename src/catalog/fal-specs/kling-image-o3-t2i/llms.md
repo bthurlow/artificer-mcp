@@ -110,7 +110,7 @@ The API returns the following output format:
 - **`images`** (`list<Image>`, _required_):
   Generated images
   - Array of Image
-  - Examples: [{"content_type":"image/png","file_name":"4b654d5a07b64b498ebdb091a76611ad.png","url":"https://v3b.fal.media/files/b/0a8d069f/8kVewB_BV3u0f8vORGZYy_4b654d5a07b64b498ebdb091a76611ad.png","file_size":1748857}]
+  - Examples: [{"file_size":1748857,"content_type":"image/png","file_name":"4b654d5a07b64b498ebdb091a76611ad.png","url":"https://v3b.fal.media/files/b/0a8d069f/8kVewB_BV3u0f8vORGZYy_4b654d5a07b64b498ebdb091a76611ad.png"}]
 
 
 
@@ -120,10 +120,10 @@ The API returns the following output format:
 {
   "images": [
     {
+      "file_size": 1748857,
       "content_type": "image/png",
       "file_name": "4b654d5a07b64b498ebdb091a76611ad.png",
-      "url": "https://v3b.fal.media/files/b/0a8d069f/8kVewB_BV3u0f8vORGZYy_4b654d5a07b64b498ebdb091a76611ad.png",
-      "file_size": 1748857
+      "url": "https://v3b.fal.media/files/b/0a8d069f/8kVewB_BV3u0f8vORGZYy_4b654d5a07b64b498ebdb091a76611ad.png"
     }
   ]
 }

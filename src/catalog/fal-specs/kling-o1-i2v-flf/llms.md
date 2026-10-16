@@ -28,6 +28,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Disabling safety checks requires account authorization; unauthorized requests are always checked. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _required_):
   Use @Image1 to reference the start frame, @Image2 to reference the end frame.
   - Examples: "Create a magical timelapse transition. The snow melts rapidly to reveal green grass, and the tree branches burst into bloom with pink flowers in real-time. The lighting shifts from cold winter light to warm spring sunshine. The camera pushes in slowly towards the tree. Disney-style magical transformation, cinematic, 8k."
@@ -62,6 +66,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "Create a magical timelapse transition. The snow melts rapidly to reveal green grass, and the tree branches burst into bloom with pink flowers in real-time. The lighting shifts from cold winter light to warm spring sunshine. The camera pushes in slowly towards the tree. Disney-style magical transformation, cinematic, 8k.",
   "start_image_url": "https://v3b.fal.media/files/b/rabbit/NaslJIC7F2WodS6DFZRRJ.png",
   "end_image_url": "https://v3b.fal.media/files/b/tiger/BwHi22qoQnqaTNMMhe533.png",
@@ -76,7 +81,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video.
-  - Examples: {"file_size":27588984,"url":"https://v3b.fal.media/files/b/koala/knryyyGF3ZVyMMrGr77CL_output.mp4","content_type":"video/mp4","file_name":"output.mp4"}
+  - Examples: {"url":"https://v3b.fal.media/files/b/koala/knryyyGF3ZVyMMrGr77CL_output.mp4","content_type":"video/mp4","file_size":27588984,"file_name":"output.mp4"}
 
 
 
@@ -85,9 +90,9 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_size": 27588984,
     "url": "https://v3b.fal.media/files/b/koala/knryyyGF3ZVyMMrGr77CL_output.mp4",
     "content_type": "video/mp4",
+    "file_size": 27588984,
     "file_name": "output.mp4"
   }
 }

@@ -90,7 +90,7 @@ The API returns the following output format:
 
 - **`images`** (`list<File>`, _required_)
   - Array of File
-  - Examples: [{"file_size":272628,"url":"https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/standard-output.webp","file_name":"image.webp","content_type":"image/webp"}]
+  - Examples: [{"file_size":272628,"file_name":"image.webp","content_type":"image/webp","url":"https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/standard-output.webp"}]
 
 - **`style_id`** (`string`, _optional_):
   The custom style used or created for this generation.
@@ -104,9 +104,9 @@ The API returns the following output format:
   "images": [
     {
       "file_size": 272628,
-      "url": "https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/standard-output.webp",
       "file_name": "image.webp",
-      "content_type": "image/webp"
+      "content_type": "image/webp",
+      "url": "https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/standard-output.webp"
     }
   ]
 }

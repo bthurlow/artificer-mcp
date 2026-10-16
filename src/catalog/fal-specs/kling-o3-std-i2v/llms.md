@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Disabling safety checks requires account authorization; unauthorized requests are always checked. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _optional_):
   Text prompt for video generation. Either prompt or multi_prompt must be provided, but not both.
   - Examples: "The character walks forward slowly, with the camera following from behind."
@@ -75,6 +79,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "The character walks forward slowly, with the camera following from behind.",
   "image_url": "https://v3b.fal.media/files/b/0a8cfd5a/8ABMp4n9rh3kfD2Rq8fHd_start_frame.png",
   "duration": "10",
@@ -90,7 +95,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video.
-  - Examples: {"file_size":12037975,"url":"https://v3b.fal.media/files/b/0a8d0278/pgIO9yOXTFCTetKBsqDwX_output.mp4","content_type":"video/mp4","file_name":"output.mp4"}
+  - Examples: {"url":"https://v3b.fal.media/files/b/0a8d0278/pgIO9yOXTFCTetKBsqDwX_output.mp4","content_type":"video/mp4","file_size":12037975,"file_name":"output.mp4"}
 
 
 
@@ -99,9 +104,9 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_size": 12037975,
     "url": "https://v3b.fal.media/files/b/0a8d0278/pgIO9yOXTFCTetKBsqDwX_output.mp4",
     "content_type": "video/mp4",
+    "file_size": 12037975,
     "file_name": "output.mp4"
   }
 }

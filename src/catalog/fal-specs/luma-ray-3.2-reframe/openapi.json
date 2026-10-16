@@ -71,94 +71,11 @@
         ]
       },
       "AgentRayV32ReframeInput": {
-        "type": "object",
         "required": [
           "prompt",
           "video_url",
           "aspect_ratio"
         ],
-        "title": "RayReframeRequest",
-        "properties": {
-          "aspect_ratio": {
-            "type": "string",
-            "enum": [
-              "3:4",
-              "4:3",
-              "1:1",
-              "9:16",
-              "16:9",
-              "21:9"
-            ],
-            "title": "Aspect Ratio",
-            "examples": [
-              "21:9"
-            ],
-            "description": "Target aspect ratio for the reframed video."
-          },
-          "prompt": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Prompt",
-            "examples": [
-              "Extend the scene into cinematic widescreen with matching lighting and background detail."
-            ],
-            "maxLength": 6000,
-            "description": "Text prompt describing the content to paint into the newly exposed canvas area when reframing to the target aspect ratio."
-          },
-          "duration": {
-            "title": "Duration",
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "5s",
-                  "10s"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Duration of the reframed video. Defaults to matching the source video's duration; set explicitly to 5s or 10s to override."
-          },
-          "video_url": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Video Url",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/birefnet-video-input.mp4"
-            ],
-            "description": "URL of the source video to reframe (must be 10 seconds or less)."
-          },
-          "enable_safety_checker": {
-            "type": "boolean",
-            "title": "Enable Safety Checker",
-            "default": true,
-            "description": "Authorized callers may set false to request relaxed screening."
-          },
-          "source_position": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/RayReframeSourcePosition"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Optional normalized source rectangle controlling where the source video sits in the output canvas."
-          },
-          "resolution": {
-            "type": "string",
-            "enum": [
-              "540p",
-              "720p",
-              "1080p"
-            ],
-            "title": "Resolution",
-            "default": "540p",
-            "description": "Resolution of the reframed video. Higher resolutions cost more."
-          }
-        },
         "x-fal-order-properties": [
           "prompt",
           "video_url",
@@ -167,16 +84,104 @@
           "duration",
           "source_position",
           "enable_safety_checker"
-        ]
+        ],
+        "title": "RayReframeRequest",
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "Extend the scene into cinematic widescreen with matching lighting and background detail."
+            ],
+            "description": "Text prompt describing the content to paint into the newly exposed canvas area when reframing to the target aspect ratio.",
+            "minLength": 1,
+            "type": "string",
+            "maxLength": 6000
+          },
+          "video_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/birefnet-video-input.mp4"
+            ],
+            "description": "URL of the source video to reframe (must be 10 seconds or less).",
+            "minLength": 1,
+            "type": "string",
+            "title": "Video Url"
+          },
+          "duration": {
+            "description": "Duration of the reframed video. Defaults to matching the source video's duration; set explicitly to 5s or 10s to override.",
+            "title": "Duration",
+            "anyOf": [
+              {
+                "enum": [
+                  "5s",
+                  "10s"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resolution": {
+            "default": "540p",
+            "enum": [
+              "540p",
+              "720p",
+              "1080p"
+            ],
+            "description": "Resolution of the reframed video. Higher resolutions cost more.",
+            "title": "Resolution",
+            "type": "string"
+          },
+          "source_position": {
+            "description": "Optional normalized source rectangle controlling where the source video sits in the output canvas.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RayReframeSourcePosition"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "title": "Enable Safety Checker",
+            "type": "boolean"
+          },
+          "aspect_ratio": {
+            "enum": [
+              "3:4",
+              "4:3",
+              "1:1",
+              "9:16",
+              "16:9",
+              "21:9"
+            ],
+            "description": "Target aspect ratio for the reframed video.",
+            "title": "Aspect Ratio",
+            "type": "string",
+            "examples": [
+              "21:9"
+            ]
+          }
+        }
       },
       "AgentRayV32ReframeOutput": {
-        "type": "object",
         "required": [
           "video"
         ],
+        "x-fal-order-properties": [
+          "video",
+          "exr_file"
+        ],
         "title": "VideoOutput",
+        "type": "object",
         "properties": {
           "exr_file": {
+            "description": "The generated EXR sidecar when exr_export is true. This may be a single EXR file or a ZIP package depending on Luma's export shape.",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/File"
@@ -184,108 +189,83 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The generated EXR sidecar when exr_export is true. This may be a single EXR file or a ZIP package depending on Luma's export shape."
+            ]
           },
           "video": {
             "$ref": "#/components/schemas/File",
             "description": "The generated video."
           }
-        },
-        "x-fal-order-properties": [
-          "video",
-          "exr_file"
-        ]
+        }
       },
       "RayReframeSourcePosition": {
-        "type": "object",
         "required": [
+          "x_norm",
+          "y_norm",
+          "w_norm",
+          "h_norm"
+        ],
+        "x-fal-order-properties": [
           "x_norm",
           "y_norm",
           "w_norm",
           "h_norm"
         ],
         "title": "RayReframeSourcePosition",
+        "type": "object",
         "properties": {
-          "x_norm": {
-            "type": "number",
-            "title": "X Norm",
-            "maximum": 2,
-            "description": "Left edge of the source rectangle as a fraction of output width.",
-            "minimum": -2
-          },
-          "h_norm": {
-            "type": "number",
+          "w_norm": {
             "exclusiveMinimum": 0,
-            "title": "H Norm",
-            "maximum": 2,
-            "description": "Height of the source rectangle as a fraction of output height."
+            "description": "Width of the source rectangle as a fraction of output width.",
+            "title": "W Norm",
+            "type": "number",
+            "maximum": 2
           },
           "y_norm": {
-            "type": "number",
-            "title": "Y Norm",
-            "maximum": 2,
+            "minimum": -2,
             "description": "Top edge of the source rectangle as a fraction of output height.",
-            "minimum": -2
-          },
-          "w_norm": {
+            "title": "Y Norm",
             "type": "number",
+            "maximum": 2
+          },
+          "x_norm": {
+            "minimum": -2,
+            "description": "Left edge of the source rectangle as a fraction of output width.",
+            "title": "X Norm",
+            "type": "number",
+            "maximum": 2
+          },
+          "h_norm": {
             "exclusiveMinimum": 0,
-            "title": "W Norm",
-            "maximum": 2,
-            "description": "Width of the source rectangle as a fraction of output width."
+            "description": "Height of the source rectangle as a fraction of output height.",
+            "title": "H Norm",
+            "type": "number",
+            "maximum": 2
           }
-        },
-        "x-fal-order-properties": [
-          "x_norm",
-          "y_norm",
-          "w_norm",
-          "h_norm"
-        ]
+        }
       },
       "File": {
-        "type": "object",
         "required": [
           "url"
         ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
         "title": "File",
+        "type": "object",
         "properties": {
-          "content_type": {
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file."
-          },
-          "file_size": {
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes."
-          },
           "url": {
-            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
             "title": "Url",
-            "description": "The URL where the file can be downloaded from."
+            "type": "string"
           },
           "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "title": "File Name",
             "anyOf": [
               {
@@ -294,19 +274,39 @@
               {
                 "type": "null"
               }
-            ],
+            ]
+          },
+          "file_size": {
             "examples": [
-              "z9RV14K95DvU.png"
+              4404019
             ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
-        },
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ]
+        }
       }
     }
   },

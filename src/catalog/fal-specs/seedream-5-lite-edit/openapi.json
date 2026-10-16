@@ -80,40 +80,46 @@
           "enable_safety_checker",
           "image_urls"
         ],
-        "required": [
-          "prompt",
-          "image_urls"
-        ],
+        "type": "object",
         "properties": {
-          "sync_mode": {
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "type": "boolean",
-            "default": false,
-            "title": "Sync Mode"
+          "image_urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "examples": [
+              [
+                "https://v3b.fal.media/files/b/0a8f9936/KOsb_qPB_W0ZJ0Ee2OsnU_586e2892841d46f09049ee7199b303d3.png",
+                "https://v3b.fal.media/files/b/0a8f994e/JroWTogO6jOTFk9b6B3XM_591ca38cef2f44bbba2843cbf80fb1b2.png",
+                "https://v3b.fal.media/files/b/0a8f9960/Q6pzwXAiFaFPOpSScoE-D_0eca5db19e5242739f127efe49b38922.png"
+              ]
+            ],
+            "description": "List of URLs of input images for editing. Presently, up to 10 image inputs are allowed. If over 10 images are sent, only the last 10 will be used.",
+            "title": "Image URLs"
+          },
+          "num_images": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 6,
+            "default": 1,
+            "description": "Number of separate model generations to be run with the prompt.",
+            "title": "Num Images"
           },
           "prompt": {
-            "description": "The text prompt used to edit the image",
             "type": "string",
             "examples": [
               "Replace the product in Figure 1 with that in Figure 2. Seamlessly render logo in Figure 3 into the product design, in frosted glass texture. Remove any extra text in Figure 1, and design a catchy tagline for the perfume."
             ],
+            "description": "The text prompt used to edit the image",
             "title": "Prompt"
           },
-          "num_images": {
-            "description": "Number of separate model generations to be run with the prompt.",
-            "maximum": 6,
-            "type": "integer",
-            "minimum": 1,
-            "default": 1,
-            "title": "Num Images"
-          },
           "image_size": {
-            "description": "The size of the generated image. Total pixels must be between 2560x1440 and 4096x4096. In case the image size does not fall within these parameters, the image size will be adjusted to by scaling.",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
               },
               {
+                "type": "string",
                 "enum": [
                   "square_hd",
                   "square",
@@ -124,47 +130,41 @@
                   "auto_2K",
                   "auto_3K",
                   "auto_4K"
-                ],
-                "type": "string"
+                ]
               }
             ],
             "default": "auto_2K",
+            "description": "The size of the generated image. Total pixels must be between 2560x1440 and 4096x4096. In case the image size does not fall within these parameters, the image size will be adjusted to by scaling.",
             "title": "Image Size"
           },
           "max_images": {
-            "description": "If set to a number greater than one, enables multi-image generation. The model will potentially return up to `max_images` images every generation, and in total, `num_images` generations will be carried out. In total, the number of images generated will be between `num_images` and `max_images*num_images`.",
-            "maximum": 6,
             "type": "integer",
             "minimum": 1,
+            "maximum": 6,
             "default": 1,
+            "description": "If set to a number greater than one, enables multi-image generation. The model will potentially return up to `max_images` images every generation, and in total, `num_images` generations will be carried out. In total, the number of images generated will be between `num_images` and `max_images*num_images`.",
             "title": "Max Images"
           },
+          "sync_mode": {
+            "type": "boolean",
+            "default": false,
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "title": "Sync Mode"
+          },
           "enable_safety_checker": {
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
             "type": "boolean",
             "examples": [
               true
             ],
             "default": true,
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
             "title": "Enable Safety Checker"
-          },
-          "image_urls": {
-            "description": "List of URLs of input images for editing. Presently, up to 10 image inputs are allowed. If over 10 images are sent, only the last 10 will be used.",
-            "type": "array",
-            "examples": [
-              [
-                "https://v3b.fal.media/files/b/0a8f9936/KOsb_qPB_W0ZJ0Ee2OsnU_586e2892841d46f09049ee7199b303d3.png",
-                "https://v3b.fal.media/files/b/0a8f994e/JroWTogO6jOTFk9b6B3XM_591ca38cef2f44bbba2843cbf80fb1b2.png",
-                "https://v3b.fal.media/files/b/0a8f9960/Q6pzwXAiFaFPOpSScoE-D_0eca5db19e5242739f127efe49b38922.png"
-              ]
-            ],
-            "items": {
-              "type": "string"
-            },
-            "title": "Image URLs"
           }
         },
-        "type": "object",
+        "required": [
+          "prompt",
+          "image_urls"
+        ],
         "title": "SeedDream50LiteEditInput"
       },
       "SeedreamV5LiteEditOutput": {
@@ -172,14 +172,13 @@
           "images",
           "seed"
         ],
-        "required": [
-          "images",
-          "seed"
-        ],
+        "type": "object",
         "properties": {
           "images": {
-            "description": "Generated images",
             "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            },
             "examples": [
               [
                 {
@@ -187,65 +186,53 @@
                 }
               ]
             ],
-            "items": {
-              "$ref": "#/components/schemas/Image"
-            },
+            "description": "Generated images",
             "title": "Images"
           },
           "seed": {
-            "description": "Seed used for generation.",
             "type": "integer",
             "examples": [
               42
             ],
+            "description": "Seed used for generation.",
             "title": "Seed"
           }
         },
-        "type": "object",
+        "required": [
+          "images",
+          "seed"
+        ],
         "title": "SeedDream50LiteEditOutput"
       },
       "ImageSize": {
-        "properties": {
-          "width": {
-            "maximum": 14142,
-            "title": "Width",
-            "default": 512,
-            "exclusiveMinimum": 0,
-            "description": "The width of the generated image.",
-            "type": "integer"
-          },
-          "height": {
-            "maximum": 14142,
-            "title": "Height",
-            "default": 512,
-            "exclusiveMinimum": 0,
-            "description": "The height of the generated image.",
-            "type": "integer"
-          }
-        },
         "title": "ImageSize",
         "x-fal-order-properties": [
           "width",
           "height"
         ],
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "width": {
+            "maximum": 14142,
+            "exclusiveMinimum": 0,
+            "default": 512,
+            "type": "integer",
+            "description": "The width of the generated image.",
+            "title": "Width"
+          },
+          "height": {
+            "maximum": 14142,
+            "exclusiveMinimum": 0,
+            "default": 512,
+            "type": "integer",
+            "description": "The height of the generated image.",
+            "title": "Height"
+          }
+        }
       },
       "Image": {
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size",
-          "width",
-          "height"
-        ],
         "properties": {
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
-          },
-          "file_size": {
+          "width": {
             "anyOf": [
               {
                 "type": "integer"
@@ -254,11 +241,16 @@
                 "type": "null"
               }
             ],
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
             "examples": [
-              4404019
-            ]
+              1024
+            ],
+            "description": "The width of the image in pixels.",
+            "title": "Width"
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
           },
           "file_name": {
             "anyOf": [
@@ -269,41 +261,11 @@
                 "type": "null"
               }
             ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
-            ]
-          },
-          "width": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
             ],
-            "title": "Width",
-            "description": "The width of the image in pixels.",
-            "examples": [
-              1024
-            ]
-          },
-          "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Height",
-            "description": "The height of the image in pixels.",
-            "examples": [
-              1024
-            ]
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
           },
           "content_type": {
             "anyOf": [
@@ -314,19 +276,57 @@
                 "type": "null"
               }
             ],
-            "title": "Content Type",
-            "description": "The mime type of the file.",
             "examples": [
               "image/png"
-            ]
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type"
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              1024
+            ],
+            "description": "The height of the image in pixels.",
+            "title": "Height"
           }
         },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
         "required": [
           "url"
         ],
-        "title": "Image",
         "description": "Represents an image file.",
-        "type": "object"
+        "type": "object",
+        "title": "Image"
       }
     }
   },

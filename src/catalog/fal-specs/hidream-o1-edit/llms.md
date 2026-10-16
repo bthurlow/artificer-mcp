@@ -39,7 +39,7 @@ The API accepts the following input parameters:
 
 - **`image_size`** (`ImageSize | Enum`, _optional_):
   Requested output image size. Reference-image outputs use the nearest model-supported resolution up to about 2048x2048 pixels.
-  - Default: `{"height":2048,"width":2048}`
+  - Default: `{"width":2048,"height":2048}`
   - One of: ImageSize | Enum
 
 - **`num_inference_steps`** (`integer`, _optional_):
@@ -99,8 +99,8 @@ The API accepts the following input parameters:
     "https://storage.googleapis.com/falserverless/model_tests/hidream/woman.png"
   ],
   "image_size": {
-    "height": 2048,
-    "width": 2048
+    "width": 2048,
+    "height": 2048
   },
   "num_inference_steps": 50,
   "guidance_scale": 5,

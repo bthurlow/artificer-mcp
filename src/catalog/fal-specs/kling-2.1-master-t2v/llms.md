@@ -28,6 +28,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Disabling safety checks requires account authorization; unauthorized requests are always checked. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _required_)
   - Examples: "Warm, earthy tones bathe the scene as the potter's hands, rough and calloused, coax a shapeless lump of clay into a vessel of elegant curves, the slow, deliberate movements highlighted by the subtle shifting light; the clay's cool, damp texture contrasts sharply with the warmth of the potter's touch, creating a captivating interplay between material and maker."
 
@@ -65,6 +69,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "Warm, earthy tones bathe the scene as the potter's hands, rough and calloused, coax a shapeless lump of clay into a vessel of elegant curves, the slow, deliberate movements highlighted by the subtle shifting light; the clay's cool, damp texture contrasts sharply with the warmth of the potter's touch, creating a captivating interplay between material and maker.",
   "duration": "5",
   "aspect_ratio": "16:9",

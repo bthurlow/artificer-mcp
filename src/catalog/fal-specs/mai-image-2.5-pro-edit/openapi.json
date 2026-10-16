@@ -71,6 +71,7 @@
         ]
       },
       "MaiImage25ProEditInput": {
+        "title": "MaiImage25ProImageToImageInput",
         "required": [
           "prompt"
         ],
@@ -83,37 +84,22 @@
           "sync_mode",
           "image_url"
         ],
-        "title": "MaiImage25ProImageToImageInput",
         "properties": {
-          "prompt": {
+          "output_format": {
+            "title": "Output Format",
+            "description": "The format of the generated image.",
             "type": "string",
-            "minLength": 3,
-            "examples": [
-              "Turn this into a clean, futuristic product shot with soft studio lighting."
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
             ],
-            "title": "Prompt",
-            "maxLength": 5000,
-            "description": "The instruction describing how to edit the input image(s)."
-          },
-          "sync_mode": {
-            "default": false,
-            "type": "boolean",
-            "title": "Sync Mode",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
-          },
-          "image_url": {
-            "default": "",
-            "type": "string",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/nano-banana-edit-input.png"
-            ],
-            "title": "Image URL",
-            "description": "The URL of the image to edit. Provide one http(s) or data: URL."
+            "default": "png"
           },
           "aspect_ratio": {
-            "default": "auto",
-            "type": "string",
             "title": "Aspect Ratio",
+            "type": "string",
+            "description": "The aspect ratio of the generated image. Use \"auto\" to match the input or let the model decide.",
             "enum": [
               "auto",
               "1:1",
@@ -124,30 +110,45 @@
               "3:2",
               "2:3"
             ],
-            "description": "The aspect ratio of the generated image. Use \"auto\" to match the input or let the model decide."
+            "default": "auto"
           },
           "num_images": {
-            "maximum": 4,
-            "type": "integer",
-            "minimum": 1,
-            "default": 1,
             "title": "Number of Images",
-            "description": "The number of images to generate."
+            "minimum": 1,
+            "type": "integer",
+            "maximum": 4,
+            "description": "The number of images to generate.",
+            "default": 1
           },
-          "output_format": {
-            "default": "png",
+          "image_url": {
+            "title": "Image URL",
             "type": "string",
-            "enum": [
-              "jpeg",
-              "png",
-              "webp"
+            "description": "The URL of the image to edit. Provide one http(s) or data: URL.",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/nano-banana-edit-input.png"
             ],
-            "title": "Output Format",
-            "description": "The format of the generated image."
+            "default": ""
+          },
+          "sync_mode": {
+            "title": "Sync Mode",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "type": "boolean",
+            "default": false
+          },
+          "prompt": {
+            "title": "Prompt",
+            "description": "The instruction describing how to edit the input image(s).",
+            "examples": [
+              "Turn this into a clean, futuristic product shot with soft studio lighting."
+            ],
+            "maxLength": 5000,
+            "minLength": 3,
+            "type": "string"
           }
         }
       },
       "MaiImage25ProEditOutput": {
+        "title": "MaiImage25ProImageToImageOutput",
         "required": [
           "images",
           "description"
@@ -157,24 +158,24 @@
           "images",
           "description"
         ],
-        "title": "MaiImage25ProImageToImageOutput",
         "properties": {
+          "description": {
+            "title": "Description",
+            "description": "The description of the generated images.",
+            "type": "string"
+          },
           "images": {
+            "title": "Images",
             "description": "The edited images.",
             "type": "array",
-            "title": "Images",
             "items": {
               "$ref": "#/components/schemas/ImageFile"
             }
-          },
-          "description": {
-            "type": "string",
-            "title": "Description",
-            "description": "The description of the generated images."
           }
         }
       },
       "ImageFile": {
+        "title": "ImageFile",
         "required": [
           "url"
         ],
@@ -187,14 +188,15 @@
           "width",
           "height"
         ],
-        "title": "ImageFile",
         "properties": {
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
-            "title": "File Size",
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "height": {
+            "title": "Height",
+            "description": "The height of the image",
             "anyOf": [
               {
                 "type": "integer"
@@ -204,14 +206,39 @@
               }
             ]
           },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
+          "file_name": {
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "width": {
-            "description": "The width of the image",
             "title": "Width",
+            "description": "The width of the image",
             "anyOf": [
               {
                 "type": "integer"
@@ -222,41 +249,14 @@
             ]
           },
           "content_type": {
+            "title": "Content Type",
             "description": "The mime type of the file.",
             "examples": [
               "image/png"
             ],
-            "title": "Content Type",
             "anyOf": [
               {
                 "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "height": {
-            "description": "The height of the image",
-            "title": "Height",
-            "anyOf": [
-              {
-                "type": "integer"
               },
               {
                 "type": "null"

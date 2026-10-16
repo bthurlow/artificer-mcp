@@ -188,7 +188,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video.
-  - Examples: {"file_name":"CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4","content_type":"video/mp4","num_frames":257,"url":"https://v3b.fal.media/files/b/0a88289e/CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4","duration":10.28,"width":1248,"height":704,"fps":25}
+  - Examples: {"width":1248,"num_frames":257,"height":704,"content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0a88289e/CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4","fps":25,"file_name":"CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4","duration":10.28}
 
 - **`seed`** (`integer`, _required_):
   The seed used for the random number generator.
@@ -205,14 +205,14 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_name": "CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
-    "content_type": "video/mp4",
-    "num_frames": 257,
-    "url": "https://v3b.fal.media/files/b/0a88289e/CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
-    "duration": 10.28,
     "width": 1248,
+    "num_frames": 257,
     "height": 704,
-    "fps": 25
+    "content_type": "video/mp4",
+    "url": "https://v3b.fal.media/files/b/0a88289e/CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
+    "fps": 25,
+    "file_name": "CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
+    "duration": 10.28
   },
   "seed": 866232447,
   "prompt": "Continue the scene naturally, maintaining the same style and motion."

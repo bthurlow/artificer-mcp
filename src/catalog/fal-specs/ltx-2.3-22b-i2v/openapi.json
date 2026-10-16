@@ -71,88 +71,70 @@
         ]
       },
       "Ltx2322bImageToVideoInput": {
-        "type": "object",
-        "required": [
-          "prompt",
-          "image_url"
-        ],
         "title": "LTX23ImageToVideoInput",
+        "type": "object",
         "properties": {
-          "acceleration": {
-            "type": "string",
-            "enum": [
-              "none",
-              "regular",
-              "high",
-              "full"
-            ],
-            "title": "Acceleration",
-            "examples": [
-              "regular"
-            ],
-            "default": "regular",
-            "description": "The acceleration level to use."
-          },
-          "audio_modality_scale": {
-            "type": "number",
-            "description": "The modality scale for the audio. Controls the ratio between video and audio modalities.",
-            "title": "Audio Modality Scale",
-            "maximum": 10,
-            "default": 3,
-            "minimum": 0
-          },
-          "distill_lora_first_pass_scale": {
-            "type": "number",
-            "description": "The scale of the distill LoRA to use for the first pass. Set to 0 to disable.",
-            "title": "Distill Lora First Pass Scale",
-            "maximum": 1,
-            "default": 0.2,
-            "minimum": 0
-          },
-          "fps": {
-            "type": "number",
-            "description": "The frames per second of the generated video.",
-            "title": "FPS",
-            "maximum": 60,
-            "default": 24,
-            "minimum": 1
-          },
-          "enable_safety_checker": {
+          "generate_audio": {
+            "title": "Generate Audio",
             "type": "boolean",
-            "title": "Enable Safety Checker",
             "default": true,
-            "description": "Whether to enable the safety checker."
-          },
-          "use_multiscale": {
-            "type": "boolean",
-            "title": "Use Multi-Scale",
-            "default": true,
-            "description": "Whether to use multi-scale generation. If True, the model will generate the video at a smaller scale first, then use the smaller video to guide the generation of a video at or above your requested size. This results in better coherence and details."
+            "description": "Whether to generate audio for the video."
           },
           "camera_lora_scale": {
+            "maximum": 1,
             "type": "number",
-            "description": "The scale of the camera LoRA to use. This allows you to control the camera movement of the generated video more accurately than just prompting the model to move the camera.",
             "title": "Camera LoRA Scale",
-            "maximum": 1,
             "default": 1,
+            "description": "The scale of the camera LoRA to use. This allows you to control the camera movement of the generated video more accurately than just prompting the model to move the camera.",
             "minimum": 0
           },
-          "enable_prompt_expansion": {
-            "type": "boolean",
-            "title": "Enable Prompt Expansion",
-            "default": true,
-            "description": "Whether to enable prompt expansion."
-          },
-          "end_image_strength": {
+          "image_strength": {
+            "maximum": 1,
             "type": "number",
-            "description": "The strength of the end image to use for the video generation.",
-            "title": "End Image Strength",
-            "maximum": 1,
+            "title": "Image Strength",
             "default": 1,
+            "description": "The strength of the image to use for the video generation.",
             "minimum": 0
+          },
+          "scheduler": {
+            "title": "Scheduler",
+            "type": "string",
+            "description": "The scheduler to use.",
+            "examples": [
+              "ltx2"
+            ],
+            "default": "ltx2",
+            "enum": [
+              "ltx2",
+              "linear_quadratic",
+              "beta"
+            ]
+          },
+          "distill_lora_first_pass_scale": {
+            "maximum": 1,
+            "type": "number",
+            "title": "Distill Lora First Pass Scale",
+            "default": 0.2,
+            "description": "The scale of the distill LoRA to use for the first pass. Set to 0 to disable.",
+            "minimum": 0
+          },
+          "audio_modality_scale": {
+            "maximum": 10,
+            "type": "number",
+            "title": "Audio Modality Scale",
+            "default": 3,
+            "description": "The modality scale for the audio. Controls the ratio between video and audio modalities.",
+            "minimum": 0
+          },
+          "image_url": {
+            "title": "Image URL",
+            "type": "string",
+            "description": "The URL of the image to generate the video from.",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/ltxv-2-i2v-input.jpg"
+            ]
           },
           "seed": {
-            "title": "Seed",
             "anyOf": [
               {
                 "type": "integer"
@@ -161,40 +143,221 @@
                 "type": "null"
               }
             ],
+            "title": "Seed",
             "description": "The seed for the random number generator."
           },
-          "gradient_estimation_gamma": {
+          "video_output_type": {
+            "title": "Video Output Type",
+            "type": "string",
+            "description": "The output type of the generated video.",
+            "default": "X264 (.mp4)",
+            "enum": [
+              "X264 (.mp4)",
+              "VP9 (.webm)",
+              "PRORES4444 (.mov)",
+              "GIF (.gif)"
+            ]
+          },
+          "negative_prompt": {
+            "title": "Negative Prompt",
+            "type": "string",
+            "description": "The negative prompt to generate the video from.",
+            "default": "news broadcast, 3d animation, computer graphics, pc game, console game, video game, cartoon, childish, watermark, logo, text, on screen text, subtitles, titles, signature, slowmo, static"
+          },
+          "audio_rescaling_scale": {
+            "maximum": 1,
             "type": "number",
-            "description": "The gamma of gradient estimation during denoising. Set to 0 to disable.",
-            "title": "Gradient Estimation Gamma",
-            "maximum": 10,
-            "default": 2,
+            "title": "Audio Rescaling Scale",
+            "default": 0.7,
+            "description": "The rescaling scale for the audio. Controls the ratio between classifier-free guidance and spatiotemporal guidance.",
             "minimum": 0
           },
-          "sync_mode": {
+          "video_write_mode": {
+            "title": "Video Write Mode",
+            "type": "string",
+            "description": "The write mode of the generated video.",
+            "default": "balanced",
+            "enum": [
+              "fast",
+              "balanced",
+              "small"
+            ]
+          },
+          "num_frames": {
+            "maximum": 481,
+            "type": "integer",
+            "default": 121,
+            "title": "Number of Frames",
+            "description": "The number of frames to generate.",
+            "minimum": 9
+          },
+          "acceleration": {
+            "title": "Acceleration",
+            "type": "string",
+            "description": "The acceleration level to use.",
+            "examples": [
+              "regular"
+            ],
+            "default": "regular",
+            "enum": [
+              "none",
+              "regular",
+              "high",
+              "full"
+            ]
+          },
+          "audio_cfg_scale": {
+            "maximum": 20,
+            "type": "number",
+            "title": "Audio CFG Scale",
+            "default": 7,
+            "description": "The Classifier-Free Guidance (CFG) scale for the audio. Higher values result in more consistent and focused audio content.",
+            "minimum": 1
+          },
+          "enable_prompt_expansion": {
+            "title": "Enable Prompt Expansion",
             "type": "boolean",
-            "title": "Sync Mode",
-            "default": false,
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
+            "description": "Whether to enable prompt expansion.",
+            "default": true
+          },
+          "distill_lora_second_pass_scale": {
+            "maximum": 1,
+            "type": "number",
+            "title": "Distill Lora Second Pass Scale",
+            "default": 0.5,
+            "description": "The scale of the distill LoRA to use for the second and subsequent passes.",
+            "minimum": 0
           },
           "prompt": {
-            "type": "string",
             "title": "Prompt",
+            "type": "string",
+            "description": "The prompt used for the generation.",
             "examples": [
               "A woman stands still amid a busy neon-lit street at night. The camera slowly dollies in toward her face as people blur past, their motion emphasizing her calm presence. City lights flicker and reflections shift across her denim jacket."
-            ],
-            "description": "The prompt used for the generation."
+            ]
           },
-          "image_url": {
+          "video_cfg_scale": {
+            "maximum": 20,
+            "type": "number",
+            "title": "Video CFG Scale",
+            "default": 3,
+            "description": "The Classifier-Free Guidance (CFG) scale for the video. Higher values result in more consistent and focused video content.",
+            "minimum": 1
+          },
+          "use_multiscale": {
+            "title": "Use Multi-Scale",
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to use multi-scale generation. If True, the model will generate the video at a smaller scale first, then use the smaller video to guide the generation of a video at or above your requested size. This results in better coherence and details."
+          },
+          "video_modality_scale": {
+            "maximum": 10,
+            "type": "number",
+            "title": "Video Modality Scale",
+            "default": 3,
+            "description": "The modality scale for the video. Controls the ratio between video and audio modalities.",
+            "minimum": 0
+          },
+          "use_restart_sampling": {
+            "title": "Use Restart Sampling",
+            "type": "boolean",
+            "description": "Whether to use restart sampling. This will inject a small amount of noise during each denoising step, which can help improve the quality of the generated video.",
+            "default": false
+          },
+          "interpolation_direction": {
+            "title": "Interpolation Direction",
             "type": "string",
-            "title": "Image URL",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/ltxv-2-i2v-input.jpg"
+            "default": "forward",
+            "description": "The direction to interpolate the image sequence in. 'Forward' goes from the start image to the end image, 'Backward' goes from the end image to the start image.",
+            "enum": [
+              "forward",
+              "backward"
+            ]
+          },
+          "end_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
             ],
-            "description": "The URL of the image to generate the video from."
+            "title": "End Image URL",
+            "description": "The URL of the image to use as the end of the video."
+          },
+          "num_inference_steps": {
+            "maximum": 50,
+            "type": "integer",
+            "title": "Number of Inference Steps",
+            "default": 40,
+            "description": "The number of inference steps to use.",
+            "minimum": 8
+          },
+          "gradient_estimation_gamma": {
+            "maximum": 10,
+            "type": "number",
+            "title": "Gradient Estimation Gamma",
+            "default": 2,
+            "description": "The gamma of gradient estimation during denoising. Set to 0 to disable.",
+            "minimum": 0
+          },
+          "end_image_strength": {
+            "maximum": 1,
+            "type": "number",
+            "title": "End Image Strength",
+            "default": 1,
+            "description": "The strength of the end image to use for the video generation.",
+            "minimum": 0
+          },
+          "video_quality": {
+            "title": "Video Quality",
+            "type": "string",
+            "description": "The quality of the generated video.",
+            "default": "high",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "maximum"
+            ]
+          },
+          "video_stg_scale": {
+            "maximum": 20,
+            "type": "number",
+            "title": "Video STG Scale",
+            "default": 0,
+            "description": "The Spatiotemporal Guidance (STG) scale for the video. Higher values result in more consistent and focused video content.",
+            "minimum": 0
+          },
+          "audio_stg_scale": {
+            "maximum": 20,
+            "type": "number",
+            "title": "Audio STG Scale",
+            "default": 0,
+            "description": "The Spatiotemporal Guidance (STG) scale for the audio. Higher values result in more consistent and focused audio content.",
+            "minimum": 0
+          },
+          "camera_lora": {
+            "title": "Camera LoRA",
+            "type": "string",
+            "description": "The camera LoRA to use. This allows you to control the camera movement of the generated video more accurately than just prompting the model to move the camera.",
+            "examples": [
+              "none"
+            ],
+            "default": "none",
+            "enum": [
+              "dolly_in",
+              "dolly_out",
+              "dolly_left",
+              "dolly_right",
+              "jib_up",
+              "jib_down",
+              "static",
+              "none"
+            ]
           },
           "video_size": {
-            "title": "Video Size",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
@@ -212,206 +375,43 @@
                 ]
               }
             ],
+            "title": "Video Size",
             "default": "auto",
             "description": "The size of the generated video."
           },
-          "image_strength": {
+          "fps": {
+            "maximum": 60,
             "type": "number",
-            "description": "The strength of the image to use for the video generation.",
-            "title": "Image Strength",
-            "maximum": 1,
-            "default": 1,
-            "minimum": 0
-          },
-          "distill_lora_second_pass_scale": {
-            "type": "number",
-            "description": "The scale of the distill LoRA to use for the second and subsequent passes.",
-            "title": "Distill Lora Second Pass Scale",
-            "maximum": 1,
-            "default": 0.5,
-            "minimum": 0
-          },
-          "scheduler": {
-            "type": "string",
-            "enum": [
-              "ltx2",
-              "linear_quadratic",
-              "beta"
-            ],
-            "title": "Scheduler",
-            "examples": [
-              "ltx2"
-            ],
-            "default": "ltx2",
-            "description": "The scheduler to use."
-          },
-          "audio_cfg_scale": {
-            "type": "number",
-            "description": "The Classifier-Free Guidance (CFG) scale for the audio. Higher values result in more consistent and focused audio content.",
-            "title": "Audio CFG Scale",
-            "maximum": 20,
-            "default": 7,
+            "title": "FPS",
+            "default": 24,
+            "description": "The frames per second of the generated video.",
             "minimum": 1
-          },
-          "camera_lora": {
-            "type": "string",
-            "enum": [
-              "dolly_in",
-              "dolly_out",
-              "dolly_left",
-              "dolly_right",
-              "jib_up",
-              "jib_down",
-              "static",
-              "none"
-            ],
-            "title": "Camera LoRA",
-            "examples": [
-              "none"
-            ],
-            "default": "none",
-            "description": "The camera LoRA to use. This allows you to control the camera movement of the generated video more accurately than just prompting the model to move the camera."
           },
           "video_rescaling_scale": {
+            "maximum": 1,
             "type": "number",
-            "description": "The rescaling scale for the video. Controls the ratio between classifier-free guidance and spatiotemporal guidance.",
             "title": "Video Rescaling Scale",
-            "maximum": 1,
             "default": 0.7,
+            "description": "The rescaling scale for the video. Controls the ratio between classifier-free guidance and spatiotemporal guidance.",
             "minimum": 0
           },
-          "video_quality": {
-            "type": "string",
-            "enum": [
-              "low",
-              "medium",
-              "high",
-              "maximum"
-            ],
-            "title": "Video Quality",
-            "default": "high",
-            "description": "The quality of the generated video."
-          },
-          "end_image_url": {
-            "title": "End Image URL",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The URL of the image to use as the end of the video."
-          },
-          "video_output_type": {
-            "type": "string",
-            "enum": [
-              "X264 (.mp4)",
-              "VP9 (.webm)",
-              "PRORES4444 (.mov)",
-              "GIF (.gif)"
-            ],
-            "title": "Video Output Type",
-            "default": "X264 (.mp4)",
-            "description": "The output type of the generated video."
-          },
-          "use_restart_sampling": {
+          "sync_mode": {
+            "title": "Sync Mode",
             "type": "boolean",
-            "title": "Use Restart Sampling",
-            "default": false,
-            "description": "Whether to use restart sampling. This will inject a small amount of noise during each denoising step, which can help improve the quality of the generated video."
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "default": false
           },
-          "video_cfg_scale": {
-            "type": "number",
-            "description": "The Classifier-Free Guidance (CFG) scale for the video. Higher values result in more consistent and focused video content.",
-            "title": "Video CFG Scale",
-            "maximum": 20,
-            "default": 3,
-            "minimum": 1
-          },
-          "negative_prompt": {
-            "type": "string",
-            "title": "Negative Prompt",
-            "default": "news broadcast, 3d animation, computer graphics, pc game, console game, video game, cartoon, childish, watermark, logo, text, on screen text, subtitles, titles, signature, slowmo, static",
-            "description": "The negative prompt to generate the video from."
-          },
-          "video_write_mode": {
-            "type": "string",
-            "enum": [
-              "fast",
-              "balanced",
-              "small"
-            ],
-            "title": "Video Write Mode",
-            "default": "balanced",
-            "description": "The write mode of the generated video."
-          },
-          "audio_stg_scale": {
-            "type": "number",
-            "description": "The Spatiotemporal Guidance (STG) scale for the audio. Higher values result in more consistent and focused audio content.",
-            "title": "Audio STG Scale",
-            "maximum": 20,
-            "default": 0,
-            "minimum": 0
-          },
-          "num_inference_steps": {
-            "type": "integer",
-            "description": "The number of inference steps to use.",
-            "title": "Number of Inference Steps",
-            "maximum": 50,
-            "default": 40,
-            "minimum": 8
-          },
-          "generate_audio": {
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
             "type": "boolean",
-            "title": "Generate Audio",
-            "default": true,
-            "description": "Whether to generate audio for the video."
-          },
-          "num_frames": {
-            "type": "integer",
-            "title": "Number of Frames",
-            "description": "The number of frames to generate.",
-            "maximum": 481,
-            "default": 121,
-            "minimum": 9
-          },
-          "video_modality_scale": {
-            "type": "number",
-            "description": "The modality scale for the video. Controls the ratio between video and audio modalities.",
-            "title": "Video Modality Scale",
-            "maximum": 10,
-            "default": 3,
-            "minimum": 0
-          },
-          "audio_rescaling_scale": {
-            "type": "number",
-            "description": "The rescaling scale for the audio. Controls the ratio between classifier-free guidance and spatiotemporal guidance.",
-            "title": "Audio Rescaling Scale",
-            "maximum": 1,
-            "default": 0.7,
-            "minimum": 0
-          },
-          "video_stg_scale": {
-            "type": "number",
-            "description": "The Spatiotemporal Guidance (STG) scale for the video. Higher values result in more consistent and focused video content.",
-            "title": "Video STG Scale",
-            "maximum": 20,
-            "default": 0,
-            "minimum": 0
-          },
-          "interpolation_direction": {
-            "type": "string",
-            "enum": [
-              "forward",
-              "backward"
-            ],
-            "title": "Interpolation Direction",
-            "default": "forward",
-            "description": "The direction to interpolate the image sequence in. 'Forward' goes from the start image to the end image, 'Backward' goes from the end image to the start image."
+            "description": "Whether to enable the safety checker.",
+            "default": true
           }
         },
+        "required": [
+          "prompt",
+          "image_url"
+        ],
         "x-fal-order-properties": [
           "prompt",
           "image_url",
@@ -452,47 +452,47 @@
         ]
       },
       "Ltx2322bImageToVideoOutput": {
+        "title": "LTX23ImageToVideoOutput",
         "type": "object",
+        "properties": {
+          "prompt": {
+            "title": "Prompt",
+            "type": "string",
+            "description": "The prompt used for the generation.",
+            "examples": [
+              "Continue the scene naturally, maintaining the same style and motion."
+            ]
+          },
+          "video": {
+            "description": "The generated video.",
+            "$ref": "#/components/schemas/VideoFile",
+            "examples": [
+              {
+                "height": 704,
+                "file_name": "CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
+                "width": 1248,
+                "fps": 25,
+                "content_type": "video/mp4",
+                "duration": 10.28,
+                "url": "https://v3b.fal.media/files/b/0a88289e/CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
+                "num_frames": 257
+              }
+            ]
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "integer",
+            "description": "The seed used for the random number generator.",
+            "examples": [
+              866232447
+            ]
+          }
+        },
         "required": [
           "video",
           "seed",
           "prompt"
         ],
-        "title": "LTX23ImageToVideoOutput",
-        "properties": {
-          "seed": {
-            "type": "integer",
-            "title": "Seed",
-            "examples": [
-              866232447
-            ],
-            "description": "The seed used for the random number generator."
-          },
-          "prompt": {
-            "type": "string",
-            "title": "Prompt",
-            "examples": [
-              "Continue the scene naturally, maintaining the same style and motion."
-            ],
-            "description": "The prompt used for the generation."
-          },
-          "video": {
-            "$ref": "#/components/schemas/VideoFile",
-            "examples": [
-              {
-                "content_type": "video/mp4",
-                "height": 704,
-                "width": 1248,
-                "file_name": "CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
-                "fps": 25,
-                "duration": 10.28,
-                "url": "https://v3b.fal.media/files/b/0a88289e/CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
-                "num_frames": 257
-              }
-            ],
-            "description": "The generated video."
-          }
-        },
         "x-fal-order-properties": [
           "video",
           "seed",
@@ -500,24 +500,24 @@
         ]
       },
       "ImageSize": {
-        "type": "object",
         "title": "ImageSize",
+        "type": "object",
         "properties": {
           "height": {
-            "exclusiveMinimum": 0,
+            "maximum": 14142,
             "type": "integer",
             "title": "Height",
-            "maximum": 14142,
             "default": 512,
-            "description": "The height of the generated image."
+            "description": "The height of the generated image.",
+            "exclusiveMinimum": 0
           },
           "width": {
-            "exclusiveMinimum": 0,
+            "maximum": 14142,
             "type": "integer",
             "title": "Width",
-            "maximum": 14142,
             "default": 512,
-            "description": "The width of the generated image."
+            "description": "The width of the generated image.",
+            "exclusiveMinimum": 0
           }
         },
         "x-fal-order-properties": [
@@ -526,29 +526,10 @@
         ]
       },
       "VideoFile": {
-        "type": "object",
-        "required": [
-          "url"
-        ],
         "title": "VideoFile",
+        "type": "object",
         "properties": {
-          "content_type": {
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file."
-          },
           "height": {
-            "title": "Height",
             "anyOf": [
               {
                 "type": "integer"
@@ -557,22 +538,10 @@
                 "type": "null"
               }
             ],
+            "title": "Height",
             "description": "The height of the video"
           },
-          "width": {
-            "title": "Width",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The width of the video"
-          },
           "file_name": {
-            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -581,13 +550,13 @@
                 "type": "null"
               }
             ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+            ]
           },
-          "file_size": {
-            "title": "File Size",
+          "width": {
             "anyOf": [
               {
                 "type": "integer"
@@ -596,13 +565,10 @@
                 "type": "null"
               }
             ],
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes."
+            "title": "Width",
+            "description": "The width of the video"
           },
           "fps": {
-            "title": "Fps",
             "anyOf": [
               {
                 "type": "number"
@@ -611,10 +577,25 @@
                 "type": "null"
               }
             ],
+            "title": "Fps",
             "description": "The FPS of the video"
           },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ]
+          },
           "duration": {
-            "title": "Duration",
             "anyOf": [
               {
                 "type": "number"
@@ -623,15 +604,15 @@
                 "type": "null"
               }
             ],
+            "title": "Duration",
             "description": "The duration of the video"
           },
           "url": {
-            "type": "string",
             "title": "Url",
+            "type": "string",
             "description": "The URL where the file can be downloaded from."
           },
           "num_frames": {
-            "title": "Num Frames",
             "anyOf": [
               {
                 "type": "integer"
@@ -640,9 +621,28 @@
                 "type": "null"
               }
             ],
+            "title": "Num Frames",
             "description": "The number of frames in the video"
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ]
           }
         },
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",

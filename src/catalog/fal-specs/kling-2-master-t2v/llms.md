@@ -28,6 +28,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Disabling safety checks requires account authorization; unauthorized requests are always checked. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _required_)
   - Examples: "A slow-motion drone shot descending from above a maze of neon-lit Tokyo alleyways at night during heavy rainfall. The camera gradually focuses on a lone figure in a luminescent white raincoat standing perfectly still amid the bustling crowd, all carrying black umbrellas. As the camera continues its downward journey, we see the raindrops creating rippling patterns on puddles that reflect the kaleidoscope of colors from the surrounding signs, creating a mirror world beneath the city."
 
@@ -65,6 +69,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "A slow-motion drone shot descending from above a maze of neon-lit Tokyo alleyways at night during heavy rainfall. The camera gradually focuses on a lone figure in a luminescent white raincoat standing perfectly still amid the bustling crowd, all carrying black umbrellas. As the camera continues its downward journey, we see the raindrops creating rippling patterns on puddles that reflect the kaleidoscope of colors from the surrounding signs, creating a mirror world beneath the city.",
   "duration": "5",
   "aspect_ratio": "16:9",

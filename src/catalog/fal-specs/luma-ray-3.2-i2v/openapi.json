@@ -71,147 +71,9 @@
         ]
       },
       "AgentRayV32ImageToVideoInput": {
-        "type": "object",
         "required": [
           "prompt"
         ],
-        "title": "RayImageToVideoRequest",
-        "properties": {
-          "duration": {
-            "type": "string",
-            "enum": [
-              "5s",
-              "10s"
-            ],
-            "title": "Duration",
-            "default": "5s",
-            "description": "Duration of the generated video. 10s requires multi-keyframe input (keyframes / keyframe_indexes); it is not supported with a single image_url / end_image_url anchor."
-          },
-          "prompt": {
-            "type": "string",
-            "minLength": 1,
-            "title": "Prompt",
-            "examples": [
-              "Low-angle shot of a majestic tiger prowling through a snowy landscape, leaving paw prints on the white blanket."
-            ],
-            "maxLength": 6000,
-            "description": "Text prompt describing the motion/scene to generate."
-          },
-          "keyframe_indexes": {
-            "title": "Keyframe Indexes",
-            "anyOf": [
-              {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "type": "integer"
-                },
-                "maxItems": 64
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Output-frame positions (duration x 24fps: 5s -> 0-120, 10s -> 0-240) where each keyframes[i] is anchored. Non-negative, unique, and the same length as keyframes."
-          },
-          "exr_export": {
-            "type": "boolean",
-            "title": "Exr Export",
-            "default": false,
-            "description": "Also export an EXR file alongside the MP4. Requires hdr=true and HDR access."
-          },
-          "keyframes": {
-            "title": "Keyframes",
-            "anyOf": [
-              {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "type": "string"
-                },
-                "maxItems": 64
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Multi-keyframe image-to-video guide frames: 1-64 image URLs pinned at the positions given by keyframe_indexes. Mutually exclusive with image_url, end_image_url, and loop; unlocks 10s and HDR. Provide keyframes and keyframe_indexes together (same length)."
-          },
-          "aspect_ratio": {
-            "type": "string",
-            "enum": [
-              "3:4",
-              "4:3",
-              "1:1",
-              "9:16",
-              "16:9",
-              "21:9"
-            ],
-            "title": "Aspect Ratio",
-            "examples": [
-              "16:9"
-            ],
-            "default": "16:9",
-            "description": "Aspect ratio of the generated video."
-          },
-          "loop": {
-            "type": "boolean",
-            "title": "Loop",
-            "default": false,
-            "description": "Generate a seamless loop. Only valid for standard-dynamic-range generations without an end frame or keyframes."
-          },
-          "end_image_url": {
-            "title": "End Image Url",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Optional URL of an image used as the last frame. When set, the model interpolates between image_url and end_image_url. Cannot be combined with keyframes."
-          },
-          "image_url": {
-            "title": "Image Url",
-            "anyOf": [
-              {
-                "type": "string",
-                "minLength": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "https://storage.googleapis.com/falserverless/gallery/example_inputs_liuyifei.png"
-            ],
-            "description": "URL of the image used as the first frame of the video. Provide either image_url (optionally with end_image_url) or keyframes — the two anchoring modes are mutually exclusive."
-          },
-          "hdr": {
-            "type": "boolean",
-            "title": "Hdr",
-            "default": false,
-            "description": "Generate an HDR-encoded MP4. Requires HDR access on the account and a resolution of 720p or 1080p; not supported with loop."
-          },
-          "enable_safety_checker": {
-            "type": "boolean",
-            "title": "Enable Safety Checker",
-            "default": true,
-            "description": "Authorized callers may set false to request relaxed screening."
-          },
-          "resolution": {
-            "type": "string",
-            "enum": [
-              "540p",
-              "720p",
-              "1080p"
-            ],
-            "title": "Resolution",
-            "default": "540p",
-            "description": "Resolution of the generated video. Higher resolutions cost more."
-          }
-        },
         "x-fal-order-properties": [
           "prompt",
           "image_url",
@@ -225,45 +87,36 @@
           "keyframes",
           "keyframe_indexes",
           "enable_safety_checker"
-        ]
-      },
-      "AgentRayV32ImageToVideoOutput": {
-        "type": "object",
-        "required": [
-          "video"
         ],
-        "title": "VideoOutput",
+        "title": "RayImageToVideoRequest",
+        "type": "object",
         "properties": {
-          "exr_file": {
+          "keyframes": {
+            "description": "Multi-keyframe image-to-video guide frames: 1-64 image URLs pinned at the positions given by keyframe_indexes. Mutually exclusive with image_url, end_image_url, and loop; unlocks 10s and HDR. Provide keyframes and keyframe_indexes together (same length).",
+            "title": "Keyframes",
             "anyOf": [
               {
-                "$ref": "#/components/schemas/File"
+                "maxItems": 64,
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "type": "array"
               },
               {
                 "type": "null"
               }
-            ],
-            "description": "The generated EXR sidecar when exr_export is true. This may be a single EXR file or a ZIP package depending on Luma's export shape."
+            ]
           },
-          "video": {
-            "$ref": "#/components/schemas/File",
-            "description": "The generated video."
-          }
-        },
-        "x-fal-order-properties": [
-          "video",
-          "exr_file"
-        ]
-      },
-      "File": {
-        "type": "object",
-        "required": [
-          "url"
-        ],
-        "title": "File",
-        "properties": {
-          "content_type": {
-            "title": "Content Type",
+          "hdr": {
+            "default": false,
+            "description": "Generate an HDR-encoded MP4. Requires HDR access on the account and a resolution of 720p or 1080p; not supported with loop.",
+            "title": "Hdr",
+            "type": "boolean"
+          },
+          "end_image_url": {
+            "description": "Optional URL of an image used as the last frame. When set, the model interpolates between image_url and end_image_url. Cannot be combined with keyframes.",
+            "title": "End Image Url",
             "anyOf": [
               {
                 "type": "string"
@@ -271,33 +124,160 @@
               {
                 "type": "null"
               }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file."
+            ]
           },
-          "file_size": {
-            "title": "File Size",
+          "resolution": {
+            "default": "540p",
+            "enum": [
+              "540p",
+              "720p",
+              "1080p"
+            ],
+            "description": "Resolution of the generated video. Higher resolutions cost more.",
+            "title": "Resolution",
+            "type": "string"
+          },
+          "aspect_ratio": {
+            "default": "16:9",
+            "enum": [
+              "3:4",
+              "4:3",
+              "1:1",
+              "9:16",
+              "16:9",
+              "21:9"
+            ],
+            "description": "Aspect ratio of the generated video.",
+            "title": "Aspect Ratio",
+            "type": "string",
+            "examples": [
+              "16:9"
+            ]
+          },
+          "exr_export": {
+            "default": false,
+            "description": "Also export an EXR file alongside the MP4. Requires hdr=true and HDR access.",
+            "title": "Exr Export",
+            "type": "boolean"
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "title": "Enable Safety Checker",
+            "type": "boolean"
+          },
+          "image_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/gallery/example_inputs_liuyifei.png"
+            ],
+            "description": "URL of the image used as the first frame of the video. Provide either image_url (optionally with end_image_url) or keyframes — the two anchoring modes are mutually exclusive.",
+            "title": "Image Url",
             "anyOf": [
               {
-                "type": "integer"
+                "minLength": 1,
+                "type": "string"
               },
               {
                 "type": "null"
               }
-            ],
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes."
+            ]
           },
-          "url": {
+          "duration": {
+            "default": "5s",
+            "enum": [
+              "5s",
+              "10s"
+            ],
+            "description": "Duration of the generated video. 10s requires multi-keyframe input (keyframes / keyframe_indexes); it is not supported with a single image_url / end_image_url anchor.",
+            "title": "Duration",
+            "type": "string"
+          },
+          "keyframe_indexes": {
+            "description": "Output-frame positions (duration x 24fps: 5s -> 0-120, 10s -> 0-240) where each keyframes[i] is anchored. Non-negative, unique, and the same length as keyframes.",
+            "title": "Keyframe Indexes",
+            "anyOf": [
+              {
+                "maxItems": 64,
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "loop": {
+            "default": false,
+            "description": "Generate a seamless loop. Only valid for standard-dynamic-range generations without an end frame or keyframes.",
+            "title": "Loop",
+            "type": "boolean"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "Low-angle shot of a majestic tiger prowling through a snowy landscape, leaving paw prints on the white blanket."
+            ],
+            "description": "Text prompt describing the motion/scene to generate.",
+            "minLength": 1,
             "type": "string",
+            "maxLength": 6000
+          }
+        }
+      },
+      "AgentRayV32ImageToVideoOutput": {
+        "required": [
+          "video"
+        ],
+        "x-fal-order-properties": [
+          "video",
+          "exr_file"
+        ],
+        "title": "VideoOutput",
+        "type": "object",
+        "properties": {
+          "exr_file": {
+            "description": "The generated EXR sidecar when exr_export is true. This may be a single EXR file or a ZIP package depending on Luma's export shape.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/File"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "video": {
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video."
+          }
+        }
+      },
+      "File": {
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "title": "File",
+        "type": "object",
+        "properties": {
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
             "title": "Url",
-            "description": "The URL where the file can be downloaded from."
+            "type": "string"
           },
           "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "title": "File Name",
             "anyOf": [
               {
@@ -306,19 +286,39 @@
               {
                 "type": "null"
               }
-            ],
+            ]
+          },
+          "file_size": {
             "examples": [
-              "z9RV14K95DvU.png"
+              4404019
             ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
-        },
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ]
+        }
       }
     }
   },
