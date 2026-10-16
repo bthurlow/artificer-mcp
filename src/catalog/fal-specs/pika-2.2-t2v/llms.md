@@ -56,6 +56,10 @@ The API accepts the following input parameters:
   - Default: `5`
   - Options: `5`, `10`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -74,7 +78,8 @@ The API accepts the following input parameters:
   "negative_prompt": "ugly, bad, terrible",
   "aspect_ratio": "16:9",
   "resolution": "1080p",
-  "duration": 5
+  "duration": 5,
+  "enable_safety_checker": true
 }
 ```
 

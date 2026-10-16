@@ -56,6 +56,10 @@ The API accepts the following input parameters:
   Optional list of reference image URLs used to guide the generation.
   - Array of string
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -72,7 +76,8 @@ The API accepts the following input parameters:
 {
   "prompt": "A manga panel of a stoic samurai overlooking a neon cyberpunk city at dusk.",
   "aspect_ratio": "16:9",
-  "style": "auto"
+  "style": "auto",
+  "enable_safety_checker": true
 }
 ```
 

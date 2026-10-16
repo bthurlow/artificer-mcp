@@ -58,6 +58,10 @@ The API accepts the following input parameters:
   Whether to automatically attempt to fix prompts that fail content policy or other validation checks by rewriting them Default value: `true`
   - Default: `true`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -76,7 +80,8 @@ The API accepts the following input parameters:
   "aspect_ratio": "16:9",
   "duration": "5s",
   "enhance_prompt": true,
-  "auto_fix": true
+  "auto_fix": true,
+  "enable_safety_checker": true
 }
 ```
 

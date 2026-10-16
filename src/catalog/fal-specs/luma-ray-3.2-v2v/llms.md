@@ -82,6 +82,10 @@ The API accepts the following input parameters:
   Source-video frame positions where each keyframes[i] is anchored. Non-negative, unique, and the same length as keyframes.
   - Array of integer
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -101,7 +105,8 @@ The API accepts the following input parameters:
   "video_url": "https://storage.googleapis.com/falserverless/example_inputs/birefnet-video-input.mp4",
   "start_image_url": "https://storage.googleapis.com/falserverless/gallery/example_inputs_liuyifei.png",
   "resolution": "540p",
-  "duration": "5s"
+  "duration": "5s",
+  "enable_safety_checker": true
 }
 ```
 

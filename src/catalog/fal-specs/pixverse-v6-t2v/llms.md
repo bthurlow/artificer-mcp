@@ -74,6 +74,10 @@ The API accepts the following input parameters:
   Prompt optimization mode: 'enabled' to optimize, 'disabled' to turn off, 'auto' for model decision
   - Options: `"enabled"`, `"disabled"`, `"auto"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -92,7 +96,8 @@ The API accepts the following input parameters:
   "aspect_ratio": "16:9",
   "resolution": "720p",
   "duration": 5,
-  "negative_prompt": "blurry, low quality, low resolution, pixelated, noisy, grainy, out of focus, poorly lit, poorly exposed, poorly composed, poorly framed, poorly cropped, poorly color corrected, poorly color graded"
+  "negative_prompt": "blurry, low quality, low resolution, pixelated, noisy, grainy, out of focus, poorly lit, poorly exposed, poorly composed, poorly framed, poorly cropped, poorly color corrected, poorly color graded",
+  "enable_safety_checker": true
 }
 ```
 
@@ -103,7 +108,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"content_type":"video/mp4","file_name":"output.mp4","file_size":5485412,"url":"https://storage.googleapis.com/falserverless/model_tests/video_models/output-4.mp4"}
+  - Examples: {"content_type":"video/mp4","file_name":"output.mp4","url":"https://storage.googleapis.com/falserverless/model_tests/video_models/output-4.mp4","file_size":5485412}
 
 
 
@@ -114,8 +119,8 @@ The API returns the following output format:
   "video": {
     "content_type": "video/mp4",
     "file_name": "output.mp4",
-    "file_size": 5485412,
-    "url": "https://storage.googleapis.com/falserverless/model_tests/video_models/output-4.mp4"
+    "url": "https://storage.googleapis.com/falserverless/model_tests/video_models/output-4.mp4",
+    "file_size": 5485412
   }
 }
 ```

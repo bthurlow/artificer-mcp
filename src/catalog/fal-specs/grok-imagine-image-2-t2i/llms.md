@@ -58,6 +58,10 @@ The API accepts the following input parameters:
   If `True`, the media will be returned as a data URI and the output data won't be available in the request history.
   - Default: `false`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 - **`quality`** (`QualityEnum`, _optional_):
   Quality level of the generated image. Default value: `"medium"`
   - Default: `"medium"`
@@ -82,6 +86,7 @@ The API accepts the following input parameters:
   "aspect_ratio": "1:1",
   "resolution": "1k",
   "output_format": "jpeg",
+  "enable_safety_checker": true,
   "quality": "medium"
 }
 ```

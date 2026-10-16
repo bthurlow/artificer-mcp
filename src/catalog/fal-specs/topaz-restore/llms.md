@@ -40,9 +40,13 @@ The API accepts the following input parameters:
   - Options: `"jpeg"`, `"png"`
 
 - **`model`** (`ModelEnum`, _optional_):
-  Restoration. Recover 3 rebuilds natural detail; Dust-Scratch V2 cleans up film dust and scratches; Faces restores facial detail with Face Recovery 3. Default value: `"Recover 3"`
+  Restoration. Recover 3 rebuilds natural detail; Dust-Scratch V2 cleans up film dust and scratches. Default value: `"Recover 3"`
   - Default: `"Recover 3"`
-  - Options: `"Recover 3"`, `"Dust-Scratch V2"`, `"Faces"`
+  - Options: `"Recover 3"`, `"Dust-Scratch V2"`
+
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
 
 
 
@@ -60,7 +64,8 @@ The API accepts the following input parameters:
 {
   "image_url": "https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_poor_1.jpeg",
   "output_format": "jpeg",
-  "model": "Recover 3"
+  "model": "Recover 3",
+  "enable_safety_checker": true
 }
 ```
 

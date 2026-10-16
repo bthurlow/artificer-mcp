@@ -71,10 +71,16 @@
         ]
       },
       "SyncLipsyncReact1Input": {
-        "type": "object",
         "properties": {
+          "video_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/react_1/input.mp4"
+            ],
+            "title": "Video Url",
+            "description": "URL to the input video. Must be **15 seconds or shorter**.",
+            "type": "string"
+          },
           "lipsync_mode": {
-            "type": "string",
             "enum": [
               "cut_off",
               "loop",
@@ -82,39 +88,28 @@
               "silence",
               "remap"
             ],
-            "default": "bounce",
+            "title": "Lipsync Mode",
             "description": "Lipsync mode when audio and video durations are out of sync.",
-            "title": "Lipsync Mode"
+            "type": "string",
+            "default": "bounce"
           },
           "temperature": {
+            "default": 0.5,
             "minimum": 0,
-            "type": "number",
-            "maximum": 1,
             "title": "Temperature",
             "description": "Controls the expresiveness of the lipsync.",
-            "default": 0.5
-          },
-          "model_mode": {
-            "type": "string",
-            "enum": [
-              "lips",
-              "face",
-              "head"
-            ],
-            "default": "face",
-            "description": "Controls the edit region and movement scope for the model. Available options:\n- `lips`: Only lipsync using react-1 (minimal facial changes).\n- `face`: Lipsync + facial expressions without head movements.\n- `head`: Lipsync + facial expressions + natural talking head movements.",
-            "title": "Model Mode"
+            "type": "number",
+            "maximum": 1
           },
           "audio_url": {
-            "type": "string",
-            "title": "Audio Url",
             "examples": [
               "https://storage.googleapis.com/falserverless/example_inputs/react_1/input.mp3"
             ],
-            "description": "URL to the input audio. Must be **15 seconds or shorter**."
+            "title": "Audio Url",
+            "description": "URL to the input audio. Must be **15 seconds or shorter**.",
+            "type": "string"
           },
           "emotion": {
-            "type": "string",
             "enum": [
               "happy",
               "sad",
@@ -123,19 +118,23 @@
               "surprised",
               "neutral"
             ],
+            "title": "Emotion",
+            "description": "Emotion prompt for the generation. Currently supports single-word emotions only.",
+            "type": "string",
             "examples": [
               "neutral"
-            ],
-            "description": "Emotion prompt for the generation. Currently supports single-word emotions only.",
-            "title": "Emotion"
+            ]
           },
-          "video_url": {
-            "type": "string",
-            "title": "Video Url",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/react_1/input.mp4"
+          "model_mode": {
+            "enum": [
+              "lips",
+              "face",
+              "head"
             ],
-            "description": "URL to the input video. Must be **15 seconds or shorter**."
+            "title": "Model Mode",
+            "description": "Controls the edit region and movement scope for the model. Available options:\n- `lips`: Only lipsync using react-1 (minimal facial changes).\n- `face`: Lipsync + facial expressions without head movements.\n- `head`: Lipsync + facial expressions + natural talking head movements.",
+            "type": "string",
+            "default": "face"
           }
         },
         "title": "React1Input",
@@ -147,6 +146,7 @@
           "lipsync_mode",
           "temperature"
         ],
+        "type": "object",
         "required": [
           "video_url",
           "audio_url",
@@ -154,42 +154,53 @@
         ]
       },
       "SyncLipsyncReact1Output": {
-        "type": "object",
         "properties": {
           "video": {
+            "$ref": "#/components/schemas/VideoFile",
+            "description": "The generated video with synchronized lip and facial movements.",
             "examples": [
               {
-                "content_type": "video/mp4",
-                "file_name": "output.mp4",
                 "width": 1920,
+                "url": "https://storage.googleapis.com/falserverless/example_outputs/react_1/output.mp4",
+                "file_name": "output.mp4",
                 "num_frames": 169,
+                "content_type": "video/mp4",
                 "fps": 24,
-                "duration": 7.041667,
                 "height": 1088,
-                "url": "https://storage.googleapis.com/falserverless/example_outputs/react_1/output.mp4"
+                "duration": 7.041667
               }
-            ],
-            "description": "The generated video with synchronized lip and facial movements.",
-            "$ref": "#/components/schemas/VideoFile"
+            ]
           }
         },
         "title": "React1Output",
         "x-fal-order-properties": [
           "video"
         ],
+        "type": "object",
         "required": [
           "video"
         ]
       },
       "VideoFile": {
-        "type": "object",
         "properties": {
-          "content_type": {
-            "title": "Content Type",
-            "examples": [
-              "image/png"
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
             ],
-            "description": "The mime type of the file.",
+            "title": "Width",
+            "description": "The width of the video"
+          },
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "file_name": {
             "anyOf": [
               {
                 "type": "string"
@@ -197,38 +208,14 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "file_size": {
-            "title": "File Size",
-            "examples": [
-              4404019
             ],
-            "description": "The size of the file in bytes.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "width": {
-            "title": "Width",
-            "description": "The width of the video",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
             ]
           },
           "num_frames": {
-            "title": "Num Frames",
-            "description": "The number of frames in the video",
             "anyOf": [
               {
                 "type": "integer"
@@ -236,26 +223,11 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "fps": {
-            "title": "Fps",
-            "description": "The FPS of the video",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "file_name": {
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "Num Frames",
+            "description": "The number of frames in the video"
+          },
+          "content_type": {
             "anyOf": [
               {
                 "type": "string"
@@ -263,23 +235,14 @@
               {
                 "type": "null"
               }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
             ]
           },
-          "duration": {
-            "title": "Duration",
-            "description": "The duration of the video",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "height": {
-            "title": "Height",
-            "description": "The height of the video",
+          "file_size": {
             "anyOf": [
               {
                 "type": "integer"
@@ -287,12 +250,48 @@
               {
                 "type": "null"
               }
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
             ]
           },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
+          "fps": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fps",
+            "description": "The FPS of the video"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "The height of the video"
+          },
+          "duration": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration",
+            "description": "The duration of the video"
           }
         },
         "title": "VideoFile",
@@ -307,6 +306,7 @@
           "duration",
           "num_frames"
         ],
+        "type": "object",
         "required": [
           "url"
         ]

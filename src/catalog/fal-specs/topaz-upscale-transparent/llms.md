@@ -38,6 +38,10 @@ The API accepts the following input parameters:
   Transparent upscaling always outputs PNG to preserve the alpha channel. Default value: `"png"`
   - Default: `"png"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -53,7 +57,8 @@ The API accepts the following input parameters:
 ```json
 {
   "image_url": "https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_poor_1.jpeg",
-  "output_format": "png"
+  "output_format": "png",
+  "enable_safety_checker": true
 }
 ```
 

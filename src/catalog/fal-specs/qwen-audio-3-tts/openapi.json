@@ -74,12 +74,23 @@
         "x-fal-order-properties": [
           "text",
           "voice",
-          "language"
+          "language",
+          "enable_safety_checker"
+        ],
+        "type": "object",
+        "required": [
+          "text"
         ],
         "title": "QwenAudio3TTSInput",
         "properties": {
+          "enable_safety_checker": {
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "default": true,
+            "title": "Enable Safety Checker",
+            "type": "boolean"
+          },
           "language": {
-            "title": "Language",
+            "description": "Language of the input text. `Auto` lets the model detect it; setting it explicitly improves pronunciation and intonation.",
             "enum": [
               "Auto",
               "Chinese",
@@ -94,24 +105,14 @@
               "Portuguese"
             ],
             "default": "Auto",
-            "description": "Language of the input text. `Auto` lets the model detect it; setting it explicitly improves pronunciation and intonation.",
-            "type": "string",
+            "title": "Language",
             "examples": [
               "English"
-            ]
-          },
-          "text": {
-            "title": "Text",
-            "maxLength": 2000,
-            "description": "The text to convert to speech.",
-            "type": "string",
-            "examples": [
-              "Hello! This is Qwen Audio 3.0 speaking on fal."
             ],
-            "minLength": 1
+            "type": "string"
           },
           "voice": {
-            "title": "Voice",
+            "description": "The voice used for speech synthesis. See the [Qwen-TTS voice list](https://www.alibabacloud.com/help/en/model-studio/qwen-tts-voice-list) for each voice's language and dialect coverage.",
             "enum": [
               "Cherry",
               "Serena",
@@ -160,43 +161,49 @@
               "Kiki"
             ],
             "default": "Cherry",
-            "description": "The voice used for speech synthesis. See the [Qwen-TTS voice list](https://www.alibabacloud.com/help/en/model-studio/qwen-tts-voice-list) for each voice's language and dialect coverage.",
-            "type": "string",
+            "title": "Voice",
             "examples": [
               "Cherry"
-            ]
+            ],
+            "type": "string"
+          },
+          "text": {
+            "minLength": 1,
+            "description": "The text to convert to speech.",
+            "maxLength": 2000,
+            "title": "Text",
+            "examples": [
+              "Hello! This is Qwen Audio 3.0 speaking on fal."
+            ],
+            "type": "string"
           }
-        },
-        "type": "object",
-        "required": [
-          "text"
-        ]
+        }
       },
       "QwenAudio3TtsOutput": {
         "x-fal-order-properties": [
           "audio"
         ],
-        "title": "QwenAudio3TTSOutput",
-        "properties": {
-          "audio": {
-            "$ref": "#/components/schemas/AudioFile",
-            "description": "The generated speech audio file.",
-            "examples": [
-              {
-                "content_type": "audio/wav",
-                "url": "https://v3b.fal.media/files/b/0aa31e93/W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav",
-                "duration": 3.44,
-                "file_name": "W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav",
-                "sample_rate": 24000,
-                "channels": 1
-              }
-            ]
-          }
-        },
         "type": "object",
         "required": [
           "audio"
-        ]
+        ],
+        "title": "QwenAudio3TTSOutput",
+        "properties": {
+          "audio": {
+            "description": "The generated speech audio file.",
+            "examples": [
+              {
+                "channels": 1,
+                "sample_rate": 24000,
+                "duration": 3.44,
+                "url": "https://v3b.fal.media/files/b/0aa31e93/W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav",
+                "file_name": "W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav",
+                "content_type": "audio/wav"
+              }
+            ],
+            "$ref": "#/components/schemas/AudioFile"
+          }
+        }
       },
       "AudioFile": {
         "x-fal-order-properties": [
@@ -209,54 +216,13 @@
           "sample_rate",
           "bitrate"
         ],
+        "type": "object",
+        "required": [
+          "url"
+        ],
         "title": "AudioFile",
         "properties": {
-          "content_type": {
-            "title": "Content Type",
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
-          },
-          "duration": {
-            "title": "Duration",
-            "description": "The duration of the audio",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "sample_rate": {
-            "title": "Sample Rate",
-            "description": "The sample rate of the audio",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "bitrate": {
-            "title": "Bitrate",
             "description": "The bitrate of the audio (e.g., '192k' or 192000)",
             "anyOf": [
               {
@@ -268,14 +234,11 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "file_size": {
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
             ],
+            "title": "Bitrate"
+          },
+          "sample_rate": {
+            "description": "The sample rate of the audio",
             "anyOf": [
               {
                 "type": "integer"
@@ -283,25 +246,22 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "file_name": {
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
             ],
+            "title": "Sample Rate"
+          },
+          "duration": {
+            "description": "The duration of the audio",
             "anyOf": [
               {
-                "type": "string"
+                "type": "number"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Duration"
           },
           "channels": {
-            "title": "Channels",
             "description": "The number of channels in the audio",
             "anyOf": [
               {
@@ -310,13 +270,60 @@
               {
                 "type": "null"
               }
+            ],
+            "title": "Channels"
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "examples": [
+              4404019
             ]
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
           }
-        },
-        "type": "object",
-        "required": [
-          "url"
-        ]
+        }
       }
     }
   },

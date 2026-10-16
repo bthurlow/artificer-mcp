@@ -71,29 +71,8 @@
         ]
       },
       "SyncLipsyncV3Input": {
-        "type": "object",
         "properties": {
-          "audio_url": {
-            "type": "string",
-            "title": "Audio Url",
-            "examples": [
-              "https://fal.media/files/lion/vyFWygmZsIZlUO4s0nr2n.wav"
-            ],
-            "description": "URL of the input audio"
-          },
-          "options": {
-            "description": "Additional Sync.so generation options. If options.sync_mode is set, it overrides the top-level sync_mode field.",
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Sync3GenerationOptions"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "sync_mode": {
-            "type": "string",
             "enum": [
               "cut_off",
               "loop",
@@ -101,17 +80,37 @@
               "silence",
               "remap"
             ],
-            "default": "cut_off",
+            "title": "Sync Mode",
             "description": "Lipsync mode when audio and video durations are out of sync.",
-            "title": "Sync Mode"
+            "type": "string",
+            "default": "cut_off"
           },
           "video_url": {
-            "type": "string",
             "title": "Video Url",
+            "description": "URL of the input video",
+            "type": "string",
             "examples": [
               "https://v3.fal.media/files/tiger/IugLCDJRIoGqvqTa-EJTr_3wg74vCqyNuQ-IiBd77MM_output.mp4"
+            ]
+          },
+          "audio_url": {
+            "title": "Audio Url",
+            "description": "URL of the input audio",
+            "type": "string",
+            "examples": [
+              "https://fal.media/files/lion/vyFWygmZsIZlUO4s0nr2n.wav"
+            ]
+          },
+          "options": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Sync3GenerationOptions"
+              },
+              {
+                "type": "null"
+              }
             ],
-            "description": "URL of the input video"
+            "description": "Additional Sync.so generation options. If options.sync_mode is set, it overrides the top-level sync_mode field."
           }
         },
         "title": "Sync3Input",
@@ -121,38 +120,86 @@
           "sync_mode",
           "options"
         ],
+        "type": "object",
         "required": [
           "video_url",
           "audio_url"
         ]
       },
       "SyncLipsyncV3Output": {
-        "type": "object",
         "properties": {
           "video": {
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video",
             "examples": [
               {
                 "url": "https://v3b.fal.media/files/b/0a93c312/TqKMiLtCcTKWSeAWXJRD0_output.mp4"
               }
-            ],
-            "description": "The generated video",
-            "$ref": "#/components/schemas/File"
+            ]
           }
         },
         "title": "Sync3Output",
         "x-fal-order-properties": [
           "video"
         ],
+        "type": "object",
         "required": [
           "video"
         ]
       },
       "Sync3GenerationOptions": {
-        "type": "object",
         "properties": {
+          "sync_mode": {
+            "anyOf": [
+              {
+                "enum": [
+                  "cut_off",
+                  "loop",
+                  "bounce",
+                  "silence",
+                  "remap"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sync Mode",
+            "description": "Defines how to handle duration mismatches between video and audio inputs. Overrides the top-level sync_mode when provided."
+          },
+          "active_speaker_detection": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Sync3ActiveSpeakerDetection"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Active speaker detection configuration for videos with multiple people."
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "enum": [
+                  "happy",
+                  "sad",
+                  "angry",
+                  "disgusted",
+                  "surprised",
+                  "neutral"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt",
+            "description": "Emotion prompt for generation. This is a Sync.so option primarily used by react-1."
+          },
           "temperature": {
-            "title": "Temperature",
-            "description": "Controls how expressive lipsync can be; 0 is least expressive, 1 is most expressive. Sync.so handles this natively for sync-3, so this option is ignored by sync-3.",
             "anyOf": [
               {
                 "minimum": 0,
@@ -162,11 +209,11 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Temperature",
+            "description": "Controls how expressive lipsync can be; 0 is least expressive, 1 is most expressive. Sync.so handles this natively for sync-3, so this option is ignored by sync-3."
           },
           "occlusion_detection_enabled": {
-            "title": "Occlusion Detection Enabled",
-            "description": "Whether to detect occlusion during generation. Sync.so handles this automatically for sync-3, so this option is ignored by sync-3.",
             "anyOf": [
               {
                 "type": "boolean"
@@ -174,14 +221,13 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Occlusion Detection Enabled",
+            "description": "Whether to detect occlusion during generation. Sync.so handles this automatically for sync-3, so this option is ignored by sync-3."
           },
           "model_mode": {
-            "title": "Model Mode",
-            "description": "Edit region for the model. This is a Sync.so option primarily used by react-1.",
             "anyOf": [
               {
-                "type": "string",
                 "enum": [
                   "lips",
                   "face",
@@ -189,62 +235,15 @@
                   "lipsync",
                   "emotion",
                   "talking_head"
-                ]
+                ],
+                "type": "string"
               },
               {
                 "type": "null"
               }
-            ]
-          },
-          "prompt": {
-            "title": "Prompt",
-            "description": "Emotion prompt for generation. This is a Sync.so option primarily used by react-1.",
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "happy",
-                  "sad",
-                  "angry",
-                  "disgusted",
-                  "surprised",
-                  "neutral"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "active_speaker_detection": {
-            "description": "Active speaker detection configuration for videos with multiple people.",
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Sync3ActiveSpeakerDetection"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "sync_mode": {
-            "title": "Sync Mode",
-            "description": "Defines how to handle duration mismatches between video and audio inputs. Overrides the top-level sync_mode when provided.",
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "cut_off",
-                  "loop",
-                  "bounce",
-                  "silence",
-                  "remap"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ]
+            ],
+            "title": "Model Mode",
+            "description": "Edit region for the model. This is a Sync.so option primarily used by react-1."
           }
         },
         "title": "Sync3GenerationOptions",
@@ -255,47 +254,12 @@
           "temperature",
           "active_speaker_detection",
           "occlusion_detection_enabled"
-        ]
+        ],
+        "type": "object"
       },
       "File": {
-        "type": "object",
         "properties": {
-          "content_type": {
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "file_name": {
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "file_size": {
-            "title": "File Size",
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -303,12 +267,47 @@
               {
                 "type": "null"
               }
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
             ]
           },
           "url": {
-            "type": "string",
             "title": "Url",
-            "description": "The URL where the file can be downloaded from."
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ]
           }
         },
         "title": "File",
@@ -318,28 +317,14 @@
           "file_name",
           "file_size"
         ],
+        "type": "object",
         "required": [
           "url"
         ]
       },
       "Sync3ActiveSpeakerDetection": {
-        "type": "object",
         "properties": {
-          "auto_detect": {
-            "title": "Auto Detect",
-            "description": "Whether to automatically detect and apply generation to the active speaker.",
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "v3": {
-            "title": "V3",
-            "description": "Whether to use Sync.so's active speaker detection v3.",
             "anyOf": [
               {
                 "type": "boolean"
@@ -347,11 +332,11 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "V3",
+            "description": "Whether to use Sync.so's active speaker detection v3."
           },
-          "bounding_boxes_url": {
-            "title": "Bounding Boxes Url",
-            "description": "URL to a JSON file containing per-frame bounding boxes.",
+          "face_image": {
             "anyOf": [
               {
                 "type": "string"
@@ -359,11 +344,11 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Face Image",
+            "description": "Base64 encoded face image for manual speaker selection."
           },
-          "use_v2": {
-            "title": "Use V2",
-            "description": "Deprecated Sync.so option for active speaker detection v2.",
+          "auto_detect": {
             "anyOf": [
               {
                 "type": "boolean"
@@ -371,28 +356,52 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Auto Detect",
+            "description": "Whether to automatically detect and apply generation to the active speaker."
           },
-          "coordinates": {
-            "title": "Coordinates",
-            "description": "Reference point [x, y] on the speaker's face in frame_number.",
+          "use_v2": {
             "anyOf": [
               {
-                "minItems": 2,
-                "type": "array",
-                "maxItems": 2,
-                "items": {
-                  "type": "integer"
-                }
+                "type": "boolean"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Use V2",
+            "description": "Deprecated Sync.so option for active speaker detection v2."
+          },
+          "bounding_boxes_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bounding Boxes Url",
+            "description": "URL to a JSON file containing per-frame bounding boxes."
+          },
+          "coordinates": {
+            "anyOf": [
+              {
+                "maxItems": 2,
+                "items": {
+                  "type": "integer"
+                },
+                "minItems": 2,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coordinates",
+            "description": "Reference point [x, y] on the speaker's face in frame_number."
           },
           "frame_number": {
-            "title": "Frame Number",
-            "description": "Frame index for manual speaker selection coordinates.",
             "anyOf": [
               {
                 "minimum": 0,
@@ -401,44 +410,34 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "face_image": {
-            "title": "Face Image",
-            "description": "Base64 encoded face image for manual speaker selection.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            ],
+            "title": "Frame Number",
+            "description": "Frame index for manual speaker selection coordinates."
           },
           "bounding_boxes": {
-            "title": "Bounding Boxes",
-            "description": "Per-frame bounding boxes [x1, y1, x2, y2] for the detected face.",
             "anyOf": [
               {
-                "type": "array",
                 "items": {
                   "anyOf": [
                     {
-                      "type": "array",
                       "items": {
                         "type": "integer"
-                      }
+                      },
+                      "type": "array"
                     },
                     {
                       "type": "null"
                     }
                   ]
-                }
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Bounding Boxes",
+            "description": "Per-frame bounding boxes [x1, y1, x2, y2] for the detected face."
           }
         },
         "title": "Sync3ActiveSpeakerDetection",
@@ -451,7 +450,8 @@
           "bounding_boxes",
           "bounding_boxes_url",
           "face_image"
-        ]
+        ],
+        "type": "object"
       }
     }
   },

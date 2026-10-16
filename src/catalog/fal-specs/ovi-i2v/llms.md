@@ -50,6 +50,10 @@ The API accepts the following input parameters:
 - **`seed`** (`integer`, _optional_):
   Random seed for reproducibility. If None, a random seed is chosen.
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 - **`image_url`** (`string`, _required_):
   The image URL to guide video generation.
   - Examples: "https://storage.googleapis.com/falserverless/example_inputs/ovi_i2v_input.png"
@@ -73,6 +77,7 @@ The API accepts the following input parameters:
   "negative_prompt": "jitter, bad hands, blur, distortion",
   "num_inference_steps": 30,
   "audio_negative_prompt": "robotic, muffled, echo, distorted",
+  "enable_safety_checker": true,
   "image_url": "https://storage.googleapis.com/falserverless/example_inputs/ovi_i2v_input.png"
 }
 ```

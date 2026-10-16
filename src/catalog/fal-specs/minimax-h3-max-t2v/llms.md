@@ -15,9 +15,9 @@
 
 ## Pricing
 
-Video costs **$0.025** per second at **480p**, **$0.04** per second at **768p**, and **$0.08** per second at **1080p**.
+Video costs **$0.03** per second at **480p**, **$0.048** per second at **768p**, and **$0.096** per second at **1080p**.
 
-Note: these are promotional launch rates, **50%** off for a limited time. The discount ends **September 30**, after which **480p** is **$0.05**/second, **768p** is **$0.08**/second, and **1080p** is **$0.16**/second.
+Note: these are promotional rates, **40%** off for a limited time. The discount ends **October 15**, after which **480p** is **$0.05**/second, **768p** is **$0.08**/second, and **1080p** is **$0.16**/second.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -36,10 +36,10 @@ The API accepts the following input parameters:
   Text prompt for video generation
   - Examples: "A white kitten chases a butterfly across a sunlit garden. Gentle camera tracking, natural movement, soft afternoon light filtering through the leaves."
 
-- **`duration`** (`integer`, _optional_):
-  The duration of the video in seconds. Default value: `5`
+- **`duration`** (`float`, _optional_):
+  Video length in seconds. The output can run up to about 0.7 s longer than requested. Use at least 2 s with target_audio_url. Default value: `5`
   - Default: `5`
-  - Range: `5` to `15`
+  - Range: `0.92` to `15`
 
 - **`resolution`** (`ResolutionEnum`, _optional_):
   The native generation resolution, or 1080P latent refinement from a native 768P source. Default value: `"768P"`
@@ -63,7 +63,7 @@ The API accepts the following input parameters:
   - Examples: "disabled", "balanced", "quality"
 
 - **`target_audio_url`** (`string`, _optional_):
-  Optional URL of an audio clip at least 2 seconds long (maximum 15 MB) to pin to the generated soundtrack. Longer clips are trimmed to the requested video duration, keeping the beginning. The original audio replaces the output soundtrack, padded with silence if shorter than the video, without changing playback speed. Exceptionally high sample rates may be resampled to 96 kHz. Accepts an HTTP(S) URL or a base64 data URI.
+  Optional URL of an audio clip at least 2 seconds long (maximum 15 MB) to pin to the generated soundtrack. Longer clips are trimmed to the generated video's length, keeping the beginning. The original audio replaces the output soundtrack, padded with silence if shorter than the video, without changing playback speed. Exceptionally high sample rates may be resampled to 96 kHz. Accepts an HTTP(S) URL or a base64 data URI.
 
 - **`aspect_ratio`** (`AspectRatioEnum`, _optional_):
   The aspect ratio of the generated video. Default value: `"16:9"`
@@ -101,7 +101,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"content_type":"video/mp4","file_size":6463396,"file_name":"--prs89fkHtWW406fmEs__NRhTqNku.mp4","url":"https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4"}
+  - Examples: {"content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4","file_size":6463396,"file_name":"--prs89fkHtWW406fmEs__NRhTqNku.mp4"}
 
 - **`expanded_prompt`** (`string`, _optional_):
   The prompt after expansion, as sent to the model. Null when prompt expansion was disabled, left the prompt unchanged, or was performed internally by MiniMax's hosted API.
@@ -117,9 +117,9 @@ The API returns the following output format:
 {
   "video": {
     "content_type": "video/mp4",
+    "url": "https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4",
     "file_size": 6463396,
-    "file_name": "--prs89fkHtWW406fmEs__NRhTqNku.mp4",
-    "url": "https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4"
+    "file_name": "--prs89fkHtWW406fmEs__NRhTqNku.mp4"
   }
 }
 ```

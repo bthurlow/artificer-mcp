@@ -44,6 +44,10 @@ The API accepts the following input parameters:
   - Default: `48000`
   - Options: `8000`, `16000`, `24000`, `32000`, `40000`, `48000`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -60,7 +64,8 @@ The API accepts the following input parameters:
 {
   "text": "Hello! This is a demo of Inworld's TTS.",
   "voice": "Craig (en)",
-  "sample_rate_hertz": 48000
+  "sample_rate_hertz": 48000,
+  "enable_safety_checker": true
 }
 ```
 

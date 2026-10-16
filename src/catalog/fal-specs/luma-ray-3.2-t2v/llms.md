@@ -62,6 +62,10 @@ The API accepts the following input parameters:
   Also export an EXR file alongside the MP4. Requires hdr=true and HDR access.
   - Default: `false`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -79,7 +83,8 @@ The API accepts the following input parameters:
   "prompt": "A herd of wild horses galloping across a dusty desert plain under a blazing midday sun, their manes flying in the wind; wide tracking shot.",
   "aspect_ratio": "16:9",
   "resolution": "540p",
-  "duration": "5s"
+  "duration": "5s",
+  "enable_safety_checker": true
 }
 ```
 

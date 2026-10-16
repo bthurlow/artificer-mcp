@@ -56,6 +56,10 @@ The API accepts the following input parameters:
   Whether to use direct audio-video generation. When true, outputs video with sound. Default value: `true`
   - Default: `true`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -74,7 +78,8 @@ The API accepts the following input parameters:
   "duration": 5,
   "aspect_ratio": "16:9",
   "resolution": "720p",
-  "audio": true
+  "audio": true,
+  "enable_safety_checker": true
 }
 ```
 

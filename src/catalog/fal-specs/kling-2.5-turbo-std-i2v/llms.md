@@ -52,6 +52,10 @@ The API accepts the following input parameters:
   - Default: `0.5`
   - Range: `0` to `1`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -71,7 +75,8 @@ The API accepts the following input parameters:
   "image_url": "https://v3b.fal.media/files/b/0a975417/w4qtfMTu-mh_KUgHIZNAH__4BUACOxwlMAEVXDfeYbj_2UxyAg3W.jpg",
   "duration": "5",
   "negative_prompt": "blur, distort, and low quality",
-  "cfg_scale": 0.5
+  "cfg_scale": 0.5,
+  "enable_safety_checker": true
 }
 ```
 
@@ -82,7 +87,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"file_size":16536912,"file_name":"output.mp4","content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0a97541e/EiyjY6_Fjf7XPgR7nUli5_output.mp4"}
+  - Examples: {"file_size":16536912,"url":"https://v3b.fal.media/files/b/0a97541e/EiyjY6_Fjf7XPgR7nUli5_output.mp4","content_type":"video/mp4","file_name":"output.mp4"}
 
 
 
@@ -92,9 +97,9 @@ The API returns the following output format:
 {
   "video": {
     "file_size": 16536912,
-    "file_name": "output.mp4",
+    "url": "https://v3b.fal.media/files/b/0a97541e/EiyjY6_Fjf7XPgR7nUli5_output.mp4",
     "content_type": "video/mp4",
-    "url": "https://v3b.fal.media/files/b/0a97541e/EiyjY6_Fjf7XPgR7nUli5_output.mp4"
+    "file_name": "output.mp4"
   }
 }
 ```

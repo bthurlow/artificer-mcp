@@ -44,6 +44,10 @@ The API accepts the following input parameters:
   - Default: `"Standard"`
   - Options: `"Standard"`, `"Strong"`, `"Lens Blur V2"`, `"Motion Blur"`, `"Natural"`, `"Refocus"`, `"Wildlife"`, `"Portrait"`, `"Auto Sharpen"`, `"Super Focus V3"`, `"Super Focus V2"`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -60,7 +64,8 @@ The API accepts the following input parameters:
 {
   "image_url": "https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_poor_1.jpeg",
   "output_format": "jpeg",
-  "model": "Standard"
+  "model": "Standard",
+  "enable_safety_checker": true
 }
 ```
 

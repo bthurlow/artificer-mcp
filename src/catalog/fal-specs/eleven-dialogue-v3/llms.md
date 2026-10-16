@@ -33,7 +33,7 @@ The API accepts the following input parameters:
 - **`inputs`** (`list<DialogueBlock>`, _required_):
   A list of dialogue inputs, each containing text and a voice ID which will be converted into speech.
   - Array of DialogueBlock
-  - Examples: [{"text":"[applause] Thank you all for coming tonight! Today we have a very special guest with us.","voice":"Aria"},{"text":"[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day.","voice":"Charlotte"}]
+  - Examples: [{"voice":"Aria","text":"[applause] Thank you all for coming tonight! Today we have a very special guest with us."},{"voice":"Charlotte","text":"[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day."}]
 
 - **`stability`** (`float`, _optional_):
   Determines how stable the voice is and the randomness between each generation. Lower values introduce broader emotional range for the voice. Higher values can result in a monotonous voice with limited emotion. Must be one of 0.0, 0.5, 1.0, else it will be rounded to the nearest value.
@@ -61,12 +61,12 @@ The API accepts the following input parameters:
 {
   "inputs": [
     {
-      "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us.",
-      "voice": "Aria"
+      "voice": "Aria",
+      "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us."
     },
     {
-      "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day.",
-      "voice": "Charlotte"
+      "voice": "Charlotte",
+      "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day."
     }
   ]
 }
@@ -78,12 +78,12 @@ The API accepts the following input parameters:
 {
   "inputs": [
     {
-      "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us.",
-      "voice": "Aria"
+      "voice": "Aria",
+      "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us."
     },
     {
-      "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day.",
-      "voice": "Charlotte"
+      "voice": "Charlotte",
+      "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day."
     }
   ],
   "pronunciation_dictionary_locators": []
@@ -127,12 +127,12 @@ curl --request POST \
   --data '{
      "inputs": [
        {
-         "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us.",
-         "voice": "Aria"
+         "voice": "Aria",
+         "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us."
        },
        {
-         "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day.",
-         "voice": "Charlotte"
+         "voice": "Charlotte",
+         "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day."
        }
      ]
    }'
@@ -160,11 +160,11 @@ result = fal_client.subscribe(
     "fal-ai/elevenlabs/text-to-dialogue/eleven-v3",
     arguments={
         "inputs": [{
-            "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us.",
-            "voice": "Aria"
+            "voice": "Aria",
+            "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us."
         }, {
-            "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day.",
-            "voice": "Charlotte"
+            "voice": "Charlotte",
+            "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day."
         }]
     },
     with_logs=True,
@@ -189,11 +189,11 @@ import { fal } from "@fal-ai/client";
 const result = await fal.subscribe("fal-ai/elevenlabs/text-to-dialogue/eleven-v3", {
   input: {
     inputs: [{
-      text: "[applause] Thank you all for coming tonight! Today we have a very special guest with us.",
-      voice: "Aria"
+      voice: "Aria",
+      text: "[applause] Thank you all for coming tonight! Today we have a very special guest with us."
     }, {
-      text: "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day.",
-      voice: "Charlotte"
+      voice: "Charlotte",
+      text: "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day."
     }]
   },
   logs: true,

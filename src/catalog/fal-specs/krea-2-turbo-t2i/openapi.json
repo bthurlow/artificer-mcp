@@ -71,9 +71,55 @@
         ]
       },
       "Krea2TurboInput": {
+        "required": [
+          "prompt"
+        ],
         "properties": {
+          "enable_safety_checker": {
+            "default": true,
+            "title": "Enable Safety Checker",
+            "description": "If true, the output safety checker is enabled. Disabling it requires account authorization; unauthorized requests are always checked, and images flagged as unsafe are returned as black images.",
+            "type": "boolean"
+          },
+          "acceleration": {
+            "enum": [
+              "none",
+              "regular"
+            ],
+            "default": "none",
+            "title": "Acceleration",
+            "description": "The acceleration level to use for the image generation.",
+            "type": "string"
+          },
+          "num_images": {
+            "maximum": 4,
+            "minimum": 1,
+            "default": 1,
+            "title": "Number of Images",
+            "description": "The number of images to generate.",
+            "type": "integer"
+          },
+          "prompt": {
+            "maxLength": 5000,
+            "examples": [
+              "a vintage travel poster for Mars"
+            ],
+            "minLength": 1,
+            "title": "Prompt",
+            "description": "Base text description of the image to generate.",
+            "type": "string"
+          },
+          "output_format": {
+            "enum": [
+              "jpeg",
+              "png"
+            ],
+            "default": "png",
+            "title": "Output Format",
+            "description": "The format of the generated image. Default value: \"png\".",
+            "type": "string"
+          },
           "image_size": {
-            "default": "square_hd",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
@@ -90,26 +136,15 @@
                 "type": "string"
               }
             ],
+            "default": "square_hd",
             "title": "Image Size",
             "description": "The size of the generated image."
           },
-          "num_images": {
-            "minimum": 1,
-            "default": 1,
-            "type": "integer",
-            "description": "The number of images to generate.",
-            "title": "Number of Images",
-            "maximum": 4
-          },
-          "prompt": {
-            "minLength": 1,
-            "type": "string",
-            "maxLength": 5000,
-            "description": "Base text description of the image to generate.",
-            "title": "Prompt",
-            "examples": [
-              "a vintage travel poster for Mars"
-            ]
+          "enable_prompt_expansion": {
+            "default": false,
+            "title": "Enable Prompt Expansion",
+            "description": "If true, the prompt is expanded with an LLM into a more detailed image-generation prompt for higher quality results. On failure, the original prompt is used unchanged.",
+            "type": "boolean"
           },
           "seed": {
             "anyOf": [
@@ -125,45 +160,12 @@
           },
           "sync_mode": {
             "default": false,
-            "type": "boolean",
+            "title": "Sync Mode",
             "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "title": "Sync Mode"
-          },
-          "acceleration": {
-            "enum": [
-              "none",
-              "regular"
-            ],
-            "default": "none",
-            "type": "string",
-            "description": "The acceleration level to use for the image generation.",
-            "title": "Acceleration"
-          },
-          "output_format": {
-            "enum": [
-              "jpeg",
-              "png"
-            ],
-            "default": "png",
-            "type": "string",
-            "description": "The format of the generated image. Default value: \"png\".",
-            "title": "Output Format"
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "type": "boolean",
-            "description": "If true, the output safety checker is enabled. Disabling it requires account authorization; unauthorized requests are always checked, and images flagged as unsafe are returned as black images.",
-            "title": "Enable Safety Checker"
-          },
-          "enable_prompt_expansion": {
-            "default": false,
-            "type": "boolean",
-            "description": "If true, the prompt is expanded with an LLM into a more detailed image-generation prompt for higher quality results. On failure, the original prompt is used unchanged.",
-            "title": "Enable Prompt Expansion"
+            "type": "boolean"
           }
         },
         "title": "Krea2Input",
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "seed",
@@ -175,35 +177,45 @@
           "enable_safety_checker",
           "output_format"
         ],
-        "required": [
-          "prompt"
-        ]
+        "type": "object"
       },
       "Krea2TurboOutput": {
+        "required": [
+          "images",
+          "timings",
+          "seed",
+          "has_nsfw_concepts",
+          "prompt"
+        ],
         "properties": {
-          "seed": {
-            "type": "integer",
-            "description": "The seed used to generate the image(s).",
-            "title": "Seed",
-            "examples": [
-              12345
-            ]
-          },
           "timings": {
-            "type": "object",
-            "description": "Timing information for the request, in seconds.",
-            "title": "Timings",
             "additionalProperties": {
               "type": "number"
-            }
-          },
-          "has_nsfw_concepts": {
-            "items": {
-              "type": "boolean"
             },
-            "type": "array",
-            "description": "Whether each generated image contains NSFW concepts.",
-            "title": "Has Nsfw Concepts"
+            "title": "Timings",
+            "description": "Timing information for the request, in seconds.",
+            "type": "object"
+          },
+          "seed": {
+            "examples": [
+              12345
+            ],
+            "title": "Seed",
+            "description": "The seed used to generate the image(s).",
+            "type": "integer"
+          },
+          "images": {
+            "items": {
+              "$ref": "#/components/schemas/ImageFile"
+            },
+            "title": "Images",
+            "description": "The generated images.",
+            "type": "array"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "description": "The prompt used for generation.",
+            "type": "string"
           },
           "actual_prompt": {
             "anyOf": [
@@ -217,22 +229,16 @@
             "title": "Actual Prompt",
             "description": "The final prompt after expansion, if prompt expansion was enabled."
           },
-          "images": {
+          "has_nsfw_concepts": {
             "items": {
-              "$ref": "#/components/schemas/ImageFile"
+              "type": "boolean"
             },
-            "type": "array",
-            "description": "The generated images.",
-            "title": "Images"
-          },
-          "prompt": {
-            "type": "string",
-            "description": "The prompt used for generation.",
-            "title": "Prompt"
+            "title": "Has Nsfw Concepts",
+            "description": "Whether each generated image contains NSFW concepts.",
+            "type": "array"
           }
         },
         "title": "Krea2Output",
-        "type": "object",
         "x-fal-order-properties": [
           "images",
           "timings",
@@ -241,58 +247,45 @@
           "prompt",
           "actual_prompt"
         ],
-        "required": [
-          "images",
-          "timings",
-          "seed",
-          "has_nsfw_concepts",
-          "prompt"
-        ]
+        "type": "object"
       },
       "ImageSize": {
         "properties": {
-          "height": {
-            "maximum": 14142,
-            "default": 512,
-            "type": "integer",
-            "description": "The height of the generated image.",
-            "title": "Height",
-            "exclusiveMinimum": 0
-          },
           "width": {
+            "title": "Width",
             "maximum": 14142,
             "default": 512,
-            "type": "integer",
+            "exclusiveMinimum": 0,
             "description": "The width of the generated image.",
-            "title": "Width",
-            "exclusiveMinimum": 0
+            "type": "integer"
+          },
+          "height": {
+            "title": "Height",
+            "maximum": 14142,
+            "default": 512,
+            "exclusiveMinimum": 0,
+            "description": "The height of the generated image.",
+            "type": "integer"
           }
         },
-        "type": "object",
         "title": "ImageSize",
         "x-fal-order-properties": [
           "width",
           "height"
-        ]
+        ],
+        "type": "object"
       },
       "ImageFile": {
+        "required": [
+          "url"
+        ],
         "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ]
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
           },
-          "height": {
+          "file_size": {
             "anyOf": [
               {
                 "type": "integer"
@@ -301,8 +294,26 @@
                 "type": "null"
               }
             ],
-            "title": "Height",
-            "description": "The height of the image"
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ]
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
           },
           "width": {
             "anyOf": [
@@ -316,8 +327,7 @@
             "title": "Width",
             "description": "The width of the image"
           },
-          "file_size": {
-            "description": "The size of the file in bytes.",
+          "height": {
             "anyOf": [
               {
                 "type": "integer"
@@ -326,13 +336,10 @@
                 "type": "null"
               }
             ],
-            "title": "File Size",
-            "examples": [
-              4404019
-            ]
+            "title": "Height",
+            "description": "The height of the image"
           },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
+          "content_type": {
             "anyOf": [
               {
                 "type": "string"
@@ -341,19 +348,14 @@
                 "type": "null"
               }
             ],
-            "title": "File Name",
+            "title": "Content Type",
+            "description": "The mime type of the file.",
             "examples": [
-              "z9RV14K95DvU.png"
+              "image/png"
             ]
-          },
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
           }
         },
         "title": "ImageFile",
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -362,9 +364,7 @@
           "width",
           "height"
         ],
-        "required": [
-          "url"
-        ]
+        "type": "object"
       }
     }
   },

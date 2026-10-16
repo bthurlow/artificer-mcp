@@ -43,7 +43,7 @@ The API accepts the following input parameters:
 - **`image_size`** (`ImageSize | Enum`, _optional_):
   The size of the generated image. If not provided, uses the input image size.
   - One of: ImageSize | Enum
-  - Examples: {"height":1152,"width":2016}
+  - Examples: {"width":2016,"height":1152}
 
 - **`num_images`** (`integer`, _optional_):
   The number of images to generate. Default value: `1`
@@ -88,8 +88,8 @@ The API accepts the following input parameters:
   "prompt": "Turn this into a realistic image",
   "num_inference_steps": 4,
   "image_size": {
-    "height": 1152,
-    "width": 2016
+    "width": 2016,
+    "height": 1152
   },
   "num_images": 1,
   "enable_safety_checker": true,

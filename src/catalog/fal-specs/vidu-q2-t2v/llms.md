@@ -59,6 +59,10 @@ The API accepts the following input parameters:
   Whether to add background music to the video (only for 4-second videos)
   - Default: `false`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -77,7 +81,8 @@ The API accepts the following input parameters:
   "duration": 4,
   "resolution": "720p",
   "aspect_ratio": "16:9",
-  "movement_amplitude": "auto"
+  "movement_amplitude": "auto",
+  "enable_safety_checker": true
 }
 ```
 

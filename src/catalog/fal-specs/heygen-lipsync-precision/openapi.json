@@ -71,18 +71,17 @@
         ]
       },
       "HeygenV3LipsyncPrecisionInput": {
-        "required": [
-          "video_url",
-          "audio_url"
-        ],
         "properties": {
-          "enable_speech_enhancement": {
-            "description": "Enhance the replacement audio quality.",
-            "type": "boolean",
-            "default": false,
-            "title": "Enable Speech Enhancement"
+          "video_url": {
+            "description": "URL of the source video to lip-sync.",
+            "type": "string",
+            "examples": [
+              "https://v3b.fal.media/files/b/0a9004c7/FM7Q5tK2b59x66Bl8HC0Z_vt-lang-en.mp4"
+            ],
+            "title": "Video Url"
           },
           "end_time": {
+            "description": "End time in seconds for partial lipsync.",
             "anyOf": [
               {
                 "type": "number",
@@ -92,18 +91,55 @@
                 "type": "null"
               }
             ],
-            "description": "End time in seconds for partial lipsync.",
             "title": "End Time"
           },
-          "video_url": {
-            "examples": [
-              "https://v3b.fal.media/files/b/0a9004c7/FM7Q5tK2b59x66Bl8HC0Z_vt-lang-en.mp4"
+          "enable_dynamic_duration": {
+            "default": true,
+            "type": "boolean",
+            "description": "Allow duration adjustment to match the new audio.",
+            "title": "Enable Dynamic Duration"
+          },
+          "start_time": {
+            "description": "Start time in seconds for partial lipsync.",
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
             ],
-            "description": "URL of the source video to lip-sync.",
+            "title": "Start Time"
+          },
+          "disable_music_track": {
+            "default": false,
+            "type": "boolean",
+            "description": "Remove background music from the source video.",
+            "title": "Disable Music Track"
+          },
+          "enable_speech_enhancement": {
+            "default": false,
+            "type": "boolean",
+            "description": "Enhance the replacement audio quality.",
+            "title": "Enable Speech Enhancement"
+          },
+          "audio_url": {
+            "description": "URL of the replacement audio file.",
             "type": "string",
-            "title": "Video Url"
+            "examples": [
+              "https://v3b.fal.media/files/b/example/new_audio.mp3"
+            ],
+            "title": "Audio Url"
+          },
+          "enable_caption": {
+            "default": false,
+            "type": "boolean",
+            "description": "Generate captions in the output video.",
+            "title": "Enable Caption"
           },
           "title": {
+            "description": "Optional title for the lipsync job.",
             "anyOf": [
               {
                 "type": "string"
@@ -112,49 +148,11 @@
                 "type": "null"
               }
             ],
-            "description": "Optional title for the lipsync job.",
             "title": "Title"
-          },
-          "enable_dynamic_duration": {
-            "description": "Allow duration adjustment to match the new audio.",
-            "type": "boolean",
-            "default": true,
-            "title": "Enable Dynamic Duration"
-          },
-          "disable_music_track": {
-            "description": "Remove background music from the source video.",
-            "type": "boolean",
-            "default": false,
-            "title": "Disable Music Track"
-          },
-          "enable_caption": {
-            "description": "Generate captions in the output video.",
-            "type": "boolean",
-            "default": false,
-            "title": "Enable Caption"
-          },
-          "audio_url": {
-            "examples": [
-              "https://v3b.fal.media/files/b/example/new_audio.mp3"
-            ],
-            "description": "URL of the replacement audio file.",
-            "type": "string",
-            "title": "Audio Url"
-          },
-          "start_time": {
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Start time in seconds for partial lipsync.",
-            "title": "Start Time"
           }
         },
+        "description": "Base request for lip-syncing a video (mode is determined by the endpoint).",
+        "type": "object",
         "x-fal-order-properties": [
           "video_url",
           "audio_url",
@@ -166,23 +164,22 @@
           "start_time",
           "end_time"
         ],
-        "description": "Base request for lip-syncing a video (mode is determined by the endpoint).",
-        "type": "object",
+        "required": [
+          "video_url",
+          "audio_url"
+        ],
         "title": "V3LipsyncBaseRequest"
       },
       "HeygenV3LipsyncPrecisionOutput": {
-        "required": [
-          "video"
-        ],
         "properties": {
           "video": {
+            "$ref": "#/components/schemas/File",
+            "description": "The lip-synced video file with new audio synced.",
             "examples": [
               {
                 "url": "https://v3b.fal.media/files/b/0a8f61f5/SwAbhEQ0tNLthNkyTqCRn_overdubbed.mp4"
               }
-            ],
-            "description": "The lip-synced video file with new audio synced.",
-            "$ref": "#/components/schemas/File"
+            ]
           },
           "caption_file": {
             "description": "Generated caption file when enable_caption is enabled and HeyGen returns one.",
@@ -196,55 +193,26 @@
             ]
           }
         },
+        "description": "Output from the Lipsync API.",
+        "type": "object",
         "x-fal-order-properties": [
           "video",
           "caption_file"
         ],
-        "description": "Output from the Lipsync API.",
-        "type": "object",
+        "required": [
+          "video"
+        ],
         "title": "V3LipsyncOutput"
       },
       "File": {
-        "required": [
-          "url"
-        ],
         "properties": {
-          "file_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
-          },
           "url": {
             "description": "The URL where the file can be downloaded from.",
             "type": "string",
             "title": "Url"
           },
           "content_type": {
+            "description": "The mime type of the file.",
             "anyOf": [
               {
                 "type": "string"
@@ -256,17 +224,49 @@
             "examples": [
               "image/png"
             ],
-            "description": "The mime type of the file.",
             "title": "Content Type"
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "title": "File Size"
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name"
           }
         },
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "type": "object",
+        "required": [
+          "url"
+        ],
         "title": "File"
       }
     }

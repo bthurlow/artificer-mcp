@@ -49,6 +49,10 @@ The API accepts the following input parameters:
   - Default: `3`
   - Range: `2` to `10`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -66,7 +70,8 @@ The API accepts the following input parameters:
   "prompt": "A man stands waist-deep in a crystal-clear mountain pool, his back turned to a massive, thundering waterfall that cascades down jagged cliffs behind him. He wears a dark blue swimming shorts and his muscular back glistens with water droplets. The camera moves in a dynamic circular motion around him, starting from his right side and sweeping left, maintaining a slightly low angle that emphasizes the towering height of the waterfall. As the camera moves, the man slowly turns his head to follow its movement, his expression one of awe as he gazes up at the natural wonder. The waterfall creates a misty atmosphere, with sunlight filtering through the spray to create rainbow refractions. The water churns and ripples around him, reflecting the dramatic landscape. The handheld camera movement adds a subtle shake that enhances the raw, untamed energy of the scene. The lighting is natural and bright, with the sun positioned behind the waterfall, creating a backlit effect that silhouettes the falling water and illuminates the mist.",
   "negative_prompt": "low quality, worst quality, deformed, distorted, disfigured, motion smear, motion artifacts, fused fingers, bad anatomy, weird hand, ugly",
   "num_inference_steps": 30,
-  "guidance_scale": 3
+  "guidance_scale": 3,
+  "enable_safety_checker": true
 }
 ```
 

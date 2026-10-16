@@ -37,16 +37,16 @@ The API accepts the following input parameters:
 
 
 - **`person_image_url`** (`string`, _required_):
-  Photo of the person who will wear the garments.
+  Photo of the person who will wear the garments. Their identity, face, hair, body shape, pose and the background are preserved.
   - Examples: "https://labs-assets.bria.ai/fal-examples/fibo-edit-1.5/virtual-try-on/person.jpg"
 
 - **`garment_image_urls`** (`list<string>`, _required_):
-  1-3 garment or accessory images to put on the person.
+  One to three garment or accessory images. They are worn together and layered, each replacing the corresponding item the person currently wears. Fabric, color, texture, pattern and print placement, closures and proportions are reproduced as given.
   - Array of string
   - Examples: ["https://labs-assets.bria.ai/fal-examples/fibo-edit-1.5/virtual-try-on/garment-1.jpg","https://labs-assets.bria.ai/fal-examples/fibo-edit-1.5/virtual-try-on/garment-2.jpg"]
 
 - **`instruction`** (`string`, _optional_):
-  Extra direction, appended after the built-in instruction.
+  Optional. A complete try-on instruction already runs; this is appended to it. Use it to say what layers over what, or which items stay untouched.
   - Examples: "He wears the navy blazer over the white t-shirt he already has, and the grey tailored trousers instead of his jeans; his sneakers stay unchanged."
 
 - **`aspect_ratio`** (`Enum`, _optional_):
@@ -54,11 +54,11 @@ The API accepts the following input parameters:
   - Options: `"1:1"`, `"2:3"`, `"3:2"`, `"3:4"`, `"4:3"`, `"4:5"`, `"5:4"`, `"9:16"`, `"16:9"`
 
 - **`seed`** (`integer`, _optional_):
-  Random seed for reproducibility. Default value: `5555`
+  Random seed. The same seed with the same inputs returns the same image. Default value: `5555`
   - Default: `5555`
 
 - **`sync_mode`** (`boolean`, _optional_):
-  If true, returns the image directly in the response (increases latency).
+  Return the image inline in the response instead of as a hosted URL. Adds latency.
   - Default: `false`
 
 
@@ -95,16 +95,16 @@ The API accepts the following input parameters:
 The API returns the following output format:
 
 - **`image`** (`Image`, _required_):
-  Generated image.
+  The edited image, in the source aspect ratio unless aspect_ratio was set.
 
 - **`images`** (`list<Image>`, _optional_):
-  Generated images.
+  Single-element list holding the same image, kept for callers of the earlier Fibo Edit endpoint.
   - Default: `[]`
   - Array of Image
   - Examples: [{"url":"https://v3b.fal.media/files/b/0aa6910f/ie5dAn55wDh7Y1adCFGyE_85a45d82c6d141c2a28d92367596dfac.png"}]
 
 - **`structured_instruction`** (`Structured Instruction`, _required_):
-  Current instruction.
+  The structured instruction the model ran, expanded from the built-in instruction plus anything passed in `instruction`. Returned so you can see how the brief was interpreted.
 
 
 

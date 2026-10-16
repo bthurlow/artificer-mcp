@@ -38,6 +38,10 @@ The API accepts the following input parameters:
   Optional image URL to use as visual inspiration for music generation. The model will create music that matches the mood and theme of the image.
   - Examples: "https://v3b.fal.media/files/b/0a93b559/qjT9o0CId1B65PbD6Yp06_9c94501900464c5aa98f302fa4b00375.png"
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -53,7 +57,8 @@ The API accepts the following input parameters:
 ```json
 {
   "prompt": "An uplifting pop song with driving electric guitar, energetic drums, and a catchy chorus singing 'Rise up and shine today'. 120 BPM. Two minutes long with a verse-chorus-verse-chorus-bridge-chorus structure.",
-  "image_url": "https://v3b.fal.media/files/b/0a93b559/qjT9o0CId1B65PbD6Yp06_9c94501900464c5aa98f302fa4b00375.png"
+  "image_url": "https://v3b.fal.media/files/b/0a93b559/qjT9o0CId1B65PbD6Yp06_9c94501900464c5aa98f302fa4b00375.png",
+  "enable_safety_checker": true
 }
 ```
 

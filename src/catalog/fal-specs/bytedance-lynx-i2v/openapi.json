@@ -71,43 +71,41 @@
         ]
       },
       "LynxInput": {
-        "title": "LynxInput",
         "required": [
           "image_url",
           "prompt"
         ],
+        "type": "object",
         "properties": {
-          "ip_scale": {
-            "minimum": 0,
-            "maximum": 2,
-            "description": "Identity preservation scale. Controls how closely the generated video preserves the subject's identity from the reference image.",
-            "title": "Ip Scale",
-            "type": "number",
-            "default": 1
-          },
-          "strength": {
-            "minimum": 0,
-            "maximum": 2,
-            "description": "Reference image scale. Controls the influence of the reference image on the generated video.",
-            "title": "Strength",
-            "type": "number",
-            "default": 1
-          },
-          "num_frames": {
-            "minimum": 9,
-            "maximum": 81,
-            "description": "Number of frames in the generated video. Must be between 9 to 100.",
-            "title": "Num Frames",
-            "type": "integer",
-            "default": 81
-          },
-          "prompt": {
-            "title": "Prompt",
-            "description": "Text prompt to guide video generation",
+          "image_url": {
+            "title": "Image Url",
+            "type": "string",
+            "description": "The URL of the subject image to be used for video generation",
             "examples": [
-              "A person carves a pumpkin on a porch in the evening. The camera captures their upper body as they draw a face with a marker, carefully cut along the lines, then lift the lid with both hands. Their face lights up with excitement as they peek inside"
-            ],
-            "type": "string"
+              "https://storage.googleapis.com/falserverless/example_inputs/lynx/example_in.png"
+            ]
+          },
+          "ip_scale": {
+            "maximum": 2,
+            "type": "number",
+            "description": "Identity preservation scale. Controls how closely the generated video preserves the subject's identity from the reference image.",
+            "default": 1,
+            "minimum": 0,
+            "title": "Ip Scale"
+          },
+          "num_inference_steps": {
+            "maximum": 75,
+            "type": "integer",
+            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
+            "default": 50,
+            "minimum": 1,
+            "title": "Num Inference Steps"
+          },
+          "enable_safety_checker": {
+            "type": "boolean",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "default": true,
+            "title": "Enable Safety Checker"
           },
           "seed": {
             "title": "Seed",
@@ -121,76 +119,83 @@
               }
             ]
           },
-          "num_inference_steps": {
-            "minimum": 1,
-            "maximum": 75,
-            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
-            "title": "Num Inference Steps",
-            "type": "integer",
-            "default": 50
-          },
           "frames_per_second": {
-            "minimum": 5,
             "maximum": 30,
-            "description": "Frames per second of the generated video. Must be between 5 to 30.",
-            "title": "Frames Per Second",
             "type": "integer",
-            "default": 16
-          },
-          "guidance_scale_2": {
-            "minimum": 0,
-            "maximum": 10,
-            "description": "Image guidance scale. Controls how closely the generated video follows the reference image. Higher values increase adherence to the reference image but may decrease quality.",
-            "title": "Guidance Scale 2",
-            "type": "number",
-            "default": 2
+            "description": "Frames per second of the generated video. Must be between 5 to 30.",
+            "default": 16,
+            "minimum": 5,
+            "title": "Frames Per Second"
           },
           "negative_prompt": {
-            "title": "Negative Prompt",
-            "default": "Bright tones, overexposed, blurred background, static, subtitles, style, works, paintings, images, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, misshapen limbs, fused fingers, still picture, messy background, three legs, many people in the background, walking backwards",
+            "type": "string",
             "description": "Negative prompt to guide what should not appear in the generated video",
-            "type": "string"
+            "default": "Bright tones, overexposed, blurred background, static, subtitles, style, works, paintings, images, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, misshapen limbs, fused fingers, still picture, messy background, three legs, many people in the background, walking backwards",
+            "title": "Negative Prompt"
+          },
+          "guidance_scale": {
+            "maximum": 20,
+            "type": "number",
+            "description": "Classifier-free guidance scale. Higher values give better adherence to the prompt but may decrease quality.",
+            "default": 5,
+            "minimum": 1,
+            "title": "Guidance Scale"
           },
           "aspect_ratio": {
+            "title": "Aspect Ratio",
+            "type": "string",
+            "description": "Aspect ratio of the generated video (16:9, 9:16, or 1:1)",
+            "default": "16:9",
             "enum": [
               "16:9",
               "9:16",
               "1:1"
-            ],
-            "title": "Aspect Ratio",
-            "default": "16:9",
-            "description": "Aspect ratio of the generated video (16:9, 9:16, or 1:1)",
-            "type": "string"
-          },
-          "guidance_scale": {
-            "minimum": 1,
-            "maximum": 20,
-            "description": "Classifier-free guidance scale. Higher values give better adherence to the prompt but may decrease quality.",
-            "title": "Guidance Scale",
-            "type": "number",
-            "default": 5
+            ]
           },
           "resolution": {
+            "title": "Resolution",
+            "type": "string",
+            "description": "Resolution of the generated video (480p, 580p, or 720p)",
+            "default": "720p",
             "enum": [
               "480p",
               "580p",
               "720p"
-            ],
-            "title": "Resolution",
-            "default": "720p",
-            "description": "Resolution of the generated video (480p, 580p, or 720p)",
-            "type": "string"
+            ]
           },
-          "image_url": {
-            "title": "Image Url",
-            "description": "The URL of the subject image to be used for video generation",
+          "guidance_scale_2": {
+            "maximum": 10,
+            "type": "number",
+            "description": "Image guidance scale. Controls how closely the generated video follows the reference image. Higher values increase adherence to the reference image but may decrease quality.",
+            "default": 2,
+            "minimum": 0,
+            "title": "Guidance Scale 2"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string",
+            "description": "Text prompt to guide video generation",
             "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/lynx/example_in.png"
-            ],
-            "type": "string"
+              "A person carves a pumpkin on a porch in the evening. The camera captures their upper body as they draw a face with a marker, carefully cut along the lines, then lift the lid with both hands. Their face lights up with excitement as they peek inside"
+            ]
+          },
+          "strength": {
+            "maximum": 2,
+            "type": "number",
+            "description": "Reference image scale. Controls the influence of the reference image on the generated video.",
+            "default": 1,
+            "minimum": 0,
+            "title": "Strength"
+          },
+          "num_frames": {
+            "maximum": 81,
+            "type": "integer",
+            "description": "Number of frames in the generated video. Must be between 9 to 100.",
+            "default": 81,
+            "minimum": 9,
+            "title": "Num Frames"
           }
         },
-        "type": "object",
         "x-fal-order-properties": [
           "image_url",
           "prompt",
@@ -204,15 +209,17 @@
           "frames_per_second",
           "guidance_scale",
           "guidance_scale_2",
-          "num_frames"
-        ]
+          "num_frames",
+          "enable_safety_checker"
+        ],
+        "title": "LynxInput"
       },
       "LynxOutput": {
-        "title": "LynxOutput",
         "required": [
           "video",
           "seed"
         ],
+        "type": "object",
         "properties": {
           "video": {
             "$ref": "#/components/schemas/VideoFile",
@@ -225,58 +232,26 @@
             ]
           },
           "seed": {
-            "title": "Seed",
+            "type": "integer",
             "description": "The seed used for generation",
-            "type": "integer"
+            "title": "Seed"
           }
         },
-        "type": "object",
         "x-fal-order-properties": [
           "video",
           "seed"
-        ]
+        ],
+        "title": "LynxOutput"
       },
       "VideoFile": {
-        "title": "VideoFile",
         "required": [
           "url"
         ],
+        "type": "object",
         "properties": {
-          "num_frames": {
-            "title": "Num Frames",
-            "description": "The number of frames in the video",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
-          },
-          "content_type": {
-            "title": "Content Type",
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "fps": {
-            "title": "Fps",
-            "description": "The FPS of the video",
+          "duration": {
+            "title": "Duration",
+            "description": "The duration of the video",
             "anyOf": [
               {
                 "type": "number"
@@ -298,12 +273,22 @@
               }
             ]
           },
-          "file_size": {
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
             ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "file_size": {
             "anyOf": [
               {
                 "type": "integer"
@@ -311,6 +296,38 @@
               {
                 "type": "null"
               }
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ]
+          },
+          "num_frames": {
+            "title": "Num Frames",
+            "description": "The number of frames in the video",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
             ]
           },
           "height": {
@@ -325,9 +342,14 @@
               }
             ]
           },
-          "duration": {
-            "title": "Duration",
-            "description": "The duration of the video",
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "fps": {
+            "title": "Fps",
+            "description": "The FPS of the video",
             "anyOf": [
               {
                 "type": "number"
@@ -336,24 +358,8 @@
                 "type": "null"
               }
             ]
-          },
-          "file_name": {
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
           }
         },
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -364,7 +370,8 @@
           "fps",
           "duration",
           "num_frames"
-        ]
+        ],
+        "title": "VideoFile"
       }
     }
   },

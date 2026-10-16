@@ -71,14 +71,13 @@
         ]
       },
       "V26ImageToVideoFlashInput": {
-        "type": "object",
-        "description": "Input for Wan 2.6 I2V Flash image-to-video generation.",
-        "required": [
-          "prompt",
-          "image_url"
-        ],
-        "title": "ImageToVideoFlashInput",
         "properties": {
+          "generate_audio": {
+            "type": "boolean",
+            "default": true,
+            "title": "Generate Audio",
+            "description": "Whether the model generates native audio for the video. Set to false for silent video generation, which is cheaper (half as much as a flash generation with audio)Independent of audio_url, which only provides a track to sync the video against."
+          },
           "duration": {
             "examples": [
               "5",
@@ -86,27 +85,55 @@
               "15"
             ],
             "type": "string",
-            "description": "Duration of the generated video in seconds. Choose between 5, 10 or 15 seconds.",
+            "default": "5",
+            "title": "Duration",
             "enum": [
               "5",
               "10",
               "15"
             ],
-            "default": "5",
-            "title": "Duration"
+            "description": "Duration of the generated video in seconds. Choose between 5, 10 or 15 seconds."
           },
-          "resolution": {
-            "type": "string",
-            "description": "Video resolution. Valid values: 720p, 1080p",
-            "enum": [
-              "720p",
-              "1080p"
+          "image_url": {
+            "examples": [
+              "https://v3b.fal.media/files/b/0a8673dd/m9EV5W9aSqg8J7rb-18TK.png"
             ],
-            "default": "1080p",
-            "title": "Resolution"
+            "type": "string",
+            "title": "Image URL",
+            "description": "URL of the image to use as the first frame. Must be publicly accessible or base64 data URI. Image dimensions must be between 240 and 7680."
+          },
+          "negative_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "low resolution, error, worst quality, low quality, defects"
+            ],
+            "default": "",
+            "title": "Negative Prompt",
+            "description": "Negative prompt to describe content to avoid. Max 500 characters."
+          },
+          "multi_shots": {
+            "type": "boolean",
+            "default": false,
+            "title": "Multi Shots",
+            "description": "When true, enables intelligent multi-shot segmentation. Only active when enable_prompt_expansion is True. Set to false for single-shot generation."
+          },
+          "enable_safety_checker": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "default": true,
+            "title": "Enable Safety Checker",
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked."
           },
           "seed": {
-            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
             "anyOf": [
               {
                 "type": "integer"
@@ -115,10 +142,29 @@
                 "type": "null"
               }
             ],
-            "title": "Seed"
+            "title": "Seed",
+            "description": "Random seed for reproducibility. If None, a random seed is chosen."
+          },
+          "prompt": {
+            "examples": [
+              "A comedic cinematic demo where typed prompts physically transform reality. Photoreal, strong match cuts, coherent main character, no subtitles.\n\nShot 1 [0-4s] Continue from first frame. The creator presses \"PRINT\". The machine clunks like a spaceship. Creator whispers: \"Okay… I'm pressing enter.\"\nShot 2 [4-8s] Smash cut: the printed paper flies into the air and unfolds into a full desert canyon scene around the desk, like reality is being unrolled. Creator says: \"Wait—my prompt has physics?\"\nShot 3 [8-12s] Hard cut: the paper tears and reveals a tropical jungle behind it, perfectly lit, cinematic sun. Creator laughs: \"This is exactly why we do AI.\"\nShot 4 [12-15s] Hard cut back to studio. The printer prints a final line (not shown clearly). Creator looks to camera: \"Multi-scene. Single prompt.\""
+            ],
+            "minLength": 1,
+            "type": "string",
+            "title": "Prompt",
+            "description": "The text prompt describing the desired video motion. Max 1500 characters."
+          },
+          "resolution": {
+            "type": "string",
+            "default": "1080p",
+            "title": "Resolution",
+            "enum": [
+              "720p",
+              "1080p"
+            ],
+            "description": "Video resolution. Valid values: 720p, 1080p"
           },
           "audio_url": {
-            "description": "\nURL of the audio to use as the background music. Must be publicly accessible.\nLimit handling: If the audio duration exceeds the duration value (5, 10, or 15 seconds),\nthe audio is truncated to the first N seconds, and the rest is discarded. If\nthe audio is shorter than the video, the remaining part of the video will be silent.\nFor example, if the audio is 3 seconds long and the video duration is 5 seconds, the\nfirst 3 seconds of the output video will have sound, and the last 2 seconds will be silent.\n- Format: WAV, MP3.\n- Duration: 3 to 30 s.\n- File size: Up to 15 MB.\n",
             "anyOf": [
               {
                 "type": "string",
@@ -130,69 +176,17 @@
                 "type": "null"
               }
             ],
-            "title": "Audio Url"
-          },
-          "image_url": {
-            "examples": [
-              "https://v3b.fal.media/files/b/0a8673dd/m9EV5W9aSqg8J7rb-18TK.png"
-            ],
-            "description": "URL of the image to use as the first frame. Must be publicly accessible or base64 data URI. Image dimensions must be between 240 and 7680.",
-            "type": "string",
-            "title": "Image URL"
+            "title": "Audio Url",
+            "description": "\nURL of the audio to use as the background music. Must be publicly accessible.\nLimit handling: If the audio duration exceeds the duration value (5, 10, or 15 seconds),\nthe audio is truncated to the first N seconds, and the rest is discarded. If\nthe audio is shorter than the video, the remaining part of the video will be silent.\nFor example, if the audio is 3 seconds long and the video duration is 5 seconds, the\nfirst 3 seconds of the output video will have sound, and the last 2 seconds will be silent.\n- Format: WAV, MP3.\n- Duration: 3 to 30 s.\n- File size: Up to 15 MB.\n"
           },
           "enable_prompt_expansion": {
-            "description": "Whether to enable prompt rewriting using LLM.",
             "type": "boolean",
             "default": true,
-            "title": "Enable Prompt Expansion"
-          },
-          "negative_prompt": {
-            "examples": [
-              "low resolution, error, worst quality, low quality, defects"
-            ],
-            "description": "Negative prompt to describe content to avoid. Max 500 characters.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": "",
-            "title": "Negative Prompt"
-          },
-          "enable_safety_checker": {
-            "examples": [
-              true
-            ],
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "type": "boolean",
-            "default": true,
-            "title": "Enable Safety Checker"
-          },
-          "generate_audio": {
-            "description": "Whether the model generates native audio for the video. Set to false for silent video generation, which is cheaper (half as much as a flash generation with audio)Independent of audio_url, which only provides a track to sync the video against.",
-            "type": "boolean",
-            "default": true,
-            "title": "Generate Audio"
-          },
-          "prompt": {
-            "examples": [
-              "A comedic cinematic demo where typed prompts physically transform reality. Photoreal, strong match cuts, coherent main character, no subtitles.\n\nShot 1 [0-4s] Continue from first frame. The creator presses \"PRINT\". The machine clunks like a spaceship. Creator whispers: \"Okay… I'm pressing enter.\"\nShot 2 [4-8s] Smash cut: the printed paper flies into the air and unfolds into a full desert canyon scene around the desk, like reality is being unrolled. Creator says: \"Wait—my prompt has physics?\"\nShot 3 [8-12s] Hard cut: the paper tears and reveals a tropical jungle behind it, perfectly lit, cinematic sun. Creator laughs: \"This is exactly why we do AI.\"\nShot 4 [12-15s] Hard cut back to studio. The printer prints a final line (not shown clearly). Creator looks to camera: \"Multi-scene. Single prompt.\""
-            ],
-            "description": "The text prompt describing the desired video motion. Max 1500 characters.",
-            "type": "string",
-            "minLength": 1,
-            "title": "Prompt"
-          },
-          "multi_shots": {
-            "description": "When true, enables intelligent multi-shot segmentation. Only active when enable_prompt_expansion is True. Set to false for single-shot generation.",
-            "type": "boolean",
-            "default": false,
-            "title": "Multi Shots"
+            "title": "Enable Prompt Expansion",
+            "description": "Whether to enable prompt rewriting using LLM."
           }
         },
+        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "image_url",
@@ -205,16 +199,15 @@
           "seed",
           "enable_safety_checker",
           "generate_audio"
-        ]
+        ],
+        "title": "ImageToVideoFlashInput",
+        "required": [
+          "prompt",
+          "image_url"
+        ],
+        "description": "Input for Wan 2.6 I2V Flash image-to-video generation."
       },
       "V26ImageToVideoFlashOutput": {
-        "type": "object",
-        "description": "Output for image-to-video generation",
-        "required": [
-          "video",
-          "seed"
-        ],
-        "title": "ImageToVideoOutput",
         "properties": {
           "video": {
             "examples": [
@@ -223,22 +216,18 @@
                 "url": "https://v3b.fal.media/files/b/0a8675cf/bCu9FiFXSjsSnIwOmjUOY_BVs2IFR3.mp4"
               }
             ],
-            "description": "The generated video file",
-            "$ref": "#/components/schemas/VideoFile"
+            "$ref": "#/components/schemas/VideoFile",
+            "description": "The generated video file"
           },
           "seed": {
             "examples": [
               175932751
             ],
-            "description": "The seed used for generation",
             "type": "integer",
-            "title": "Seed"
+            "title": "Seed",
+            "description": "The seed used for generation"
           },
           "actual_prompt": {
-            "examples": [
-              "A comedic cinematic scene where the creator interacts with AI-generated reality transformations."
-            ],
-            "description": "The actual prompt used if prompt rewriting was enabled",
             "anyOf": [
               {
                 "type": "string"
@@ -247,41 +236,29 @@
                 "type": "null"
               }
             ],
-            "title": "Actual Prompt"
+            "examples": [
+              "A comedic cinematic scene where the creator interacts with AI-generated reality transformations."
+            ],
+            "title": "Actual Prompt",
+            "description": "The actual prompt used if prompt rewriting was enabled"
           }
         },
+        "type": "object",
         "x-fal-order-properties": [
           "video",
           "seed",
           "actual_prompt"
-        ]
+        ],
+        "title": "ImageToVideoOutput",
+        "required": [
+          "video",
+          "seed"
+        ],
+        "description": "Output for image-to-video generation"
       },
       "VideoFile": {
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size",
-          "width",
-          "height",
-          "fps",
-          "duration",
-          "num_frames"
-        ],
         "properties": {
-          "fps": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fps",
-            "description": "The FPS of the video"
-          },
-          "height": {
+          "file_size": {
             "anyOf": [
               {
                 "type": "integer"
@@ -290,23 +267,11 @@
                 "type": "null"
               }
             ],
-            "title": "Height",
-            "description": "The height of the video"
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
-              "z9RV14K95DvU.png"
-            ]
+              4404019
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes."
           },
           "content_type": {
             "anyOf": [
@@ -317,31 +282,11 @@
                 "type": "null"
               }
             ],
-            "title": "Content Type",
-            "description": "The mime type of the file.",
             "examples": [
               "image/png"
-            ]
-          },
-          "file_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
             ],
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ]
-          },
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
+            "title": "Content Type",
+            "description": "The mime type of the file."
           },
           "duration": {
             "anyOf": [
@@ -355,17 +300,10 @@
             "title": "Duration",
             "description": "The duration of the video"
           },
-          "num_frames": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Num Frames",
-            "description": "The number of frames in the video"
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
           },
           "width": {
             "anyOf": [
@@ -378,9 +316,71 @@
             ],
             "title": "Width",
             "description": "The width of the video"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "The height of the video"
+          },
+          "num_frames": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Num Frames",
+            "description": "The number of frames in the video"
+          },
+          "fps": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fps",
+            "description": "The FPS of the video"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
           }
         },
         "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height",
+          "fps",
+          "duration",
+          "num_frames"
+        ],
         "title": "VideoFile",
         "required": [
           "url"

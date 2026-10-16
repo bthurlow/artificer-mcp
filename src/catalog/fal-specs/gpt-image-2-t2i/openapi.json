@@ -71,92 +71,9 @@
         ]
       },
       "GptImage2Input": {
-        "title": "TextToImageRequest",
-        "properties": {
-          "sync_mode": {
-            "default": false,
-            "title": "Sync Mode",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "type": "boolean"
-          },
-          "background": {
-            "default": "auto",
-            "enum": [
-              "auto",
-              "transparent",
-              "opaque"
-            ],
-            "title": "Background",
-            "description": "Background for the generated image",
-            "type": "string"
-          },
-          "quality": {
-            "default": "high",
-            "enum": [
-              "auto",
-              "low",
-              "medium",
-              "high"
-            ],
-            "title": "Quality",
-            "description": "Quality for the generated image. Use 'auto' to let the model pick the best quality for the prompt.",
-            "type": "string"
-          },
-          "prompt": {
-            "maxLength": 32000,
-            "minLength": 2,
-            "title": "Prompt",
-            "examples": [
-              "create a realistic image taken with iphone at these coordinates 41°43′32″N 49°56′49″W 15 April 1912"
-            ],
-            "description": "The prompt for image generation",
-            "type": "string"
-          },
-          "num_images": {
-            "maximum": 4,
-            "minimum": 1,
-            "default": 1,
-            "title": "Number of Images",
-            "examples": [
-              1
-            ],
-            "description": "Number of images to generate",
-            "type": "integer"
-          },
-          "image_size": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ImageSize"
-              },
-              {
-                "enum": [
-                  "square_hd",
-                  "square",
-                  "portrait_4_3",
-                  "portrait_16_9",
-                  "landscape_4_3",
-                  "landscape_16_9",
-                  "auto"
-                ],
-                "type": "string"
-              }
-            ],
-            "default": "landscape_4_3",
-            "title": "Image Size",
-            "description": "The size of the generated image. Supports preset names, explicit {width, height}, or 'auto' to let the model pick the best size. Concrete sizes must have both dimensions as multiples of 16, max edge 3840px, aspect ratio <= 3:1, total pixels between 655,360 and 8,294,400."
-          },
-          "output_format": {
-            "default": "png",
-            "enum": [
-              "jpeg",
-              "png",
-              "webp"
-            ],
-            "title": "Output Format",
-            "description": "Output format for the images",
-            "type": "string"
-          }
-        },
+        "required": [
+          "prompt"
+        ],
         "type": "object",
         "x-fal-order-properties": [
           "prompt",
@@ -165,70 +82,172 @@
           "quality",
           "num_images",
           "output_format",
-          "sync_mode"
+          "sync_mode",
+          "enable_safety_checker"
         ],
-        "required": [
-          "prompt"
-        ]
+        "title": "TextToImageRequest",
+        "properties": {
+          "output_format": {
+            "default": "png",
+            "type": "string",
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
+            ],
+            "title": "Output Format",
+            "description": "Output format for the images"
+          },
+          "num_images": {
+            "maximum": 4,
+            "type": "integer",
+            "minimum": 1,
+            "examples": [
+              1
+            ],
+            "default": 1,
+            "title": "Number of Images",
+            "description": "Number of images to generate"
+          },
+          "prompt": {
+            "type": "string",
+            "minLength": 2,
+            "examples": [
+              "create a realistic image taken with iphone at these coordinates 41°43′32″N 49°56′49″W 15 April 1912"
+            ],
+            "title": "Prompt",
+            "maxLength": 32000,
+            "description": "The prompt for image generation"
+          },
+          "sync_mode": {
+            "default": false,
+            "type": "boolean",
+            "title": "Sync Mode",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
+          },
+          "image_size": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageSize"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9",
+                  "auto"
+                ]
+              }
+            ],
+            "default": "landscape_4_3",
+            "title": "Image Size",
+            "description": "The size of the generated image. Supports preset names, explicit {width, height}, or 'auto' to let the model pick the best size. Concrete sizes must have both dimensions as multiples of 16, max edge 3840px, aspect ratio <= 3:1, total pixels between 655,360 and 8,294,400."
+          },
+          "quality": {
+            "default": "high",
+            "type": "string",
+            "title": "Quality",
+            "enum": [
+              "auto",
+              "low",
+              "medium",
+              "high"
+            ],
+            "description": "Quality for the generated image. Use 'auto' to let the model pick the best quality for the prompt."
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "type": "boolean",
+            "title": "Enable Safety Checker",
+            "description": "Authorized callers may set false to request relaxed screening."
+          },
+          "background": {
+            "default": "auto",
+            "type": "string",
+            "enum": [
+              "auto",
+              "transparent",
+              "opaque"
+            ],
+            "title": "Background",
+            "description": "Background for the generated image"
+          }
+        }
       },
       "GptImage2Output": {
+        "required": [
+          "images"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
+          "images"
+        ],
         "title": "ImageResponse",
         "properties": {
           "images": {
-            "items": {
-              "$ref": "#/components/schemas/ImageFile"
-            },
-            "title": "Images",
+            "description": "The generated images.",
+            "type": "array",
             "examples": [
               [
                 {
-                  "url": "https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png",
-                  "file_name": "EnWrO3XWjPE0nxBDpaQrj.png",
                   "width": 1024,
+                  "url": "https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png",
                   "content_type": "image/png",
+                  "file_name": "EnWrO3XWjPE0nxBDpaQrj.png",
                   "height": 1024
                 }
               ]
             ],
-            "description": "The generated images.",
-            "type": "array"
+            "title": "Images",
+            "items": {
+              "$ref": "#/components/schemas/ImageFile"
+            }
           }
-        },
-        "type": "object",
-        "x-fal-order-properties": [
-          "images"
-        ],
-        "required": [
-          "images"
-        ]
+        }
       },
       "ImageSize": {
-        "title": "ImageSize",
-        "properties": {
-          "width": {
-            "maximum": 14142,
-            "exclusiveMinimum": 0,
-            "default": 512,
-            "title": "Width",
-            "description": "The width of the generated image.",
-            "type": "integer"
-          },
-          "height": {
-            "maximum": 14142,
-            "exclusiveMinimum": 0,
-            "default": 512,
-            "title": "Height",
-            "description": "The height of the generated image.",
-            "type": "integer"
-          }
-        },
         "type": "object",
         "x-fal-order-properties": [
           "width",
           "height"
-        ]
+        ],
+        "title": "ImageSize",
+        "properties": {
+          "width": {
+            "maximum": 14142,
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 512,
+            "title": "Width",
+            "description": "The width of the generated image."
+          },
+          "height": {
+            "maximum": 14142,
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 512,
+            "title": "Height",
+            "description": "The height of the generated image."
+          }
+        }
       },
       "ImageFile": {
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
         "title": "ImageFile",
         "properties": {
           "file_size": {
@@ -240,31 +259,16 @@
                 "type": "null"
               }
             ],
-            "title": "File Size",
             "examples": [
               4404019
             ],
+            "title": "File Size",
             "description": "The size of the file in bytes."
           },
           "url": {
+            "type": "string",
             "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+            "description": "The URL where the file can be downloaded from."
           },
           "width": {
             "anyOf": [
@@ -287,11 +291,26 @@
                 "type": "null"
               }
             ],
-            "title": "Content Type",
             "examples": [
               "image/png"
             ],
+            "title": "Content Type",
             "description": "The mime type of the file."
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
           },
           "height": {
             "anyOf": [
@@ -305,19 +324,7 @@
             "title": "Height",
             "description": "The height of the image"
           }
-        },
-        "type": "object",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size",
-          "width",
-          "height"
-        ],
-        "required": [
-          "url"
-        ]
+        }
       }
     }
   },

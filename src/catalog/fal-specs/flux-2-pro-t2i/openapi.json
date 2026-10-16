@@ -71,24 +71,39 @@
         ]
       },
       "Flux2ProInput": {
+        "required": [
+          "prompt"
+        ],
+        "type": "object",
         "properties": {
-          "seed": {
+          "image_size": {
             "anyOf": [
               {
-                "type": "integer"
+                "$ref": "#/components/schemas/ImageSize"
               },
               {
-                "type": "null"
+                "type": "string",
+                "enum": [
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9"
+                ]
               }
             ],
-            "title": "Seed",
-            "description": "The seed to use for the generation."
-          },
-          "sync_mode": {
-            "default": false,
-            "type": "boolean",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "title": "Sync Mode"
+            "default": "landscape_4_3",
+            "description": "The size of the generated image.",
+            "x-fal": {
+              "max_area": 4194304,
+              "min_height": 256,
+              "multiple_of": 16,
+              "max_height": 2560,
+              "min_width": 256,
+              "max_width": 2560
+            },
+            "title": "Image Size"
           },
           "safety_tolerance": {
             "enum": [
@@ -98,67 +113,54 @@
               "4",
               "5"
             ],
-            "default": "2",
             "type": "string",
+            "default": "2",
             "description": "The safety tolerance level for the generated image. 1 being the most strict and 5 being the most permissive.",
             "title": "Safety Tolerance"
+          },
+          "enable_safety_checker": {
+            "type": "boolean",
+            "description": "Whether to enable the safety checker. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "default": true,
+            "title": "Enable Safety Checker"
+          },
+          "sync_mode": {
+            "type": "boolean",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "default": false,
+            "title": "Sync Mode"
+          },
+          "prompt": {
+            "examples": [
+              "An intense close-up of knight's visor reflecting battle, sword raised, flames in background, chiaroscuro helmet shadows, hyper-detailed armor, square medieval, cinematic lighting"
+            ],
+            "type": "string",
+            "description": "The prompt to generate an image from.",
+            "title": "Prompt"
           },
           "output_format": {
             "enum": [
               "jpeg",
               "png"
             ],
-            "default": "jpeg",
             "type": "string",
             "description": "The format of the generated image.",
+            "default": "jpeg",
             "title": "Output Format"
           },
-          "image_size": {
-            "description": "The size of the generated image.",
-            "title": "Image Size",
-            "default": "landscape_4_3",
+          "seed": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ImageSize"
+                "type": "integer"
               },
               {
-                "enum": [
-                  "square_hd",
-                  "square",
-                  "portrait_4_3",
-                  "portrait_16_9",
-                  "landscape_4_3",
-                  "landscape_16_9"
-                ],
-                "type": "string"
+                "type": "null"
               }
             ],
-            "x-fal": {
-              "max_area": 4194304,
-              "multiple_of": 16,
-              "min_height": 256,
-              "max_height": 2560,
-              "max_width": 2560,
-              "min_width": 256
-            }
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "type": "boolean",
-            "description": "Whether to enable the safety checker. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "title": "Enable Safety Checker"
-          },
-          "prompt": {
-            "type": "string",
-            "description": "The prompt to generate an image from.",
-            "examples": [
-              "An intense close-up of knight's visor reflecting battle, sword raised, flames in background, chiaroscuro helmet shadows, hyper-detailed armor, square medieval, cinematic lighting"
-            ],
-            "title": "Prompt"
+            "description": "The seed to use for the generation.",
+            "title": "Seed"
           }
         },
-        "title": "Flux2ProTextToImageInput",
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "image_size",
@@ -168,23 +170,20 @@
           "output_format",
           "sync_mode"
         ],
-        "required": [
-          "prompt"
-        ]
+        "title": "Flux2ProTextToImageInput"
       },
       "Flux2ProOutput": {
+        "required": [
+          "images",
+          "seed"
+        ],
+        "type": "object",
         "properties": {
-          "seed": {
-            "type": "integer",
-            "description": "The seed used for the generation.",
-            "title": "Seed"
-          },
           "images": {
             "items": {
               "$ref": "#/components/schemas/ImageFile"
             },
             "type": "array",
-            "description": "The generated images.",
             "examples": [
               [
                 {
@@ -192,40 +191,41 @@
                 }
               ]
             ],
+            "description": "The generated images.",
             "title": "Images"
+          },
+          "seed": {
+            "type": "integer",
+            "description": "The seed used for the generation.",
+            "title": "Seed"
           }
         },
-        "title": "Flux2ProOutput",
-        "type": "object",
         "x-fal-order-properties": [
           "images",
           "seed"
         ],
-        "required": [
-          "images",
-          "seed"
-        ]
+        "title": "Flux2ProOutput"
       },
       "ImageSize": {
+        "type": "object",
         "properties": {
-          "height": {
-            "title": "Height",
-            "maximum": 14142,
-            "type": "integer",
-            "description": "The height of the generated image.",
-            "exclusiveMinimum": 0,
-            "default": 512
-          },
           "width": {
-            "title": "Width",
             "maximum": 14142,
             "type": "integer",
-            "description": "The width of the generated image.",
             "exclusiveMinimum": 0,
-            "default": 512
+            "default": 512,
+            "description": "The width of the generated image.",
+            "title": "Width"
+          },
+          "height": {
+            "maximum": 14142,
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 512,
+            "description": "The height of the generated image.",
+            "title": "Height"
           }
         },
-        "type": "object",
         "x-fal-order-properties": [
           "width",
           "height"
@@ -233,34 +233,11 @@
         "title": "ImageSize"
       },
       "ImageFile": {
+        "required": [
+          "url"
+        ],
+        "type": "object",
         "properties": {
-          "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Height",
-            "description": "The height of the image"
-          },
-          "content_type": {
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file."
-          },
           "width": {
             "anyOf": [
               {
@@ -270,26 +247,10 @@
                 "type": "null"
               }
             ],
-            "title": "Width",
-            "description": "The width of the image"
-          },
-          "file_size": {
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes."
+            "description": "The width of the image",
+            "title": "Width"
           },
           "file_name": {
-            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -301,16 +262,57 @@
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size"
           },
           "url": {
             "type": "string",
             "description": "The URL where the file can be downloaded from.",
             "title": "Url"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The height of the image",
+            "title": "Height"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type"
           }
         },
-        "title": "ImageFile",
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -319,9 +321,7 @@
           "width",
           "height"
         ],
-        "required": [
-          "url"
-        ]
+        "title": "ImageFile"
       }
     }
   },

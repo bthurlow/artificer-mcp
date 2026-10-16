@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Billing is calculated per second of generated video. Video costs **$0.05** per second at **480p**, **$0.08** per second at **768p**, **$0.16** per second at **1080p**, and **$0.32** per second at **2K**. A **5-second** video at **768p** costs **$0.40**.
+Billing is calculated per second of generated video. Video costs **$0.05** per second at **480p**, **$0.08** per second at **768p**, **$0.16** per second at **1080p**, and **$0.32** per second at **2K**.  A 1.2x multiplier is added to videos over 15 seconds. A **5-second** video at **768p** costs **$0.40**. A **30-second** video at **768p** costs **$2.88**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -34,7 +34,7 @@ The API accepts the following input parameters:
   Image to animate. The aspect ratio must be between 0.4 and 2.5.
 
 - **`audio_url`** (`string`, _required_):
-  Audio to synchronize the mouth movements to, at least 5 seconds long. Audio over 14.8 seconds is automatically clipped to its first 14.8 seconds. The output video matches the clipped audio duration in a single generation.
+  Audio to synchronize the mouth movements to, at least 5 seconds long. Supports up to 15 minutes. The output video matches the supplied audio duration.
 
 - **`resolution`** (`ResolutionEnum`, _optional_):
   Output resolution. Uses the supported aspect ratio nearest the image. Default value: `"768P"`

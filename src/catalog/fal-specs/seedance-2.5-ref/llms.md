@@ -30,7 +30,7 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
-- **`prompt`** (`string`, _required_):
+- **`prompt`** (`string`, _optional_):
   The text prompt used to generate the video.
   - Examples: "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea."
 
@@ -49,13 +49,17 @@ The API accepts the following input parameters:
   - Array of string
 
 - **`audio_urls`** (`list<string>`, _optional_):
-  Reference audio to guide video generation. Refer to them in the prompt as @Audio1, @Audio2, etc. Supported formats: MP3, WAV. Up to 10 files. Each file must be 1.8 to 30.2 seconds and no larger than 15 MB; combined duration must not exceed 30.2 seconds. At least one reference image or video is required.
+  Reference audio to guide video generation. Refer to them in the prompt as @Audio1, @Audio2, etc. Supported formats: MP3, WAV. Up to 10 files. Each file must be 1.8 to 30.2 seconds and no larger than 15 MB; combined duration must not exceed 30.2 seconds.
   - Array of string
 
 - **`resolution`** (`ResolutionEnum`, _optional_):
   Video resolution - 480p for faster generation, 720p for balance, 1080p for high quality. Default value: `"720p"`
   - Default: `"720p"`
   - Options: `"480p"`, `"720p"`, `"1080p"`
+
+- **`draft`** (`boolean`, _optional_):
+  Generate a draft preview at 480p, overriding resolution. Returns a draft_id for completing the draft at 1080p within seven days.
+  - Default: `false`
 
 - **`duration`** (`DurationEnum`, _optional_):
   Duration of the video in seconds. Supports 4 to 30 seconds, or auto to let the model decide based on the prompt. Default value: `"auto"`
@@ -94,9 +98,7 @@ The API accepts the following input parameters:
 **Required Parameters Example**:
 
 ```json
-{
-  "prompt": "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea."
-}
+{}
 ```
 
 **Full Example**:
@@ -130,6 +132,9 @@ The API returns the following output format:
   The seed used for generation.
   - Examples: 42
 
+- **`draft_id`** (`string`, _optional_):
+  The draft ID, or null when draft mode is disabled. Complete this draft within seven days using the same account.
+
 
 
 **Example Response**:
@@ -153,9 +158,7 @@ curl --request POST \
   --url https://fal.run/bytedance/seedance-2.5/reference-to-video \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
-  --data '{
-     "prompt": "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea."
-   }'
+  --data '{}'
 ```
 
 ### Python
@@ -178,9 +181,7 @@ def on_queue_update(update):
 
 result = fal_client.subscribe(
     "bytedance/seedance-2.5/reference-to-video",
-    arguments={
-        "prompt": "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea."
-    },
+    arguments={},
     with_logs=True,
     on_queue_update=on_queue_update,
 )
@@ -201,9 +202,7 @@ Then use the API client to make requests:
 import { fal } from "@fal-ai/client";
 
 const result = await fal.subscribe("bytedance/seedance-2.5/reference-to-video", {
-  input: {
-    prompt: "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea."
-  },
+  input: {},
   logs: true,
   onQueueUpdate: (update) => {
     if (update.status === "IN_PROGRESS") {

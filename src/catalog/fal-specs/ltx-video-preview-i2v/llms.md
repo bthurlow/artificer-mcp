@@ -49,6 +49,10 @@ The API accepts the following input parameters:
   - Default: `3`
   - Range: `2` to `10`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 - **`image_url`** (`string`, _required_):
   The URL of the image to generate the video from.
   - Examples: "https://v3b.fal.media/files/b/0a9f096b/K1kmKVbB5XDufFrz1n1cP_50DK8jif.png"
@@ -72,6 +76,7 @@ The API accepts the following input parameters:
   "negative_prompt": "low quality, worst quality, deformed, distorted, disfigured, motion smear, motion artifacts, fused fingers, bad anatomy, weird hand, ugly",
   "num_inference_steps": 30,
   "guidance_scale": 3,
+  "enable_safety_checker": true,
   "image_url": "https://v3b.fal.media/files/b/0a9f096b/K1kmKVbB5XDufFrz1n1cP_50DK8jif.png"
 }
 ```

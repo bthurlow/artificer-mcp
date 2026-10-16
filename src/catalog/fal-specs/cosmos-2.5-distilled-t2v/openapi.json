@@ -71,35 +71,56 @@
         ]
       },
       "CosmosPredict25DistilledTextToVideoInput": {
-        "type": "object",
-        "required": [
-          "prompt"
-        ],
-        "x-fal-order-properties": [
-          "prompt",
-          "negative_prompt",
-          "num_frames",
-          "num_inference_steps",
-          "seed",
-          "sync_mode",
-          "video_output_type",
-          "video_quality"
-        ],
         "properties": {
-          "video_output_type": {
-            "description": "The format of the output video.",
-            "type": "string",
-            "default": "X264 (.mp4)",
-            "enum": [
-              "X264 (.mp4)",
-              "VP9 (.webm)",
-              "PRORES4444 (.mov)",
-              "GIF (.gif)"
+          "enable_safety_checker": {
+            "default": true,
+            "title": "Enable Safety Checker",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "type": "boolean"
+          },
+          "negative_prompt": {
+            "default": "The video captures a series of frames showing ugly scenes, static with no motion, motion blur, over-saturation, shaky footage, low resolution, grainy texture, pixelated images, poorly lit areas, underexposed and overexposed scenes, poor color balance, washed out colors, choppy sequences, jerky movements, low frame rate, artifacting, color banding, unnatural transitions, outdated special effects, fake elements, unconvincing visuals, poorly edited content, jump cuts, visual noise, and flickering. Overall, the video is of poor quality.",
+            "title": "Negative Prompt",
+            "description": "A negative prompt to guide generation away from undesired content.",
+            "type": "string"
+          },
+          "prompt": {
+            "examples": [
+              "A static, locked-off camera frames an industrial conveyor belt steadily transporting rough rocks through a dimly lit quarry processing facility. The belt runs horizontally across the center of the frame, its thick black rubber surface textured with dust and fine gravel. Jagged gray and brown stones of varying sizes tumble forward in a slow, continuous motion, their sharp edges catching the light. Subtle vibrations ripple through the belt’s surface as small pebbles bounce and shift. In the background, blurred steel beams, pipes, and muted industrial machinery create depth without distraction. Cool, diffused overhead lighting casts soft shadows and highlights the gritty textures, emphasizing dust particles in the air and the raw, rugged surfaces of the rocks."
             ],
-            "title": "Video Output Type"
+            "title": "Prompt",
+            "description": "The text prompt describing the video to generate.",
+            "type": "string"
+          },
+          "num_frames": {
+            "description": "Number of frames to generate. Must be between 9 and 93.",
+            "minimum": 9,
+            "default": 93,
+            "title": "Number of Frames",
+            "maximum": 93,
+            "type": "integer"
+          },
+          "video_quality": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "maximum"
+            ],
+            "default": "high",
+            "title": "Video Quality",
+            "description": "The quality of the output video.",
+            "type": "string"
+          },
+          "num_inference_steps": {
+            "description": "Number of denoising steps. Distilled model works well with fewer steps.",
+            "minimum": 1,
+            "default": 10,
+            "title": "Num Inference Steps",
+            "maximum": 20,
+            "type": "integer"
           },
           "seed": {
-            "description": "Random seed for reproducible generation.",
             "anyOf": [
               {
                 "type": "integer"
@@ -108,93 +129,191 @@
                 "type": "null"
               }
             ],
-            "title": "Seed"
+            "title": "Seed",
+            "description": "Random seed for reproducible generation."
           },
-          "negative_prompt": {
-            "description": "A negative prompt to guide generation away from undesired content.",
-            "type": "string",
-            "default": "The video captures a series of frames showing ugly scenes, static with no motion, motion blur, over-saturation, shaky footage, low resolution, grainy texture, pixelated images, poorly lit areas, underexposed and overexposed scenes, poor color balance, washed out colors, choppy sequences, jerky movements, low frame rate, artifacting, color banding, unnatural transitions, outdated special effects, fake elements, unconvincing visuals, poorly edited content, jump cuts, visual noise, and flickering. Overall, the video is of poor quality.",
-            "title": "Negative Prompt"
-          },
-          "num_frames": {
-            "minimum": 9,
-            "description": "Number of frames to generate. Must be between 9 and 93.",
-            "maximum": 93,
-            "type": "integer",
-            "default": 93,
-            "title": "Number of Frames"
-          },
-          "video_quality": {
-            "description": "The quality of the output video.",
-            "type": "string",
-            "default": "high",
+          "video_output_type": {
             "enum": [
-              "low",
-              "medium",
-              "high",
-              "maximum"
+              "X264 (.mp4)",
+              "VP9 (.webm)",
+              "PRORES4444 (.mov)",
+              "GIF (.gif)"
             ],
-            "title": "Video Quality"
-          },
-          "num_inference_steps": {
-            "minimum": 1,
-            "description": "Number of denoising steps. Distilled model works well with fewer steps.",
-            "maximum": 20,
-            "type": "integer",
-            "default": 10,
-            "title": "Num Inference Steps"
-          },
-          "prompt": {
-            "examples": [
-              "A static, locked-off camera frames an industrial conveyor belt steadily transporting rough rocks through a dimly lit quarry processing facility. The belt runs horizontally across the center of the frame, its thick black rubber surface textured with dust and fine gravel. Jagged gray and brown stones of varying sizes tumble forward in a slow, continuous motion, their sharp edges catching the light. Subtle vibrations ripple through the belt’s surface as small pebbles bounce and shift. In the background, blurred steel beams, pipes, and muted industrial machinery create depth without distraction. Cool, diffused overhead lighting casts soft shadows and highlights the gritty textures, emphasizing dust particles in the air and the raw, rugged surfaces of the rocks."
-            ],
-            "description": "The text prompt describing the video to generate.",
-            "type": "string",
-            "title": "Prompt"
+            "default": "X264 (.mp4)",
+            "title": "Video Output Type",
+            "description": "The format of the output video.",
+            "type": "string"
           },
           "sync_mode": {
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "type": "boolean",
             "default": false,
-            "title": "Sync Mode"
+            "title": "Sync Mode",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "type": "boolean"
           }
         },
-        "title": "DistilledTextToVideoInput"
+        "required": [
+          "prompt"
+        ],
+        "title": "DistilledTextToVideoInput",
+        "x-fal-order-properties": [
+          "prompt",
+          "negative_prompt",
+          "num_frames",
+          "num_inference_steps",
+          "seed",
+          "sync_mode",
+          "video_output_type",
+          "video_quality",
+          "enable_safety_checker"
+        ],
+        "type": "object"
       },
       "CosmosPredict25DistilledTextToVideoOutput": {
-        "type": "object",
+        "properties": {
+          "seed": {
+            "title": "Seed",
+            "description": "The random seed used for generation.",
+            "type": "integer"
+          },
+          "video": {
+            "$ref": "#/components/schemas/VideoFile",
+            "description": "The generated video file.",
+            "examples": [
+              {
+                "url": "https://v3b.fal.media/files/b/0a8fabc5/qAi19s0dSuQHDZ3O7D_HV_FkSwbls1.mp4",
+                "content_type": "video/mp4"
+              }
+            ]
+          }
+        },
         "required": [
           "video",
           "seed"
         ],
+        "title": "VideoOutput",
         "x-fal-order-properties": [
           "video",
           "seed"
         ],
-        "properties": {
-          "video": {
-            "examples": [
-              {
-                "content_type": "video/mp4",
-                "url": "https://v3b.fal.media/files/b/0a8fabc5/qAi19s0dSuQHDZ3O7D_HV_FkSwbls1.mp4"
-              }
-            ],
-            "description": "The generated video file.",
-            "$ref": "#/components/schemas/VideoFile"
-          },
-          "seed": {
-            "description": "The random seed used for generation.",
-            "type": "integer",
-            "title": "Seed"
-          }
-        },
-        "title": "VideoOutput"
+        "type": "object"
       },
       "VideoFile": {
-        "type": "object",
+        "properties": {
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "The height of the video"
+          },
+          "num_frames": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Num Frames",
+            "description": "The number of frames in the video"
+          },
+          "duration": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration",
+            "description": "The duration of the video"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ]
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "description": "The width of the video"
+          },
+          "fps": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fps",
+            "description": "The FPS of the video"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ]
+          }
+        },
         "required": [
           "url"
         ],
+        "title": "VideoFile",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -206,119 +325,7 @@
           "duration",
           "num_frames"
         ],
-        "properties": {
-          "duration": {
-            "description": "The duration of the video",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Duration"
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type"
-          },
-          "width": {
-            "description": "The width of the video",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Width"
-          },
-          "num_frames": {
-            "description": "The number of frames in the video",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Num Frames"
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
-          },
-          "height": {
-            "description": "The height of the video",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Height"
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size"
-          },
-          "fps": {
-            "description": "The FPS of the video",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fps"
-          }
-        },
-        "title": "VideoFile"
+        "type": "object"
       }
     }
   },

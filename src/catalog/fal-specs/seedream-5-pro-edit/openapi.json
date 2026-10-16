@@ -71,30 +71,72 @@
         ]
       },
       "SeedreamV5ProEditInput": {
-        "required": [
-          "prompt",
-          "image_urls"
-        ],
         "properties": {
-          "image_size": {
-            "title": "Image Size",
+          "enable_safety_checker": {
+            "type": "boolean",
+            "default": true,
+            "title": "Enable Safety Checker",
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
             "examples": [
-              "auto_2K"
-            ],
-            "x-fal": {
-              "max_area": 4194304,
-              "min_area": 1048576,
-              "min_aspect_ratio": 0.0625,
-              "max_aspect_ratio": 16
+              true
+            ]
+          },
+          "image_urls": {
+            "items": {
+              "type": "string"
             },
-            "description": "The size of the generated image. Total pixels must be between 1024x1024 and 2048x2048, with aspect ratio between 1/16 and 16.",
-            "default": "auto_2K",
+            "type": "array",
+            "title": "Image URLs",
+            "description": "List of URLs of input reference images. Up to 10 images are supported; if more are sent, only the last 10 are used.",
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/example_inputs/seedreamv45/seedream_v45_edit_input_1.png",
+                "https://storage.googleapis.com/falserverless/example_inputs/seedreamv45/seedream_v45_edit_input_2.png",
+                "https://storage.googleapis.com/falserverless/example_inputs/seedreamv45/seedream_v45_edit_input_3.png"
+              ]
+            ]
+          },
+          "num_images": {
+            "maximum": 6,
+            "minimum": 1,
+            "default": 1,
+            "title": "Num Images",
+            "description": "Number of separate model generations to run with the prompt.",
+            "type": "integer"
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "The text prompt used to edit the image.",
+            "examples": [
+              "Replace the product in Figure 1 with that in Figure 2. Seamlessly render the logo in Figure 3 into the product design, in a frosted glass texture."
+            ]
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "jpeg",
+              "png"
+            ],
+            "default": "jpeg",
+            "title": "Output Format",
+            "description": "The file format of the generated image.",
+            "examples": [
+              "jpeg"
+            ]
+          },
+          "sync_mode": {
+            "default": false,
+            "title": "Sync Mode",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "type": "boolean"
+          },
+          "image_size": {
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
               },
               {
-                "type": "string",
                 "enum": [
                   "square_hd",
                   "square",
@@ -104,72 +146,39 @@
                   "landscape_16_9",
                   "auto_1K",
                   "auto_2K"
-                ]
+                ],
+                "type": "string"
               }
+            ],
+            "x-fal": {
+              "max_area": 4194304,
+              "min_aspect_ratio": 0.0625,
+              "min_area": 1048576,
+              "max_aspect_ratio": 16
+            },
+            "default": "auto_2K",
+            "title": "Image Size",
+            "description": "The size of the generated image. Total pixels must be between 1024x1024 and 2048x2048, with aspect ratio between 1/16 and 16.",
+            "examples": [
+              "auto_2K"
             ]
           },
-          "image_urls": {
-            "items": {
-              "type": "string"
-            },
-            "examples": [
-              [
-                "https://storage.googleapis.com/falserverless/example_inputs/seedreamv45/seedream_v45_edit_input_1.png",
-                "https://storage.googleapis.com/falserverless/example_inputs/seedreamv45/seedream_v45_edit_input_2.png",
-                "https://storage.googleapis.com/falserverless/example_inputs/seedreamv45/seedream_v45_edit_input_3.png"
-              ]
-            ],
-            "description": "List of URLs of input reference images. Up to 10 images are supported; if more are sent, only the last 10 are used.",
-            "type": "array",
-            "title": "Image URLs"
-          },
-          "output_format": {
-            "examples": [
-              "jpeg"
-            ],
-            "description": "The file format of the generated image.",
-            "type": "string",
-            "default": "jpeg",
+          "enhance_prompt_mode": {
             "enum": [
-              "jpeg",
-              "png"
+              "standard",
+              "fast"
             ],
-            "title": "Output Format"
-          },
-          "sync_mode": {
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "type": "boolean",
-            "default": false,
-            "title": "Sync Mode"
-          },
-          "prompt": {
-            "examples": [
-              "Replace the product in Figure 1 with that in Figure 2. Seamlessly render the logo in Figure 3 into the product design, in a frosted glass texture."
-            ],
-            "description": "The text prompt used to edit the image.",
-            "type": "string",
-            "title": "Prompt"
-          },
-          "enable_safety_checker": {
-            "examples": [
-              true
-            ],
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "type": "boolean",
-            "default": true,
-            "title": "Enable Safety Checker"
-          },
-          "num_images": {
-            "title": "Num Images",
-            "description": "Number of separate model generations to run with the prompt.",
-            "type": "integer",
-            "default": 1,
-            "maximum": 6,
-            "minimum": 1
+            "default": "standard",
+            "title": "Enhance Prompt Mode",
+            "description": "Prompt optimization mode. `standard` prioritizes image quality; `fast` reduces generation time.",
+            "type": "string"
           }
         },
+        "required": [
+          "prompt",
+          "image_urls"
+        ],
         "title": "SeedDream50ProEditInput",
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "image_size",
@@ -177,151 +186,65 @@
           "output_format",
           "sync_mode",
           "enable_safety_checker",
+          "enhance_prompt_mode",
           "image_urls"
-        ]
+        ],
+        "type": "object"
       },
       "SeedreamV5ProEditOutput": {
-        "required": [
-          "images"
-        ],
         "properties": {
           "images": {
             "items": {
               "$ref": "#/components/schemas/Image"
             },
+            "type": "array",
+            "title": "Images",
+            "description": "Generated images.",
             "examples": [
               [
                 {
                   "url": "https://v3b.fal.media/files/b/0aa16df4/L8veDBOTxHhmpO5wQnioS_14c2d9c1736b4803a43796669c6d4fca.png"
                 }
               ]
-            ],
-            "description": "Generated images.",
-            "type": "array",
-            "title": "Images"
+            ]
           }
         },
+        "required": [
+          "images"
+        ],
         "title": "SeedDream50ProEditOutput",
-        "type": "object",
         "x-fal-order-properties": [
           "images"
-        ]
+        ],
+        "type": "object"
       },
       "ImageSize": {
-        "title": "ImageSize",
         "properties": {
-          "height": {
-            "exclusiveMinimum": 0,
-            "description": "The height of the generated image.",
-            "type": "integer",
-            "default": 512,
-            "maximum": 14142,
-            "title": "Height"
-          },
           "width": {
+            "maximum": 14142,
+            "title": "Width",
+            "default": 512,
             "exclusiveMinimum": 0,
             "description": "The width of the generated image.",
-            "type": "integer",
-            "default": 512,
+            "type": "integer"
+          },
+          "height": {
             "maximum": 14142,
-            "title": "Width"
+            "title": "Height",
+            "default": 512,
+            "exclusiveMinimum": 0,
+            "description": "The height of the generated image.",
+            "type": "integer"
           }
         },
-        "type": "object",
+        "title": "ImageSize",
         "x-fal-order-properties": [
           "width",
           "height"
-        ]
+        ],
+        "type": "object"
       },
       "Image": {
-        "required": [
-          "url"
-        ],
-        "properties": {
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
-          },
-          "file_size": {
-            "title": "File Size",
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "file_name": {
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "content_type": {
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "height": {
-            "title": "Height",
-            "examples": [
-              1024
-            ],
-            "description": "The height of the image in pixels.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "width": {
-            "title": "Width",
-            "examples": [
-              1024
-            ],
-            "description": "The width of the image in pixels.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "title": "Image",
-        "description": "Represents an image file.",
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -329,7 +252,95 @@
           "file_size",
           "width",
           "height"
-        ]
+        ],
+        "properties": {
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ]
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "description": "The width of the image in pixels.",
+            "examples": [
+              1024
+            ]
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "The height of the image in pixels.",
+            "examples": [
+              1024
+            ]
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ]
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "Image",
+        "description": "Represents an image file.",
+        "type": "object"
       }
     }
   },

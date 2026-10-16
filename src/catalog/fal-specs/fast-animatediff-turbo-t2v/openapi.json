@@ -75,9 +75,44 @@
           "prompt"
         ],
         "properties": {
+          "enable_safety_checker": {
+            "default": true,
+            "title": "Enable Safety Checker",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "type": "boolean"
+          },
+          "negative_prompt": {
+            "default": "(bad quality, worst quality:1.2), ugly faces, bad anime",
+            "title": "Negative Prompt",
+            "description": "\n            The negative prompt to use. Use it to address details that you don't want\n            in the image. This could be colors, objects, scenery and even the small details\n            (e.g. moustache, blurry, low resolution).\n        ",
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "The prompt to use for generating the video. Be as descriptive as possible for best results.",
+            "examples": [
+              "masterpiece, best quality, 1girl, solo, cherry blossoms, hanami, pink flower, white flower, spring season, wisteria, petals, flower, plum blossoms, outdoors, falling petals, white hair, black eyes",
+              "panda playing a guitar, on a boat, in the ocean, high quality, high quality, ultra HD, realistic"
+            ]
+          },
+          "num_frames": {
+            "description": "The number of frames to generate for the video.",
+            "minimum": 1,
+            "default": 16,
+            "title": "Num Frames",
+            "maximum": 32,
+            "type": "integer"
+          },
+          "num_inference_steps": {
+            "description": "The number of inference steps to perform. 4-12 is recommended for turbo mode.",
+            "minimum": 1,
+            "default": 8,
+            "title": "Num Inference Steps",
+            "maximum": 50,
+            "type": "integer"
+          },
           "seed": {
-            "title": "Seed",
-            "description": "\n            The same seed and the same prompt given to the same version of Stable Diffusion\n            will output the same image every time.\n        ",
             "anyOf": [
               {
                 "type": "integer"
@@ -85,48 +120,32 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Seed",
+            "description": "\n            The same seed and the same prompt given to the same version of Stable Diffusion\n            will output the same image every time.\n        "
           },
           "guidance_scale": {
-            "title": "Guidance Scale",
             "description": "The CFG (Classifier Free Guidance) scale is a measure of how close you want the model to stick to your prompt when looking for a related image to show you.",
-            "maximum": 20,
+            "minimum": 0,
             "default": 2,
-            "type": "number",
-            "minimum": 0
+            "title": "Guidance Scale",
+            "maximum": 20,
+            "type": "number"
           },
           "fps": {
-            "title": "Fps",
             "description": "Number of frames per second to extract from the video.",
+            "minimum": 1,
+            "default": 8,
+            "title": "Fps",
             "maximum": 16,
-            "default": 8,
-            "type": "integer",
-            "minimum": 1
-          },
-          "negative_prompt": {
-            "description": "\n            The negative prompt to use. Use it to address details that you don't want\n            in the image. This could be colors, objects, scenery and even the small details\n            (e.g. moustache, blurry, low resolution).\n        ",
-            "type": "string",
-            "default": "(bad quality, worst quality:1.2), ugly faces, bad anime",
-            "title": "Negative Prompt"
-          },
-          "num_inference_steps": {
-            "title": "Num Inference Steps",
-            "description": "The number of inference steps to perform. 4-12 is recommended for turbo mode.",
-            "maximum": 50,
-            "default": 8,
-            "type": "integer",
-            "minimum": 1
+            "type": "integer"
           },
           "video_size": {
-            "title": "Video Size",
-            "description": "The size of the video to generate.",
-            "default": "square",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
               },
               {
-                "type": "string",
                 "enum": [
                   "square_hd",
                   "square",
@@ -134,30 +153,16 @@
                   "portrait_16_9",
                   "landscape_4_3",
                   "landscape_16_9"
-                ]
+                ],
+                "type": "string"
               }
-            ]
-          },
-          "prompt": {
-            "examples": [
-              "masterpiece, best quality, 1girl, solo, cherry blossoms, hanami, pink flower, white flower, spring season, wisteria, petals, flower, plum blossoms, outdoors, falling petals, white hair, black eyes",
-              "panda playing a guitar, on a boat, in the ocean, high quality, high quality, ultra HD, realistic"
             ],
-            "description": "The prompt to use for generating the video. Be as descriptive as possible for best results.",
-            "type": "string",
-            "title": "Prompt"
-          },
-          "num_frames": {
-            "title": "Num Frames",
-            "description": "The number of frames to generate for the video.",
-            "maximum": 32,
-            "default": 16,
-            "type": "integer",
-            "minimum": 1
+            "default": "square",
+            "title": "Video Size",
+            "description": "The size of the video to generate."
           }
         },
         "title": "AnimateDiffT2VTurboInput",
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "negative_prompt",
@@ -166,8 +171,10 @@
           "guidance_scale",
           "seed",
           "fps",
-          "video_size"
-        ]
+          "video_size",
+          "enable_safety_checker"
+        ],
+        "type": "object"
       },
       "FastAnimatediffTurboTextToVideoOutput": {
         "required": [
@@ -176,58 +183,63 @@
         ],
         "properties": {
           "seed": {
+            "title": "Seed",
             "description": "Seed used for generating the video.",
-            "type": "integer",
-            "title": "Seed"
+            "type": "integer"
           },
           "video": {
+            "$ref": "#/components/schemas/File",
+            "description": "Generated video file.",
             "examples": [
               {
                 "url": "https://fal-cdn.batuhan-941.workers.dev/files/kangaroo/DSrFBOk9XXIplm_kukI4n.mp4"
               }
-            ],
-            "description": "Generated video file.",
-            "$ref": "#/components/schemas/File"
+            ]
           }
         },
         "title": "AnimateDiffT2VOutput",
-        "type": "object",
         "x-fal-order-properties": [
           "video",
           "seed"
-        ]
+        ],
+        "type": "object"
       },
       "ImageSize": {
-        "title": "ImageSize",
         "properties": {
-          "height": {
-            "description": "The height of the generated image.",
-            "exclusiveMinimum": 0,
-            "maximum": 14142,
-            "default": 512,
-            "type": "integer",
-            "title": "Height"
-          },
           "width": {
+            "title": "Width",
             "description": "The width of the generated image.",
+            "default": 512,
             "exclusiveMinimum": 0,
             "maximum": 14142,
+            "type": "integer"
+          },
+          "height": {
+            "title": "Height",
+            "description": "The height of the generated image.",
             "default": 512,
-            "type": "integer",
-            "title": "Width"
+            "exclusiveMinimum": 0,
+            "maximum": 14142,
+            "type": "integer"
           }
         },
-        "type": "object",
+        "title": "ImageSize",
         "x-fal-order-properties": [
           "width",
           "height"
-        ]
+        ],
+        "type": "object"
       },
       "File": {
         "required": [
           "url"
         ],
         "properties": {
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
           "file_size": {
             "anyOf": [
               {
@@ -237,11 +249,11 @@
                 "type": "null"
               }
             ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "examples": [
               4404019
-            ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
+            ]
           },
           "file_name": {
             "anyOf": [
@@ -252,11 +264,11 @@
                 "type": "null"
               }
             ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
+            ]
           },
           "content_type": {
             "anyOf": [
@@ -267,26 +279,21 @@
                 "type": "null"
               }
             ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
             "examples": [
               "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
+            ]
           }
         },
         "title": "File",
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
-        ]
+        ],
+        "type": "object"
       }
     }
   },

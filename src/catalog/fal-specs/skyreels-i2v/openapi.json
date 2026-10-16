@@ -71,6 +71,7 @@
         ]
       },
       "SkyreelsI2vInput": {
+        "title": "SkyreelsI2VRequest",
         "type": "object",
         "required": [
           "prompt",
@@ -83,36 +84,44 @@
           "guidance_scale",
           "num_inference_steps",
           "negative_prompt",
-          "aspect_ratio"
+          "aspect_ratio",
+          "enable_safety_checker"
         ],
         "properties": {
-          "image_url": {
-            "examples": [
-              "https://fal.media/files/panda/TuXlMwArpQcdYNCLAEM8K.webp"
-            ],
-            "type": "string",
-            "description": "URL of the image input.",
-            "title": "Image Url"
-          },
           "aspect_ratio": {
-            "type": "string",
-            "description": "Aspect ratio of the output video",
-            "default": "16:9",
+            "title": "Aspect Ratio",
             "enum": [
               "16:9",
               "9:16"
             ],
-            "title": "Aspect Ratio"
+            "type": "string",
+            "description": "Aspect ratio of the output video",
+            "default": "16:9"
           },
-          "num_inference_steps": {
+          "guidance_scale": {
+            "title": "Guidance Scale",
             "minimum": 1,
-            "type": "integer",
-            "maximum": 50,
-            "description": "Number of denoising steps (between 1 and 50). Higher values give better quality but take longer.",
-            "default": 30,
-            "title": "Num Inference Steps"
+            "type": "number",
+            "description": "Guidance scale for generation (between 1.0 and 20.0)",
+            "maximum": 20,
+            "default": 6
+          },
+          "image_url": {
+            "title": "Image Url",
+            "type": "string",
+            "examples": [
+              "https://fal.media/files/panda/TuXlMwArpQcdYNCLAEM8K.webp"
+            ],
+            "description": "URL of the image input."
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "type": "boolean",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "default": true
           },
           "seed": {
+            "title": "Seed",
             "anyOf": [
               {
                 "type": "integer"
@@ -121,18 +130,26 @@
                 "type": "null"
               }
             ],
-            "description": "Random seed for generation. If not provided, a random seed will be used.",
-            "title": "Seed"
+            "description": "Random seed for generation. If not provided, a random seed will be used."
           },
           "prompt": {
+            "title": "Prompt",
+            "type": "string",
             "examples": [
               "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage. She wears a black leather jacket, a long red dress, and black boots, and carries a black purse."
             ],
-            "type": "string",
-            "description": "The prompt to generate the video from.",
-            "title": "Prompt"
+            "description": "The prompt to generate the video from."
+          },
+          "num_inference_steps": {
+            "title": "Num Inference Steps",
+            "minimum": 1,
+            "type": "integer",
+            "description": "Number of denoising steps (between 1 and 50). Higher values give better quality but take longer.",
+            "maximum": 50,
+            "default": 30
           },
           "negative_prompt": {
+            "title": "Negative Prompt",
             "anyOf": [
               {
                 "type": "string"
@@ -141,21 +158,12 @@
                 "type": "null"
               }
             ],
-            "description": "Negative prompt to guide generation away from certain attributes.",
-            "title": "Negative Prompt"
-          },
-          "guidance_scale": {
-            "minimum": 1,
-            "type": "number",
-            "maximum": 20,
-            "description": "Guidance scale for generation (between 1.0 and 20.0)",
-            "default": 6,
-            "title": "Guidance Scale"
+            "description": "Negative prompt to guide generation away from certain attributes."
           }
-        },
-        "title": "SkyreelsI2VRequest"
+        }
       },
       "SkyreelsI2vOutput": {
+        "title": "SkyreelsI2VResponse",
         "type": "object",
         "required": [
           "video",
@@ -175,17 +183,17 @@
             "$ref": "#/components/schemas/File"
           },
           "seed": {
+            "title": "Seed",
+            "type": "integer",
             "examples": [
               42
             ],
-            "type": "integer",
-            "description": "The seed used for generation",
-            "title": "Seed"
+            "description": "The seed used for generation"
           }
-        },
-        "title": "SkyreelsI2VResponse"
+        }
       },
       "File": {
+        "title": "File",
         "type": "object",
         "required": [
           "url"
@@ -197,7 +205,13 @@
           "file_size"
         ],
         "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
           "content_type": {
+            "title": "Content Type",
             "examples": [
               "image/png"
             ],
@@ -209,30 +223,10 @@
                 "type": "null"
               }
             ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
-          },
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
+            "description": "The mime type of the file."
           },
           "file_name": {
+            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
             ],
@@ -244,11 +238,24 @@
                 "type": "null"
               }
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "file_size": {
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes."
           }
-        },
-        "title": "File"
+        }
       }
     }
   },

@@ -41,6 +41,10 @@ The API accepts the following input parameters:
   If true, the output is returned as a data URI and is not stored in request history.
   - Default: `false`
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -48,6 +52,15 @@ The API accepts the following input parameters:
 ```json
 {
   "image_url": "https://storage.googleapis.com/falserverless/example_inputs/birefnet-input.jpeg"
+}
+```
+
+**Full Example**:
+
+```json
+{
+  "image_url": "https://storage.googleapis.com/falserverless/example_inputs/birefnet-input.jpeg",
+  "enable_safety_checker": true
 }
 ```
 

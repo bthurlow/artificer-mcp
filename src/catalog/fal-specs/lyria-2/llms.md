@@ -42,6 +42,10 @@ The API accepts the following input parameters:
 - **`seed`** (`integer`, _optional_):
   A seed for deterministic generation. If provided, the model will attempt to produce the same audio given the same prompt and other parameters.
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -57,7 +61,8 @@ The API accepts the following input parameters:
 ```json
 {
   "prompt": "A lush, ambient soundscape featuring the serene sounds of a flowing river, complemented by the distant chirping of birds, and a gentle, melancholic piano melody that slowly unfolds.",
-  "negative_prompt": "vocals, slow tempo"
+  "negative_prompt": "vocals, slow tempo",
+  "enable_safety_checker": true
 }
 ```
 
