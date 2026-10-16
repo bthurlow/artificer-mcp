@@ -7,7 +7,7 @@
 
 - **Endpoint**: `https://fal.run/alibaba/wan-3.0/reference-to-video`
 - **Model ID**: `alibaba/wan-3.0/reference-to-video`
-- **Category**: image-to-video
+- **Category**: video-to-video
 - **Kind**: inference
 **Tags**: stylized, transform, lipsync
 

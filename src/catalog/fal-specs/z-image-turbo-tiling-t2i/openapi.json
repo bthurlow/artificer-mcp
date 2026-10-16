@@ -71,8 +71,169 @@
         ]
       },
       "ZImageTurboTilingInput": {
-        "title": "ZImageTurboTilingInput",
         "type": "object",
+        "title": "ZImageTurboTilingInput",
+        "properties": {
+          "num_images": {
+            "maximum": 4,
+            "default": 1,
+            "type": "integer",
+            "description": "The number of images to generate.",
+            "minimum": 1,
+            "title": "Number of Images"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "\n            The same seed and the same prompt given to the same version of the model\n            will output the same image every time.\n        "
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The prompt to generate an image from.",
+            "examples": [
+              "A hyper-realistic, high-resolution 4k texture of an ancient weathered brick wall heavily overgrown with lush green moss and soft lichens. The bricks are aged, featuring deep earthy tones, natural cracks, and gritty textures. Vibrant emerald moss fills the mortar lines and spills over the rough surfaces of the stones. Uniform, flat cinematic lighting ensures no harsh shadows, highlighting the intricate organic details and damp stone surfaces. The composition is a perfectly balanced overhead view, showcasing a rich tapestry of botanical growth and masonry craftsmanship with professional clarity and hyper-detailed grit."
+            ],
+            "title": "Prompt"
+          },
+          "mask_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mask Image URL",
+            "description": "URL of a mask image for inpainting. White regions are regenerated, black regions are preserved. Requires image_url."
+          },
+          "output_format": {
+            "default": "png",
+            "type": "string",
+            "description": "The format of the generated image.",
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
+            ],
+            "title": "Output Format"
+          },
+          "enable_prompt_expansion": {
+            "default": false,
+            "type": "boolean",
+            "description": "Whether to enable prompt expansion. Note: this will increase the price by 0.0025 credits per request.",
+            "title": "Enable Prompt Expansion"
+          },
+          "image_size": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageSize"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9",
+                  "auto"
+                ]
+              }
+            ],
+            "default": "square_hd",
+            "description": "The size of the generated image. Use 'auto' to match the input image size (or 1024x1024 if no image).",
+            "title": "Image Size"
+          },
+          "tiling_mode": {
+            "default": "both",
+            "description": "Tiling direction: 'both' (omnidirectional), 'horizontal' (left-right only), 'vertical' (top-bottom only).",
+            "enum": [
+              "both",
+              "horizontal",
+              "vertical"
+            ],
+            "type": "string",
+            "title": "Tiling Mode"
+          },
+          "strength": {
+            "maximum": 1,
+            "default": 0.6,
+            "type": "number",
+            "description": "How much to transform the input image. Only used when image_url is provided.",
+            "exclusiveMinimum": 0,
+            "title": "Strength"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image URL",
+            "description": "URL of an image for image-to-image or inpainting. When provided without mask_image_url, performs image-to-image; with mask_image_url, performs inpainting."
+          },
+          "tile_size": {
+            "maximum": 256,
+            "default": 128,
+            "type": "integer",
+            "description": "Tile size in latent space. Must be even (divisible by 2) for patchification. Automatically capped to the generated image dimensions on tiled axes. (64 = 512px, 128 = 1024px, 256 = 2048px).",
+            "multipleOf": 2,
+            "minimum": 32,
+            "title": "Tile Size"
+          },
+          "num_inference_steps": {
+            "maximum": 8,
+            "default": 8,
+            "type": "integer",
+            "description": "The number of inference steps to perform.",
+            "minimum": 1,
+            "title": "Number of Inference Steps"
+          },
+          "acceleration": {
+            "default": "regular",
+            "type": "string",
+            "description": "The acceleration level to use.",
+            "enum": [
+              "none",
+              "regular",
+              "high"
+            ],
+            "title": "Acceleration"
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "type": "boolean",
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked, and images flagged as unsafe are returned as black images.",
+            "title": "Enable Safety Checker"
+          },
+          "tile_stride": {
+            "maximum": 128,
+            "default": 64,
+            "type": "integer",
+            "description": "Tile stride in latent space. Must be even (divisible by 2). Automatically capped to half the effective tile size. (32 = 256px, 64 = 512px, 128 = 1024px).",
+            "multipleOf": 2,
+            "minimum": 16,
+            "title": "Tile Stride"
+          },
+          "sync_mode": {
+            "default": false,
+            "type": "boolean",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "title": "Sync Mode"
+          }
+        },
         "required": [
           "prompt"
         ],
@@ -93,172 +254,57 @@
           "tile_size",
           "tile_stride",
           "tiling_mode"
-        ],
-        "properties": {
-          "sync_mode": {
-            "title": "Sync Mode",
-            "type": "boolean",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "default": false
-          },
-          "tile_size": {
-            "title": "Tile Size",
-            "multipleOf": 2,
-            "type": "integer",
-            "description": "Tile size in latent space. Must be even (divisible by 2) for patchification. Automatically capped to the generated image dimensions on tiled axes. (64 = 512px, 128 = 1024px, 256 = 2048px).",
-            "minimum": 32,
-            "maximum": 256,
-            "default": 128
-          },
-          "seed": {
-            "title": "Seed",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "\n            The same seed and the same prompt given to the same version of the model\n            will output the same image every time.\n        "
-          },
-          "tile_stride": {
-            "title": "Tile Stride",
-            "multipleOf": 2,
-            "type": "integer",
-            "description": "Tile stride in latent space. Must be even (divisible by 2). Automatically capped to half the effective tile size. (32 = 256px, 64 = 512px, 128 = 1024px).",
-            "minimum": 16,
-            "maximum": 128,
-            "default": 64
-          },
-          "acceleration": {
-            "title": "Acceleration",
-            "enum": [
-              "none",
-              "regular",
-              "high"
-            ],
-            "type": "string",
-            "description": "The acceleration level to use.",
-            "default": "regular"
-          },
-          "prompt": {
-            "title": "Prompt",
-            "type": "string",
-            "examples": [
-              "A hyper-realistic, high-resolution 4k texture of an ancient weathered brick wall heavily overgrown with lush green moss and soft lichens. The bricks are aged, featuring deep earthy tones, natural cracks, and gritty textures. Vibrant emerald moss fills the mortar lines and spills over the rough surfaces of the stones. Uniform, flat cinematic lighting ensures no harsh shadows, highlighting the intricate organic details and damp stone surfaces. The composition is a perfectly balanced overhead view, showcasing a rich tapestry of botanical growth and masonry craftsmanship with professional clarity and hyper-detailed grit."
-            ],
-            "description": "The prompt to generate an image from."
-          },
-          "num_inference_steps": {
-            "title": "Number of Inference Steps",
-            "default": 8,
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 8,
-            "description": "The number of inference steps to perform."
-          },
-          "num_images": {
-            "title": "Number of Images",
-            "default": 1,
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 4,
-            "description": "The number of images to generate."
-          },
-          "tiling_mode": {
-            "title": "Tiling Mode",
-            "enum": [
-              "both",
-              "horizontal",
-              "vertical"
-            ],
-            "type": "string",
-            "description": "Tiling direction: 'both' (omnidirectional), 'horizontal' (left-right only), 'vertical' (top-bottom only).",
-            "default": "both"
-          },
-          "strength": {
-            "title": "Strength",
-            "type": "number",
-            "exclusiveMinimum": 0,
-            "description": "How much to transform the input image. Only used when image_url is provided.",
-            "maximum": 1,
-            "default": 0.6
-          },
-          "enable_safety_checker": {
-            "title": "Enable Safety Checker",
-            "type": "boolean",
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked, and images flagged as unsafe are returned as black images.",
-            "default": true
-          },
-          "mask_image_url": {
-            "title": "Mask Image URL",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "URL of a mask image for inpainting. White regions are regenerated, black regions are preserved. Requires image_url."
-          },
-          "output_format": {
-            "title": "Output Format",
-            "enum": [
-              "jpeg",
-              "png",
-              "webp"
-            ],
-            "type": "string",
-            "description": "The format of the generated image.",
-            "default": "png"
-          },
-          "image_url": {
-            "title": "Image URL",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "URL of an image for image-to-image or inpainting. When provided without mask_image_url, performs image-to-image; with mask_image_url, performs inpainting."
-          },
-          "image_size": {
-            "title": "Image Size",
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ImageSize"
-              },
-              {
-                "enum": [
-                  "square_hd",
-                  "square",
-                  "portrait_4_3",
-                  "portrait_16_9",
-                  "landscape_4_3",
-                  "landscape_16_9",
-                  "auto"
-                ],
-                "type": "string"
-              }
-            ],
-            "description": "The size of the generated image. Use 'auto' to match the input image size (or 1024x1024 if no image).",
-            "default": "square_hd"
-          },
-          "enable_prompt_expansion": {
-            "title": "Enable Prompt Expansion",
-            "type": "boolean",
-            "description": "Whether to enable prompt expansion. Note: this will increase the price by 0.0025 credits per request.",
-            "default": false
-          }
-        }
+        ]
       },
       "ZImageTurboTilingOutput": {
-        "title": "ZImageTurboTilingOutput",
         "type": "object",
+        "title": "ZImageTurboTilingOutput",
+        "properties": {
+          "timings": {
+            "type": "object",
+            "title": "Timings",
+            "description": "The timings of the generation process.",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "images": {
+            "items": {
+              "$ref": "#/components/schemas/ImageFile"
+            },
+            "type": "array",
+            "examples": [
+              [
+                {
+                  "height": 2048,
+                  "content_type": "image/png",
+                  "width": 2048,
+                  "url": "https://v3b.fal.media/files/b/0a9276c3/6KxxMb0bPmfNLH3DqcuSf_qRUe8cIL.png"
+                }
+              ]
+            ],
+            "description": "The generated image files info.",
+            "title": "Images"
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "The prompt used for generating the image."
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed",
+            "description": "Seed of the generated Image. It will be the same value of the one passed in the input or the randomly generated that was used in case none was passed."
+          },
+          "has_nsfw_concepts": {
+            "items": {
+              "type": "boolean"
+            },
+            "type": "array",
+            "title": "Has Nsfw Concepts",
+            "description": "Whether the generated images contain NSFW concepts."
+          }
+        },
         "required": [
           "images",
           "timings",
@@ -272,83 +318,113 @@
           "seed",
           "has_nsfw_concepts",
           "prompt"
-        ],
-        "properties": {
-          "timings": {
-            "title": "Timings",
-            "type": "object",
-            "additionalProperties": {
-              "type": "number"
-            },
-            "description": "The timings of the generation process."
-          },
-          "has_nsfw_concepts": {
-            "title": "Has Nsfw Concepts",
-            "type": "array",
-            "description": "Whether the generated images contain NSFW concepts.",
-            "items": {
-              "type": "boolean"
-            }
-          },
-          "seed": {
-            "title": "Seed",
-            "type": "integer",
-            "description": "Seed of the generated Image. It will be the same value of the one passed in the input or the randomly generated that was used in case none was passed."
-          },
-          "images": {
-            "title": "Images",
-            "type": "array",
-            "examples": [
-              [
-                {
-                  "content_type": "image/png",
-                  "height": 2048,
-                  "url": "https://v3b.fal.media/files/b/0a9276c3/6KxxMb0bPmfNLH3DqcuSf_qRUe8cIL.png",
-                  "width": 2048
-                }
-              ]
-            ],
-            "description": "The generated image files info.",
-            "items": {
-              "$ref": "#/components/schemas/ImageFile"
-            }
-          },
-          "prompt": {
-            "title": "Prompt",
-            "type": "string",
-            "description": "The prompt used for generating the image."
-          }
-        }
+        ]
       },
       "ImageSize": {
-        "title": "ImageSize",
         "type": "object",
+        "title": "ImageSize",
+        "properties": {
+          "height": {
+            "maximum": 14142,
+            "default": 512,
+            "type": "integer",
+            "description": "The height of the generated image.",
+            "exclusiveMinimum": 0,
+            "title": "Height"
+          },
+          "width": {
+            "maximum": 14142,
+            "default": 512,
+            "type": "integer",
+            "description": "The width of the generated image.",
+            "exclusiveMinimum": 0,
+            "title": "Width"
+          }
+        },
         "x-fal-order-properties": [
           "width",
           "height"
-        ],
-        "properties": {
-          "height": {
-            "title": "Height",
-            "type": "integer",
-            "exclusiveMinimum": 0,
-            "description": "The height of the generated image.",
-            "maximum": 14142,
-            "default": 512
-          },
-          "width": {
-            "title": "Width",
-            "type": "integer",
-            "exclusiveMinimum": 0,
-            "description": "The width of the generated image.",
-            "maximum": 14142,
-            "default": 512
-          }
-        }
+        ]
       },
       "ImageFile": {
-        "title": "ImageFile",
         "type": "object",
+        "title": "ImageFile",
+        "properties": {
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "The height of the image"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "description": "The width of the image"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes."
+          }
+        },
         "required": [
           "url"
         ],
@@ -359,83 +435,7 @@
           "file_size",
           "width",
           "height"
-        ],
-        "properties": {
-          "content_type": {
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file."
-          },
-          "height": {
-            "title": "Height",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The height of the image"
-          },
-          "file_name": {
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "width": {
-            "title": "Width",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The width of the image"
-          },
-          "file_size": {
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes."
-          },
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
-          }
-        }
+        ]
       }
     }
   },

@@ -74,8 +74,8 @@
         "required": [
           "prompt"
         ],
-        "type": "object",
         "x-fal-order-properties": [
+          "enable_safety_checker",
           "prompt",
           "duration",
           "aspect_ratio",
@@ -84,27 +84,31 @@
           "camera_control",
           "advanced_camera_control"
         ],
-        "title": "V1TextToVideoRequest",
         "properties": {
-          "duration": {
-            "description": "The duration of the generated video in seconds",
-            "type": "string",
-            "enum": [
-              "5",
-              "10"
-            ],
-            "title": "Duration",
-            "default": "5"
+          "negative_prompt": {
+            "default": "blur, distort, and low quality",
+            "maxLength": 2500,
+            "title": "Negative Prompt",
+            "type": "string"
           },
           "cfg_scale": {
             "maximum": 1,
-            "type": "number",
-            "minimum": 0,
+            "default": 0.5,
             "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
+            "minimum": 0,
             "title": "Cfg Scale",
-            "default": 0.5
+            "type": "number"
+          },
+          "prompt": {
+            "examples": [
+              "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage. She wears a black leather jacket, a long red dress, and black boots, and carries a black purse."
+            ],
+            "maxLength": 2500,
+            "title": "Prompt",
+            "type": "string"
           },
           "advanced_camera_control": {
+            "description": "Advanced Camera control parameters",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/CameraControl"
@@ -112,63 +116,64 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "Advanced Camera control parameters"
+            ]
           },
-          "camera_control": {
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "down_back",
-                  "forward_up",
-                  "right_turn_forward",
-                  "left_turn_forward"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Camera Control",
-            "description": "Camera control parameters"
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Disabling safety checks requires account authorization; unauthorized requests are always checked.",
+            "title": "Enable Safety Checker",
+            "type": "boolean"
           },
           "aspect_ratio": {
-            "description": "The aspect ratio of the generated video frame",
-            "type": "string",
             "enum": [
               "16:9",
               "9:16",
               "1:1"
             ],
+            "default": "16:9",
+            "description": "The aspect ratio of the generated video frame",
             "title": "Aspect Ratio",
-            "default": "16:9"
+            "type": "string"
           },
-          "prompt": {
-            "type": "string",
-            "examples": [
-              "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage. She wears a black leather jacket, a long red dress, and black boots, and carries a black purse."
+          "camera_control": {
+            "description": "Camera control parameters",
+            "anyOf": [
+              {
+                "enum": [
+                  "down_back",
+                  "forward_up",
+                  "right_turn_forward",
+                  "left_turn_forward"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
             ],
-            "title": "Prompt",
-            "maxLength": 2500
+            "title": "Camera Control"
           },
-          "negative_prompt": {
-            "type": "string",
-            "title": "Negative Prompt",
-            "maxLength": 2500,
-            "default": "blur, distort, and low quality"
+          "duration": {
+            "enum": [
+              "5",
+              "10"
+            ],
+            "default": "5",
+            "description": "The duration of the generated video in seconds",
+            "title": "Duration",
+            "type": "string"
           }
-        }
+        },
+        "title": "V1TextToVideoRequest",
+        "type": "object"
       },
       "KlingVideoV1StandardTextToVideoOutput": {
         "required": [
           "video"
         ],
-        "type": "object",
         "x-fal-order-properties": [
           "video"
         ],
-        "title": "T2VOutput",
         "properties": {
           "video": {
             "$ref": "#/components/schemas/File",
@@ -179,25 +184,21 @@
             ],
             "description": "The generated video"
           }
-        }
+        },
+        "title": "T2VOutput",
+        "type": "object"
       },
       "CameraControl": {
         "required": [
           "movement_type",
           "movement_value"
         ],
-        "type": "object",
         "x-fal-order-properties": [
           "movement_type",
           "movement_value"
         ],
-        "title": "CameraControl",
         "properties": {
           "movement_type": {
-            "type": "string",
-            "examples": [
-              "horizontal"
-            ],
             "enum": [
               "horizontal",
               "vertical",
@@ -206,35 +207,63 @@
               "roll",
               "zoom"
             ],
+            "examples": [
+              "horizontal"
+            ],
+            "description": "The type of camera movement",
             "title": "Movement Type",
-            "description": "The type of camera movement"
+            "type": "string"
           },
           "movement_value": {
             "maximum": 10,
-            "type": "integer",
-            "minimum": -10,
             "examples": [
               10
             ],
+            "description": "The value of the camera movement",
+            "minimum": -10,
             "title": "Movement Value",
-            "description": "The value of the camera movement"
+            "type": "integer"
           }
-        }
+        },
+        "title": "CameraControl",
+        "type": "object"
       },
       "File": {
         "required": [
           "url"
         ],
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "title": "File",
         "properties": {
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
+          },
           "file_size": {
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -243,48 +272,26 @@
                 "type": "null"
               }
             ],
-            "examples": [
-              4404019
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
-          },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type",
-            "description": "The mime type of the file."
+            "title": "File Size"
           },
           "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name"
           }
-        }
+        },
+        "title": "File",
+        "type": "object"
       }
     }
   },

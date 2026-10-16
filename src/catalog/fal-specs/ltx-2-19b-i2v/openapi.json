@@ -71,6 +71,12 @@
         ]
       },
       "Ltx219bImageToVideoInput": {
+        "title": "LTX2ImageToVideoInput",
+        "required": [
+          "prompt",
+          "image_url"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "image_url",
@@ -98,127 +104,58 @@
           "end_image_strength"
         ],
         "properties": {
-          "interpolation_direction": {
-            "description": "The direction to interpolate the image sequence in. 'Forward' goes from the start image to the end image, 'Backward' goes from the end image to the start image.",
-            "enum": [
-              "forward",
-              "backward"
-            ],
-            "type": "string",
-            "default": "forward",
-            "title": "Interpolation Direction"
-          },
-          "fps": {
-            "minimum": 1,
-            "description": "The frames per second of the generated video.",
-            "maximum": 60,
-            "type": "number",
-            "default": 25,
-            "title": "FPS"
-          },
-          "video_write_mode": {
-            "description": "The write mode of the generated video.",
-            "enum": [
-              "fast",
-              "balanced",
-              "small"
-            ],
-            "type": "string",
-            "default": "balanced",
-            "title": "Video Write Mode"
-          },
-          "prompt": {
-            "description": "The prompt used for the generation.",
-            "type": "string",
+          "image_url": {
+            "title": "Image URL",
             "examples": [
-              "A woman stands still amid a busy neon-lit street at night. The camera slowly dollies in toward her face as people blur past, their motion emphasizing her calm presence. City lights flicker and reflections shift across her denim jacket."
+              "https://storage.googleapis.com/falserverless/example_inputs/ltxv-2-i2v-input.jpg"
             ],
-            "title": "Prompt"
-          },
-          "enable_safety_checker": {
-            "description": "Whether to enable the safety checker.",
-            "type": "boolean",
-            "default": true,
-            "title": "Enable Safety Checker"
-          },
-          "guidance_scale": {
-            "minimum": 1,
-            "description": "The guidance scale to use.",
-            "maximum": 10,
-            "type": "number",
-            "default": 3,
-            "title": "Guidance Scale"
-          },
-          "num_inference_steps": {
-            "minimum": 8,
-            "description": "The number of inference steps to use.",
-            "maximum": 50,
-            "type": "integer",
-            "default": 40,
-            "title": "Number of Inference Steps"
-          },
-          "sync_mode": {
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "type": "boolean",
-            "default": false,
-            "title": "Sync Mode"
-          },
-          "enable_prompt_expansion": {
-            "description": "Whether to enable prompt expansion.",
-            "type": "boolean",
-            "default": true,
-            "title": "Enable Prompt Expansion"
+            "type": "string",
+            "description": "The URL of the image to generate the video from."
           },
           "acceleration": {
+            "title": "Acceleration",
+            "examples": [
+              "regular"
+            ],
+            "type": "string",
+            "default": "regular",
             "description": "The acceleration level to use.",
             "enum": [
               "none",
               "regular",
               "high",
               "full"
-            ],
-            "type": "string",
-            "default": "regular",
-            "title": "Acceleration",
-            "examples": [
-              "regular"
             ]
           },
-          "video_size": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ImageSize"
-              },
-              {
-                "enum": [
-                  "auto",
-                  "square_hd",
-                  "square",
-                  "portrait_4_3",
-                  "portrait_16_9",
-                  "landscape_4_3",
-                  "landscape_16_9"
-                ],
-                "type": "string"
-              }
-            ],
-            "description": "The size of the generated video.",
-            "default": "auto",
-            "title": "Video Size"
+          "video_quality": {
+            "title": "Video Quality",
+            "description": "The quality of the generated video.",
+            "default": "high",
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "maximum"
+            ]
           },
-          "end_image_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The URL of the image to use as the end of the video.",
-            "title": "End Image URL"
+          "num_inference_steps": {
+            "maximum": 50,
+            "description": "The number of inference steps to use.",
+            "type": "integer",
+            "title": "Number of Inference Steps",
+            "minimum": 8,
+            "default": 40
+          },
+          "generate_audio": {
+            "title": "Generate Audio",
+            "description": "Whether to generate audio for the video.",
+            "type": "boolean",
+            "default": true
           },
           "seed": {
+            "title": "Seed",
+            "description": "The seed for the random number generator.",
             "anyOf": [
               {
                 "type": "integer"
@@ -226,53 +163,100 @@
               {
                 "type": "null"
               }
+            ]
+          },
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "A woman stands still amid a busy neon-lit street at night. The camera slowly dollies in toward her face as people blur past, their motion emphasizing her calm presence. City lights flicker and reflections shift across her denim jacket."
             ],
-            "description": "The seed for the random number generator.",
-            "title": "Seed"
+            "type": "string",
+            "description": "The prompt used for the generation."
+          },
+          "video_write_mode": {
+            "title": "Video Write Mode",
+            "description": "The write mode of the generated video.",
+            "default": "balanced",
+            "type": "string",
+            "enum": [
+              "fast",
+              "balanced",
+              "small"
+            ]
+          },
+          "interpolation_direction": {
+            "title": "Interpolation Direction",
+            "description": "The direction to interpolate the image sequence in. 'Forward' goes from the start image to the end image, 'Backward' goes from the end image to the start image.",
+            "default": "forward",
+            "type": "string",
+            "enum": [
+              "forward",
+              "backward"
+            ]
           },
           "camera_lora_scale": {
-            "minimum": 0,
-            "description": "The scale of the camera LoRA to use. This allows you to control the camera movement of the generated video more accurately than just prompting the model to move the camera.",
             "maximum": 1,
+            "description": "The scale of the camera LoRA to use. This allows you to control the camera movement of the generated video more accurately than just prompting the model to move the camera.",
             "type": "number",
-            "default": 1,
-            "title": "Camera LoRA Scale"
+            "title": "Camera LoRA Scale",
+            "minimum": 0,
+            "default": 1
           },
-          "negative_prompt": {
-            "description": "The negative prompt to generate the video from.",
-            "type": "string",
-            "default": "blurry, out of focus, overexposed, underexposed, low contrast, washed out colors, excessive noise, grainy texture, poor lighting, flickering, motion blur, distorted proportions, unnatural skin tones, deformed facial features, asymmetrical face, missing facial features, extra limbs, disfigured hands, wrong hand count, artifacts around text, inconsistent perspective, camera shake, incorrect depth of field, background too sharp, background clutter, distracting reflections, harsh shadows, inconsistent lighting direction, color banding, cartoonish rendering, 3D CGI look, unrealistic materials, uncanny valley effect, incorrect ethnicity, wrong gender, exaggerated expressions, wrong gaze direction, mismatched lip sync, silent or muted audio, distorted voice, robotic voice, echo, background noise, off-sync audio,incorrect dialogue, added dialogue, repetitive speech, jittery movement, awkward pauses, incorrect timing, unnatural transitions, inconsistent framing, tilted camera, flat lighting, inconsistent tone, cinematic oversaturation, stylized filters, or AI artifacts.",
-            "title": "Negative Prompt"
+          "fps": {
+            "maximum": 60,
+            "description": "The frames per second of the generated video.",
+            "type": "number",
+            "title": "FPS",
+            "minimum": 1,
+            "default": 25
+          },
+          "enable_prompt_expansion": {
+            "title": "Enable Prompt Expansion",
+            "description": "Whether to enable prompt expansion.",
+            "type": "boolean",
+            "default": true
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "description": "Whether to enable the safety checker.",
+            "type": "boolean",
+            "default": true
           },
           "end_image_strength": {
-            "minimum": 0,
-            "description": "The strength of the end image to use for the video generation.",
             "maximum": 1,
+            "description": "The strength of the end image to use for the video generation.",
             "type": "number",
-            "default": 1,
-            "title": "End Image Strength"
-          },
-          "video_quality": {
-            "description": "The quality of the generated video.",
-            "enum": [
-              "low",
-              "medium",
-              "high",
-              "maximum"
-            ],
-            "type": "string",
-            "default": "high",
-            "title": "Video Quality"
+            "title": "End Image Strength",
+            "minimum": 0,
+            "default": 1
           },
           "num_frames": {
-            "minimum": 9,
-            "description": "The number of frames to generate.",
             "maximum": 481,
+            "description": "The number of frames to generate.",
+            "title": "Number of Frames",
             "type": "integer",
-            "default": 121,
-            "title": "Number of Frames"
+            "minimum": 9,
+            "default": 121
+          },
+          "video_output_type": {
+            "title": "Video Output Type",
+            "description": "The output type of the generated video.",
+            "default": "X264 (.mp4)",
+            "type": "string",
+            "enum": [
+              "X264 (.mp4)",
+              "VP9 (.webm)",
+              "PRORES4444 (.mov)",
+              "GIF (.gif)"
+            ]
           },
           "camera_lora": {
+            "title": "Camera LoRA",
+            "examples": [
+              "none"
+            ],
+            "type": "string",
+            "default": "none",
             "description": "The camera LoRA to use. This allows you to control the camera movement of the generated video more accurately than just prompting the model to move the camera.",
             "enum": [
               "dolly_in",
@@ -283,137 +267,158 @@
               "jib_down",
               "static",
               "none"
-            ],
-            "type": "string",
-            "default": "none",
-            "title": "Camera LoRA",
-            "examples": [
-              "none"
             ]
           },
-          "video_output_type": {
-            "description": "The output type of the generated video.",
-            "enum": [
-              "X264 (.mp4)",
-              "VP9 (.webm)",
-              "PRORES4444 (.mov)",
-              "GIF (.gif)"
-            ],
-            "type": "string",
-            "default": "X264 (.mp4)",
-            "title": "Video Output Type"
-          },
-          "image_url": {
-            "description": "The URL of the image to generate the video from.",
-            "type": "string",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/ltxv-2-i2v-input.jpg"
-            ],
-            "title": "Image URL"
-          },
-          "generate_audio": {
-            "description": "Whether to generate audio for the video.",
-            "type": "boolean",
-            "default": true,
-            "title": "Generate Audio"
+          "image_strength": {
+            "maximum": 1,
+            "description": "The strength of the image to use for the video generation.",
+            "type": "number",
+            "title": "Image Strength",
+            "minimum": 0,
+            "default": 1
           },
           "use_multiscale": {
+            "title": "Use Multi-Scale",
             "description": "Whether to use multi-scale generation. If True, the model will generate the video at a smaller scale first, then use the smaller video to guide the generation of a video at or above your requested size. This results in better coherence and details.",
             "type": "boolean",
-            "default": true,
-            "title": "Use Multi-Scale"
+            "default": true
           },
-          "image_strength": {
-            "minimum": 0,
-            "description": "The strength of the image to use for the video generation.",
-            "maximum": 1,
+          "video_size": {
+            "title": "Video Size",
+            "description": "The size of the generated video.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageSize"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "auto",
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9"
+                ]
+              }
+            ],
+            "default": "auto"
+          },
+          "negative_prompt": {
+            "title": "Negative Prompt",
+            "description": "The negative prompt to generate the video from.",
+            "type": "string",
+            "default": "blurry, out of focus, overexposed, underexposed, low contrast, washed out colors, excessive noise, grainy texture, poor lighting, flickering, motion blur, distorted proportions, unnatural skin tones, deformed facial features, asymmetrical face, missing facial features, extra limbs, disfigured hands, wrong hand count, artifacts around text, inconsistent perspective, camera shake, incorrect depth of field, background too sharp, background clutter, distracting reflections, harsh shadows, inconsistent lighting direction, color banding, cartoonish rendering, 3D CGI look, unrealistic materials, uncanny valley effect, incorrect ethnicity, wrong gender, exaggerated expressions, wrong gaze direction, mismatched lip sync, silent or muted audio, distorted voice, robotic voice, echo, background noise, off-sync audio,incorrect dialogue, added dialogue, repetitive speech, jittery movement, awkward pauses, incorrect timing, unnatural transitions, inconsistent framing, tilted camera, flat lighting, inconsistent tone, cinematic oversaturation, stylized filters, or AI artifacts."
+          },
+          "end_image_url": {
+            "title": "End Image URL",
+            "description": "The URL of the image to use as the end of the video.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "guidance_scale": {
+            "maximum": 10,
+            "description": "The guidance scale to use.",
             "type": "number",
-            "default": 1,
-            "title": "Image Strength"
+            "title": "Guidance Scale",
+            "minimum": 1,
+            "default": 3
+          },
+          "sync_mode": {
+            "title": "Sync Mode",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "type": "boolean",
+            "default": false
           }
-        },
-        "type": "object",
-        "required": [
-          "prompt",
-          "image_url"
-        ],
-        "title": "LTX2ImageToVideoInput"
+        }
       },
       "Ltx219bImageToVideoOutput": {
+        "title": "LTX2ImageToVideoOutput",
+        "required": [
+          "video",
+          "seed",
+          "prompt"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "video",
           "seed",
           "prompt"
         ],
         "properties": {
-          "prompt": {
-            "description": "The prompt used for the generation.",
-            "type": "string",
-            "examples": [
-              "Continue the scene naturally, maintaining the same style and motion."
-            ],
-            "title": "Prompt"
-          },
-          "seed": {
-            "description": "The seed used for the random number generator.",
-            "type": "integer",
-            "examples": [
-              866232447
-            ],
-            "title": "Seed"
-          },
           "video": {
-            "description": "The generated video.",
             "$ref": "#/components/schemas/VideoFile",
             "examples": [
               {
-                "file_name": "CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
-                "content_type": "video/mp4",
-                "num_frames": 257,
-                "url": "https://v3b.fal.media/files/b/0a88289e/CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
-                "duration": 10.28,
                 "width": 1248,
+                "num_frames": 257,
                 "height": 704,
-                "fps": 25
+                "content_type": "video/mp4",
+                "url": "https://v3b.fal.media/files/b/0a88289e/CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
+                "fps": 25,
+                "file_name": "CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
+                "duration": 10.28
               }
-            ]
+            ],
+            "description": "The generated video."
+          },
+          "seed": {
+            "title": "Seed",
+            "examples": [
+              866232447
+            ],
+            "type": "integer",
+            "description": "The seed used for the random number generator."
+          },
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "Continue the scene naturally, maintaining the same style and motion."
+            ],
+            "type": "string",
+            "description": "The prompt used for the generation."
           }
-        },
-        "type": "object",
-        "required": [
-          "video",
-          "seed",
-          "prompt"
-        ],
-        "title": "LTX2ImageToVideoOutput"
+        }
       },
       "ImageSize": {
+        "title": "ImageSize",
+        "type": "object",
         "x-fal-order-properties": [
           "width",
           "height"
         ],
         "properties": {
           "width": {
-            "description": "The width of the generated image.",
-            "maximum": 14142,
-            "type": "integer",
-            "exclusiveMinimum": 0,
             "title": "Width",
+            "description": "The width of the generated image.",
+            "exclusiveMinimum": 0,
+            "type": "integer",
+            "maximum": 14142,
             "default": 512
           },
           "height": {
-            "description": "The height of the generated image.",
-            "maximum": 14142,
-            "type": "integer",
-            "exclusiveMinimum": 0,
             "title": "Height",
+            "description": "The height of the generated image.",
+            "exclusiveMinimum": 0,
+            "type": "integer",
+            "maximum": 14142,
             "default": 512
           }
-        },
-        "type": "object",
-        "title": "ImageSize"
+        }
       },
       "VideoFile": {
+        "title": "VideoFile",
+        "required": [
+          "url"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -426,37 +431,21 @@
           "num_frames"
         ],
         "properties": {
-          "file_name": {
+          "width": {
+            "title": "Width",
+            "description": "The width of the video",
             "anyOf": [
               {
-                "type": "string"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name"
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type"
+            ]
           },
           "num_frames": {
+            "title": "Num Frames",
+            "description": "The number of frames in the video",
             "anyOf": [
               {
                 "type": "integer"
@@ -464,43 +453,26 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The number of frames in the video",
-            "title": "Num Frames"
+            ]
           },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
-          },
-          "duration": {
+          "height": {
+            "title": "Height",
+            "description": "The height of the video",
             "anyOf": [
               {
-                "type": "number"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
-            ],
-            "description": "The duration of the video",
-            "title": "Duration"
+            ]
           },
           "file_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "examples": [
               4404019
             ],
-            "title": "File Size"
-          },
-          "width": {
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -508,23 +480,31 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The width of the video",
-            "title": "Width"
+            ]
           },
-          "height": {
+          "content_type": {
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string"
               },
               {
                 "type": "null"
               }
-            ],
-            "description": "The height of the video",
-            "title": "Height"
+            ]
+          },
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
           },
           "fps": {
+            "title": "Fps",
+            "description": "The FPS of the video",
             "anyOf": [
               {
                 "type": "number"
@@ -532,16 +512,36 @@
               {
                 "type": "null"
               }
+            ]
+          },
+          "file_name": {
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
             ],
-            "description": "The FPS of the video",
-            "title": "Fps"
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duration": {
+            "title": "Duration",
+            "description": "The duration of the video",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
-        },
-        "type": "object",
-        "required": [
-          "url"
-        ],
-        "title": "VideoFile"
+        }
       }
     }
   },

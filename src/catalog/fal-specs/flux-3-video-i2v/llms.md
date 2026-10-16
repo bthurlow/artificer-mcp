@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will be charged at **0.17** $ per second of generated video at 720p, and **0.29** $ per second at 1080p. 
+Your request will be charged at **0.17** $ per second of generated video at 720p, **0.29** $ per second at 1080p,  **0.32** $ per second at 2K (1440p), and **0.47** $ per second at 4K (2160p).
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -40,9 +40,9 @@ The API accepts the following input parameters:
   - Options: `"auto"`, `"21:9"`, `"2:1"`, `"16:9"`, `"4:3"`, `"1:1"`, `"3:4"`, `"9:16"`
 
 - **`resolution`** (`ResolutionEnum`, _optional_):
-  Resolution of the generated video. Default value: `"720p"`
+  Resolution of the generated video. `1080p`, `1440p` (2K) and `2160p` (4K) are finished by the video upsampler; exact dimensions depend on the aspect ratio. Default value: `"720p"`
   - Default: `"720p"`
-  - Options: `"720p"`, `"1080p"`
+  - Options: `"720p"`, `"1080p"`, `"1440p"`, `"2160p"`
 
 - **`duration`** (`DurationEnum`, _optional_):
   Duration of the generated video in seconds. `auto` lets the model choose. Default value: `"auto"`

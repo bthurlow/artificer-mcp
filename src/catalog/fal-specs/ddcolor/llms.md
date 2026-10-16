@@ -54,7 +54,7 @@ The API returns the following output format:
 
 - **`image`** (`Image`, _required_):
   The generated image file info.
-  - Examples: {"url":"https://storage.googleapis.com/falserverless/gallery/5fcaaac6d1344d998ebb9703102c6c63.png","file_name":"36d3ca4791a647678b2ff01a35c87f5a.png","width":512,"content_type":"image/png","height":512,"file_size":423052}
+  - Examples: {"url":"https://storage.googleapis.com/falserverless/gallery/5fcaaac6d1344d998ebb9703102c6c63.png","width":512,"file_size":423052,"file_name":"36d3ca4791a647678b2ff01a35c87f5a.png","height":512,"content_type":"image/png"}
 
 
 
@@ -64,11 +64,11 @@ The API returns the following output format:
 {
   "image": {
     "url": "https://storage.googleapis.com/falserverless/gallery/5fcaaac6d1344d998ebb9703102c6c63.png",
-    "file_name": "36d3ca4791a647678b2ff01a35c87f5a.png",
     "width": 512,
-    "content_type": "image/png",
+    "file_size": 423052,
+    "file_name": "36d3ca4791a647678b2ff01a35c87f5a.png",
     "height": 512,
-    "file_size": 423052
+    "content_type": "image/png"
   }
 }
 ```

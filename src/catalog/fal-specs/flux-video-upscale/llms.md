@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Billing is calculated per second of output video, by resolution and mode. In precise mode, **1080p** costs **$0.14** per second, **2K** costs **$0.25** per second, and **4K** costs **$0.55** per second. Creative mode costs more at each tier: **$0.20**, **$0.35**, and **$0.79** per second respectively. A **10-second** **1080p** clip runs **$1.40** in precise mode or **$2.00** in creative mode. You are charged for the delivered output only.
+Billing is calculated per second of output video, by resolution and mode. In precise mode, **1080p** costs **$0.084** per second, **2K** costs **$0.15** per second, and **4K** costs **$0.33** per second. Creative mode costs more at each tier: **$0.12**, **$0.21**, and **$0.474** per second respectively. A **10-second** **1080p** clip runs **$0.84** in precise mode or **$1.20** in creative mode. You are charged for the delivered output only.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

@@ -71,42 +71,47 @@
         ]
       },
       "UpscaleImageCreativeInput": {
-        "required": [
-          "image_url"
-        ],
-        "type": "object",
         "properties": {
-          "image_url": {
-            "examples": [
-              "https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_poor_1.jpeg"
-            ],
+          "upscale_factor": {
+            "type": "number",
+            "default": 2,
+            "description": "Factor to upscale the image by (e.g. 2.0 doubles width and height)",
+            "minimum": 1,
+            "maximum": 4,
+            "title": "Upscale Factor"
+          },
+          "crop_to_fill": {
+            "type": "boolean",
+            "default": false,
+            "title": "Crop To Fill"
+          },
+          "model": {
             "type": "string",
-            "minLength": 1,
-            "description": "Url of the image to be upscaled",
-            "title": "Image Url"
+            "default": "Bloom 2",
+            "description": "Creative (Bloom) upscaling model. Bloom 2 is the latest and most capable; Bloom creatively upscales and transforms AI-generated images; Bloom Realism biases the added detail toward photorealism.",
+            "enum": [
+              "Bloom 2",
+              "Bloom",
+              "Bloom Realism"
+            ],
+            "title": "Model"
           },
           "enable_safety_checker": {
             "type": "boolean",
-            "description": "Authorized callers may set false to request relaxed screening.",
             "default": true,
+            "description": "Authorized callers may set false to request relaxed screening.",
             "title": "Enable Safety Checker"
           },
-          "creativity": {
-            "title": "Creativity",
-            "description": "Creativity level (1-9). Higher values produce more creative/hallucinated details. Applies to Bloom 2 only.",
-            "anyOf": [
-              {
-                "maximum": 9,
-                "type": "integer",
-                "minimum": 1
-              },
-              {
-                "type": "null"
-              }
+          "image_url": {
+            "type": "string",
+            "description": "Url of the image to be upscaled",
+            "title": "Image Url",
+            "minLength": 1,
+            "examples": [
+              "https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_poor_1.jpeg"
             ]
           },
           "color_preservation": {
-            "title": "Color Preservation",
             "description": "Preserve the source image's colors in the output. Applies to Bloom 2 only.",
             "anyOf": [
               {
@@ -115,23 +120,34 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Color Preservation"
           },
-          "upscale_factor": {
-            "maximum": 4,
-            "type": "number",
-            "default": 2,
-            "minimum": 1,
-            "description": "Factor to upscale the image by (e.g. 2.0 doubles width and height)",
-            "title": "Upscale Factor"
+          "output_format": {
+            "type": "string",
+            "default": "jpeg",
+            "description": "Output format of the upscaled image.",
+            "enum": [
+              "jpeg",
+              "png"
+            ],
+            "title": "Output Format"
           },
-          "crop_to_fill": {
-            "type": "boolean",
-            "default": false,
-            "title": "Crop To Fill"
+          "creativity": {
+            "description": "Creativity level (1-9). Higher values produce more creative/hallucinated details. Applies to Bloom 2 only.",
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Creativity"
           },
           "autoprompt": {
-            "title": "Autoprompt",
             "description": "Enable automatic prompt generation. Applies to Bloom 2 only; Topaz defaults it to true when omitted.",
             "anyOf": [
               {
@@ -140,30 +156,11 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "model": {
-            "enum": [
-              "Bloom 2",
-              "Bloom",
-              "Bloom Realism"
             ],
-            "type": "string",
-            "default": "Bloom 2",
-            "description": "Creative (Bloom) upscaling model. Bloom 2 is the latest and most capable; Bloom creatively upscales and transforms AI-generated images; Bloom Realism biases the added detail toward photorealism.",
-            "title": "Model"
-          },
-          "output_format": {
-            "title": "Output Format",
-            "type": "string",
-            "description": "Output format of the upscaled image.",
-            "default": "jpeg",
-            "enum": [
-              "jpeg",
-              "png"
-            ]
+            "title": "Autoprompt"
           }
         },
+        "type": "object",
         "x-fal-order-properties": [
           "image_url",
           "model",
@@ -175,35 +172,30 @@
           "output_format",
           "enable_safety_checker"
         ],
-        "title": "ImageCreativeUpscaleRequest"
+        "title": "ImageCreativeUpscaleRequest",
+        "required": [
+          "image_url"
+        ]
       },
       "UpscaleImageCreativeOutput": {
-        "required": [
-          "image"
-        ],
-        "type": "object",
         "properties": {
           "image": {
-            "$ref": "#/components/schemas/File",
-            "description": "The upscaled image."
+            "description": "The upscaled image.",
+            "$ref": "#/components/schemas/File"
           }
         },
+        "type": "object",
         "x-fal-order-properties": [
           "image"
         ],
-        "title": "ImageUpscaleOutput"
+        "title": "ImageUpscaleOutput",
+        "required": [
+          "image"
+        ]
       },
       "File": {
-        "required": [
-          "url"
-        ],
-        "type": "object",
         "properties": {
           "file_name": {
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
             "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
@@ -212,33 +204,13 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "file_size": {
-            "title": "File Size",
-            "examples": [
-              4404019
             ],
-            "description": "The size of the file in bytes.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
             ]
-          },
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
           },
           "content_type": {
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
             "description": "The mime type of the file.",
             "anyOf": [
               {
@@ -247,16 +219,44 @@
               {
                 "type": "null"
               }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
             ]
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "examples": [
+              4404019
+            ]
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
           }
         },
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "title": "File"
+        "title": "File",
+        "required": [
+          "url"
+        ]
       }
     }
   },

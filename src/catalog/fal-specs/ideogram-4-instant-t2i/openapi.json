@@ -71,6 +71,11 @@
         ]
       },
       "V4InstantInput": {
+        "title": "LightningFastTextToImageInput",
+        "required": [
+          "prompt"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "expansion_model",
@@ -82,17 +87,38 @@
           "output_format"
         ],
         "properties": {
-          "num_images": {
-            "type": "integer",
-            "description": "Number of images to generate.",
-            "minimum": 1,
-            "title": "Number of Images",
-            "default": 1,
-            "maximum": 4
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "type": "boolean",
+            "default": true
+          },
+          "output_format": {
+            "title": "Output Format",
+            "description": "The format of the generated image.",
+            "default": "jpeg",
+            "type": "string",
+            "enum": [
+              "jpeg",
+              "png"
+            ]
+          },
+          "expansion_model": {
+            "title": "Expansion Model",
+            "examples": [
+              "Medium"
+            ],
+            "description": "Which model expands the prompt. 'None' disables expansion; 'Medium' uses the fast magic prompt model.",
+            "default": "Medium",
+            "type": "string",
+            "enum": [
+              "None",
+              "Medium"
+            ]
           },
           "seed": {
-            "description": "The seed to use for generation. If not provided, a random seed will be used.",
             "title": "Seed",
+            "description": "The seed to use for generation. If not provided, a random seed will be used.",
             "anyOf": [
               {
                 "type": "integer"
@@ -102,28 +128,44 @@
               }
             ]
           },
-          "enable_safety_checker": {
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "title": "Enable Safety Checker",
-            "default": true,
-            "type": "boolean"
+          "prompt": {
+            "title": "Prompt",
+            "description": "The prompt to generate an image from.",
+            "examples": [
+              "A red panda perched on a mossy branch in a misty forest at sunrise"
+            ],
+            "type": "string"
+          },
+          "num_images": {
+            "maximum": 4,
+            "description": "Number of images to generate.",
+            "title": "Number of Images",
+            "type": "integer",
+            "minimum": 1,
+            "default": 1
+          },
+          "sync_mode": {
+            "title": "Sync Mode",
+            "description": "If `True`, the image is returned as a data URI and is not stored.",
+            "type": "boolean",
+            "default": false
           },
           "image_size": {
+            "title": "Image Size",
             "description": "The resolution of the generated image.",
             "x-fal": {
               "min_height": 512,
-              "min_width": 512,
+              "multiple_of": 16,
               "max_width": 2048,
               "max_height": 2048,
-              "multiple_of": 16
+              "min_width": 512
             },
-            "title": "Image Size",
-            "default": "square_hd",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
               },
               {
+                "type": "string",
                 "enum": [
                   "square_hd",
                   "square",
@@ -131,56 +173,23 @@
                   "portrait_16_9",
                   "landscape_4_3",
                   "landscape_16_9"
-                ],
-                "type": "string"
+                ]
               }
-            ]
-          },
-          "sync_mode": {
-            "description": "If `True`, the image is returned as a data URI and is not stored.",
-            "title": "Sync Mode",
-            "default": false,
-            "type": "boolean"
-          },
-          "prompt": {
-            "description": "The prompt to generate an image from.",
-            "title": "Prompt",
-            "examples": [
-              "A red panda perched on a mossy branch in a misty forest at sunrise"
             ],
-            "type": "string"
-          },
-          "expansion_model": {
-            "enum": [
-              "None",
-              "Medium"
-            ],
-            "description": "Which model expands the prompt. 'None' disables expansion; 'Medium' uses the fast magic prompt model.",
-            "examples": [
-              "Medium"
-            ],
-            "title": "Expansion Model",
-            "default": "Medium",
-            "type": "string"
-          },
-          "output_format": {
-            "enum": [
-              "jpeg",
-              "png"
-            ],
-            "description": "The format of the generated image.",
-            "title": "Output Format",
-            "default": "jpeg",
-            "type": "string"
+            "default": "square_hd"
           }
-        },
-        "required": [
-          "prompt"
-        ],
-        "title": "LightningFastTextToImageInput",
-        "type": "object"
+        }
       },
       "V4InstantOutput": {
+        "title": "IdeogramV4Output",
+        "required": [
+          "images",
+          "timings",
+          "seed",
+          "has_nsfw_concepts",
+          "prompt"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "images",
           "timings",
@@ -189,24 +198,9 @@
           "prompt"
         ],
         "properties": {
-          "timings": {
-            "title": "Timings",
-            "additionalProperties": {
-              "type": "number"
-            },
-            "type": "object"
-          },
-          "seed": {
-            "description": "\n            Seed of the generated Image. It will be the same value of the one passed in the\n            input or the randomly generated that was used in case none was passed.\n        ",
-            "title": "Seed",
-            "type": "integer"
-          },
           "images": {
-            "description": "The generated images.",
-            "items": {
-              "$ref": "#/components/schemas/ImageFile"
-            },
             "title": "Images",
+            "description": "The generated images.",
             "examples": [
               [
                 {
@@ -214,59 +208,70 @@
                 }
               ]
             ],
+            "items": {
+              "$ref": "#/components/schemas/ImageFile"
+            },
             "type": "array"
+          },
+          "timings": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Timings",
+            "type": "object"
           },
           "has_nsfw_concepts": {
+            "title": "Has Nsfw Concepts",
             "description": "Whether the generated images contain NSFW concepts.",
+            "type": "array",
             "items": {
               "type": "boolean"
-            },
-            "title": "Has Nsfw Concepts",
-            "type": "array"
+            }
+          },
+          "seed": {
+            "title": "Seed",
+            "description": "\n            Seed of the generated Image. It will be the same value of the one passed in the\n            input or the randomly generated that was used in case none was passed.\n        ",
+            "type": "integer"
           },
           "prompt": {
-            "description": "The prompt used for generating the image.",
             "title": "Prompt",
+            "description": "The prompt used for generating the image.",
             "type": "string"
           }
-        },
-        "required": [
-          "images",
-          "timings",
-          "seed",
-          "has_nsfw_concepts",
-          "prompt"
-        ],
-        "title": "IdeogramV4Output",
-        "type": "object"
+        }
       },
       "ImageSize": {
+        "title": "ImageSize",
+        "type": "object",
         "x-fal-order-properties": [
           "width",
           "height"
         ],
         "properties": {
-          "height": {
-            "type": "integer",
-            "description": "The height of the generated image.",
-            "exclusiveMinimum": 0,
-            "title": "Height",
-            "default": 512,
-            "maximum": 14142
-          },
           "width": {
-            "type": "integer",
+            "maximum": 14142,
             "description": "The width of the generated image.",
-            "exclusiveMinimum": 0,
+            "type": "integer",
             "title": "Width",
-            "default": 512,
-            "maximum": 14142
+            "exclusiveMinimum": 0,
+            "default": 512
+          },
+          "height": {
+            "maximum": 14142,
+            "description": "The height of the generated image.",
+            "type": "integer",
+            "title": "Height",
+            "exclusiveMinimum": 0,
+            "default": 512
           }
-        },
-        "title": "ImageSize",
-        "type": "object"
+        }
       },
       "ImageFile": {
+        "title": "ImageFile",
+        "required": [
+          "url"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -276,26 +281,14 @@
           "height"
         ],
         "properties": {
-          "width": {
-            "description": "The width of the image",
-            "title": "Width",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "url": {
-            "description": "The URL where the file can be downloaded from.",
             "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
             "type": "string"
           },
-          "height": {
-            "description": "The height of the image",
-            "title": "Height",
+          "width": {
+            "title": "Width",
+            "description": "The width of the image",
             "anyOf": [
               {
                 "type": "integer"
@@ -305,15 +298,12 @@
               }
             ]
           },
-          "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
+          "height": {
+            "title": "Height",
+            "description": "The height of the image",
             "anyOf": [
               {
-                "type": "string"
+                "type": "integer"
               },
               {
                 "type": "null"
@@ -321,8 +311,8 @@
             ]
           },
           "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
@@ -336,8 +326,8 @@
             ]
           },
           "file_size": {
-            "description": "The size of the file in bytes.",
             "title": "File Size",
+            "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ],
@@ -349,13 +339,23 @@
                 "type": "null"
               }
             ]
+          },
+          "content_type": {
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
-        },
-        "required": [
-          "url"
-        ],
-        "title": "ImageFile",
-        "type": "object"
+        }
       }
     }
   },

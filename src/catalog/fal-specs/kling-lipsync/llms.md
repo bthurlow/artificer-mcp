@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Disabling safety checks requires account authorization; unauthorized requests are always checked. Default value: `true`
+  - Default: `true`
+
 - **`video_url`** (`string`, _required_):
   The URL of the video to generate the lip sync for. Supports .mp4/.mov, ≤100MB, 2–10s, 720p/1080p only, width/height 720–1920px.
   - Examples: "https://fal.media/files/koala/8teUPbRRMtAUTORDvqy0l.mp4"
@@ -44,6 +48,16 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "video_url": "https://fal.media/files/koala/8teUPbRRMtAUTORDvqy0l.mp4",
+  "audio_url": "https://storage.googleapis.com/falserverless/kling/kling-audio.mp3"
+}
+```
+
+**Full Example**:
+
+```json
+{
+  "enable_safety_checker": true,
   "video_url": "https://fal.media/files/koala/8teUPbRRMtAUTORDvqy0l.mp4",
   "audio_url": "https://storage.googleapis.com/falserverless/kling/kling-audio.mp3"
 }

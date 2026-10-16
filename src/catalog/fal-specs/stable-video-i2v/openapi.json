@@ -71,8 +71,29 @@
         ]
       },
       "StableVideoInput": {
+        "required": [
+          "image_url"
+        ],
         "properties": {
+          "motion_bucket_id": {
+            "type": "integer",
+            "title": "Motion Bucket Id",
+            "default": 127,
+            "description": "\n            The motion bucket id determines the motion of the generated video. The\n            higher the number, the more motion there will be.\n        ",
+            "maximum": 255,
+            "minimum": 1
+          },
+          "cond_aug": {
+            "type": "number",
+            "title": "Cond Aug",
+            "default": 0.02,
+            "description": "\n            The conditoning augmentation determines the amount of noise that will be\n            added to the conditioning frame. The higher the number, the more noise\n            there will be, and the less the video will look like the initial image.\n            Increase it for more motion.\n        ",
+            "maximum": 10,
+            "minimum": 0
+          },
           "seed": {
+            "title": "Seed",
+            "description": "\n            The same seed and the same prompt given to the same version of Stable Diffusion\n            will output the same image every time.\n        ",
             "anyOf": [
               {
                 "type": "integer"
@@ -80,28 +101,9 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Seed",
-            "description": "\n            The same seed and the same prompt given to the same version of Stable Diffusion\n            will output the same image every time.\n        "
-          },
-          "fps": {
-            "type": "integer",
-            "minimum": 10,
-            "title": "Fps",
-            "description": "The frames per second of the generated video.",
-            "default": 25,
-            "maximum": 100
-          },
-          "cond_aug": {
-            "type": "number",
-            "minimum": 0,
-            "title": "Cond Aug",
-            "description": "\n            The conditoning augmentation determines the amount of noise that will be\n            added to the conditioning frame. The higher the number, the more noise\n            there will be, and the less the video will look like the initial image.\n            Increase it for more motion.\n        ",
-            "default": 0.02,
-            "maximum": 10
+            ]
           },
           "image_url": {
-            "minLength": 1,
             "title": "Image Url",
             "examples": [
               "https://storage.googleapis.com/falserverless/model_tests/svd/rocket.png",
@@ -109,16 +111,17 @@
               "https://storage.googleapis.com/falserverless/model_tests/svd/ship.png",
               "https://storage.googleapis.com/falserverless/model_tests/svd/rocket2.png"
             ],
+            "description": "The URL of the image to use as a starting point for the generation.",
             "type": "string",
-            "description": "The URL of the image to use as a starting point for the generation."
+            "minLength": 1
           },
-          "motion_bucket_id": {
+          "fps": {
             "type": "integer",
-            "minimum": 1,
-            "title": "Motion Bucket Id",
-            "description": "\n            The motion bucket id determines the motion of the generated video. The\n            higher the number, the more motion there will be.\n        ",
-            "default": 127,
-            "maximum": 255
+            "title": "Fps",
+            "default": 25,
+            "description": "The frames per second of the generated video.",
+            "maximum": 100,
+            "minimum": 10
           }
         },
         "title": "ImageInput",
@@ -129,17 +132,18 @@
           "cond_aug",
           "fps"
         ],
-        "type": "object",
-        "required": [
-          "image_url"
-        ]
+        "type": "object"
       },
       "StableVideoOutput": {
+        "required": [
+          "video",
+          "seed"
+        ],
         "properties": {
           "video": {
+            "$ref": "#/components/schemas/File",
             "title": "Video",
-            "description": "Generated video",
-            "$ref": "#/components/schemas/File"
+            "description": "Generated video"
           },
           "seed": {
             "title": "Seed",
@@ -152,15 +156,19 @@
           "video",
           "seed"
         ],
-        "type": "object",
-        "required": [
-          "video",
-          "seed"
-        ]
+        "type": "object"
       },
       "File": {
+        "required": [
+          "url"
+        ],
         "properties": {
           "file_size": {
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -168,47 +176,42 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Size",
+            ]
+          },
+          "file_name": {
+            "title": "File Name",
             "examples": [
-              4404019
+              "z9RV14K95DvU.png"
             ],
-            "description": "The size of the file in bytes."
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "url": {
             "title": "Url",
             "description": "The URL where the file can be downloaded from.",
             "type": "string"
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file."
           }
         },
         "title": "File",
@@ -218,10 +221,7 @@
           "file_name",
           "file_size"
         ],
-        "type": "object",
-        "required": [
-          "url"
-        ]
+        "type": "object"
       }
     }
   },

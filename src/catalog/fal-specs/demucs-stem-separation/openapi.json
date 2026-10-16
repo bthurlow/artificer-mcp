@@ -71,97 +71,37 @@
         ]
       },
       "DemucsInput": {
-        "title": "DemucsInput",
         "properties": {
           "segment_length": {
-            "title": "Segment Length",
             "anyOf": [
               {
-                "type": "integer",
-                "minimum": 1
+                "minimum": 1,
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Length in seconds of each segment for processing (minimum 1). Smaller values use less memory but may reduce quality. Default is model-specific."
-          },
-          "overlap": {
-            "title": "Overlap",
-            "default": 0.25,
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1,
-            "description": "Overlap between segments (0.0 to 1.0). Higher values may improve quality but increase processing time."
-          },
-          "shifts": {
-            "title": "Shifts",
-            "default": 1,
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 10,
-            "description": "Number of random shifts for equivariant stabilization. Higher values improve quality but increase processing time."
+            "description": "Length in seconds of each segment for processing (minimum 1). Smaller values use less memory but may reduce quality. Default is model-specific.",
+            "title": "Segment Length"
           },
           "audio_url": {
-            "title": "Audio Url",
-            "type": "string",
             "examples": [
               "https://storage.googleapis.com/falserverless/model_tests/audio-understanding/Title_%20Running%20on%20Fal.mp3"
             ],
-            "description": "URL of the audio file to separate into stems"
-          },
-          "model": {
-            "title": "Model",
-            "enum": [
-              "htdemucs",
-              "htdemucs_ft",
-              "htdemucs_6s",
-              "hdemucs_mmi",
-              "mdx",
-              "mdx_extra",
-              "mdx_q",
-              "mdx_extra_q"
-            ],
             "type": "string",
-            "examples": [
-              "htdemucs_6s"
-            ],
-            "description": "Demucs model to use for separation",
-            "default": "htdemucs_6s"
-          },
-          "output_format": {
-            "title": "Output Format",
-            "enum": [
-              "wav",
-              "mp3"
-            ],
-            "type": "string",
-            "examples": [
-              "mp3"
-            ],
-            "description": "Output audio format for the separated stems",
-            "default": "mp3"
+            "description": "URL of the audio file to separate into stems",
+            "title": "Audio Url"
           },
           "stems": {
             "title": "Stems",
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "enum": [
-                    "vocals",
-                    "drums",
-                    "bass",
-                    "other",
-                    "guitar",
-                    "piano"
-                  ],
-                  "type": "string"
-                }
-              },
-              {
-                "type": "null"
-              }
+            "default": [
+              "vocals",
+              "drums",
+              "bass",
+              "other",
+              "guitar",
+              "piano"
             ],
             "examples": [
               [
@@ -173,21 +113,76 @@
                 "piano"
               ]
             ],
-            "description": "Specific stems to extract. If None, extracts all available stems. Available stems depend on model: vocals, drums, bass, other, guitar, piano (for 6s model)",
-            "default": [
-              "vocals",
-              "drums",
-              "bass",
-              "other",
-              "guitar",
-              "piano"
-            ]
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "vocals",
+                    "drums",
+                    "bass",
+                    "other",
+                    "guitar",
+                    "piano"
+                  ]
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Specific stems to extract. If None, extracts all available stems. Available stems depend on model: vocals, drums, bass, other, guitar, piano (for 6s model)"
+          },
+          "output_format": {
+            "default": "mp3",
+            "examples": [
+              "mp3"
+            ],
+            "type": "string",
+            "description": "Output audio format for the separated stems",
+            "enum": [
+              "wav",
+              "mp3"
+            ],
+            "title": "Output Format"
+          },
+          "model": {
+            "default": "htdemucs_6s",
+            "examples": [
+              "htdemucs_6s"
+            ],
+            "type": "string",
+            "description": "Demucs model to use for separation",
+            "enum": [
+              "htdemucs",
+              "htdemucs_ft",
+              "htdemucs_6s",
+              "hdemucs_mmi",
+              "mdx",
+              "mdx_extra",
+              "mdx_q",
+              "mdx_extra_q"
+            ],
+            "title": "Model"
+          },
+          "overlap": {
+            "maximum": 1,
+            "default": 0.25,
+            "minimum": 0,
+            "type": "number",
+            "description": "Overlap between segments (0.0 to 1.0). Higher values may improve quality but increase processing time.",
+            "title": "Overlap"
+          },
+          "shifts": {
+            "maximum": 10,
+            "default": 1,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Number of random shifts for equivariant stabilization. Higher values improve quality but increase processing time.",
+            "title": "Shifts"
           }
         },
-        "required": [
-          "audio_url"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "audio_url",
           "model",
@@ -196,11 +191,48 @@
           "shifts",
           "overlap",
           "output_format"
-        ]
+        ],
+        "required": [
+          "audio_url"
+        ],
+        "type": "object",
+        "title": "DemucsInput"
       },
       "DemucsOutput": {
-        "title": "DemucsOutput",
         "properties": {
+          "piano": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/File"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Separated piano audio file (only available for 6s models)"
+          },
+          "guitar": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/File"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Separated guitar audio file (only available for 6s models)"
+          },
+          "drums": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/File"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Separated drums audio file"
+          },
           "bass": {
             "anyOf": [
               {
@@ -223,28 +255,6 @@
             ],
             "description": "Separated vocals audio file"
           },
-          "drums": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/File"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Separated drums audio file"
-          },
-          "guitar": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/File"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Separated guitar audio file (only available for 6s models)"
-          },
           "other": {
             "anyOf": [
               {
@@ -255,17 +265,6 @@
               }
             ],
             "description": "Separated other instruments audio file"
-          },
-          "piano": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/File"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Separated piano audio file (only available for 6s models)"
           }
         },
         "x-fal-order-properties": [
@@ -276,33 +275,17 @@
           "guitar",
           "piano"
         ],
-        "type": "object"
+        "type": "object",
+        "title": "DemucsOutput"
       },
       "File": {
-        "title": "File",
         "properties": {
-          "content_type": {
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file."
-          },
           "url": {
-            "title": "Url",
             "type": "string",
-            "description": "The URL where the file can be downloaded from."
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
           },
           "file_name": {
-            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -314,10 +297,25 @@
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type"
           },
           "file_size": {
-            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -329,19 +327,21 @@
             "examples": [
               4404019
             ],
-            "description": "The size of the file in bytes."
+            "description": "The size of the file in bytes.",
+            "title": "File Size"
           }
         },
-        "required": [
-          "url"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
-        ]
+        ],
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "title": "File"
       }
     }
   },

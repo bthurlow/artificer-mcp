@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Disabling safety checks requires account authorization; unauthorized requests are always checked. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _optional_):
   Text prompt for video generation. Either prompt or multi_prompt must be provided, but not both.
   - Examples: "Camera slowly orbits around the vase. Soft light shifts across the ceramic surface. The pampas grass sways gently. Shadows move elegantly. Smooth continuous motion, premium feel."
@@ -90,6 +94,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "Camera slowly orbits around the vase. Soft light shifts across the ceramic surface. The pampas grass sways gently. Shadows move elegantly. Smooth continuous motion, premium feel.",
   "multi_prompt": null,
   "start_image_url": "https://storage.googleapis.com/falserverless/example_inputs/kling-v3/standard-i2v/start_image.png",
@@ -119,7 +124,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"file_size":3149129,"url":"https://storage.googleapis.com/falserverless/example_outputs/kling-v3/standard-i2v/out.mp4","content_type":"video/mp4","file_name":"out.mp4"}
+  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/kling-v3/standard-i2v/out.mp4","content_type":"video/mp4","file_size":3149129,"file_name":"out.mp4"}
 
 
 
@@ -128,9 +133,9 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_size": 3149129,
     "url": "https://storage.googleapis.com/falserverless/example_outputs/kling-v3/standard-i2v/out.mp4",
     "content_type": "video/mp4",
+    "file_size": 3149129,
     "file_name": "out.mp4"
   }
 }

@@ -71,21 +71,18 @@
         ]
       },
       "MinimaxMusicV26Input": {
-        "x-fal-order-properties": [
-          "prompt",
-          "lyrics",
-          "lyrics_optimizer",
-          "is_instrumental",
-          "audio_setting",
-          "enable_safety_checker"
+        "required": [
+          "prompt"
         ],
+        "title": "TextToMusic26Request",
+        "type": "object",
         "properties": {
           "lyrics": {
             "maxLength": 3500,
             "description": "Lyrics of the song. Use \\n to separate lines. Supports structure tags: [Intro], [Verse], [Pre Chorus], [Chorus], [Post Chorus], [Hook], [Bridge], [Interlude], [Transition], [Build Up], [Break], [Inst], [Solo], [Outro]. Max 3500 characters. Required when is_instrumental is false.",
+            "title": "Lyrics",
             "type": "string",
             "default": "",
-            "title": "Lyrics",
             "examples": [
               "[verse]\nStreetlights flicker, the night breeze sighs\nShadows stretch as I walk alone\n[chorus]\nWandering, longing, where should I go"
             ]
@@ -94,45 +91,50 @@
             "$ref": "#/components/schemas/AudioSetting25",
             "description": "Audio configuration settings"
           },
+          "lyrics_optimizer": {
+            "description": "When true and lyrics is empty, auto-generates lyrics from the prompt.",
+            "title": "Lyrics Optimizer",
+            "type": "boolean",
+            "default": false
+          },
           "prompt": {
-            "maxLength": 2000,
             "description": "A description of the music style, mood, genre, and scenario. 10-2000 characters.",
+            "title": "Prompt",
             "type": "string",
+            "minLength": 10,
+            "maxLength": 2000,
             "examples": [
               "City Pop, 80s retro, groovy synth bass, warm female vocal, 104 BPM, nostalgic urban night"
-            ],
-            "title": "Prompt",
-            "minLength": 10
-          },
-          "enable_safety_checker": {
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "type": "boolean",
-            "default": true,
-            "title": "Enable Safety Checker"
+            ]
           },
           "is_instrumental": {
             "description": "When true, generates vocal-free instrumental music.",
+            "title": "Is Instrumental",
             "type": "boolean",
-            "default": false,
-            "title": "Is Instrumental"
+            "default": false
           },
-          "lyrics_optimizer": {
-            "description": "When true and lyrics is empty, auto-generates lyrics from the prompt.",
+          "enable_safety_checker": {
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "title": "Enable Safety Checker",
             "type": "boolean",
-            "default": false,
-            "title": "Lyrics Optimizer"
+            "default": true
           }
         },
-        "type": "object",
-        "required": [
-          "prompt"
-        ],
-        "title": "TextToMusic26Request"
+        "x-fal-order-properties": [
+          "prompt",
+          "lyrics",
+          "lyrics_optimizer",
+          "is_instrumental",
+          "audio_setting",
+          "enable_safety_checker"
+        ]
       },
       "MinimaxMusicV26Output": {
-        "x-fal-order-properties": [
+        "required": [
           "audio"
         ],
+        "title": "MusicV26Output",
+        "type": "object",
         "properties": {
           "audio": {
             "$ref": "#/components/schemas/File",
@@ -144,72 +146,89 @@
             ]
           }
         },
-        "type": "object",
-        "required": [
+        "x-fal-order-properties": [
           "audio"
-        ],
-        "title": "MusicV26Output"
+        ]
       },
       "AudioSetting25": {
-        "x-fal-order-properties": [
-          "sample_rate",
-          "bitrate",
-          "format"
-        ],
+        "title": "AudioSetting25",
+        "type": "object",
         "properties": {
           "sample_rate": {
-            "description": "Sample rate of generated audio",
             "enum": [
               16000,
               24000,
               32000,
               44100
             ],
+            "title": "Sample Rate",
             "type": "integer",
-            "default": 44100,
-            "title": "Sample Rate"
-          },
-          "format": {
-            "description": "Audio format",
-            "enum": [
-              "mp3",
-              "wav",
-              "pcm"
-            ],
-            "type": "string",
-            "default": "mp3",
-            "title": "Format"
+            "description": "Sample rate of generated audio",
+            "default": 44100
           },
           "bitrate": {
-            "description": "Bitrate of generated audio",
             "enum": [
               32000,
               64000,
               128000,
               256000
             ],
+            "title": "Bitrate",
             "type": "integer",
-            "default": 256000,
-            "title": "Bitrate"
+            "description": "Bitrate of generated audio",
+            "default": 256000
+          },
+          "format": {
+            "enum": [
+              "mp3",
+              "wav",
+              "pcm"
+            ],
+            "title": "Format",
+            "type": "string",
+            "description": "Audio format",
+            "default": "mp3"
           }
         },
-        "type": "object",
-        "title": "AudioSetting25"
+        "x-fal-order-properties": [
+          "sample_rate",
+          "bitrate",
+          "format"
+        ]
       },
       "File": {
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
+        "required": [
+          "url"
         ],
+        "title": "File",
+        "type": "object",
         "properties": {
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "url": {
             "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
+            "title": "Url",
+            "type": "string"
           },
           "file_size": {
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -217,29 +236,14 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
-            "title": "File Size"
+            ]
           },
           "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "title": "File Name"
-          },
-          "content_type": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -247,19 +251,15 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type"
+            ]
           }
         },
-        "type": "object",
-        "required": [
-          "url"
-        ],
-        "title": "File"
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ]
       }
     }
   },

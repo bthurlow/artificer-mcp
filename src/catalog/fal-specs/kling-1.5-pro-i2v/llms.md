@@ -28,6 +28,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Disabling safety checks requires account authorization; unauthorized requests are always checked. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _required_)
   - Examples: "Snowflakes fall as a car moves along the road."
 
@@ -80,6 +84,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "Snowflakes fall as a car moves along the road.",
   "image_url": "https://storage.googleapis.com/falserverless/kling/kling_input.jpeg",
   "duration": "5",
@@ -92,12 +97,12 @@ The API accepts the following input parameters:
       "mask_url": "https://storage.googleapis.com/falserverless/kling/new_dynamic_mask.png",
       "trajectories": [
         {
-          "y": 219,
-          "x": 279
+          "x": 279,
+          "y": 219
         },
         {
-          "y": 65,
-          "x": 417
+          "x": 417,
+          "y": 65
         }
       ]
     }

@@ -33,6 +33,10 @@ The API accepts the following input parameters:
   The prompt to generate the video from.
   - Examples: "The white dragon warrior stands still, eyes full of determination and strength. The camera slowly moves closer or circles around the warrior, highlighting the powerful presence and heroic spirit of the character."
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 - **`image_url`** (`string`, _required_):
   The URL of the image to use as a reference for the video generation.
   - Examples: "https://storage.googleapis.com/falserverless/model_tests/wan/dragon-warrior.jpg"
@@ -76,6 +80,7 @@ The API accepts the following input parameters:
 ```json
 {
   "prompt": "The white dragon warrior stands still, eyes full of determination and strength. The camera slowly moves closer or circles around the warrior, highlighting the powerful presence and heroic spirit of the character.",
+  "enable_safety_checker": true,
   "image_url": "https://storage.googleapis.com/falserverless/model_tests/wan/dragon-warrior.jpg",
   "resolution": "512P",
   "duration": "5s",
@@ -92,7 +97,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _optional_):
   The generated video file.
-  - Examples: {"content_type":"application/octet-stream","file_size":22253751,"file_name":"output.mp4","url":"https://v3b.fal.media/files/b/0a877276/Bg24FK_awlNAYKn962Vm0_output.mp4"}
+  - Examples: {"file_name":"output.mp4","content_type":"application/octet-stream","file_size":22253751,"url":"https://v3b.fal.media/files/b/0a877276/Bg24FK_awlNAYKn962Vm0_output.mp4"}
 
 - **`seed`** (`integer`, _required_):
   The seed used for generation.
@@ -104,9 +109,9 @@ The API returns the following output format:
 ```json
 {
   "video": {
+    "file_name": "output.mp4",
     "content_type": "application/octet-stream",
     "file_size": 22253751,
-    "file_name": "output.mp4",
     "url": "https://v3b.fal.media/files/b/0a877276/Bg24FK_awlNAYKn962Vm0_output.mp4"
   }
 }

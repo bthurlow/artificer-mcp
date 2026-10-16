@@ -71,6 +71,11 @@
         ]
       },
       "Qwen3TtsTextToSpeech06bInput": {
+        "title": "Qwen3TTSInput06b",
+        "required": [
+          "text"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "text",
           "prompt",
@@ -90,56 +95,30 @@
           "enable_safety_checker"
         ],
         "properties": {
-          "reference_text": {
+          "subtalker_temperature": {
+            "title": "Subtalker Temperature",
+            "description": "Temperature for sub-talker sampling.",
             "anyOf": [
               {
-                "type": "string"
+                "maximum": 1,
+                "type": "number",
+                "minimum": 0
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Optional reference text that was used when creating the speaker embedding. Providing this can improve synthesis quality when using a cloned voice.",
-            "title": "Reference Text"
-          },
-          "prompt": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Optional prompt to guide the style of the generated speech. This prompt will be ignored if a speaker embedding is provided.",
-            "examples": [
-              "Very happy."
-            ],
-            "title": "Prompt"
-          },
-          "enable_safety_checker": {
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "type": "boolean",
-            "default": true,
-            "title": "Enable Safety Checker"
-          },
-          "repetition_penalty": {
-            "anyOf": [
-              {
-                "minimum": 0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Penalty to reduce repeated tokens/codes.",
-            "default": 1.05,
-            "title": "Repetition Penalty"
+            "default": 0.9
           },
           "voice": {
+            "title": "Voice",
+            "description": "The voice to be used for speech synthesis, will be ignored if a speaker embedding is provided. Check out the **[documentation](https://github.com/QwenLM/Qwen3-TTS/tree/main?tab=readme-ov-file#custom-voice-generate)** for each voice's details and which language they primarily support.",
+            "examples": [
+              "Vivian"
+            ],
             "anyOf": [
               {
+                "type": "string",
                 "enum": [
                   "Vivian",
                   "Serena",
@@ -150,64 +129,78 @@
                   "Aiden",
                   "Ono_Anna",
                   "Sohee"
-                ],
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "repetition_penalty": {
+            "title": "Repetition Penalty",
+            "description": "Penalty to reduce repeated tokens/codes.",
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 1.05
+          },
+          "subtalker_top_k": {
+            "title": "Subtalker Top K",
+            "description": "Top-k for sub-talker sampling.",
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": 50
+          },
+          "prompt": {
+            "title": "Prompt",
+            "description": "Optional prompt to guide the style of the generated speech. This prompt will be ignored if a speaker embedding is provided.",
+            "examples": [
+              "Very happy."
+            ],
+            "anyOf": [
+              {
                 "type": "string"
               },
               {
                 "type": "null"
               }
-            ],
-            "description": "The voice to be used for speech synthesis, will be ignored if a speaker embedding is provided. Check out the **[documentation](https://github.com/QwenLM/Qwen3-TTS/tree/main?tab=readme-ov-file#custom-voice-generate)** for each voice's details and which language they primarily support.",
-            "examples": [
-              "Vivian"
-            ],
-            "title": "Voice"
+            ]
           },
-          "speaker_voice_embedding_file_url": {
+          "temperature": {
+            "title": "Temperature",
+            "description": "Sampling temperature; higher => more random.",
             "anyOf": [
               {
-                "type": "string",
-                "ui": {
-                  "field": "url"
-                }
+                "exclusiveMinimum": 0,
+                "maximum": 1,
+                "type": "number"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "URL to a speaker embedding file in safetensors format, from `fal-ai/qwen-3-tts/clone-voice/0.6b` endpoint. If provided, the TTS model will use the cloned voice for synthesis instead of the predefined voices.",
-            "title": "Speaker Voice Embedding File Url"
-          },
-          "top_k": {
-            "anyOf": [
-              {
-                "minimum": 0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Top-k sampling parameter.",
-            "default": 50,
-            "title": "Top K"
-          },
-          "subtalker_top_k": {
-            "anyOf": [
-              {
-                "minimum": 0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Top-k for sub-talker sampling.",
-            "default": 50,
-            "title": "Subtalker Top K"
+            "default": 0.9
           },
           "language": {
+            "title": "Language",
             "description": "The language of the voice.",
+            "type": "string",
+            "examples": [
+              "English"
+            ],
             "enum": [
               "Auto",
               "English",
@@ -221,82 +214,96 @@
               "Portuguese",
               "Russian"
             ],
-            "type": "string",
-            "default": "Auto",
-            "title": "Language",
-            "examples": [
-              "English"
+            "default": "Auto"
+          },
+          "reference_text": {
+            "title": "Reference Text",
+            "description": "Optional reference text that was used when creating the speaker embedding. Providing this can improve synthesis quality when using a cloned voice.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "type": "boolean",
+            "default": true
+          },
+          "speaker_voice_embedding_file_url": {
+            "title": "Speaker Voice Embedding File Url",
+            "description": "URL to a speaker embedding file in safetensors format, from `fal-ai/qwen-3-tts/clone-voice/0.6b` endpoint. If provided, the TTS model will use the cloned voice for synthesis instead of the predefined voices.",
+            "anyOf": [
+              {
+                "type": "string",
+                "ui": {
+                  "field": "url"
+                }
+              },
+              {
+                "type": "null"
+              }
             ]
           },
           "max_new_tokens": {
-            "anyOf": [
-              {
-                "minimum": 1,
-                "maximum": 8192,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "title": "Max New Tokens",
             "description": "Maximum number of new codec tokens to generate.",
-            "default": 200,
-            "title": "Max New Tokens"
-          },
-          "top_p": {
             "anyOf": [
               {
-                "minimum": 0,
-                "maximum": 1,
-                "type": "number"
+                "maximum": 8192,
+                "type": "integer",
+                "minimum": 1
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Top-p sampling parameter.",
-            "default": 1,
-            "title": "Top P"
+            "default": 200
           },
-          "subtalker_temperature": {
-            "anyOf": [
-              {
-                "minimum": 0,
-                "maximum": 1,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Temperature for sub-talker sampling.",
-            "default": 0.9,
-            "title": "Subtalker Temperature"
-          },
-          "temperature": {
+          "subtalker_top_p": {
+            "title": "Subtalker Top P",
+            "description": "Top-p for sub-talker sampling.",
             "anyOf": [
               {
                 "maximum": 1,
                 "type": "number",
-                "exclusiveMinimum": 0
+                "minimum": 0
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Sampling temperature; higher => more random.",
-            "default": 0.9,
-            "title": "Temperature"
+            "default": 1
           },
           "text": {
+            "title": "Text",
             "description": "The text to be converted to speech.",
             "type": "string",
             "examples": [
               "I feel like I'm taking crazy pills! How can something be both a square and a circle at the same time? It defies all logic!"
+            ]
+          },
+          "top_k": {
+            "title": "Top K",
+            "description": "Top-k sampling parameter.",
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
             ],
-            "title": "Text"
+            "default": 50
           },
           "subtalker_dosample": {
+            "title": "Subtalker Dosample",
+            "description": "Sampling switch for the sub-talker.",
             "anyOf": [
               {
                 "type": "boolean"
@@ -305,33 +312,31 @@
                 "type": "null"
               }
             ],
-            "description": "Sampling switch for the sub-talker.",
-            "default": true,
-            "title": "Subtalker Dosample"
+            "default": true
           },
-          "subtalker_top_p": {
+          "top_p": {
+            "title": "Top P",
+            "description": "Top-p sampling parameter.",
             "anyOf": [
               {
-                "minimum": 0,
                 "maximum": 1,
-                "type": "number"
+                "type": "number",
+                "minimum": 0
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Top-p for sub-talker sampling.",
-            "default": 1,
-            "title": "Subtalker Top P"
+            "default": 1
           }
-        },
-        "type": "object",
-        "required": [
-          "text"
-        ],
-        "title": "Qwen3TTSInput06b"
+        }
       },
       "Qwen3TtsTextToSpeech06bOutput": {
+        "title": "Qwen3TTSOutput06b",
+        "required": [
+          "audio"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "audio"
         ],
@@ -345,19 +350,19 @@
                 "channels": 1,
                 "file_name": "n6Av3SeD5dFENf9-VmQ1v_is3jLh5h.mp3",
                 "sample_rate": 24000,
-                "content_type": "audio/mpeg",
-                "duration": 9.816875
+                "duration": 9.816875,
+                "content_type": "audio/mpeg"
               }
             ]
           }
-        },
-        "type": "object",
-        "required": [
-          "audio"
-        ],
-        "title": "Qwen3TTSOutput06b"
+        }
       },
       "AudioFile": {
+        "title": "AudioFile",
+        "required": [
+          "url"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -370,6 +375,8 @@
         ],
         "properties": {
           "channels": {
+            "title": "Channels",
+            "description": "The number of channels in the audio",
             "anyOf": [
               {
                 "type": "integer"
@@ -377,41 +384,53 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The number of channels in the audio",
-            "title": "Channels"
+            ]
           },
-          "file_name": {
+          "file_size": {
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
             "anyOf": [
               {
-                "type": "string"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name"
+            ]
+          },
+          "sample_rate": {
+            "title": "Sample Rate",
+            "description": "The sample rate of the audio",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "title": "Content Type",
             "description": "The mime type of the file.",
             "examples": [
               "image/png"
             ],
-            "title": "Content Type"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "bitrate": {
+            "title": "Bitrate",
+            "description": "The bitrate of the audio (e.g., '192k' or 192000)",
             "anyOf": [
               {
                 "type": "string"
@@ -422,16 +441,31 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The bitrate of the audio (e.g., '192k' or 192000)",
-            "title": "Bitrate"
+            ]
           },
           "url": {
+            "title": "Url",
             "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
+            "type": "string"
+          },
+          "file_name": {
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "duration": {
+            "title": "Duration",
+            "description": "The duration of the audio",
             "anyOf": [
               {
                 "type": "number"
@@ -439,43 +473,9 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The duration of the audio",
-            "title": "Duration"
-          },
-          "file_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
-            "title": "File Size"
-          },
-          "sample_rate": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The sample rate of the audio",
-            "title": "Sample Rate"
+            ]
           }
-        },
-        "type": "object",
-        "required": [
-          "url"
-        ],
-        "title": "AudioFile"
+        }
       }
     }
   },
