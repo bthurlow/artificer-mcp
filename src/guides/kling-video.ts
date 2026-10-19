@@ -121,7 +121,7 @@ Patterns that consistently work:
 - **Action verbs in present tense**: gallops, drifts, glides, tilts, frolics. Kling renders verbs more reliably than mood adjectives.
 - **Multi-shot with \`multi_prompt\`** (v3 / O3): provide an array of \`{prompt, duration}\` objects to split a single render into shots. Use \`shot_type: "customize"\` to honor your timing exactly, \`"intelligent"\` to let Kling pace.
 - **Reference characters / objects with \`@Element1\`, \`@Element2\`** when you pass an \`elements\` array (v3 / O3). Reference reference-images with \`@Image1\`, \`@Image2\` (O3 reference-to-video).
-- For dialogue (v3 / O3 with audio on): same pattern as Veo / Sora — quote the line, lead with speaker + speech verb, keep to one sentence per shot. English / Chinese supported natively; other languages auto-translate to English.
+- For dialogue (v3 / O3 with audio on): same pattern as Veo — quote the line, lead with speaker + speech verb, keep to one sentence per shot. English / Chinese supported natively; other languages auto-translate to English.
 
 For older Kling tiers (1.x / 2.x non-v3): no audio in schema; treat as silent cinematic. Multi-prompt is not available — write a single dense paragraph.
 

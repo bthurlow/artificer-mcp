@@ -10,7 +10,7 @@ Older / open-weights video models in the fal catalog. These exist for completene
 - You want the cheapest possible per-clip fallback for non-critical work.
 - A downstream pipeline specifically expects one of these model lineages.
 
-For new production work, prefer the modern catalog: Veo / Sora / Kling / Wan / Hailuo / LTX-2.x.
+For new production work, prefer the modern catalog: Veo / Kling / Wan / Hailuo / LTX-2.x.
 
 ## AnimateDiff lineage
 Older anime/illustrated-style t2v built on top of Stable Diffusion + temporal modules. Stylized aesthetic. Two variants remain on fal: Fast AnimateDiff and AnimateDiff Turbo. Turbo is fastest but lowest quality.

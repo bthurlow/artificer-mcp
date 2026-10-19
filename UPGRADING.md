@@ -9,6 +9,27 @@ because they landed under a commit type it hides.
 
 ---
 
+## 0.12.x → 0.13.0
+
+### Sora 2 routes retired, and `sora_video_prompt_guide` removed
+
+**Removed: these 404 upstream with no successor.** OpenAI shut down the Sora
+API, and since 2026-10-12 all four fal routes return 404 on both fal's
+OpenAPI and `llms.txt` surfaces (re-checked 2026-10-19). fal's model index
+lists no replacement.
+
+`sora-2-t2v` · `sora-2-i2v` · `sora-2-pro-t2v` · `sora-2-pro-i2v`
+
+- **`sora_video_prompt_guide` is gone with its only models.** A caller that
+  invokes it gets an unknown-tool error.
+- **Replacement:** pick another `video.cinematic` route from `model_catalog`.
+  For a similar premium text- or image-to-video shot with native audio, Veo 3.1
+  (`veo-3.1-t2v` / `-i2v`, `veo_video_prompt_guide`) or Kling 3 / O3
+  (`kling_video_prompt_guide`) are the closest. Prompts carry over, but check
+  each guide for duration and resolution limits.
+
+---
+
 ## 0.11.x → 0.12.0
 
 ### `gemini_omni_generate_video` defaults to `gemini-omni-1.1-flash`

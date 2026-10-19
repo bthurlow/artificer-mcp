@@ -23,7 +23,7 @@ Pricing is flat-rate per duration: typically $0.08 for 5s, $0.16 for 10s.
 - Open-ish weights lineage.
 
 ## Known weaknesses
-- Output style narrower than universal models (Veo, Sora).
+- Output style narrower than universal models (Veo, Kling).
 - Limited duration tier (typically 5s or 10s only).
 - No native audio.
 

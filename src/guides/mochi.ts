@@ -5,7 +5,7 @@ import { z } from 'zod';
 const MOCHI_GUIDE = `# Mochi 1 — Prompt Guide
 
 ## What this model is best for
-Open-weights text-to-video preview model from Genmo. Best for research workflows, fine-tuning experiments, or when caller wants the lineage compatible with locally-runnable Mochi-1 weights. Not the right pick for premium-quality output — reach for Veo, Sora, or Kling for production.
+Open-weights text-to-video preview model from Genmo. Best for research workflows, fine-tuning experiments, or when caller wants the lineage compatible with locally-runnable Mochi-1 weights. Not the right pick for premium-quality output — reach for Veo or Kling for production.
 
 ## Picking a model
 Single fal route. Mochi has limited duration (a few seconds) and modest resolution by current premium-tier standards.
@@ -16,7 +16,7 @@ Single fal route. Mochi has limited duration (a few seconds) and modest resoluti
 - Cheaper than premium-tier alternatives at fal.
 
 ## Known weaknesses
-- Output quality and motion realism trail Veo / Sora / Kling.
+- Output quality and motion realism trail Veo / Kling.
 - Short duration cap.
 - No audio output.
 
