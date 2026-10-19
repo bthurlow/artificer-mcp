@@ -109,7 +109,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   Upscaled video file after processing
-  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/seedvr-output.mp4","content_type":"video/mp4"}
+  - Examples: {"content_type":"video/mp4","url":"https://storage.googleapis.com/falserverless/example_outputs/seedvr-output.mp4"}
 
 - **`seed`** (`integer`, _required_):
   The random seed used for the generation process.
@@ -121,8 +121,8 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/seedvr-output.mp4",
-    "content_type": "video/mp4"
+    "content_type": "video/mp4",
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/seedvr-output.mp4"
   }
 }
 ```

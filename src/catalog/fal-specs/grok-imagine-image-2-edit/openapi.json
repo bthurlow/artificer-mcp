@@ -71,60 +71,51 @@
         ]
       },
       "GrokImagineImageV20EditInput": {
-        "required": [
-          "prompt"
-        ],
-        "x-fal-order-properties": [
-          "prompt",
-          "num_images",
-          "aspect_ratio",
-          "resolution",
-          "output_format",
-          "sync_mode",
-          "enable_safety_checker",
-          "image_urls",
-          "quality"
-        ],
-        "title": "XAIImageEditV2Input",
         "properties": {
-          "sync_mode": {
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "title": "Sync Mode",
-            "type": "boolean",
-            "default": false
-          },
-          "enable_safety_checker": {
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "title": "Enable Safety Checker",
-            "type": "boolean",
-            "default": true
-          },
           "resolution": {
             "enum": [
               "1k",
               "2k"
             ],
-            "title": "Resolution",
             "description": "Resolution of the generated image. `1k` for standard resolution, `2k` for high resolution.",
+            "default": "1k",
             "type": "string",
-            "default": "1k"
+            "title": "Resolution"
           },
-          "prompt": {
-            "maxLength": 8000,
-            "description": "Text description of the desired image.",
-            "title": "Prompt",
-            "type": "string",
+          "image_urls": {
+            "title": "Image URLs",
+            "description": "List of URLs of the images to edit. A maximum of 5 images are supported.",
+            "type": "array",
             "examples": [
-              "Make this scene more realistic but still keep the game vibes"
-            ]
+              [
+                "https://v3b.fal.media/files/b/0a8b911d/Abk8vStrvmSPlzUqI_NN3_image_043.png"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            }
           },
-          "num_images": {
-            "maximum": 4,
-            "description": "Number of images to generate.",
-            "title": "Number of Images",
-            "minimum": 1,
-            "type": "integer",
-            "default": 1
+          "quality": {
+            "enum": [
+              "low",
+              "medium"
+            ],
+            "description": "Quality level of the edited image.",
+            "default": "medium",
+            "type": "string",
+            "title": "Quality"
+          },
+          "sync_mode": {
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "type": "boolean",
+            "default": false,
+            "title": "Sync Mode"
+          },
+          "enable_safety_checker": {
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "type": "boolean",
+            "default": true,
+            "title": "Enable Safety Checker"
           },
           "aspect_ratio": {
             "enum": [
@@ -143,10 +134,19 @@
               "9:20",
               "1:2"
             ],
-            "title": "Aspect Ratio",
             "description": "Aspect ratio of the edited image. When set to `auto` (the default), the output preserves the aspect ratio of the first input image.",
             "type": "string",
-            "default": "auto"
+            "default": "auto",
+            "title": "Aspect Ratio"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "description": "Text description of the desired image.",
+            "type": "string",
+            "examples": [
+              "Make this scene more realistic but still keep the game vibes"
+            ],
+            "maxLength": 8000
           },
           "output_format": {
             "enum": [
@@ -154,48 +154,41 @@
               "png",
               "webp"
             ],
-            "title": "Output Format",
             "description": "The format of the generated image.",
             "type": "string",
-            "default": "jpeg"
+            "default": "jpeg",
+            "title": "Output Format"
           },
-          "image_urls": {
-            "description": "List of URLs of the images to edit. A maximum of 5 images are supported.",
-            "items": {
-              "type": "string"
-            },
-            "title": "Image URLs",
-            "type": "array",
-            "examples": [
-              [
-                "https://v3b.fal.media/files/b/0a8b911d/Abk8vStrvmSPlzUqI_NN3_image_043.png"
-              ]
-            ]
-          },
-          "quality": {
-            "enum": [
-              "low",
-              "medium"
-            ],
-            "title": "Quality",
-            "description": "Quality level of the edited image.",
-            "type": "string",
-            "default": "medium"
+          "num_images": {
+            "description": "Number of images to generate.",
+            "type": "integer",
+            "default": 1,
+            "maximum": 4,
+            "title": "Number of Images",
+            "minimum": 1
           }
         },
-        "type": "object"
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "title": "XAIImageEditV2Input",
+        "x-fal-order-properties": [
+          "prompt",
+          "num_images",
+          "aspect_ratio",
+          "resolution",
+          "output_format",
+          "sync_mode",
+          "enable_safety_checker",
+          "image_urls",
+          "quality"
+        ]
       },
       "GrokImagineImageV20EditOutput": {
-        "required": [
-          "images"
-        ],
-        "x-fal-order-properties": [
-          "images",
-          "revised_prompt"
-        ],
-        "title": "XAIImageEditOutput",
         "properties": {
           "revised_prompt": {
+            "description": "The enhanced prompt that was used to generate the image.",
             "anyOf": [
               {
                 "type": "string"
@@ -204,15 +197,11 @@
                 "type": "null"
               }
             ],
-            "description": "The enhanced prompt that was used to generate the image.",
             "title": "Revised Prompt"
           },
           "images": {
-            "description": "The URL of the edited image.",
-            "items": {
-              "$ref": "#/components/schemas/ImageFile"
-            },
             "title": "Images",
+            "description": "The URL of the edited image.",
             "type": "array",
             "examples": [
               [
@@ -220,15 +209,104 @@
                   "url": "https://v3b.fal.media/files/b/0a8b911d/XMqiVoO2ECXUZEUYmPl2l.jpg"
                 }
               ]
-            ]
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ImageFile"
+            }
           }
         },
-        "type": "object"
+        "type": "object",
+        "required": [
+          "images"
+        ],
+        "title": "XAIImageEditOutput",
+        "x-fal-order-properties": [
+          "images",
+          "revised_prompt"
+        ]
       },
       "ImageFile": {
+        "properties": {
+          "file_size": {
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "width": {
+            "description": "The width of the image",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width"
+          },
+          "file_name": {
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "height": {
+            "description": "The height of the image",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height"
+          }
+        },
+        "type": "object",
         "required": [
           "url"
         ],
+        "title": "ImageFile",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -236,85 +314,7 @@
           "file_size",
           "width",
           "height"
-        ],
-        "title": "ImageFile",
-        "properties": {
-          "file_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "examples": [
-              4404019
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
-          "width": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The width of the image",
-            "title": "Width"
-          },
-          "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The height of the image",
-            "title": "Height"
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ]
-          }
-        },
-        "type": "object"
+        ]
       }
     }
   },

@@ -71,11 +71,6 @@
         ]
       },
       "FastAnimatediffTextToVideoInput": {
-        "title": "AnimateDiffT2VInput",
-        "required": [
-          "prompt"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "negative_prompt",
@@ -89,17 +84,65 @@
           "enable_safety_checker"
         ],
         "properties": {
-          "num_frames": {
-            "description": "The number of frames to generate for the video.",
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "\n            The same seed and the same prompt given to the same version of Stable Diffusion\n            will output the same image every time.\n        ",
+            "title": "Seed"
+          },
+          "negative_prompt": {
+            "default": "(bad quality, worst quality:1.2), ugly faces, bad anime",
+            "description": "\n            The negative prompt to use. Use it to address details that you don't want\n            in the image. This could be colors, objects, scenery and even the small details\n            (e.g. moustache, blurry, low resolution).\n        ",
+            "title": "Negative Prompt",
+            "type": "string"
+          },
+          "fps": {
+            "default": 8,
             "minimum": 1,
-            "type": "integer",
-            "maximum": 32,
+            "description": "Number of frames per second to extract from the video.",
+            "title": "Fps",
+            "maximum": 16,
+            "type": "integer"
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "title": "Enable Safety Checker",
+            "type": "boolean"
+          },
+          "num_frames": {
+            "default": 16,
+            "minimum": 1,
+            "description": "The number of frames to generate for the video.",
             "title": "Num Frames",
-            "default": 16
+            "maximum": 32,
+            "type": "integer"
+          },
+          "guidance_scale": {
+            "default": 7.5,
+            "minimum": 0,
+            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt when looking for a related image to show you.\n        ",
+            "title": "Guidance scale (CFG)",
+            "maximum": 20,
+            "type": "number"
+          },
+          "prompt": {
+            "examples": [
+              "masterpiece, best quality, 1girl, solo, cherry blossoms, hanami, pink flower, white flower, spring season, wisteria, petals, flower, plum blossoms, outdoors, falling petals, white hair, black eyes",
+              "panda playing a guitar, on a boat, in the ocean, high quality, high quality, ultra HD, realistic"
+            ],
+            "description": "The prompt to use for generating the video. Be as descriptive as possible for best results.",
+            "title": "Prompt",
+            "type": "string"
           },
           "video_size": {
-            "description": "The size of the video to generate.",
-            "title": "Video Size",
+            "default": "square",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
@@ -116,10 +159,11 @@
                 ]
               }
             ],
-            "default": "square"
+            "description": "The size of the video to generate.",
+            "title": "Video Size"
           },
           "motions": {
-            "title": "Motions",
+            "uniqueItems": true,
             "items": {
               "type": "string",
               "enum": [
@@ -131,129 +175,80 @@
                 "tilt-down"
               ]
             },
-            "type": "array",
             "description": "The motions to apply to the video.",
-            "uniqueItems": true
-          },
-          "fps": {
-            "description": "Number of frames per second to extract from the video.",
-            "minimum": 1,
-            "type": "integer",
-            "maximum": 16,
-            "title": "Fps",
-            "default": 8
-          },
-          "enable_safety_checker": {
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "title": "Enable Safety Checker",
-            "type": "boolean",
-            "default": true
-          },
-          "seed": {
-            "title": "Seed",
-            "description": "\n            The same seed and the same prompt given to the same version of Stable Diffusion\n            will output the same image every time.\n        ",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "guidance_scale": {
-            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt when looking for a related image to show you.\n        ",
-            "minimum": 0,
-            "type": "number",
-            "maximum": 20,
-            "title": "Guidance scale (CFG)",
-            "default": 7.5
+            "title": "Motions",
+            "type": "array"
           },
           "num_inference_steps": {
-            "description": "The number of inference steps to perform.",
+            "default": 25,
             "minimum": 1,
-            "type": "integer",
-            "maximum": 50,
+            "description": "The number of inference steps to perform.",
             "title": "Num Inference Steps",
-            "default": 25
-          },
-          "prompt": {
-            "title": "Prompt",
-            "description": "The prompt to use for generating the video. Be as descriptive as possible for best results.",
-            "type": "string",
-            "examples": [
-              "masterpiece, best quality, 1girl, solo, cherry blossoms, hanami, pink flower, white flower, spring season, wisteria, petals, flower, plum blossoms, outdoors, falling petals, white hair, black eyes",
-              "panda playing a guitar, on a boat, in the ocean, high quality, high quality, ultra HD, realistic"
-            ]
-          },
-          "negative_prompt": {
-            "description": "\n            The negative prompt to use. Use it to address details that you don't want\n            in the image. This could be colors, objects, scenery and even the small details\n            (e.g. moustache, blurry, low resolution).\n        ",
-            "title": "Negative Prompt",
-            "type": "string",
-            "default": "(bad quality, worst quality:1.2), ugly faces, bad anime"
+            "maximum": 50,
+            "type": "integer"
           }
-        }
+        },
+        "title": "AnimateDiffT2VInput",
+        "required": [
+          "prompt"
+        ],
+        "type": "object"
       },
       "FastAnimatediffTextToVideoOutput": {
+        "x-fal-order-properties": [
+          "video",
+          "seed"
+        ],
+        "properties": {
+          "seed": {
+            "description": "Seed used for generating the video.",
+            "title": "Seed",
+            "type": "integer"
+          },
+          "video": {
+            "examples": [
+              {
+                "url": "https://fal-cdn.batuhan-941.workers.dev/files/kangaroo/DSrFBOk9XXIplm_kukI4n.mp4"
+              }
+            ],
+            "$ref": "#/components/schemas/File",
+            "description": "Generated video file."
+          }
+        },
         "title": "AnimateDiffT2VOutput",
         "required": [
           "video",
           "seed"
         ],
-        "type": "object",
-        "x-fal-order-properties": [
-          "video",
-          "seed"
-        ],
-        "properties": {
-          "seed": {
-            "title": "Seed",
-            "description": "Seed used for generating the video.",
-            "type": "integer"
-          },
-          "video": {
-            "description": "Generated video file.",
-            "$ref": "#/components/schemas/File",
-            "examples": [
-              {
-                "url": "https://fal-cdn.batuhan-941.workers.dev/files/kangaroo/DSrFBOk9XXIplm_kukI4n.mp4"
-              }
-            ]
-          }
-        }
+        "type": "object"
       },
       "ImageSize": {
-        "title": "ImageSize",
-        "type": "object",
         "x-fal-order-properties": [
           "width",
           "height"
         ],
         "properties": {
-          "height": {
-            "exclusiveMinimum": 0,
-            "title": "Height",
-            "type": "integer",
-            "maximum": 14142,
-            "description": "The height of the generated image.",
-            "default": 512
-          },
           "width": {
+            "default": 512,
+            "description": "The width of the generated image.",
             "exclusiveMinimum": 0,
             "title": "Width",
-            "type": "integer",
             "maximum": 14142,
-            "description": "The width of the generated image.",
-            "default": 512
+            "type": "integer"
+          },
+          "height": {
+            "default": 512,
+            "description": "The height of the generated image.",
+            "exclusiveMinimum": 0,
+            "title": "Height",
+            "maximum": 14142,
+            "type": "integer"
           }
-        }
+        },
+        "title": "ImageSize",
+        "type": "object"
       },
       "File": {
-        "title": "File",
-        "required": [
-          "url"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -262,28 +257,11 @@
         ],
         "properties": {
           "url": {
-            "title": "Url",
             "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
             "type": "string"
           },
-          "file_name": {
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "content_type": {
-            "title": "Content Type",
-            "description": "The mime type of the file.",
             "examples": [
               "image/png"
             ],
@@ -294,11 +272,11 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type"
           },
           "file_size": {
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ],
@@ -309,9 +287,31 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
           }
-        }
+        },
+        "title": "File",
+        "required": [
+          "url"
+        ],
+        "type": "object"
       }
     }
   },

@@ -81,7 +81,7 @@ The API returns the following output format:
 
 - **`audio`** (`AudioFile`, _required_):
   The generated speech audio file.
-  - Examples: {"url":"https://v3b.fal.media/files/b/0aa31e93/W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav","channels":1,"file_name":"W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav","duration":3.44,"sample_rate":24000,"content_type":"audio/wav"}
+  - Examples: {"file_name":"W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav","content_type":"audio/wav","channels":1,"duration":3.44,"url":"https://v3b.fal.media/files/b/0aa31e93/W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav","sample_rate":24000}
 
 
 
@@ -90,12 +90,12 @@ The API returns the following output format:
 ```json
 {
   "audio": {
-    "url": "https://v3b.fal.media/files/b/0aa31e93/W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav",
-    "channels": 1,
     "file_name": "W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav",
+    "content_type": "audio/wav",
+    "channels": 1,
     "duration": 3.44,
-    "sample_rate": 24000,
-    "content_type": "audio/wav"
+    "url": "https://v3b.fal.media/files/b/0aa31e93/W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav",
+    "sample_rate": 24000
   }
 }
 ```

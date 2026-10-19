@@ -71,9 +71,98 @@
         ]
       },
       "StableAudio3MediumTextToAudioInput": {
-        "required": [
-          "prompt"
-        ],
+        "properties": {
+          "prompt": {
+            "examples": [
+              "An anthemic Pop Rock instrumental that fills your head with nostalgic thoughtfulness"
+            ],
+            "type": "string",
+            "title": "Prompt",
+            "description": "Text description of the audio to generate."
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "Random seed for reproducible outputs. Omit for a random seed."
+          },
+          "bitrate": {
+            "default": "192k",
+            "type": "string",
+            "title": "Bitrate",
+            "description": "Audio bitrate for compressed output formats (e.g., mp3, aac, opus). Format e.g. '192k' or '320k'. Ignored for lossless formats (wav, flac)."
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "type": "boolean",
+            "title": "Enable Safety Checker",
+            "description": "Enable NSFW content safety checking."
+          },
+          "sync_mode": {
+            "default": false,
+            "type": "boolean",
+            "title": "Sync Mode",
+            "description": "If True, the audio is returned inline as a data URI and the result is not saved to the request history."
+          },
+          "output_format": {
+            "description": "Container format for the generated audio output.",
+            "default": "mp3",
+            "type": "string",
+            "title": "Output Format",
+            "enum": [
+              "mp3",
+              "wav",
+              "flac",
+              "ogg",
+              "opus",
+              "m4a",
+              "aac"
+            ]
+          },
+          "duration": {
+            "description": "Duration of the generated audio in seconds. The medium model supports up to 380 seconds (~6m20s).",
+            "default": 30,
+            "type": "number",
+            "minimum": 1,
+            "title": "Duration",
+            "maximum": 380
+          },
+          "enable_prompt_expansion": {
+            "default": false,
+            "type": "boolean",
+            "title": "Enable Prompt Expansion",
+            "description": "If True, the prompt will be expanded using an LLM for more detailed and higher quality results."
+          },
+          "guidance_scale": {
+            "description": "Classifier-free guidance scale. Higher values follow the prompt more strictly. Only effective on base (non-distilled) checkpoints.",
+            "default": 1,
+            "type": "number",
+            "minimum": 0,
+            "title": "Guidance Scale",
+            "maximum": 25
+          },
+          "negative_prompt": {
+            "default": "",
+            "type": "string",
+            "title": "Negative Prompt",
+            "description": "Text description of qualities to avoid in the output."
+          },
+          "num_inference_steps": {
+            "description": "Number of sampling steps. Post-trained (distilled) checkpoints look good with the default 8 and gain little from going higher.",
+            "default": 8,
+            "type": "integer",
+            "minimum": 1,
+            "title": "Num Inference Steps",
+            "maximum": 100
+          }
+        },
+        "type": "object",
         "x-fal-order-properties": [
           "negative_prompt",
           "duration",
@@ -87,44 +176,82 @@
           "bitrate",
           "prompt"
         ],
+        "title": "TextToAudioMediumInput",
+        "required": [
+          "prompt"
+        ]
+      },
+      "StableAudio3MediumTextToAudioOutput": {
         "properties": {
-          "bitrate": {
-            "default": "192k",
-            "description": "Audio bitrate for compressed output formats (e.g., mp3, aac, opus). Format e.g. '192k' or '320k'. Ignored for lossless formats (wav, flac).",
-            "title": "Bitrate",
-            "type": "string"
-          },
-          "prompt": {
-            "examples": [
-              "An anthemic Pop Rock instrumental that fills your head with nostalgic thoughtfulness"
-            ],
-            "description": "Text description of the audio to generate.",
-            "title": "Prompt",
-            "type": "string"
-          },
-          "output_format": {
-            "enum": [
-              "mp3",
-              "wav",
-              "flac",
-              "ogg",
-              "opus",
-              "m4a",
-              "aac"
-            ],
-            "default": "mp3",
-            "description": "Container format for the generated audio output.",
-            "title": "Output Format",
-            "type": "string"
-          },
-          "negative_prompt": {
-            "default": "",
-            "description": "Text description of qualities to avoid in the output.",
-            "title": "Negative Prompt",
-            "type": "string"
+          "audio": {
+            "description": "The generated audio clip.",
+            "$ref": "#/components/schemas/File"
           },
           "seed": {
-            "description": "Random seed for reproducible outputs. Omit for a random seed.",
+            "type": "integer",
+            "title": "Seed",
+            "description": "The random seed used for generation."
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "The prompt used for generation."
+          }
+        },
+        "type": "object",
+        "x-fal-order-properties": [
+          "audio",
+          "seed",
+          "prompt"
+        ],
+        "title": "AudioOutput",
+        "required": [
+          "audio",
+          "seed",
+          "prompt"
+        ]
+      },
+      "File": {
+        "properties": {
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file."
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
             "anyOf": [
               {
                 "type": "integer"
@@ -133,148 +260,21 @@
                 "type": "null"
               }
             ],
-            "title": "Seed"
-          },
-          "enable_prompt_expansion": {
-            "default": false,
-            "description": "If True, the prompt will be expanded using an LLM for more detailed and higher quality results.",
-            "title": "Enable Prompt Expansion",
-            "type": "boolean"
-          },
-          "sync_mode": {
-            "default": false,
-            "description": "If True, the audio is returned inline as a data URI and the result is not saved to the request history.",
-            "title": "Sync Mode",
-            "type": "boolean"
-          },
-          "guidance_scale": {
-            "maximum": 25,
-            "default": 1,
-            "description": "Classifier-free guidance scale. Higher values follow the prompt more strictly. Only effective on base (non-distilled) checkpoints.",
-            "minimum": 0,
-            "title": "Guidance Scale",
-            "type": "number"
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "description": "Enable NSFW content safety checking.",
-            "title": "Enable Safety Checker",
-            "type": "boolean"
-          },
-          "num_inference_steps": {
-            "maximum": 100,
-            "default": 8,
-            "description": "Number of sampling steps. Post-trained (distilled) checkpoints look good with the default 8 and gain little from going higher.",
-            "minimum": 1,
-            "title": "Num Inference Steps",
-            "type": "integer"
-          },
-          "duration": {
-            "maximum": 380,
-            "default": 30,
-            "description": "Duration of the generated audio in seconds. The medium model supports up to 380 seconds (~6m20s).",
-            "minimum": 1,
-            "title": "Duration",
-            "type": "number"
+            "title": "File Size",
+            "description": "The size of the file in bytes."
           }
         },
-        "title": "TextToAudioMediumInput",
-        "type": "object"
-      },
-      "StableAudio3MediumTextToAudioOutput": {
-        "required": [
-          "audio",
-          "seed",
-          "prompt"
-        ],
-        "x-fal-order-properties": [
-          "audio",
-          "seed",
-          "prompt"
-        ],
-        "properties": {
-          "prompt": {
-            "description": "The prompt used for generation.",
-            "title": "Prompt",
-            "type": "string"
-          },
-          "seed": {
-            "description": "The random seed used for generation.",
-            "title": "Seed",
-            "type": "integer"
-          },
-          "audio": {
-            "$ref": "#/components/schemas/File",
-            "description": "The generated audio clip."
-          }
-        },
-        "title": "AudioOutput",
-        "type": "object"
-      },
-      "File": {
-        "required": [
-          "url"
-        ],
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "properties": {
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name"
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type"
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          }
-        },
         "title": "File",
-        "type": "object"
+        "required": [
+          "url"
+        ]
       }
     }
   },

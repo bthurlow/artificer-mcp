@@ -39,7 +39,7 @@ The API accepts the following input parameters:
   - Array of string
 
 - **`reference_video_urls`** (`list<string>`, _optional_):
-  URLs of up to three reference videos. Each video must be at most three seconds long.
+  URLs of up to three reference videos. Each video must be at most ten seconds long.
   - Array of string
 
 - **`aspect_ratio`** (`AspectRatioEnum`, _optional_):

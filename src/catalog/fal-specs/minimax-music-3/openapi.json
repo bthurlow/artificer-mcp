@@ -71,12 +71,77 @@
         ]
       },
       "Music3Input": {
-        "title": "MiniMaxMusic3Request",
         "required": [
           "prompt",
           "lyrics"
         ],
-        "type": "object",
+        "properties": {
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Random seed for reproducibility. If not provided, a random seed will be used.",
+            "title": "Seed"
+          },
+          "lyrics": {
+            "examples": [
+              "[verse]\nMorning light filtering through the pine\nEvery quiet street is yours and mine\n[chorus]\nSoftly the world begins to breathe"
+            ],
+            "description": "The lyrics to sing. Structure tags such as [intro], [verse], [pre-chorus], [chorus], [post-chorus], [bridge], [instrumental], [solo] and [outro] must each be on their own line; text on the same line as a leading tag is dropped by the model's input contract.",
+            "title": "Lyrics",
+            "type": "string"
+          },
+          "guidance_scale": {
+            "examples": [
+              1.7
+            ],
+            "minimum": 0,
+            "description": "Classifier-free guidance scale of the flow-matching stage.",
+            "title": "Guidance Scale",
+            "default": 1.7,
+            "type": "number",
+            "maximum": 20
+          },
+          "prompt": {
+            "examples": [
+              "Genre: acoustic pop. BPM: 96. Key: C major. Warm and intimate, building gently into the chorus. Vocals: soft female lead, close and breathy, light stacked harmonies in the chorus. Arrangement: fingerpicked guitar and soft piano; brushed drums and upright bass enter in the chorus."
+            ],
+            "description": "Music description: style, mood, vocals, instrumentation and arrangement. For precise control use a Structured Caption with global metadata (genre, BPM, key, emotional progression), vocal details, and a section-by-section arrangement.",
+            "title": "Prompt",
+            "type": "string"
+          },
+          "num_inference_steps": {
+            "examples": [
+              30
+            ],
+            "minimum": 1,
+            "description": "Number of flow-matching Euler steps per 8-second denoising chunk. More steps improve quality at the cost of speed.",
+            "title": "Num Inference Steps",
+            "default": 30,
+            "type": "integer",
+            "maximum": 100
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "title": "Enable Safety Checker",
+            "type": "boolean"
+          },
+          "duration": {
+            "default": 60,
+            "minimum": 1,
+            "description": "Upper bound on the generated audio length in seconds. The model may stop earlier; the actual duration is returned in the output.",
+            "title": "Duration",
+            "type": "number",
+            "maximum": 300
+          }
+        },
+        "title": "MiniMaxMusic3Request",
         "x-fal-order-properties": [
           "prompt",
           "lyrics",
@@ -86,160 +151,50 @@
           "guidance_scale",
           "enable_safety_checker"
         ],
-        "properties": {
-          "duration": {
-            "description": "Upper bound on the generated audio length in seconds. The model may stop earlier; the actual duration is returned in the output.",
-            "minimum": 1,
-            "type": "number",
-            "maximum": 300,
-            "title": "Duration",
-            "default": 60
-          },
-          "lyrics": {
-            "description": "The lyrics to sing. Structure tags such as [intro], [verse], [pre-chorus], [chorus], [post-chorus], [bridge], [instrumental], [solo] and [outro] must each be on their own line; text on the same line as a leading tag is dropped by the model's input contract.",
-            "type": "string",
-            "examples": [
-              "[verse]\nMorning light filtering through the pine\nEvery quiet street is yours and mine\n[chorus]\nSoftly the world begins to breathe"
-            ],
-            "title": "Lyrics"
-          },
-          "num_inference_steps": {
-            "description": "Number of flow-matching Euler steps per 8-second denoising chunk. More steps improve quality at the cost of speed.",
-            "minimum": 1,
-            "type": "integer",
-            "maximum": 100,
-            "examples": [
-              30
-            ],
-            "title": "Num Inference Steps",
-            "default": 30
-          },
-          "seed": {
-            "description": "Random seed for reproducibility. If not provided, a random seed will be used.",
-            "title": "Seed",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "enable_safety_checker": {
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "title": "Enable Safety Checker",
-            "type": "boolean",
-            "default": true
-          },
-          "prompt": {
-            "description": "Music description: style, mood, vocals, instrumentation and arrangement. For precise control use a Structured Caption with global metadata (genre, BPM, key, emotional progression), vocal details, and a section-by-section arrangement.",
-            "type": "string",
-            "examples": [
-              "Genre: acoustic pop. BPM: 96. Key: C major. Warm and intimate, building gently into the chorus. Vocals: soft female lead, close and breathy, light stacked harmonies in the chorus. Arrangement: fingerpicked guitar and soft piano; brushed drums and upright bass enter in the chorus."
-            ],
-            "title": "Prompt"
-          },
-          "guidance_scale": {
-            "description": "Classifier-free guidance scale of the flow-matching stage.",
-            "minimum": 0,
-            "type": "number",
-            "maximum": 20,
-            "examples": [
-              1.7
-            ],
-            "title": "Guidance Scale",
-            "default": 1.7
-          }
-        }
+        "type": "object"
       },
       "Music3Output": {
-        "title": "MiniMaxMusic3Output",
         "required": [
           "audio",
           "seed",
           "duration"
         ],
-        "type": "object",
+        "properties": {
+          "seed": {
+            "examples": [
+              42
+            ],
+            "description": "The random seed used for the generation process.",
+            "title": "Seed",
+            "type": "integer"
+          },
+          "duration": {
+            "examples": [
+              60
+            ],
+            "description": "The actual duration of the generated audio in seconds (may be shorter than the requested duration).",
+            "title": "Duration",
+            "type": "number"
+          },
+          "audio": {
+            "$ref": "#/components/schemas/File",
+            "description": "The generated audio file (44.1 kHz 16-bit stereo WAV)."
+          }
+        },
+        "title": "MiniMaxMusic3Output",
         "x-fal-order-properties": [
           "audio",
           "seed",
           "duration"
         ],
-        "properties": {
-          "audio": {
-            "description": "The generated audio file (44.1 kHz 16-bit stereo WAV).",
-            "$ref": "#/components/schemas/File"
-          },
-          "seed": {
-            "description": "The random seed used for the generation process.",
-            "title": "Seed",
-            "type": "integer",
-            "examples": [
-              42
-            ]
-          },
-          "duration": {
-            "description": "The actual duration of the generated audio in seconds (may be shorter than the requested duration).",
-            "title": "Duration",
-            "type": "number",
-            "examples": [
-              60
-            ]
-          }
-        }
+        "type": "object"
       },
       "File": {
-        "title": "File",
         "required": [
           "url"
         ],
-        "type": "object",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
         "properties": {
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "file_size": {
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
             "examples": [
               4404019
             ],
@@ -250,9 +205,54 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size"
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
           }
-        }
+        },
+        "title": "File",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object"
       }
     }
   },

@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _required_)
   - Examples: "A rugged middle-aged man with wheat-colored skin and a full beard streaked with gray stands in the harsh sunlight of a desert outpost. His curly hair is windswept, and sweat drips down the bridge of his slightly crooked nose. His faded utility jacket and weathered boots are caked in dust, while his sharp, watchful eyes scan the horizon."
 
@@ -51,6 +55,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "A rugged middle-aged man with wheat-colored skin and a full beard streaked with gray stands in the harsh sunlight of a desert outpost. His curly hair is windswept, and sweat drips down the bridge of his slightly crooked nose. His faded utility jacket and weathered boots are caked in dust, while his sharp, watchful eyes scan the horizon.",
   "prompt_optimizer": true
 }

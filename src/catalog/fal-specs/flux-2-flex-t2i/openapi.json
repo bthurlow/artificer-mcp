@@ -71,7 +71,9 @@
         ]
       },
       "Flux2FlexInput": {
-        "title": "Flux2FlexTextToImageInput",
+        "required": [
+          "prompt"
+        ],
         "x-fal-order-properties": [
           "prompt",
           "image_size",
@@ -83,9 +85,26 @@
           "guidance_scale",
           "num_inference_steps"
         ],
+        "type": "object",
+        "title": "Flux2FlexTextToImageInput",
         "properties": {
+          "guidance_scale": {
+            "title": "Guidance Scale",
+            "default": 3.5,
+            "type": "number",
+            "minimum": 1.5,
+            "maximum": 10,
+            "description": "The guidance scale to use for the generation."
+          },
           "image_size": {
-            "title": "Image Size",
+            "x-fal": {
+              "max_width": 2560,
+              "max_height": 2560,
+              "min_height": 256,
+              "min_width": 256,
+              "max_area": 4194304,
+              "multiple_of": 16
+            },
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
@@ -102,74 +121,9 @@
                 "type": "string"
               }
             ],
-            "x-fal": {
-              "max_area": 4194304,
-              "min_width": 256,
-              "multiple_of": 16,
-              "min_height": 256,
-              "max_height": 2560,
-              "max_width": 2560
-            },
-            "description": "The size of the generated image.",
-            "default": "landscape_4_3"
-          },
-          "prompt": {
-            "title": "Prompt",
-            "examples": [
-              "A high-quality 3D render of a cute fluffy monster eating a giant donut; the fur simulation is incredibly detailed, the donut glaze is sticky and reflective, bright daylight lighting, shallow depth of field."
-            ],
-            "description": "The prompt to generate an image from.",
-            "type": "string"
-          },
-          "num_inference_steps": {
-            "title": "Number of Inference Steps",
-            "default": 28,
-            "maximum": 50,
-            "description": "The number of inference steps to perform.",
-            "type": "integer",
-            "minimum": 2
-          },
-          "sync_mode": {
-            "title": "Sync Mode",
-            "default": false,
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "type": "boolean"
-          },
-          "seed": {
-            "title": "Seed",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The seed to use for the generation."
-          },
-          "output_format": {
-            "enum": [
-              "jpeg",
-              "png"
-            ],
-            "default": "jpeg",
-            "title": "Output Format",
-            "description": "The format of the generated image.",
-            "type": "string"
-          },
-          "enable_safety_checker": {
-            "title": "Enable Safety Checker",
-            "default": true,
-            "description": "Whether to enable the safety checker. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "type": "boolean"
-          },
-          "guidance_scale": {
-            "title": "Guidance Scale",
-            "default": 3.5,
-            "maximum": 10,
-            "description": "The guidance scale to use for the generation.",
-            "type": "number",
-            "minimum": 1.5
+            "default": "landscape_4_3",
+            "title": "Image Size",
+            "description": "The size of the generated image."
           },
           "safety_tolerance": {
             "enum": [
@@ -179,31 +133,81 @@
               "4",
               "5"
             ],
+            "type": "string",
             "default": "2",
             "title": "Safety Tolerance",
-            "description": "The safety tolerance level for the generated image. 1 being the most strict and 5 being the most permissive.",
-            "type": "string"
+            "description": "The safety tolerance level for the generated image. 1 being the most strict and 5 being the most permissive."
+          },
+          "output_format": {
+            "enum": [
+              "jpeg",
+              "png"
+            ],
+            "type": "string",
+            "default": "jpeg",
+            "title": "Output Format",
+            "description": "The format of the generated image."
+          },
+          "num_inference_steps": {
+            "title": "Number of Inference Steps",
+            "default": 28,
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 50,
+            "description": "The number of inference steps to perform."
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "type": "boolean",
+            "title": "Enable Safety Checker",
+            "description": "Whether to enable the safety checker. Disabling it requires account authorization; unauthorized requests are always checked."
+          },
+          "prompt": {
+            "examples": [
+              "A high-quality 3D render of a cute fluffy monster eating a giant donut; the fur simulation is incredibly detailed, the donut glaze is sticky and reflective, bright daylight lighting, shallow depth of field."
+            ],
+            "type": "string",
+            "title": "Prompt",
+            "description": "The prompt to generate an image from."
+          },
+          "sync_mode": {
+            "default": false,
+            "type": "boolean",
+            "title": "Sync Mode",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "The seed to use for the generation."
           }
-        },
-        "required": [
-          "prompt"
-        ],
-        "type": "object"
+        }
       },
       "Flux2FlexOutput": {
-        "title": "Flux2FlexOutput",
+        "required": [
+          "images",
+          "seed"
+        ],
         "x-fal-order-properties": [
           "images",
           "seed"
         ],
+        "type": "object",
+        "title": "Flux2FlexOutput",
         "properties": {
           "seed": {
+            "type": "integer",
             "title": "Seed",
-            "description": "The seed used for the generation.",
-            "type": "integer"
+            "description": "The seed used for the generation."
           },
           "images": {
-            "title": "Images",
             "examples": [
               [
                 {
@@ -211,47 +215,45 @@
                 }
               ]
             ],
-            "description": "The generated images.",
             "items": {
               "$ref": "#/components/schemas/ImageFile"
             },
-            "type": "array"
+            "type": "array",
+            "title": "Images",
+            "description": "The generated images."
           }
-        },
-        "required": [
-          "images",
-          "seed"
-        ],
-        "type": "object"
+        }
       },
       "ImageSize": {
-        "title": "ImageSize",
         "x-fal-order-properties": [
           "width",
           "height"
         ],
+        "type": "object",
+        "title": "ImageSize",
         "properties": {
-          "width": {
-            "title": "Width",
-            "default": 512,
-            "maximum": 14142,
-            "description": "The width of the generated image.",
-            "type": "integer",
-            "exclusiveMinimum": 0
-          },
           "height": {
             "title": "Height",
             "default": 512,
-            "maximum": 14142,
-            "description": "The height of the generated image.",
+            "exclusiveMinimum": 0,
             "type": "integer",
-            "exclusiveMinimum": 0
+            "maximum": 14142,
+            "description": "The height of the generated image."
+          },
+          "width": {
+            "title": "Width",
+            "default": 512,
+            "exclusiveMinimum": 0,
+            "type": "integer",
+            "maximum": 14142,
+            "description": "The width of the generated image."
           }
-        },
-        "type": "object"
+        }
       },
       "ImageFile": {
-        "title": "ImageFile",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -260,71 +262,28 @@
           "width",
           "height"
         ],
+        "type": "object",
+        "title": "ImageFile",
         "properties": {
-          "file_name": {
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
           "content_type": {
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
             "examples": [
               "image/png"
             ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
             "description": "The mime type of the file."
           },
-          "height": {
-            "title": "Height",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The height of the image"
-          },
           "file_size": {
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
             "examples": [
               4404019
             ],
-            "description": "The size of the file in bytes."
-          },
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
-          },
-          "width": {
-            "title": "Width",
             "anyOf": [
               {
                 "type": "integer"
@@ -333,13 +292,54 @@
                 "type": "null"
               }
             ],
+            "title": "File Size",
+            "description": "The size of the file in bytes."
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "The height of the image"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
             "description": "The width of the image"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
           }
-        },
-        "required": [
-          "url"
-        ],
-        "type": "object"
+        }
       }
     }
   },

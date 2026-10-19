@@ -15,9 +15,9 @@
 
 ## Pricing
 
-Video costs **$0.03** per second at **480p**, **$0.048** per second at **768p**, and **$0.096** per second at **1080p**.
+Video costs **$0.0325** per second at **480p**, **$0.052** per second at **768p**, and **$0.104** per second at **1080p**.
 
-Note: these are promotional rates, **40%** off for a limited time. The discount ends **October 15**, after which **480p** is **$0.05**/second, **768p** is **$0.08**/second, and **1080p** is **$0.16**/second.
+Note: these are promotional rates, **35%** off for a limited time. The discount ends **October 31**, after which **480p** is **$0.05**/second, **768p** is **$0.08**/second, and **1080p** is **$0.16**/second.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

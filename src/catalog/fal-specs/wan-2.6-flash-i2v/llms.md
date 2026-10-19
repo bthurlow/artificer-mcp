@@ -116,7 +116,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video file
-  - Examples: {"url":"https://v3b.fal.media/files/b/0a8675cf/bCu9FiFXSjsSnIwOmjUOY_BVs2IFR3.mp4","content_type":"video/mp4"}
+  - Examples: {"content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0a8675cf/bCu9FiFXSjsSnIwOmjUOY_BVs2IFR3.mp4"}
 
 - **`seed`** (`integer`, _required_):
   The seed used for generation
@@ -133,8 +133,8 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "url": "https://v3b.fal.media/files/b/0a8675cf/bCu9FiFXSjsSnIwOmjUOY_BVs2IFR3.mp4",
-    "content_type": "video/mp4"
+    "content_type": "video/mp4",
+    "url": "https://v3b.fal.media/files/b/0a8675cf/bCu9FiFXSjsSnIwOmjUOY_BVs2IFR3.mp4"
   },
   "seed": 175932751,
   "actual_prompt": "A comedic cinematic scene where the creator interacts with AI-generated reality transformations."

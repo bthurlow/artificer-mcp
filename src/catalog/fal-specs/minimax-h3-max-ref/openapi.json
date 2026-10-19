@@ -71,6 +71,186 @@
         ]
       },
       "H3MaxReferenceToVideoInput": {
+        "title": "TurboReferenceToVideoHailuo03Input",
+        "type": "object",
+        "properties": {
+          "image_url": {
+            "title": "Start Image URL",
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional URL of the image to use as the first frame. The video opens exactly on this image while the references keep the subjects consistent; the output canvas follows this image."
+          },
+          "reference_image_urls": {
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg"
+              ]
+            ],
+            "title": "Reference Image URLs",
+            "type": "array",
+            "description": "URLs of subject/style reference images, referenced in the prompt as Image 1, Image 2, and so on. Reference images, videos, and audio clips must add up to at most 12 files.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 9
+          },
+          "prompt": {
+            "examples": [
+              "Image 1 is the female protagonist. Image 2 is her small dog. Keep the woman and dog consistent with their respective reference images while they walk together through a sunlit garden."
+            ],
+            "maxLength": 50000,
+            "title": "Prompt",
+            "type": "string",
+            "minLength": 1,
+            "description": "Text prompt for video generation. Refer to reference assets by their modality and order in the reference lists: Image 1, Image 2, Video 1, Audio 1, and so on."
+          },
+          "sync_mode": {
+            "title": "Sync Mode",
+            "type": "boolean",
+            "description": "Return the generated video as base64 instead of a CDN URL.",
+            "default": false
+          },
+          "duration": {
+            "title": "Duration",
+            "type": "number",
+            "minimum": 0.92,
+            "maximum": 15,
+            "description": "Video length in seconds. The output can run up to about 0.7 s longer than requested.",
+            "default": 5
+          },
+          "reference_video_urls": {
+            "title": "Reference Video URLs",
+            "type": "array",
+            "description": "URLs of motion/reference video clips (2-15 seconds each, combined duration at most 15 seconds), referenced in the prompt as Video 1, Video 2, and so on. Reference images, videos, and audio clips must add up to at most 12 files.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3
+          },
+          "seed": {
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Random seed. A random seed is selected when omitted."
+          },
+          "reference_conditions": {
+            "title": "Reference Conditions",
+            "description": "Ordered reference list; cross-modality order is semantic and is preserved end-to-end. Do not combine with reference_*_urls.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceCondition"
+            },
+            "maxItems": 12
+          },
+          "prompt_expansion_mode": {
+            "examples": [
+              "disabled",
+              "balanced",
+              "quality"
+            ],
+            "title": "Prompt Expansion Mode",
+            "type": "string",
+            "description": "How much effort to spend rewriting the prompt before generation. 'disabled' skips prompt expansion. 'balanced' returns in about a second. 'quality' spends up to ~30s on a richer prompt.",
+            "default": "balanced"
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "type": "boolean",
+            "description": "If set to true, the safety checker will be enabled.",
+            "default": true
+          },
+          "aspect_ratio": {
+            "title": "Aspect Ratio",
+            "type": "string",
+            "enum": [
+              "adaptive",
+              "21:9",
+              "16:9",
+              "4:3",
+              "1:1",
+              "3:4",
+              "9:16"
+            ],
+            "description": "The aspect ratio of the generated video.",
+            "default": "adaptive"
+          },
+          "reference_audio_urls": {
+            "title": "Reference Audio URLs",
+            "type": "array",
+            "description": "URLs of reference audio clips (2-15 seconds each, combined duration at most 15 seconds), referenced in the prompt as Audio 1, Audio 2, and so on. Images, videos, and audio can be provided individually or together. Reference images, videos, and audio clips must add up to at most 12 files.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 3
+          },
+          "middle_frame_time": {
+            "examples": [
+              2.5
+            ],
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMaximum": 15,
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Time (seconds)",
+            "description": "Target time for the middle image, in seconds from the start. Rounded to the nearest frame at 24 fps; it must fall strictly between the first and last frames of the requested duration. Requires middle_image_url."
+          },
+          "middle_image_url": {
+            "title": "Middle Image",
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional image to guide the video at middle_frame_time. Requires start and end images and native 480P or 768P resolution."
+          },
+          "resolution": {
+            "title": "Resolution",
+            "type": "string",
+            "enum": [
+              "480P",
+              "768P",
+              "1080P"
+            ],
+            "description": "The native generation resolution, or 1080P latent refinement from a native 768P source.",
+            "default": "768P"
+          },
+          "end_image_url": {
+            "title": "End Image URL",
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional URL of the image to use as the last frame. The video ends exactly on this image."
+          }
+        },
         "x-fal-order-properties": [
           "prompt",
           "reference_image_urls",
@@ -89,210 +269,17 @@
           "aspect_ratio",
           "reference_conditions"
         ],
-        "type": "object",
-        "title": "TurboReferenceToVideoHailuo03Input",
         "required": [
           "prompt",
           "prompt_expansion_mode"
-        ],
-        "properties": {
-          "middle_frame_time": {
-            "anyOf": [
-              {
-                "type": "number",
-                "exclusiveMinimum": 0,
-                "exclusiveMaximum": 15
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Target time for the middle image, in seconds from the start. Rounded to the nearest frame at 24 fps; it must fall strictly between the first and last frames of the requested duration. Requires middle_image_url.",
-            "examples": [
-              2.5
-            ],
-            "title": "Time (seconds)"
-          },
-          "reference_image_urls": {
-            "description": "URLs of subject/style reference images, referenced in the prompt as Image 1, Image 2, and so on. Reference images, videos, and audio clips must add up to at most 12 files.",
-            "examples": [
-              [
-                "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg"
-              ]
-            ],
-            "type": "array",
-            "title": "Reference Image URLs",
-            "maxItems": 9,
-            "items": {
-              "type": "string"
-            }
-          },
-          "prompt_expansion_mode": {
-            "default": "balanced",
-            "examples": [
-              "disabled",
-              "balanced",
-              "quality"
-            ],
-            "type": "string",
-            "title": "Prompt Expansion Mode",
-            "description": "How much effort to spend rewriting the prompt before generation. 'disabled' skips prompt expansion. 'balanced' returns in about a second. 'quality' spends up to ~30s on a richer prompt."
-          },
-          "resolution": {
-            "default": "768P",
-            "description": "The native generation resolution, or 1080P latent refinement from a native 768P source.",
-            "enum": [
-              "480P",
-              "768P",
-              "1080P"
-            ],
-            "title": "Resolution",
-            "type": "string"
-          },
-          "aspect_ratio": {
-            "default": "adaptive",
-            "description": "The aspect ratio of the generated video.",
-            "enum": [
-              "adaptive",
-              "21:9",
-              "16:9",
-              "4:3",
-              "1:1",
-              "3:4",
-              "9:16"
-            ],
-            "title": "Aspect Ratio",
-            "type": "string"
-          },
-          "image_url": {
-            "anyOf": [
-              {
-                "type": "string",
-                "minLength": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Optional URL of the image to use as the first frame. The video opens exactly on this image while the references keep the subjects consistent; the output canvas follows this image.",
-            "title": "Start Image URL"
-          },
-          "reference_video_urls": {
-            "description": "URLs of motion/reference video clips (2-15 seconds each, combined duration at most 15 seconds), referenced in the prompt as Video 1, Video 2, and so on. Reference images, videos, and audio clips must add up to at most 12 files.",
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Reference Video URLs",
-            "maxItems": 3
-          },
-          "middle_image_url": {
-            "anyOf": [
-              {
-                "type": "string",
-                "minLength": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Optional image to guide the video at middle_frame_time. Requires start and end images and native 480P or 768P resolution.",
-            "title": "Middle Image"
-          },
-          "end_image_url": {
-            "anyOf": [
-              {
-                "type": "string",
-                "minLength": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Optional URL of the image to use as the last frame. The video ends exactly on this image.",
-            "title": "End Image URL"
-          },
-          "reference_audio_urls": {
-            "description": "URLs of reference audio clips (2-15 seconds each, combined duration at most 15 seconds), referenced in the prompt as Audio 1, Audio 2, and so on. Images, videos, and audio can be provided individually or together. Reference images, videos, and audio clips must add up to at most 12 files.",
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Reference Audio URLs",
-            "maxItems": 3
-          },
-          "duration": {
-            "default": 5,
-            "description": "Video length in seconds. The output can run up to about 0.7 s longer than requested.",
-            "type": "number",
-            "title": "Duration",
-            "maximum": 15,
-            "minimum": 0.92
-          },
-          "reference_conditions": {
-            "description": "Ordered reference list; cross-modality order is semantic and is preserved end-to-end. Do not combine with reference_*_urls.",
-            "items": {
-              "$ref": "#/components/schemas/ReferenceCondition"
-            },
-            "type": "array",
-            "title": "Reference Conditions",
-            "maxItems": 12
-          },
-          "prompt": {
-            "maxLength": 50000,
-            "examples": [
-              "Image 1 is the female protagonist. Image 2 is her small dog. Keep the woman and dog consistent with their respective reference images while they walk together through a sunlit garden."
-            ],
-            "type": "string",
-            "title": "Prompt",
-            "description": "Text prompt for video generation. Refer to reference assets by their modality and order in the reference lists: Image 1, Image 2, Video 1, Audio 1, and so on.",
-            "minLength": 1
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "description": "If set to true, the safety checker will be enabled.",
-            "type": "boolean",
-            "title": "Enable Safety Checker"
-          },
-          "seed": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Random seed. A random seed is selected when omitted.",
-            "title": "Seed"
-          },
-          "sync_mode": {
-            "default": false,
-            "description": "Return the generated video as base64 instead of a CDN URL.",
-            "type": "boolean",
-            "title": "Sync Mode"
-          }
-        }
+        ]
       },
       "H3MaxReferenceToVideoOutput": {
-        "x-fal-order-properties": [
-          "video",
-          "expanded_prompt",
-          "seed",
-          "timings"
-        ],
-        "type": "object",
         "title": "TurboReferenceToVideoHailuo03Output",
-        "required": [
-          "video",
-          "seed"
-        ],
+        "type": "object",
         "properties": {
-          "video": {
-            "description": "The generated video",
-            "$ref": "#/components/schemas/File"
-          },
           "timings": {
+            "title": "Timings",
             "anyOf": [
               {
                 "type": "object",
@@ -304,10 +291,14 @@
                 "type": "null"
               }
             ],
-            "description": "Timing breakdown in seconds. 'inference' is the DiT denoising time on the GPU backend. Null on routes that do not report backend timings.",
-            "title": "Timings"
+            "description": "Timing breakdown in seconds. 'inference' is the DiT denoising time on the GPU backend. Null on routes that do not report backend timings."
+          },
+          "video": {
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video"
           },
           "expanded_prompt": {
+            "title": "Expanded Prompt",
             "anyOf": [
               {
                 "type": "string"
@@ -316,61 +307,99 @@
                 "type": "null"
               }
             ],
-            "description": "The prompt after expansion, as sent to the model. Null when prompt expansion was disabled, left the prompt unchanged, or was performed internally by MiniMax's hosted API.",
-            "title": "Expanded Prompt"
+            "description": "The prompt after expansion, as sent to the model. Null when prompt expansion was disabled, left the prompt unchanged, or was performed internally by MiniMax's hosted API."
           },
           "seed": {
-            "description": "Base seed for reproducing the generation.",
+            "title": "Seed",
             "type": "integer",
-            "title": "Seed"
+            "description": "Base seed for reproducing the generation."
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "video",
+          "expanded_prompt",
+          "seed",
+          "timings"
+        ],
+        "required": [
+          "video",
+          "seed"
+        ]
       },
       "ReferenceCondition": {
-        "x-fal-order-properties": [
-          "type",
-          "url"
-        ],
-        "description": "One ordered Ref2VA media condition.",
-        "type": "object",
         "title": "ReferenceCondition",
-        "required": [
-          "type",
-          "url"
-        ],
+        "type": "object",
         "properties": {
           "type": {
-            "description": "Reference modality. Cross-modality list order is semantic.",
+            "title": "Type",
             "type": "string",
             "enum": [
               "image",
               "video",
               "audio"
             ],
-            "title": "Type"
+            "description": "Reference modality. Cross-modality list order is semantic."
           },
           "url": {
-            "description": "URL of the reference media.",
+            "title": "Url",
             "type": "string",
             "minLength": 1,
-            "title": "Url"
+            "description": "URL of the reference media."
           }
-        }
-      },
-      "File": {
+        },
         "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
-        "type": "object",
-        "title": "File",
-        "required": [
+          "type",
           "url"
         ],
+        "description": "One ordered Ref2VA media condition.",
+        "required": [
+          "type",
+          "url"
+        ]
+      },
+      "File": {
+        "title": "File",
+        "type": "object",
         "properties": {
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file."
+          },
           "file_size": {
+            "examples": [
+              4404019
+            ],
             "anyOf": [
               {
                 "type": "integer"
@@ -379,48 +408,19 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
-            "title": "File Size"
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name"
+            "title": "File Size",
+            "description": "The size of the file in bytes."
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "required": [
+          "url"
+        ]
       }
     }
   },

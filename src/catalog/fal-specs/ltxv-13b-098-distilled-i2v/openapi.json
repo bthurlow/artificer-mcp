@@ -71,7 +71,6 @@
         ]
       },
       "Ltxv13b098DistilledImageToVideoInput": {
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "negative_prompt",
@@ -93,119 +92,70 @@
           "constant_rate_factor",
           "image_url"
         ],
-        "required": [
-          "prompt",
-          "image_url"
-        ],
-        "title": "DistilledImageToVideoInput",
         "properties": {
-          "enable_detail_pass": {
-            "examples": [
-              false
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
             ],
-            "type": "boolean",
-            "title": "Enable Detail Pass",
-            "description": "Whether to use a detail pass. If True, the model will perform a second pass to refine the video and enhance details. This incurs a 2.0x cost multiplier on the base price.",
-            "default": false
-          },
-          "negative_prompt": {
-            "type": "string",
-            "title": "Negative Prompt",
-            "description": "Negative prompt for generation",
-            "default": "worst quality, inconsistent motion, blurry, jittery, distorted"
-          },
-          "reverse_video": {
-            "examples": [
-              false
-            ],
-            "type": "boolean",
-            "title": "Reverse Video",
-            "description": "Whether to reverse the video.",
-            "default": false
-          },
-          "num_frames": {
-            "examples": [
-              121
-            ],
-            "type": "integer",
-            "title": "Number of Frames",
-            "description": "The number of frames in the video.",
-            "default": 121,
-            "minimum": 9,
-            "maximum": 1441
-          },
-          "image_url": {
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/ltxv-image-input.jpg"
-            ],
-            "type": "string",
-            "title": "Image URL",
-            "description": "Image URL for Image-to-Video task"
+            "title": "Seed",
+            "description": "Random seed for generation"
           },
           "tone_map_compression_ratio": {
-            "type": "number",
-            "title": "Tone Map Compression Ratio",
             "default": 0,
+            "minimum": 0,
+            "title": "Tone Map Compression Ratio",
+            "multipleOf": 0.05,
+            "maximum": 1,
             "examples": [
               0
             ],
-            "multipleOf": 0.05,
             "description": "The compression ratio for tone mapping. This is used to compress the dynamic range of the video to improve visual quality. A value of 0.0 means no compression, while a value of 1.0 means maximum compression.",
-            "minimum": 0,
-            "maximum": 1
+            "type": "number"
           },
-          "second_pass_skip_initial_steps": {
+          "resolution": {
+            "default": "720p",
             "examples": [
-              5
+              "720p"
             ],
-            "type": "integer",
-            "title": "Second Pass Skip Initial Steps",
-            "description": "The number of inference steps to skip in the initial steps of the second pass. By skipping some steps at the beginning, the second pass can focus on smaller details instead of larger changes.",
-            "default": 5,
-            "minimum": 1,
-            "maximum": 11
+            "title": "Resolution",
+            "description": "Resolution of the generated video.",
+            "type": "string",
+            "enum": [
+              "480p",
+              "720p"
+            ]
           },
-          "frame_rate": {
+          "enable_safety_checker": {
+            "default": true,
             "examples": [
-              24
+              true
             ],
-            "type": "integer",
-            "title": "Frame Rate",
-            "description": "The frame rate of the video.",
-            "default": 24,
-            "minimum": 1,
-            "maximum": 60
+            "title": "Enable Safety Checker",
+            "description": "Whether to enable the safety checker. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "type": "boolean"
           },
-          "first_pass_num_inference_steps": {
+          "enable_detail_pass": {
+            "default": false,
             "examples": [
-              8
+              false
             ],
-            "type": "integer",
-            "title": "Number of Inference Steps",
-            "description": "Number of inference steps during the first pass.",
-            "default": 8,
-            "minimum": 2,
-            "maximum": 12
-          },
-          "second_pass_num_inference_steps": {
-            "examples": [
-              8
-            ],
-            "type": "integer",
-            "title": "Second Pass Number of Inference Steps",
-            "description": "Number of inference steps during the second pass.",
-            "default": 8,
-            "minimum": 2,
-            "maximum": 12
+            "title": "Enable Detail Pass",
+            "description": "Whether to use a detail pass. If True, the model will perform a second pass to refine the video and enhance details. This incurs a 2.0x cost multiplier on the base price.",
+            "type": "boolean"
           },
           "aspect_ratio": {
+            "default": "auto",
             "examples": [
               "auto"
             ],
-            "type": "string",
             "title": "Aspect Ratio",
             "description": "The aspect ratio of the video.",
-            "default": "auto",
+            "type": "string",
             "enum": [
               "9:16",
               "1:1",
@@ -213,148 +163,192 @@
               "auto"
             ]
           },
-          "temporal_adain_factor": {
-            "type": "number",
-            "title": "Temporal AdaIN Factor",
-            "default": 0.5,
+          "num_frames": {
+            "default": 121,
+            "minimum": 9,
+            "title": "Number of Frames",
+            "description": "The number of frames in the video.",
             "examples": [
-              0.5
+              121
             ],
-            "multipleOf": 0.05,
-            "description": "The factor for adaptive instance normalization (AdaIN) applied to generated video chunks after the first. This can help deal with a gradual increase in saturation/contrast in the generated video by normalizing the color distribution across the video. A high value will ensure the color distribution is more consistent across the video, while a low value will allow for more variation in color distribution.",
-            "minimum": 0,
-            "maximum": 1
+            "maximum": 1441,
+            "type": "integer"
+          },
+          "first_pass_num_inference_steps": {
+            "default": 8,
+            "minimum": 2,
+            "title": "Number of Inference Steps",
+            "description": "Number of inference steps during the first pass.",
+            "examples": [
+              8
+            ],
+            "maximum": 12,
+            "type": "integer"
           },
           "loras": {
+            "default": [],
+            "title": "Loras",
+            "description": "LoRA weights to use for generation",
             "items": {
               "$ref": "#/components/schemas/LoRAWeight"
             },
-            "type": "array",
-            "title": "Loras",
-            "description": "LoRA weights to use for generation",
-            "default": []
-          },
-          "constant_rate_factor": {
-            "examples": [
-              29
-            ],
-            "type": "integer",
-            "title": "Constant Rate Factor",
-            "description": "The constant rate factor (CRF) to compress input media with. Compressed input media more closely matches the model's training data, which can improve motion quality.",
-            "default": 29,
-            "minimum": 0,
-            "maximum": 51
-          },
-          "resolution": {
-            "examples": [
-              "720p"
-            ],
-            "type": "string",
-            "title": "Resolution",
-            "description": "Resolution of the generated video.",
-            "default": "720p",
-            "enum": [
-              "480p",
-              "720p"
-            ]
-          },
-          "seed": {
-            "title": "Seed",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Random seed for generation"
-          },
-          "enable_safety_checker": {
-            "examples": [
-              true
-            ],
-            "type": "boolean",
-            "title": "Enable Safety Checker",
-            "description": "Whether to enable the safety checker. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "default": true
-          },
-          "expand_prompt": {
-            "examples": [
-              false
-            ],
-            "type": "boolean",
-            "title": "Expand Prompt",
-            "description": "Whether to expand the prompt using a language model.",
-            "default": false
+            "type": "array"
           },
           "prompt": {
             "examples": [
               "The astronaut gets up and walks away"
             ],
-            "type": "string",
             "title": "Prompt",
-            "description": "Text prompt to guide generation"
+            "description": "Text prompt to guide generation",
+            "type": "string"
+          },
+          "frame_rate": {
+            "default": 24,
+            "minimum": 1,
+            "title": "Frame Rate",
+            "description": "The frame rate of the video.",
+            "examples": [
+              24
+            ],
+            "maximum": 60,
+            "type": "integer"
+          },
+          "negative_prompt": {
+            "default": "worst quality, inconsistent motion, blurry, jittery, distorted",
+            "title": "Negative Prompt",
+            "description": "Negative prompt for generation",
+            "type": "string"
+          },
+          "image_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/ltxv-image-input.jpg"
+            ],
+            "title": "Image URL",
+            "description": "Image URL for Image-to-Video task",
+            "type": "string"
+          },
+          "second_pass_num_inference_steps": {
+            "default": 8,
+            "minimum": 2,
+            "title": "Second Pass Number of Inference Steps",
+            "description": "Number of inference steps during the second pass.",
+            "examples": [
+              8
+            ],
+            "maximum": 12,
+            "type": "integer"
+          },
+          "temporal_adain_factor": {
+            "default": 0.5,
+            "minimum": 0,
+            "title": "Temporal AdaIN Factor",
+            "multipleOf": 0.05,
+            "maximum": 1,
+            "examples": [
+              0.5
+            ],
+            "description": "The factor for adaptive instance normalization (AdaIN) applied to generated video chunks after the first. This can help deal with a gradual increase in saturation/contrast in the generated video by normalizing the color distribution across the video. A high value will ensure the color distribution is more consistent across the video, while a low value will allow for more variation in color distribution.",
+            "type": "number"
+          },
+          "reverse_video": {
+            "default": false,
+            "examples": [
+              false
+            ],
+            "title": "Reverse Video",
+            "description": "Whether to reverse the video.",
+            "type": "boolean"
+          },
+          "expand_prompt": {
+            "default": false,
+            "examples": [
+              false
+            ],
+            "title": "Expand Prompt",
+            "description": "Whether to expand the prompt using a language model.",
+            "type": "boolean"
+          },
+          "constant_rate_factor": {
+            "default": 29,
+            "minimum": 0,
+            "title": "Constant Rate Factor",
+            "description": "The constant rate factor (CRF) to compress input media with. Compressed input media more closely matches the model's training data, which can improve motion quality.",
+            "examples": [
+              29
+            ],
+            "maximum": 51,
+            "type": "integer"
+          },
+          "second_pass_skip_initial_steps": {
+            "default": 5,
+            "minimum": 1,
+            "title": "Second Pass Skip Initial Steps",
+            "description": "The number of inference steps to skip in the initial steps of the second pass. By skipping some steps at the beginning, the second pass can focus on smaller details instead of larger changes.",
+            "examples": [
+              5
+            ],
+            "maximum": 11,
+            "type": "integer"
           }
-        }
+        },
+        "title": "DistilledImageToVideoInput",
+        "required": [
+          "prompt",
+          "image_url"
+        ],
+        "type": "object"
       },
       "Ltxv13b098DistilledImageToVideoOutput": {
-        "type": "object",
         "x-fal-order-properties": [
           "video",
           "prompt",
           "seed"
         ],
-        "required": [
-          "video",
-          "prompt",
-          "seed"
-        ],
-        "title": "ImageToVideoOutput",
         "properties": {
           "seed": {
-            "type": "integer",
             "title": "Seed",
-            "description": "The seed used for generation."
+            "description": "The seed used for generation.",
+            "type": "integer"
           },
           "video": {
-            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://storage.googleapis.com/falserverless/example_outputs/ltxv-image-to-video-output.mp4"
               }
             ],
+            "$ref": "#/components/schemas/File",
             "description": "The generated video file."
           },
           "prompt": {
             "examples": [
               "The astronaut gets up and walks away"
             ],
-            "type": "string",
             "title": "Prompt",
-            "description": "The prompt used for generation."
+            "description": "The prompt used for generation.",
+            "type": "string"
           }
-        }
+        },
+        "title": "ImageToVideoOutput",
+        "required": [
+          "video",
+          "prompt",
+          "seed"
+        ],
+        "type": "object"
       },
       "LoRAWeight": {
-        "type": "object",
         "x-fal-order-properties": [
           "path",
           "weight_name",
           "scale"
         ],
-        "required": [
-          "path"
-        ],
-        "title": "LoRAWeight",
         "properties": {
           "path": {
-            "type": "string",
             "title": "Path",
-            "description": "URL or path to the LoRA weights."
+            "description": "URL or path to the LoRA weights.",
+            "type": "string"
           },
           "weight_name": {
-            "title": "Weight Name",
             "anyOf": [
               {
                 "type": "string"
@@ -363,56 +357,41 @@
                 "type": "null"
               }
             ],
+            "title": "Weight Name",
             "description": "Name of the LoRA weight. Only used if `path` is a HuggingFace repository, and is only required when the repository contains multiple LoRA weights."
           },
           "scale": {
-            "type": "number",
-            "title": "Scale",
-            "description": "Scale of the LoRA weight. This is a multiplier applied to the LoRA weight when loading it.",
             "default": 1,
             "minimum": 0,
-            "maximum": 4
+            "title": "Scale",
+            "description": "Scale of the LoRA weight. This is a multiplier applied to the LoRA weight when loading it.",
+            "maximum": 4,
+            "type": "number"
           }
-        }
+        },
+        "title": "LoRAWeight",
+        "required": [
+          "path"
+        ],
+        "type": "object"
       },
       "File": {
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "required": [
-          "url"
-        ],
-        "title": "File",
         "properties": {
           "url": {
-            "type": "string",
             "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
           },
           "content_type": {
             "examples": [
               "image/png"
             ],
-            "title": "Content Type",
             "anyOf": [
               {
                 "type": "string"
@@ -421,13 +400,13 @@
                 "type": "null"
               }
             ],
+            "title": "Content Type",
             "description": "The mime type of the file."
           },
           "file_size": {
             "examples": [
               4404019
             ],
-            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -436,9 +415,30 @@
                 "type": "null"
               }
             ],
+            "title": "File Size",
             "description": "The size of the file in bytes."
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
           }
-        }
+        },
+        "title": "File",
+        "required": [
+          "url"
+        ],
+        "type": "object"
       }
     }
   },

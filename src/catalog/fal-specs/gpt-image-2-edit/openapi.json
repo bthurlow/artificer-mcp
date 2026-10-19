@@ -71,53 +71,11 @@
         ]
       },
       "GptImage2EditInput": {
-        "title": "EditImageRequest",
-        "required": [
-          "prompt",
-          "image_urls"
-        ],
-        "type": "object",
-        "x-fal-order-properties": [
-          "prompt",
-          "image_urls",
-          "image_size",
-          "background",
-          "quality",
-          "num_images",
-          "output_format",
-          "sync_mode",
-          "enable_safety_checker",
-          "mask_url"
-        ],
         "properties": {
-          "mask_url": {
-            "title": "Mask URL",
-            "description": "The URL of the mask image to use for the generation. This indicates what part of the image to edit.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "sync_mode": {
-            "title": "Sync Mode",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "type": "boolean",
-            "default": false
-          },
-          "enable_safety_checker": {
-            "title": "Enable Safety Checker",
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "type": "boolean",
-            "default": true
-          },
           "background": {
+            "type": "string",
             "title": "Background",
             "description": "Background for the generated image",
-            "type": "string",
             "enum": [
               "auto",
               "transparent",
@@ -125,43 +83,46 @@
             ],
             "default": "auto"
           },
-          "quality": {
-            "title": "Quality",
-            "type": "string",
-            "description": "Quality for the generated image. Use 'auto' to let the model pick the best quality for the prompt.",
-            "enum": [
-              "auto",
-              "low",
-              "medium",
-              "high"
-            ],
-            "default": "high"
-          },
-          "output_format": {
-            "title": "Output Format",
-            "description": "Output format for the images",
-            "type": "string",
-            "enum": [
-              "jpeg",
-              "png",
-              "webp"
-            ],
-            "default": "png"
-          },
           "num_images": {
-            "title": "Number of Images",
             "minimum": 1,
+            "type": "integer",
+            "title": "Number of Images",
             "examples": [
               1
             ],
-            "maximum": 4,
             "description": "Number of images to generate",
-            "type": "integer",
+            "maximum": 4,
             "default": 1
           },
+          "prompt": {
+            "maxLength": 32000,
+            "minLength": 2,
+            "type": "string",
+            "title": "Prompt",
+            "examples": [
+              "Same workers, same beam, same lunch boxes - but they're all on their phones now. One is taking a selfie. One is on a call looking annoyed. Same danger, new priorities. A hard hat has AirPods."
+            ],
+            "description": "The prompt for image generation"
+          },
+          "mask_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mask URL",
+            "description": "The URL of the mask image to use for the generation. This indicates what part of the image to edit."
+          },
+          "enable_safety_checker": {
+            "type": "boolean",
+            "title": "Enable Safety Checker",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "default": true
+          },
           "image_size": {
-            "title": "Image Size",
-            "description": "The size of the generated image. Use 'auto' to infer from input images.",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
@@ -179,97 +140,212 @@
                 ]
               }
             ],
+            "title": "Image Size",
+            "description": "The size of the generated image. Use 'auto' to infer from input images.",
             "default": "auto"
           },
+          "quality": {
+            "type": "string",
+            "title": "Quality",
+            "description": "Quality for the generated image. Use 'auto' to let the model pick the best quality for the prompt.",
+            "enum": [
+              "auto",
+              "low",
+              "medium",
+              "high"
+            ],
+            "default": "high"
+          },
           "image_urls": {
+            "type": "array",
             "title": "Image URLs",
-            "description": "The URLs of the images to use as a reference for the generation. A maximum of 16 images are allowed.",
+            "items": {
+              "type": "string"
+            },
             "examples": [
               [
                 "https://v3b.fal.media/files/b/0a8691af/9Se_1_VX1wzTjjTOpWbs9_bb39c2eb-1a41-4749-b1d0-cf134abc8bbf.png"
               ]
             ],
-            "type": "array",
-            "maxItems": 16,
-            "items": {
-              "type": "string"
-            }
+            "description": "The URLs of the images to use as a reference for the generation. A maximum of 16 images are allowed.",
+            "maxItems": 16
           },
-          "prompt": {
-            "title": "Prompt",
-            "description": "The prompt for image generation",
-            "minLength": 2,
-            "maxLength": 32000,
-            "examples": [
-              "Same workers, same beam, same lunch boxes - but they're all on their phones now. One is taking a selfie. One is on a call looking annoyed. Same danger, new priorities. A hard hat has AirPods."
+          "sync_mode": {
+            "type": "boolean",
+            "title": "Sync Mode",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "default": false
+          },
+          "output_format": {
+            "type": "string",
+            "title": "Output Format",
+            "description": "Output format for the images",
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
             ],
-            "type": "string"
+            "default": "png"
           }
-        }
+        },
+        "type": "object",
+        "title": "EditImageRequest",
+        "required": [
+          "prompt",
+          "image_urls"
+        ],
+        "x-fal-order-properties": [
+          "prompt",
+          "image_urls",
+          "image_size",
+          "background",
+          "quality",
+          "num_images",
+          "output_format",
+          "sync_mode",
+          "enable_safety_checker",
+          "mask_url"
+        ]
       },
       "GptImage2EditOutput": {
-        "title": "EditImageResponse",
-        "required": [
-          "images"
-        ],
-        "type": "object",
-        "x-fal-order-properties": [
-          "images"
-        ],
         "properties": {
           "images": {
+            "type": "array",
             "title": "Images",
-            "description": "The generated images.",
+            "items": {
+              "$ref": "#/components/schemas/ImageFile"
+            },
             "examples": [
               [
                 {
                   "url": "https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png",
-                  "file_name": "yUt7tifLSbg1WzWWgfj2o.png",
-                  "height": 1024,
                   "content_type": "image/png",
+                  "height": 1024,
+                  "file_name": "yUt7tifLSbg1WzWWgfj2o.png",
                   "width": 1024
                 }
               ]
             ],
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ImageFile"
-            }
+            "description": "The generated images."
           }
-        }
+        },
+        "type": "object",
+        "title": "EditImageResponse",
+        "required": [
+          "images"
+        ],
+        "x-fal-order-properties": [
+          "images"
+        ]
       },
       "ImageSize": {
-        "title": "ImageSize",
-        "type": "object",
-        "x-fal-order-properties": [
-          "width",
-          "height"
-        ],
         "properties": {
           "height": {
-            "exclusiveMinimum": 0,
-            "title": "Height",
             "type": "integer",
-            "maximum": 14142,
+            "title": "Height",
             "description": "The height of the generated image.",
+            "exclusiveMinimum": 0,
+            "maximum": 14142,
             "default": 512
           },
           "width": {
-            "exclusiveMinimum": 0,
-            "title": "Width",
             "type": "integer",
-            "maximum": 14142,
+            "title": "Width",
             "description": "The width of the generated image.",
+            "exclusiveMinimum": 0,
+            "maximum": 14142,
             "default": 512
           }
-        }
+        },
+        "type": "object",
+        "title": "ImageSize",
+        "x-fal-order-properties": [
+          "width",
+          "height"
+        ]
       },
       "ImageFile": {
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes."
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "The height of the image"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "description": "The width of the image"
+          }
+        },
+        "type": "object",
         "title": "ImageFile",
         "required": [
           "url"
         ],
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -277,83 +353,7 @@
           "file_size",
           "width",
           "height"
-        ],
-        "properties": {
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
-          },
-          "file_name": {
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "width": {
-            "title": "Width",
-            "description": "The width of the image",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "height": {
-            "title": "Height",
-            "description": "The height of the image",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "content_type": {
-            "title": "Content Type",
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "file_size": {
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        }
+        ]
       }
     }
   },

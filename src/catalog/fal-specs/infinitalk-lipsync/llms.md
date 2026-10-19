@@ -100,7 +100,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video file.
-  - Examples: {"url":"https://v3.fal.media/files/kangaroo/z6VqUwNTwzuWa6YE1g7In_74af6c0bdd6041c3b1130d54885e3eee.mp4","file_size":515275,"file_name":"74af6c0bdd6041c3b1130d54885e3eee.mp4","content_type":"application/octet-stream"}
+  - Examples: {"content_type":"application/octet-stream","file_name":"74af6c0bdd6041c3b1130d54885e3eee.mp4","url":"https://v3.fal.media/files/kangaroo/z6VqUwNTwzuWa6YE1g7In_74af6c0bdd6041c3b1130d54885e3eee.mp4","file_size":515275}
 
 - **`seed`** (`integer`, _required_):
   The seed used for generation.
@@ -112,10 +112,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "url": "https://v3.fal.media/files/kangaroo/z6VqUwNTwzuWa6YE1g7In_74af6c0bdd6041c3b1130d54885e3eee.mp4",
-    "file_size": 515275,
+    "content_type": "application/octet-stream",
     "file_name": "74af6c0bdd6041c3b1130d54885e3eee.mp4",
-    "content_type": "application/octet-stream"
+    "url": "https://v3.fal.media/files/kangaroo/z6VqUwNTwzuWa6YE1g7In_74af6c0bdd6041c3b1130d54885e3eee.mp4",
+    "file_size": 515275
   }
 }
 ```

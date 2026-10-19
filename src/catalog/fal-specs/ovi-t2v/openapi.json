@@ -71,11 +71,6 @@
         ]
       },
       "OviInput": {
-        "title": "OviT2VRequest",
-        "required": [
-          "prompt"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "negative_prompt",
@@ -85,10 +80,30 @@
           "resolution",
           "enable_safety_checker"
         ],
+        "required": [
+          "prompt"
+        ],
+        "type": "object",
         "properties": {
+          "negative_prompt": {
+            "description": "Negative prompt for video generation.",
+            "default": "jitter, bad hands, blur, distortion",
+            "type": "string",
+            "title": "Negative Prompt"
+          },
+          "audio_negative_prompt": {
+            "description": "Negative prompt for audio generation.",
+            "default": "robotic, muffled, echo, distorted",
+            "type": "string",
+            "title": "Audio Negative Prompt"
+          },
+          "enable_safety_checker": {
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "default": true,
+            "type": "boolean",
+            "title": "Enable Safety Checker"
+          },
           "seed": {
-            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
-            "title": "Seed",
             "anyOf": [
               {
                 "type": "integer"
@@ -96,18 +111,28 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "title": "Seed"
           },
-          "audio_negative_prompt": {
-            "description": "Negative prompt for audio generation.",
-            "title": "Audio Negative Prompt",
+          "num_inference_steps": {
+            "minimum": 1,
+            "description": "The number of inference steps.",
+            "maximum": 50,
+            "default": 30,
+            "type": "integer",
+            "title": "Num Inference Steps"
+          },
+          "prompt": {
+            "description": "The text prompt to guide video generation.",
+            "examples": [
+              "A close-up of someone's face as they pet a cat, their hands stroking the soft fur in the foreground. Their affectionate expression shows as the cat purrs contentedly in their lap. They say, <S>This little guy has been with me for eight years now. He knows exactly when I need comfort. Animals are pretty amazing that way.<E>.<AUDCAP>Affectionate voice with cat purring and gentle petting sounds<ENDAUDCAP>"
+            ],
             "type": "string",
-            "default": "robotic, muffled, echo, distorted"
+            "title": "Prompt"
           },
           "resolution": {
             "description": "Resolution of the generated video in W:H format. One of (512x992, 992x512, 960x512, 512x960, 720x720, or 448x1120).",
-            "title": "Resolution",
-            "type": "string",
             "enum": [
               "512x992",
               "992x512",
@@ -117,61 +142,24 @@
               "448x1120",
               "1120x448"
             ],
-            "default": "992x512"
-          },
-          "negative_prompt": {
-            "description": "Negative prompt for video generation.",
-            "title": "Negative Prompt",
+            "default": "992x512",
             "type": "string",
-            "default": "jitter, bad hands, blur, distortion"
-          },
-          "enable_safety_checker": {
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "title": "Enable Safety Checker",
-            "type": "boolean",
-            "default": true
-          },
-          "prompt": {
-            "description": "The text prompt to guide video generation.",
-            "title": "Prompt",
-            "type": "string",
-            "examples": [
-              "A close-up of someone's face as they pet a cat, their hands stroking the soft fur in the foreground. Their affectionate expression shows as the cat purrs contentedly in their lap. They say, <S>This little guy has been with me for eight years now. He knows exactly when I need comfort. Animals are pretty amazing that way.<E>.<AUDCAP>Affectionate voice with cat purring and gentle petting sounds<ENDAUDCAP>"
-            ]
-          },
-          "num_inference_steps": {
-            "description": "The number of inference steps.",
-            "minimum": 1,
-            "type": "integer",
-            "maximum": 50,
-            "title": "Num Inference Steps",
-            "default": 30
+            "title": "Resolution"
           }
-        }
+        },
+        "title": "OviT2VRequest"
       },
       "OviOutput": {
-        "title": "OviT2VResponse",
-        "required": [
-          "seed"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "video",
           "seed"
         ],
+        "required": [
+          "seed"
+        ],
+        "type": "object",
         "properties": {
-          "seed": {
-            "description": "The seed used for generation.",
-            "title": "Seed",
-            "type": "integer"
-          },
           "video": {
-            "description": "The generated video file.",
-            "examples": [
-              {
-                "url": "https://storage.googleapis.com/falserverless/example_inputs/ovi_t2v_output.mp4"
-              }
-            ],
             "anyOf": [
               {
                 "$ref": "#/components/schemas/File"
@@ -179,34 +167,40 @@
               {
                 "type": "null"
               }
+            ],
+            "description": "The generated video file.",
+            "examples": [
+              {
+                "url": "https://storage.googleapis.com/falserverless/example_inputs/ovi_t2v_output.mp4"
+              }
             ]
+          },
+          "seed": {
+            "description": "The seed used for generation.",
+            "type": "integer",
+            "title": "Seed"
           }
-        }
+        },
+        "title": "OviT2VResponse"
       },
       "File": {
-        "title": "File",
-        "required": [
-          "url"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
+        "required": [
+          "url"
+        ],
+        "type": "object",
         "properties": {
           "url": {
             "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
+            "type": "string",
+            "title": "Url"
           },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
+          "content_type": {
             "anyOf": [
               {
                 "type": "string"
@@ -214,14 +208,14 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "content_type": {
+            ],
             "description": "The mime type of the file.",
-            "title": "Content Type",
             "examples": [
               "image/png"
             ],
+            "title": "Content Type"
+          },
+          "file_name": {
             "anyOf": [
               {
                 "type": "string"
@@ -229,14 +223,14 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name"
           },
           "file_size": {
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "examples": [
-              4404019
-            ],
             "anyOf": [
               {
                 "type": "integer"
@@ -244,9 +238,15 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size"
           }
-        }
+        },
+        "title": "File"
       }
     }
   },

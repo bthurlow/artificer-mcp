@@ -71,55 +71,77 @@
         ]
       },
       "AgentUni1V1MaxInput": {
-        "required": [
-          "prompt"
-        ],
-        "x-fal-order-properties": [
-          "prompt",
-          "aspect_ratio",
-          "style",
-          "output_format",
-          "enable_web_search",
-          "reference_image_urls",
-          "enable_safety_checker"
-        ],
-        "title": "TextToImageRequest",
         "type": "object",
+        "title": "TextToImageRequest",
         "properties": {
-          "reference_image_urls": {
-            "description": "Optional list of reference image URLs used to guide the generation.",
-            "title": "Reference Image Urls",
+          "style": {
+            "type": "string",
+            "title": "Style",
+            "description": "Visual style of the generated image.",
+            "enum": [
+              "auto",
+              "manga"
+            ],
+            "default": "auto"
+          },
+          "output_format": {
             "anyOf": [
               {
-                "maxItems": 9,
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
+                "type": "string",
+                "enum": [
+                  "png",
+                  "jpeg"
+                ]
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Output Format",
+            "description": "Encoding format of the generated image."
+          },
+          "enable_safety_checker": {
+            "type": "boolean",
+            "title": "Enable Safety Checker",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "default": true
+          },
+          "reference_image_urls": {
+            "anyOf": [
+              {
+                "type": "array",
+                "maxItems": 9,
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Image Urls",
+            "description": "Optional list of reference image URLs used to guide the generation."
+          },
+          "enable_web_search": {
+            "type": "boolean",
+            "title": "Enable Web Search",
+            "description": "When true, the model may consult the web for references.",
+            "default": false
           },
           "prompt": {
+            "minLength": 1,
             "title": "Prompt",
+            "type": "string",
+            "description": "Text prompt describing the image to generate.",
             "examples": [
               "A manga panel of a stoic samurai overlooking a neon cyberpunk city at dusk."
             ],
-            "description": "Text prompt describing the image to generate.",
-            "minLength": 1,
-            "type": "string",
             "maxLength": 6000
           },
           "aspect_ratio": {
-            "examples": [
-              "16:9"
-            ],
-            "description": "Aspect ratio of the generated image.",
-            "title": "Aspect Ratio",
             "anyOf": [
               {
+                "type": "string",
                 "enum": [
                   "3:1",
                   "2:1",
@@ -130,98 +152,57 @@
                   "9:16",
                   "1:2",
                   "1:3"
-                ],
-                "type": "string"
+                ]
               },
               {
                 "type": "null"
               }
-            ]
-          },
-          "style": {
-            "default": "auto",
-            "enum": [
-              "auto",
-              "manga"
             ],
-            "description": "Visual style of the generated image.",
-            "title": "Style",
-            "type": "string"
-          },
-          "output_format": {
-            "description": "Encoding format of the generated image.",
-            "title": "Output Format",
-            "anyOf": [
-              {
-                "enum": [
-                  "png",
-                  "jpeg"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+            "title": "Aspect Ratio",
+            "description": "Aspect ratio of the generated image.",
+            "examples": [
+              "16:9"
             ]
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "title": "Enable Safety Checker",
-            "type": "boolean"
-          },
-          "enable_web_search": {
-            "default": false,
-            "description": "When true, the model may consult the web for references.",
-            "title": "Enable Web Search",
-            "type": "boolean"
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "prompt",
+          "aspect_ratio",
+          "style",
+          "output_format",
+          "enable_web_search",
+          "reference_image_urls",
+          "enable_safety_checker"
+        ],
+        "required": [
+          "prompt"
+        ]
       },
       "AgentUni1V1MaxOutput": {
-        "required": [
-          "images"
-        ],
-        "x-fal-order-properties": [
-          "images"
-        ],
-        "title": "ImageOutput",
         "type": "object",
+        "title": "ImageOutput",
         "properties": {
           "images": {
+            "type": "array",
+            "title": "Images",
+            "description": "The generated image(s).",
             "items": {
               "$ref": "#/components/schemas/File"
-            },
-            "description": "The generated image(s).",
-            "title": "Images",
-            "type": "array"
+            }
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "images"
+        ],
+        "required": [
+          "images"
+        ]
       },
       "File": {
-        "required": [
-          "url"
-        ],
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
-        "title": "File",
         "type": "object",
+        "title": "File",
         "properties": {
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
           "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -229,14 +210,34 @@
               {
                 "type": "null"
               }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
             ]
           },
           "file_size": {
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -244,24 +245,23 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
             ],
-            "description": "The mime type of the file.",
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
             ]
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "required": [
+          "url"
+        ]
       }
     }
   },

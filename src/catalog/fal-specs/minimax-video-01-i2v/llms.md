@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _required_)
   - Examples: "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage."
 
@@ -56,6 +60,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "A stylish woman walks down a Tokyo street filled with warm glowing neon and animated city signage.",
   "image_url": "https://storage.googleapis.com/falserverless/model_tests/wan/dragon-warrior.jpg",
   "prompt_optimizer": true

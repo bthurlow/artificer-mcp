@@ -1,6 +1,6 @@
 # LTX Video (preview)
 
-> Generate videos from prompts using LTX Video
+> Generate videos from prompts using LTX Video 0.9.1
 
 
 ## Overview

@@ -71,9 +71,59 @@
         ]
       },
       "KlingVideoV2MasterTextToVideoInput": {
-        "required": [
-          "prompt"
-        ],
+        "type": "object",
+        "title": "TextToVideoV2MasterRequest",
+        "properties": {
+          "duration": {
+            "type": "string",
+            "enum": [
+              "5",
+              "10"
+            ],
+            "description": "The duration of the generated video in seconds",
+            "title": "Duration",
+            "default": "5"
+          },
+          "cfg_scale": {
+            "type": "number",
+            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
+            "maximum": 1,
+            "title": "Cfg Scale",
+            "default": 0.5,
+            "minimum": 0
+          },
+          "aspect_ratio": {
+            "type": "string",
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1"
+            ],
+            "description": "The aspect ratio of the generated video frame",
+            "title": "Aspect Ratio",
+            "default": "16:9"
+          },
+          "enable_safety_checker": {
+            "type": "boolean",
+            "title": "Enable Safety Checker",
+            "description": "Disabling safety checks requires account authorization; unauthorized requests are always checked.",
+            "default": true
+          },
+          "negative_prompt": {
+            "type": "string",
+            "title": "Negative Prompt",
+            "default": "blur, distort, and low quality",
+            "maxLength": 2500
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "examples": [
+              "A slow-motion drone shot descending from above a maze of neon-lit Tokyo alleyways at night during heavy rainfall. The camera gradually focuses on a lone figure in a luminescent white raincoat standing perfectly still amid the bustling crowd, all carrying black umbrellas. As the camera continues its downward journey, we see the raindrops creating rippling patterns on puddles that reflect the kaleidoscope of colors from the surrounding signs, creating a mirror world beneath the city."
+            ],
+            "maxLength": 2500
+          }
+        },
         "x-fal-order-properties": [
           "enable_safety_checker",
           "prompt",
@@ -82,102 +132,41 @@
           "negative_prompt",
           "cfg_scale"
         ],
-        "properties": {
-          "enable_safety_checker": {
-            "default": true,
-            "description": "Disabling safety checks requires account authorization; unauthorized requests are always checked.",
-            "title": "Enable Safety Checker",
-            "type": "boolean"
-          },
-          "prompt": {
-            "examples": [
-              "A slow-motion drone shot descending from above a maze of neon-lit Tokyo alleyways at night during heavy rainfall. The camera gradually focuses on a lone figure in a luminescent white raincoat standing perfectly still amid the bustling crowd, all carrying black umbrellas. As the camera continues its downward journey, we see the raindrops creating rippling patterns on puddles that reflect the kaleidoscope of colors from the surrounding signs, creating a mirror world beneath the city."
-            ],
-            "maxLength": 2500,
-            "title": "Prompt",
-            "type": "string"
-          },
-          "cfg_scale": {
-            "maximum": 1,
-            "default": 0.5,
-            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
-            "minimum": 0,
-            "title": "Cfg Scale",
-            "type": "number"
-          },
-          "aspect_ratio": {
-            "enum": [
-              "16:9",
-              "9:16",
-              "1:1"
-            ],
-            "default": "16:9",
-            "description": "The aspect ratio of the generated video frame",
-            "title": "Aspect Ratio",
-            "type": "string"
-          },
-          "negative_prompt": {
-            "default": "blur, distort, and low quality",
-            "maxLength": 2500,
-            "title": "Negative Prompt",
-            "type": "string"
-          },
-          "duration": {
-            "enum": [
-              "5",
-              "10"
-            ],
-            "default": "5",
-            "description": "The duration of the generated video in seconds",
-            "title": "Duration",
-            "type": "string"
-          }
-        },
-        "title": "TextToVideoV2MasterRequest",
-        "type": "object"
+        "required": [
+          "prompt"
+        ]
       },
       "KlingVideoV2MasterTextToVideoOutput": {
-        "required": [
-          "video"
-        ],
-        "x-fal-order-properties": [
-          "video"
-        ],
+        "type": "object",
+        "title": "TextToVideoV2MasterOutput",
         "properties": {
           "video": {
             "$ref": "#/components/schemas/File",
+            "description": "The generated video",
             "examples": [
               {
                 "url": "https://v3.fal.media/files/rabbit/5fu6OSZdvV825r2s_c0S8_output.mp4"
               }
-            ],
-            "description": "The generated video"
+            ]
           }
         },
-        "title": "TextToVideoV2MasterOutput",
-        "type": "object"
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "required": [
+          "video"
+        ]
       },
       "File": {
-        "required": [
-          "url"
-        ],
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
+        "type": "object",
+        "title": "File",
         "properties": {
           "url": {
-            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
             "title": "Url",
-            "type": "string"
+            "description": "The URL where the file can be downloaded from."
           },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
+          "file_name": {
             "anyOf": [
               {
                 "type": "string"
@@ -186,13 +175,28 @@
                 "type": "null"
               }
             ],
-            "title": "Content Type"
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ]
           },
           "file_size": {
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -201,26 +205,22 @@
                 "type": "null"
               }
             ],
-            "title": "File Size"
-          },
-          "file_name": {
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name"
+              4404019
+            ]
           }
         },
-        "title": "File",
-        "type": "object"
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "required": [
+          "url"
+        ]
       }
     }
   },

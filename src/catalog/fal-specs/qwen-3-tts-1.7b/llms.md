@@ -141,7 +141,7 @@ The API returns the following output format:
 
 - **`audio`** (`AudioFile`, _required_):
   The generated speech audio file.
-  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/qwen3-tts/tts_out.mp3","channels":1,"file_name":"n5Ynr2aFKUPw1QjLYjB_4_XEdHoD1K.mp3","sample_rate":24000,"duration":13.025333333333334,"content_type":"audio/mpeg"}
+  - Examples: {"content_type":"audio/mpeg","url":"https://storage.googleapis.com/falserverless/example_outputs/qwen3-tts/tts_out.mp3","file_name":"n5Ynr2aFKUPw1QjLYjB_4_XEdHoD1K.mp3","duration":13.025333333333334,"channels":1,"sample_rate":24000}
 
 
 
@@ -150,12 +150,12 @@ The API returns the following output format:
 ```json
 {
   "audio": {
+    "content_type": "audio/mpeg",
     "url": "https://storage.googleapis.com/falserverless/example_outputs/qwen3-tts/tts_out.mp3",
-    "channels": 1,
     "file_name": "n5Ynr2aFKUPw1QjLYjB_4_XEdHoD1K.mp3",
-    "sample_rate": 24000,
     "duration": 13.025333333333334,
-    "content_type": "audio/mpeg"
+    "channels": 1,
+    "sample_rate": 24000
   }
 }
 ```

@@ -107,7 +107,7 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated image files info.
   - Array of ImageFile
-  - Examples: [{"height":768,"content_type":"image/png","width":1024,"url":"https://storage.googleapis.com/falserverless/example_outputs/z-image-turbo-output.png"}]
+  - Examples: [{"content_type":"image/png","width":1024,"height":768,"url":"https://storage.googleapis.com/falserverless/example_outputs/z-image-turbo-output.png"}]
 
 - **`timings`** (`Timings`, _required_):
   The timings of the generation process.
@@ -130,9 +130,9 @@ The API returns the following output format:
 {
   "images": [
     {
-      "height": 768,
       "content_type": "image/png",
       "width": 1024,
+      "height": 768,
       "url": "https://storage.googleapis.com/falserverless/example_outputs/z-image-turbo-output.png"
     }
   ],

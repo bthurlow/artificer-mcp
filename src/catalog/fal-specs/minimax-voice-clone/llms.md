@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 - **`audio_url`** (`string`, _required_):
   URL of the input audio file for voice cloning. Should be at least 10 seconds
   long. To retain the voice permanently, use it with a TTS (text-to-speech)
@@ -74,6 +78,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "audio_url": "https://storage.googleapis.com/falserverless/model_tests/zonos/demo_voice_zonos.wav",
   "text": "Hello, this is a preview of your cloned voice! I hope you like it!",
   "model": "speech-02-hd"
