@@ -5,7 +5,7 @@ import { z } from 'zod';
 const HAILUO_GUIDE = `# MiniMax Hailuo Video — Prompt Guide
 
 ## What this model is best for
-MiniMax Hailuo is the cost-conscious mid-tier workhorse: predictable pricing, solid output quality, reliable for batch jobs. Best for high-volume social-content production where unit economics matter and Veo / Sora premium tier is overkill. Three generations active: **H3 (Hailuo 3.0, latest — start here)**, Hailuo 2.3, and Hailuo 02.
+MiniMax Hailuo is the cost-conscious mid-tier workhorse: predictable pricing, solid output quality, reliable for batch jobs. Best for high-volume social-content production where unit economics matter and Veo premium tier is overkill. Three generations active: **H3 (Hailuo 3.0, latest — start here)**, Hailuo 2.3, and Hailuo 02.
 
 ## MiniMax H3 (Hailuo 3.0) — the current generation
 

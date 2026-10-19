@@ -700,6 +700,8 @@ Skip: `fal-ai/bytedance/omnihuman` (1.0, $0.14/s, superseded by 1.5), `fal-ai/sy
 
 ## 23. Sora 2 routes: verify status — CLOSED 2026-09-24 (covered by the drift cron)
 
+**Retired 2026-10-19:** all four `sora-2-*` routes 404ed on both surfaces from 2026-10-12, and were removed with `sora_video_prompt_guide` (UPGRADING.md, 0.13.0). The drift cron caught it as designed.
+
 Closed without separate work: the weekly drift job (#2) catches both failure modes this item worried about. A dead route 404s and turns the job red; a silent redirect shows up as a `deprecated` notice. Its first run after the #46 fix (2026-09-24) reported neither for `sora-2-*`. If a Monday run flags them, retire them per the #18b pattern.
 
 ### Original filing (kept for history)

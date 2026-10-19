@@ -21,7 +21,7 @@ xAI's Grok Imagine Video lineage. Native audio output, multi-reference image con
 
 ## Known weaknesses
 - 720p resolution cap — no 1080p / 4K.
-- Motion realism trails Veo / Sora / Kling Pro.
+- Motion realism trails Veo / Kling Pro.
 - Audio quality is functional but not premium.
 
 ## Input requirements

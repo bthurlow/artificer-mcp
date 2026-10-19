@@ -11,7 +11,7 @@ import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { createTestServerClient } from '../helpers/server.js';
 
 /**
- * All 183 tool names registered by the artificer-mcp server, grouped by category.
+ * All 182 tool names registered by the artificer-mcp server, grouped by category.
  */
 const EXPECTED_TOOLS = {
   core: [
@@ -156,7 +156,6 @@ const EXPECTED_TOOLS = {
     'cassette_sfx_prompt_guide',
     'transcription_prompt_guide',
     'ass_karaoke_prompt_guide',
-    'sora_video_prompt_guide',
     'luma_ray_prompt_guide',
     'kling_video_prompt_guide',
     'seedance_prompt_guide',
@@ -244,15 +243,15 @@ describe('MCP Protocol — artificer-mcp Server', () => {
   // ── 2. Tool discovery ─────────────────────────────────────────────────────
 
   describe('tool discovery', () => {
-    it('should return exactly 183 tools', () => {
-      expect(tools).toHaveLength(183);
+    it('should return exactly 182 tools', () => {
+      expect(tools).toHaveLength(182);
     });
   });
 
   // ── 3. Tool names ─────────────────────────────────────────────────────────
 
   describe('tool names', () => {
-    it('should contain all 183 expected tool names', () => {
+    it('should contain all 182 expected tool names', () => {
       const registeredNames = tools.map((t) => t.name).sort();
       const expectedNames = [...ALL_TOOL_NAMES].sort();
 

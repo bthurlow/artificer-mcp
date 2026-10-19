@@ -23,7 +23,7 @@ Pricing tiers by inference steps — base = 16 steps; doubling steps roughly dou
 - Distilled variants give ~2× faster inference.
 
 ## Known weaknesses
-- Aesthetic / cinematic quality trails Veo / Sora / Kling.
+- Aesthetic / cinematic quality trails Veo / Kling.
 - Inference-step pricing model — overshooting steps gets expensive fast.
 - No native audio.
 

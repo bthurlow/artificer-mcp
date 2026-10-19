@@ -80,7 +80,7 @@ LTX is the cheapest path to 1080p / 2160p video on fal with native audio support
 - Open-weights 19B / 22B variants are replicable locally.
 
 ## Known weaknesses
-- Per-frame quality at top tiers trails Veo / Sora / Kling Pro.
+- Per-frame quality at top tiers trails Veo / Kling Pro.
 - Many variants — picking the right one needs this guide.
 - Legacy variants are noticeably weaker than current.
 

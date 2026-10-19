@@ -23,7 +23,7 @@ Tencent's open-weights video lineage. Best for research workflows, fine-tuning e
 - Hunyuan Custom does identity preservation for portrait-driven i2v.
 
 ## Known weaknesses
-- Quality trails Veo / Sora / Kling Pro.
+- Quality trails Veo / Kling Pro.
 - No native audio.
 
 ## Input requirements

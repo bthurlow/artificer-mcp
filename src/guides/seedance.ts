@@ -5,7 +5,7 @@ import { z } from 'zod';
 const SEEDANCE_GUIDE = `# ByteDance Seedance Video — Prompt Guide
 
 ## What this model is best for
-ByteDance's Seedance is a premium-tier video model with multi-reference inputs, native audio, and start/end-frame control. Seedance 2.0 is the latest; 1.5 Pro and 1.0 lineages remain available for cost-conscious use cases. Best for high-quality social and ad content where Veo / Sora pricing is too high but mid-tier (Wan / Hailuo) is too low.
+ByteDance's Seedance is a premium-tier video model with multi-reference inputs, native audio, and start/end-frame control. Seedance 2.0 is the latest; 1.5 Pro and 1.0 lineages remain available for cost-conscious use cases. Best for high-quality social and ad content where Veo pricing is too high but mid-tier (Wan / Hailuo) is too low.
 
 ## Picking a model
 | Slug | Generation | Modality | Audio | Cost (720p) | Best for |

@@ -21,7 +21,6 @@ import { registerStableAudioPromptGuide } from './stable-audio.js';
 import { registerCassetteSfxPromptGuide } from './cassette-sfx.js';
 import { registerTranscriptionPromptGuide } from './transcription.js';
 import { registerAssKaraokePromptGuide } from './ass-karaoke.js';
-import { registerSoraPromptGuide } from './sora-video.js';
 import { registerLumaRayPromptGuide } from './luma-ray.js';
 import { registerKlingVideoPromptGuide } from './kling-video.js';
 import { registerSeedancePromptGuide } from './seedance.js';
@@ -107,7 +106,6 @@ export function registerGuideTools(server: McpServer): void {
   registerAssKaraokePromptGuide(server);
 
   // Video — cinematic (premium tier)
-  registerSoraPromptGuide(server);
   registerLumaRayPromptGuide(server);
   registerKlingVideoPromptGuide(server);
   registerSeedancePromptGuide(server);

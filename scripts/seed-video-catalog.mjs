@@ -82,14 +82,9 @@ function googleAndFalEntry(slug, googleModel, falModel, guide) {
 }
 
 // ── video.cinematic ────────────────────────────────────────────────────────
-// Premium tier: Veo, Sora, Luma Ray, Kling Master/O3/3, Seedance 2.x/1.5, Marey
+// Premium tier: Veo, Luma Ray, Kling Master/O3/3, Seedance 2.x/1.5, Marey
 
 const cinematic = [
-  // Sora 2 (OpenAI on fal)
-  falEntry('sora-2-pro-t2v', 'fal-ai/sora-2/text-to-video/pro', 'sora_video_prompt_guide'),
-  falEntry('sora-2-pro-i2v', 'fal-ai/sora-2/image-to-video/pro', 'sora_video_prompt_guide'),
-  falEntry('sora-2-t2v', 'fal-ai/sora-2/text-to-video', 'sora_video_prompt_guide'),
-  falEntry('sora-2-i2v', 'fal-ai/sora-2/image-to-video', 'sora_video_prompt_guide'),
 
   // Veo 3.1 family (full / fast / lite × t2v / i2v / FLF / ref)
   falEntry('veo-3.1-t2v', 'fal-ai/veo3.1', 'veo_video_prompt_guide'),

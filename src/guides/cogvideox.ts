@@ -5,7 +5,7 @@ import { z } from 'zod';
 const COGVIDEOX_GUIDE = `# CogVideoX-5B — Prompt Guide
 
 ## What this model is best for
-Open-weights 5B-parameter video model from THUDM / Zhipu AI. Best for research workflows, fine-tuning experiments, or when caller wants a fal-hosted alias for the popular CogVideoX local model. Production-quality output trails Veo / Sora / Kling.
+Open-weights 5B-parameter video model from THUDM / Zhipu AI. Best for research workflows, fine-tuning experiments, or when caller wants a fal-hosted alias for the popular CogVideoX local model. Production-quality output trails Veo / Kling.
 
 ## Picking a model
 | Slug | Modality | Best for |
