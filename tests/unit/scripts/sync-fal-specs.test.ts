@@ -5,6 +5,10 @@ import {
   extractPricing,
   extractDeprecation,
   buildReport,
+  classifyFetches,
+  planRetirements,
+  retireRoutes,
+  MAX_AUTO_RETIRE,
 } from '../../../scripts/sync-fal-specs.mjs';
 
 describe('extractPricing', () => {
@@ -238,5 +242,135 @@ describe('buildReport', () => {
     expect(r.costChanges).toHaveLength(1);
     expect(r.failures).toHaveLength(1);
     expect(r.blocking).toBe(true);
+  });
+});
+
+describe('classifyFetches', () => {
+  const ok = { status: 'fulfilled', value: 'body' };
+  const err = (status: number) => ({
+    status: 'rejected',
+    reason: Object.assign(new Error('x'), { status }),
+  });
+
+  it('is ok when both surfaces answer', () => {
+    expect(classifyFetches([ok, ok])).toBe('ok');
+  });
+
+  it('is gone only when BOTH surfaces 404', () => {
+    expect(classifyFetches([err(404), err(404)])).toBe('gone');
+  });
+
+  it('is a plain failure when only one surface 404s', () => {
+    // One surface missing is as likely a fal docs hiccup as a dead route.
+    expect(classifyFetches([err(404), ok])).toBe('failed');
+    expect(classifyFetches([ok, err(404)])).toBe('failed');
+  });
+
+  it('is a plain failure on an outage, even on both surfaces', () => {
+    expect(classifyFetches([err(503), err(503)])).toBe('failed');
+    expect(classifyFetches([err(404), err(500)])).toBe('failed');
+    // A network error has no status at all.
+    expect(
+      classifyFetches([{ status: 'rejected', reason: new Error('ECONNRESET') }, err(404)]),
+    ).toBe('failed');
+  });
+});
+
+describe('planRetirements', () => {
+  const gone = (n: number) =>
+    Array.from({ length: n }, (_, i) => ({
+      slug: `r${i}`,
+      endpointId: `fal-ai/r${i}`,
+      error: '404',
+    }));
+
+  it('retires everything up to the cap', () => {
+    const plan = planRetirements(gone(MAX_AUTO_RETIRE));
+    expect(plan.retire).toHaveLength(MAX_AUTO_RETIRE);
+    expect(plan.failures).toEqual([]);
+  });
+
+  it('retires nothing over the cap, and reports every route as a failure', () => {
+    // Mass 404s look like fal changing its spec URLs, not dozens of models
+    // dying the same week. Removing them would gut the catalog.
+    const plan = planRetirements(gone(MAX_AUTO_RETIRE + 1));
+    expect(plan.retire).toEqual([]);
+    expect(plan.failures).toHaveLength(MAX_AUTO_RETIRE + 1);
+    expect(plan.failures[0].error).toContain('auto-retire cap');
+  });
+});
+
+describe('retireRoutes', () => {
+  const catalog = () => ({
+    video: {
+      cinematic: [
+        {
+          slug: 'dead-a',
+          prompt_guide: 'solo_guide',
+          access_routes: [{ provider: 'fal', model: 'fal-ai/a' }],
+        },
+        {
+          slug: 'mixed',
+          prompt_guide: 'shared_guide',
+          access_routes: [
+            { provider: 'google', model: 'g-1' },
+            { provider: 'fal', model: 'fal-ai/m' },
+          ],
+        },
+        {
+          slug: 'alive',
+          prompt_guide: 'shared_guide',
+          access_routes: [{ provider: 'fal', model: 'fal-ai/ok' }],
+        },
+      ],
+    },
+  });
+
+  it('removes an entry whose only route died, and flags its guide as orphaned', () => {
+    const c = catalog();
+    const [r] = retireRoutes(c, [{ slug: 'dead-a', endpointId: 'fal-ai/a' }]);
+    expect(c.video.cinematic.map((e) => e.slug)).toEqual(['mixed', 'alive']);
+    expect(r).toMatchObject({ entryRemoved: true, promptGuide: 'solo_guide', guideOrphaned: true });
+  });
+
+  it('keeps an entry that still has another route', () => {
+    const c = catalog();
+    const [r] = retireRoutes(c, [{ slug: 'mixed', endpointId: 'fal-ai/m' }]);
+    const mixed = c.video.cinematic.find((e) => e.slug === 'mixed');
+    expect(mixed?.access_routes).toEqual([{ provider: 'google', model: 'g-1' }]);
+    expect(r).toMatchObject({ entryRemoved: false, guideOrphaned: false });
+  });
+
+  it('judges orphaned guides against the final catalog', () => {
+    const c = catalog();
+    const results = retireRoutes(c, [
+      { slug: 'mixed', endpointId: 'fal-ai/m' },
+      { slug: 'alive', endpointId: 'fal-ai/ok' },
+    ]);
+    // 'mixed' keeps its google route, so shared_guide still has a model.
+    expect(results.every((r: { guideOrphaned: boolean }) => r.guideOrphaned === false)).toBe(true);
+  });
+});
+
+describe('buildReport — retirements', () => {
+  it('carries retired routes without marking the run blocking', () => {
+    // The removal is the PR diff; a red job is for findings with no diff.
+    const retired = [
+      {
+        slug: 'gone',
+        endpointId: 'fal-ai/gone',
+        entryRemoved: true,
+        promptGuide: null,
+        guideOrphaned: false,
+      },
+    ];
+    const r = buildReport([{ slug: 'gone', endpointId: 'fal-ai/gone' }], retired);
+    expect(r.retired).toEqual(retired);
+    expect(r.failures).toEqual([]);
+    expect(r.blocking).toBe(false);
+  });
+
+  it('defaults to no retirements', () => {
+    expect(buildReport([]).retired).toEqual([]);
   });
 });

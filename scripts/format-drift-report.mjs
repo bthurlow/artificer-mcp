@@ -27,18 +27,24 @@ function cell(value) {
 /**
  * Render the PR body.
  *
- * Ordering is deliberate — findings that produce NO file diff come first,
- * because the changed-files view will not show them and they are the only
- * ones a reviewer can miss entirely.
+ * Ordering is deliberate — breaking retirements first, then findings that
+ * produce NO file diff, because the changed-files view will not show them
+ * and they are the only ones a reviewer can miss entirely.
  *
  * Exported for unit testing.
  *
- * @param {{routes: number, deprecated: Array<any>, failures: Array<any>, costChanges: Array<any>, undeprecated: Array<any>, blocking: boolean}} report
+ * @param {{routes: number, retired?: Array<any>, deprecated: Array<any>, failures: Array<any>, costChanges: Array<any>, undeprecated: Array<any>, blocking: boolean}} report
  * @param {{verifyFailed?: boolean}} [opts]
  * @returns {string} markdown
  */
 export function formatDriftReport(report, opts = {}) {
-  const { deprecated = [], failures = [], costChanges = [], undeprecated = [] } = report;
+  const {
+    retired = [],
+    deprecated = [],
+    failures = [],
+    costChanges = [],
+    undeprecated = [],
+  } = report;
   const out = [];
 
   out.push(
@@ -48,11 +54,43 @@ export function formatDriftReport(report, opts = {}) {
     '',
   );
 
+  if (retired.length > 0) {
+    out.push(
+      `## 🗑️ ${retired.length} route(s) retired — BREAKING`,
+      '',
+      'Both the OpenAPI spec and `llms.txt` return **404** for these, so they were removed from `models.json` along with their spec dirs. Before merging, check fal for a renamed successor (repoint `model` instead of removing, if there is one). This PR is titled as a breaking change so release-please bumps the version.',
+      '',
+      '| Slug | Endpoint | Entry | Prompt guide |',
+      '|------|----------|-------|--------------|',
+    );
+    for (const r of retired) {
+      const guide = r.promptGuide
+        ? `\`${r.promptGuide}\`${r.guideOrphaned ? ' — **now has no model: delete the tool**' : ''}`
+        : '—';
+      out.push(
+        `| \`${r.slug}\` | \`${r.endpointId}\` | ${r.entryRemoved ? 'removed' : 'route removed, entry kept'} | ${guide} |`,
+      );
+    }
+    const refs = [...new Set(retired.flatMap((r) => r.references ?? []))].sort();
+    out.push(
+      '',
+      '**Manual follow-up on this branch before merging:**',
+      '',
+      ...refs.map((f) => `- [ ] Update \`${f}\` (still names a retired route)`),
+      ...[...new Set(retired.filter((r) => r.guideOrphaned).map((r) => r.promptGuide))].map(
+        (g) =>
+          `- [ ] Delete \`${g}\` (guide file, its registration in \`src/guides/index.ts\`, and its entry in \`tests/protocol/server.test.ts\`)`,
+      ),
+      '- [ ] Add an `UPGRADING.md` entry naming the removed slugs and a replacement',
+      '',
+    );
+  }
+
   if (failures.length > 0) {
     out.push(
       `## ⚠️ ${failures.length} route(s) failed to fetch`,
       '',
-      '**These produce no file diff**, so they will not appear in the changed files — this list is the only place they show up. Check whether the endpoint was renamed (repoint `model`) or genuinely retired (remove the slug, its spec dir, and every guide reference).',
+      '**These produce no file diff**, so they will not appear in the changed files — this list is the only place they show up. They were not retired automatically: either only one surface failed, the error was not a 404 (an outage or timeout), or too many routes died at once to trust. Re-run the job, or check whether the endpoint was renamed (repoint `model`).',
       '',
     );
     for (const f of failures) {
@@ -134,6 +172,7 @@ export function formatDriftReport(report, opts = {}) {
   }
 
   if (
+    retired.length === 0 &&
     failures.length === 0 &&
     deprecated.length === 0 &&
     costChanges.length === 0 &&
