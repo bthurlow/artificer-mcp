@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.13.0](https://github.com/bthurlow/artificer-mcp/compare/v0.12.0...v0.13.0) (2026-10-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* **catalog:** the sora-2-* catalog slugs and the sora_video_prompt_guide tool are removed. See UPGRADING.md (0.12.x -> 0.13.0) for replacements.
+
+### Features
+
+* **ci:** drift cron retires routes that 404 on both fal surfaces ([#64](https://github.com/bthurlow/artificer-mcp/issues/64)) ([49f4695](https://github.com/bthurlow/artificer-mcp/commit/49f4695bb251db5b686c38187a28c88479f90abb))
+
+
+### Bug Fixes
+
+* **catalog:** retire the 4 dead Sora 2 routes and sora_video_prompt_guide ([#63](https://github.com/bthurlow/artificer-mcp/issues/63)) ([f38d75a](https://github.com/bthurlow/artificer-mcp/commit/f38d75a935eccc3718e449919f1240a166818f60))
+
 ## [0.12.0](https://github.com/bthurlow/artificer-mcp/compare/v0.11.0...v0.12.0) (2026-10-16)
 
 
