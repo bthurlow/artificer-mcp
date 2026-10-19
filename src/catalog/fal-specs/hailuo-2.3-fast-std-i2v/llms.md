@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _required_):
   Text prompt for video generation
   - Examples: "Athlete running powerfully on beach, dynamic camera movement tracking the runner, waves and sunset in motion, Hollywood movie cinematography, professional sports filming, inspiring atmosphere"
@@ -62,6 +66,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "Athlete running powerfully on beach, dynamic camera movement tracking the runner, waves and sunset in motion, Hollywood movie cinematography, professional sports filming, inspiring atmosphere",
   "prompt_optimizer": true,
   "image_url": "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/fast_standard_i2v_in.jpg",

@@ -1,6 +1,6 @@
 # LTX Video (preview)
 
-> Generate videos from images using LTX Video
+> Generate videos from images using LTX Video 0.9.1
 
 
 ## Overview

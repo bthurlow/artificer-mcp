@@ -106,7 +106,7 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated images.
   - Array of ImageFile
-  - Examples: [{"url":"https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png","file_name":"EnWrO3XWjPE0nxBDpaQrj.png","width":1024,"content_type":"image/png","height":1024}]
+  - Examples: [{"url":"https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png","file_name":"EnWrO3XWjPE0nxBDpaQrj.png","height":1024,"width":1024,"content_type":"image/png"}]
 
 
 
@@ -118,9 +118,9 @@ The API returns the following output format:
     {
       "url": "https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png",
       "file_name": "EnWrO3XWjPE0nxBDpaQrj.png",
+      "height": 1024,
       "width": 1024,
-      "content_type": "image/png",
-      "height": 1024
+      "content_type": "image/png"
     }
   ]
 }

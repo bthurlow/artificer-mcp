@@ -71,7 +71,9 @@
         ]
       },
       "SeedvrUpscaleImageInput": {
-        "title": "SeedVRImageInput",
+        "required": [
+          "image_url"
+        ],
         "x-fal-order-properties": [
           "image_url",
           "upscale_mode",
@@ -82,8 +84,68 @@
           "output_format",
           "sync_mode"
         ],
+        "title": "SeedVRImageInput",
         "properties": {
+          "image_url": {
+            "description": "The input image to be processed",
+            "title": "Image Url",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/seedvr2/image_in.png"
+            ],
+            "type": "string"
+          },
+          "noise_scale": {
+            "minimum": 0,
+            "description": "The noise scale to use for the generation process.",
+            "title": "Noise Scale",
+            "multipleOf": 0.001,
+            "type": "number",
+            "maximum": 1,
+            "default": 0.1
+          },
+          "target_resolution": {
+            "description": "The target resolution to upscale to when `upscale_mode` is `target`.",
+            "title": "Target Resolution",
+            "enum": [
+              "720p",
+              "1080p",
+              "1440p",
+              "2160p"
+            ],
+            "type": "string",
+            "default": "1080p"
+          },
+          "upscale_factor": {
+            "minimum": 1,
+            "description": "Upscaling factor to be used. Will multiply the dimensions with this factor when `upscale_mode` is `factor`.",
+            "title": "Upscale Factor",
+            "type": "number",
+            "maximum": 10,
+            "default": 2
+          },
+          "output_format": {
+            "description": "The format of the output image.",
+            "title": "Output Format",
+            "enum": [
+              "png",
+              "jpg",
+              "webp"
+            ],
+            "type": "string",
+            "default": "jpg"
+          },
+          "upscale_mode": {
+            "description": "The mode to use for the upscale. If 'target', the upscale factor will be calculated based on the target resolution. If 'factor', the upscale factor will be used directly.",
+            "title": "Upscale Mode",
+            "enum": [
+              "target",
+              "factor"
+            ],
+            "type": "string",
+            "default": "factor"
+          },
           "seed": {
+            "description": "The random seed used for the generation process.",
             "title": "Seed",
             "anyOf": [
               {
@@ -92,110 +154,50 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The random seed used for the generation process."
-          },
-          "upscale_mode": {
-            "title": "Upscale Mode",
-            "default": "factor",
-            "enum": [
-              "target",
-              "factor"
-            ],
-            "description": "The mode to use for the upscale. If 'target', the upscale factor will be calculated based on the target resolution. If 'factor', the upscale factor will be used directly.",
-            "type": "string"
+            ]
           },
           "sync_mode": {
-            "title": "Sync Mode",
-            "default": false,
             "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "type": "boolean"
-          },
-          "noise_scale": {
-            "multipleOf": 0.001,
-            "default": 0.1,
-            "title": "Noise Scale",
-            "description": "The noise scale to use for the generation process.",
-            "maximum": 1,
-            "minimum": 0,
-            "type": "number"
-          },
-          "output_format": {
-            "title": "Output Format",
-            "default": "jpg",
-            "enum": [
-              "png",
-              "jpg",
-              "webp"
-            ],
-            "description": "The format of the output image.",
-            "type": "string"
-          },
-          "target_resolution": {
-            "title": "Target Resolution",
-            "default": "1080p",
-            "enum": [
-              "720p",
-              "1080p",
-              "1440p",
-              "2160p"
-            ],
-            "description": "The target resolution to upscale to when `upscale_mode` is `target`.",
-            "type": "string"
-          },
-          "upscale_factor": {
-            "title": "Upscale Factor",
-            "default": 2,
-            "description": "Upscaling factor to be used. Will multiply the dimensions with this factor when `upscale_mode` is `factor`.",
-            "maximum": 10,
-            "minimum": 1,
-            "type": "number"
-          },
-          "image_url": {
-            "title": "Image Url",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/seedvr2/image_in.png"
-            ],
-            "description": "The input image to be processed",
-            "type": "string"
+            "title": "Sync Mode",
+            "type": "boolean",
+            "default": false
           }
         },
-        "required": [
-          "image_url"
-        ],
         "type": "object"
       },
       "SeedvrUpscaleImageOutput": {
-        "title": "SeedVRImageOutput",
+        "required": [
+          "image",
+          "seed"
+        ],
         "x-fal-order-properties": [
           "image",
           "seed"
         ],
+        "title": "SeedVRImageOutput",
         "properties": {
           "seed": {
-            "title": "Seed",
             "description": "The random seed used for the generation process.",
+            "title": "Seed",
             "type": "integer"
           },
           "image": {
+            "description": "Upscaled image file after processing",
+            "$ref": "#/components/schemas/ImageFile",
             "examples": [
               {
-                "url": "https://storage.googleapis.com/falserverless/example_outputs/seedvr2/image_out.png",
-                "content_type": "image/png"
+                "content_type": "image/png",
+                "url": "https://storage.googleapis.com/falserverless/example_outputs/seedvr2/image_out.png"
               }
-            ],
-            "description": "Upscaled image file after processing",
-            "$ref": "#/components/schemas/ImageFile"
+            ]
           }
         },
-        "required": [
-          "image",
-          "seed"
-        ],
         "type": "object"
       },
       "ImageFile": {
-        "title": "ImageFile",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -204,55 +206,10 @@
           "width",
           "height"
         ],
+        "title": "ImageFile",
         "properties": {
-          "width": {
-            "title": "Width",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The width of the image"
-          },
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
-          },
-          "content_type": {
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file."
-          },
-          "file_size": {
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes."
-          },
           "height": {
+            "description": "The height of the image",
             "title": "Height",
             "anyOf": [
               {
@@ -261,11 +218,14 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The height of the image"
+            ]
           },
-          "file_name": {
-            "title": "File Name",
+          "content_type": {
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
             "anyOf": [
               {
                 "type": "string"
@@ -273,16 +233,56 @@
               {
                 "type": "null"
               }
-            ],
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "width": {
+            "description": "The width of the image",
+            "title": "Width",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
-        "required": [
-          "url"
-        ],
         "type": "object"
       }
     }

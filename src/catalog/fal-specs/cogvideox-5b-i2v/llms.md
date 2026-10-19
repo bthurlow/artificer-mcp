@@ -34,7 +34,7 @@ The API accepts the following input parameters:
 
 - **`video_size`** (`ImageSize | Enum`, _optional_):
   The size of the generated video.
-  - Default: `{"width":720,"height":480}`
+  - Default: `{"height":480,"width":720}`
   - One of: ImageSize | Enum
 
 - **`negative_prompt`** (`string`, _optional_):
@@ -96,8 +96,8 @@ The API accepts the following input parameters:
 {
   "prompt": "A low angle shot of a man walking down a street, illuminated by the neon signs of the bars around him",
   "video_size": {
-    "width": 720,
-    "height": 480
+    "height": 480,
+    "width": 720
   },
   "negative_prompt": "Distorted, discontinuous, Ugly, blurry, low resolution, motionless, static, disfigured, disconnected limbs, Ugly faces, incomplete arms",
   "num_inference_steps": 50,

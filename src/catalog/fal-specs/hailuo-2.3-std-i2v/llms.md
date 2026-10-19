@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _required_):
   Text prompt for video generation
   - Examples: "The space station slowly rotates in orbit, its solar panels tracking the sun. Earth rotates majestically in the background with weather patterns and landmasses drifting by. The station's communication arrays adjust position. A small spacecraft approaches one of the docking ports. The scene captures the silent majesty of space and human engineering."
@@ -62,6 +66,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "The space station slowly rotates in orbit, its solar panels tracking the sun. Earth rotates majestically in the background with weather patterns and landmasses drifting by. The station's communication arrays adjust position. A small spacecraft approaches one of the docking ports. The scene captures the silent majesty of space and human engineering.",
   "prompt_optimizer": true,
   "duration": "6",

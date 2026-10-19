@@ -71,10 +71,197 @@
         ]
       },
       "Ltx23QualityExtendVideoInput": {
-        "required": [
-          "prompt",
-          "video_url"
-        ],
+        "properties": {
+          "video_write_mode": {
+            "title": "Video Write Mode",
+            "type": "string",
+            "enum": [
+              "fast",
+              "balanced",
+              "small"
+            ],
+            "description": "The write mode of the generated video.",
+            "default": "balanced"
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "type": "boolean",
+            "description": "Whether to enable the safety checker.",
+            "default": true
+          },
+          "resolution": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageSize"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "auto",
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9"
+                ]
+              }
+            ],
+            "title": "Resolution",
+            "description": "The size of the generated video. 'auto' follows the source video size/aspect up to the LTX limits; the source is scaled to the final size in the stitched output. Sizes are 32px-aligned (e.g. 1920x1080 is delivered as 1888x1056). Higher resolutions reduce the maximum stable extension length; lower resolutions can run longer.",
+            "default": "auto"
+          },
+          "num_inference_steps": {
+            "title": "Number of Inference Steps",
+            "type": "integer",
+            "minimum": 8,
+            "maximum": 30,
+            "description": "Number of inference steps. Defaults to 15 and can be increased up to 30.",
+            "default": 15
+          },
+          "generate_audio": {
+            "title": "Generate Audio",
+            "type": "boolean",
+            "description": "Whether to generate new audio for the extension segment (crossfaded with the source audio at the seam). When disabled, the source video's own audio track is preserved and the extension stays silent.",
+            "default": true
+          },
+          "guidance_scale": {
+            "title": "Guidance Scale",
+            "type": "number",
+            "minimum": 1,
+            "maximum": 20,
+            "description": "Classifier-free guidance scale. The default is tuned for fast, high-quality generation.",
+            "default": 1
+          },
+          "num_context_frames": {
+            "title": "Number of Context Frames",
+            "type": "integer",
+            "minimum": 9,
+            "maximum": 121,
+            "description": "The number of source frames used as context/overlap for the extension. Snapped down to the LTX temporal grid (8k+1) and clamped to the frames available in the source video.",
+            "default": 25
+          },
+          "video_quality": {
+            "title": "Video Quality",
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "maximum"
+            ],
+            "description": "The quality preset of the generated video.",
+            "default": "high"
+          },
+          "extend_direction": {
+            "title": "Extend Direction",
+            "type": "string",
+            "enum": [
+              "forward",
+              "backward"
+            ],
+            "description": "Direction to extend the video. 'forward' continues from the end of the video, 'backward' generates a new beginning.",
+            "default": "forward"
+          },
+          "negative_prompt": {
+            "title": "Negative Prompt",
+            "type": "string",
+            "description": "The negative prompt to steer generation away from.",
+            "default": "color distortion, overexposure, static, blurry details, subtitles, style, artwork, painting, frame, still, dim overall tone, worst quality, low quality, JPEG compression artifacts, ugly, mutilated, extra fingers, poorly drawn hands, poorly drawn face, deformed, disfigured, malformed limbs, fused fingers, motionless frame, cluttered background, three legs, crowded background, walking backwards"
+          },
+          "video_strength": {
+            "title": "Video Strength",
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Conditioning strength of the source context frames. 1.0 keeps the overlap locked to the source for a seamless transition; lower values give the model more freedom.",
+            "default": 1
+          },
+          "end_image_strength": {
+            "title": "End Image Strength",
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Conditioning strength of the optional end keyframe. 1.0 = exact match, lower = more freedom for the model.",
+            "default": 1
+          },
+          "sync_mode": {
+            "title": "Sync Mode",
+            "type": "boolean",
+            "description": "If True, the media is returned as a data URI inline in the response. Useful for short-lived requests and tests.",
+            "default": false
+          },
+          "video_url": {
+            "title": "Video URL",
+            "type": "string",
+            "description": "The URL of the video to extend.",
+            "examples": [
+              "https://v3b.fal.media/files/b/0a8824b1/sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4"
+            ]
+          },
+          "enable_prompt_expansion": {
+            "title": "Enable Prompt Expansion",
+            "type": "boolean",
+            "description": "Whether to enable prompt expansion.",
+            "default": true
+          },
+          "frames_per_second": {
+            "title": "FPS",
+            "type": "number",
+            "minimum": 1,
+            "maximum": 60,
+            "description": "Frames per second of the generated video.",
+            "default": 24
+          },
+          "num_frames": {
+            "title": "Number of Frames",
+            "type": "integer",
+            "minimum": 9,
+            "maximum": 481,
+            "description": "The number of frames to generate for the extension segment, including num_context_frames of overlap with the source video. The new content adds approximately (num_frames - num_context_frames) / frames_per_second seconds. The stable generation budget caps the resolution x frames volume: at 24 fps roughly 20s at 480p-class, 11s at 720p-class and 5s at 1080p-class; a request above the budget returns a 422 (lower num_frames or use a smaller resolution).",
+            "default": 121
+          },
+          "match_input_fps": {
+            "title": "Match Input FPS",
+            "type": "boolean",
+            "description": "When enabled, the output FPS matches the source video's FPS (rounded to an integer and clamped to the supported range) instead of frames_per_second.",
+            "default": true
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string",
+            "description": "The prompt describing how the video should continue.",
+            "examples": [
+              "Continue the scene naturally, maintaining the same style and motion."
+            ]
+          },
+          "end_image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Image URL",
+            "description": "Optional keyframe image for the far end of the extension: the final frame for forward extension, or the new first frame for backward extension."
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "Random seed for reproducibility. If None, a random seed is chosen."
+          }
+        },
+        "type": "object",
+        "title": "LTX23QualityExtendVideoInput",
         "x-fal-order-properties": [
           "prompt",
           "video_url",
@@ -99,287 +286,70 @@
           "sync_mode"
         ],
         "description": "Extend a video forward (continue the ending) or backward (prepend a\nbeginning).\n\nThe last (forward) or first (backward) ``num_context_frames`` of the\nsource video condition the head/tail of a fresh LTX-2.3 generation via the\nofficial Lightricks guide mechanism, and the generated segment is\ncrossfaded onto the source over that overlap. Field surface follows the\nhosted ``ltx-2.3-22b/extend-video`` endpoint. Audio for the extension is\nnewly generated from the prompt (the ComfyUI graph has no audio-context\nconditioning); it is crossfaded with the source audio at the seam rather\nthan continuing the source soundtrack.",
-        "properties": {
-          "seed": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
-            "title": "Seed"
-          },
-          "enable_safety_checker": {
-            "description": "Whether to enable the safety checker.",
-            "title": "Enable Safety Checker",
-            "default": true,
-            "type": "boolean"
-          },
-          "enable_prompt_expansion": {
-            "description": "Whether to enable prompt expansion.",
-            "title": "Enable Prompt Expansion",
-            "default": true,
-            "type": "boolean"
-          },
-          "video_url": {
-            "description": "The URL of the video to extend.",
-            "title": "Video URL",
-            "type": "string",
-            "examples": [
-              "https://v3b.fal.media/files/b/0a8824b1/sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4"
-            ]
-          },
-          "end_image_strength": {
-            "maximum": 1,
-            "minimum": 0,
-            "description": "Conditioning strength of the optional end keyframe. 1.0 = exact match, lower = more freedom for the model.",
-            "title": "End Image Strength",
-            "default": 1,
-            "type": "number"
-          },
-          "extend_direction": {
-            "enum": [
-              "forward",
-              "backward"
-            ],
-            "description": "Direction to extend the video. 'forward' continues from the end of the video, 'backward' generates a new beginning.",
-            "title": "Extend Direction",
-            "default": "forward",
-            "type": "string"
-          },
-          "resolution": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ImageSize"
-              },
-              {
-                "enum": [
-                  "auto",
-                  "square_hd",
-                  "square",
-                  "portrait_4_3",
-                  "portrait_16_9",
-                  "landscape_4_3",
-                  "landscape_16_9"
-                ],
-                "type": "string"
-              }
-            ],
-            "description": "The size of the generated video. 'auto' follows the source video size/aspect up to the LTX limits; the source is scaled to the final size in the stitched output. Sizes are 32px-aligned (e.g. 1920x1080 is delivered as 1888x1056). Higher resolutions reduce the maximum stable extension length; lower resolutions can run longer.",
-            "title": "Resolution",
-            "default": "auto"
-          },
-          "end_image_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Optional keyframe image for the far end of the extension: the final frame for forward extension, or the new first frame for backward extension.",
-            "title": "End Image URL"
-          },
-          "guidance_scale": {
-            "maximum": 20,
-            "minimum": 1,
-            "description": "Classifier-free guidance scale. The default is tuned for fast, high-quality generation.",
-            "title": "Guidance Scale",
-            "default": 1,
-            "type": "number"
-          },
-          "frames_per_second": {
-            "maximum": 60,
-            "minimum": 1,
-            "description": "Frames per second of the generated video.",
-            "title": "FPS",
-            "default": 24,
-            "type": "number"
-          },
-          "generate_audio": {
-            "description": "Whether to generate new audio for the extension segment (crossfaded with the source audio at the seam). When disabled, the source video's own audio track is preserved and the extension stays silent.",
-            "title": "Generate Audio",
-            "default": true,
-            "type": "boolean"
-          },
-          "negative_prompt": {
-            "description": "The negative prompt to steer generation away from.",
-            "title": "Negative Prompt",
-            "default": "color distortion, overexposure, static, blurry details, subtitles, style, artwork, painting, frame, still, dim overall tone, worst quality, low quality, JPEG compression artifacts, ugly, mutilated, extra fingers, poorly drawn hands, poorly drawn face, deformed, disfigured, malformed limbs, fused fingers, motionless frame, cluttered background, three legs, crowded background, walking backwards",
-            "type": "string"
-          },
-          "sync_mode": {
-            "description": "If True, the media is returned as a data URI inline in the response. Useful for short-lived requests and tests.",
-            "title": "Sync Mode",
-            "default": false,
-            "type": "boolean"
-          },
-          "video_quality": {
-            "enum": [
-              "low",
-              "medium",
-              "high",
-              "maximum"
-            ],
-            "description": "The quality preset of the generated video.",
-            "title": "Video Quality",
-            "default": "high",
-            "type": "string"
-          },
-          "prompt": {
-            "description": "The prompt describing how the video should continue.",
-            "title": "Prompt",
-            "type": "string",
-            "examples": [
-              "Continue the scene naturally, maintaining the same style and motion."
-            ]
-          },
-          "num_frames": {
-            "maximum": 481,
-            "minimum": 9,
-            "description": "The number of frames to generate for the extension segment, including num_context_frames of overlap with the source video. The new content adds approximately (num_frames - num_context_frames) / frames_per_second seconds. The stable generation budget caps the resolution x frames volume: at 24 fps roughly 20s at 480p-class, 11s at 720p-class and 5s at 1080p-class; a request above the budget returns a 422 (lower num_frames or use a smaller resolution).",
-            "title": "Number of Frames",
-            "default": 121,
-            "type": "integer"
-          },
-          "num_context_frames": {
-            "maximum": 121,
-            "minimum": 9,
-            "description": "The number of source frames used as context/overlap for the extension. Snapped down to the LTX temporal grid (8k+1) and clamped to the frames available in the source video.",
-            "title": "Number of Context Frames",
-            "default": 25,
-            "type": "integer"
-          },
-          "video_write_mode": {
-            "enum": [
-              "fast",
-              "balanced",
-              "small"
-            ],
-            "description": "The write mode of the generated video.",
-            "title": "Video Write Mode",
-            "default": "balanced",
-            "type": "string"
-          },
-          "video_strength": {
-            "maximum": 1,
-            "minimum": 0,
-            "description": "Conditioning strength of the source context frames. 1.0 keeps the overlap locked to the source for a seamless transition; lower values give the model more freedom.",
-            "title": "Video Strength",
-            "default": 1,
-            "type": "number"
-          },
-          "num_inference_steps": {
-            "maximum": 30,
-            "minimum": 8,
-            "description": "Number of inference steps. Defaults to 15 and can be increased up to 30.",
-            "title": "Number of Inference Steps",
-            "default": 15,
-            "type": "integer"
-          },
-          "match_input_fps": {
-            "description": "When enabled, the output FPS matches the source video's FPS (rounded to an integer and clamped to the supported range) instead of frames_per_second.",
-            "title": "Match Input FPS",
-            "default": true,
-            "type": "boolean"
-          }
-        },
-        "title": "LTX23QualityExtendVideoInput",
-        "type": "object"
+        "required": [
+          "prompt",
+          "video_url"
+        ]
       },
       "Ltx23QualityExtendVideoOutput": {
-        "required": [
-          "video",
-          "seed",
-          "prompt"
-        ],
+        "properties": {
+          "prompt": {
+            "title": "Prompt",
+            "type": "string",
+            "description": "The prompt used for generation (after any expansion)."
+          },
+          "video": {
+            "description": "The generated video.",
+            "$ref": "#/components/schemas/File"
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "integer",
+            "description": "The seed actually used for generation."
+          }
+        },
+        "type": "object",
+        "title": "LTX23QualityOutput",
         "x-fal-order-properties": [
           "video",
           "seed",
           "prompt"
         ],
         "description": "Standard output for every endpoint on this app.",
-        "properties": {
-          "seed": {
-            "description": "The seed actually used for generation.",
-            "title": "Seed",
-            "type": "integer"
-          },
-          "video": {
-            "$ref": "#/components/schemas/File",
-            "description": "The generated video."
-          },
-          "prompt": {
-            "description": "The prompt used for generation (after any expansion).",
-            "title": "Prompt",
-            "type": "string"
-          }
-        },
-        "title": "LTX23QualityOutput",
-        "type": "object"
+        "required": [
+          "video",
+          "seed",
+          "prompt"
+        ]
       },
       "ImageSize": {
-        "x-fal-order-properties": [
-          "width",
-          "height"
-        ],
-        "title": "ImageSize",
         "properties": {
           "width": {
+            "title": "Width",
+            "type": "integer",
             "exclusiveMinimum": 0,
             "maximum": 14142,
             "description": "The width of the generated image.",
-            "title": "Width",
-            "default": 512,
-            "type": "integer"
+            "default": 512
           },
           "height": {
+            "title": "Height",
+            "type": "integer",
             "exclusiveMinimum": 0,
             "maximum": 14142,
             "description": "The height of the generated image.",
-            "title": "Height",
-            "default": 512,
-            "type": "integer"
+            "default": 512
           }
         },
-        "type": "object"
+        "type": "object",
+        "title": "ImageSize",
+        "x-fal-order-properties": [
+          "width",
+          "height"
+        ]
       },
       "File": {
-        "required": [
-          "url"
-        ],
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
-        "title": "File",
         "properties": {
-          "file_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "examples": [
-              4404019
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
           "file_name": {
             "anyOf": [
               {
@@ -389,8 +359,8 @@
                 "type": "null"
               }
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ]
@@ -404,14 +374,44 @@
                 "type": "null"
               }
             ],
-            "description": "The mime type of the file.",
             "title": "Content Type",
+            "description": "The mime type of the file.",
             "examples": [
               "image/png"
             ]
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ]
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
           }
         },
-        "type": "object"
+        "type": "object",
+        "title": "File",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "required": [
+          "url"
+        ]
       }
     }
   },

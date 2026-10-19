@@ -71,67 +71,24 @@
         ]
       },
       "QwenImageEdit2511MultipleAnglesInput": {
-        "title": "MultipleAnglesInput",
-        "required": [
-          "image_urls"
-        ],
         "properties": {
           "zoom": {
-            "title": "Zoom (Distance)",
-            "type": "number",
-            "description": "Camera zoom/distance. 0=wide shot (far away), 5=medium shot (normal), 10=close-up (very close).",
-            "default": 5,
+            "minimum": 0,
             "maximum": 10,
-            "minimum": 0
-          },
-          "horizontal_angle": {
-            "title": "Horizontal Angle (Azimuth °)",
+            "title": "Zoom (Distance)",
+            "description": "Camera zoom/distance. 0=wide shot (far away), 5=medium shot (normal), 10=close-up (very close).",
             "type": "number",
-            "description": "Horizontal rotation angle around the object in degrees. 0°=front view, 90°=right side, 180°=back view, 270°=left side, 360°=front view again.",
-            "default": 0,
-            "maximum": 360,
-            "minimum": 0
+            "default": 5
           },
-          "lora_scale": {
-            "title": "Lora Scale",
+          "guidance_scale": {
+            "minimum": 1,
+            "maximum": 20,
+            "description": "The CFG (Classifier Free Guidance) scale.",
+            "title": "Guidance Scale",
             "type": "number",
-            "description": "The scale factor for the LoRA model. Controls the strength of the camera control effect.",
-            "default": 1,
-            "maximum": 4,
-            "minimum": 0
-          },
-          "vertical_angle": {
-            "title": "Vertical Angle (Elevation °)",
-            "type": "number",
-            "description": "Vertical camera angle in degrees. -30°=low-angle shot (looking up), 0°=eye-level, 30°=elevated, 60°=high-angle, 90°=bird's-eye view (looking down).",
-            "default": 0,
-            "maximum": 90,
-            "minimum": -30
-          },
-          "image_urls": {
-            "examples": [
-              [
-                "https://v3b.fal.media/files/b/0a8973cb/qUbVwDCcMlvX4drBGYB1H.png"
-              ]
-            ],
-            "type": "array",
-            "title": "Image URLs",
-            "items": {
-              "type": "string"
-            },
-            "description": "The URL of the image to adjust camera angle for.",
-            "minItems": 1
-          },
-          "num_inference_steps": {
-            "title": "Num Inference Steps",
-            "type": "integer",
-            "description": "The number of inference steps to perform.",
-            "default": 28,
-            "maximum": 50,
-            "minimum": 1
+            "default": 4.5
           },
           "additional_prompt": {
-            "title": "Additional Prompt",
             "anyOf": [
               {
                 "type": "string"
@@ -140,43 +97,57 @@
                 "type": "null"
               }
             ],
-            "description": "Additional text to append to the automatically generated prompt."
+            "description": "Additional text to append to the automatically generated prompt.",
+            "title": "Additional Prompt"
+          },
+          "acceleration": {
+            "type": "string",
+            "description": "Acceleration level for image generation.",
+            "title": "Acceleration",
+            "enum": [
+              "none",
+              "regular"
+            ],
+            "default": "regular"
+          },
+          "negative_prompt": {
+            "type": "string",
+            "description": "The negative prompt for the generation",
+            "title": "Negative Prompt",
+            "default": ""
+          },
+          "image_urls": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            },
+            "description": "The URL of the image to adjust camera angle for.",
+            "title": "Image URLs",
+            "examples": [
+              [
+                "https://v3b.fal.media/files/b/0a8973cb/qUbVwDCcMlvX4drBGYB1H.png"
+              ]
+            ]
+          },
+          "sync_mode": {
+            "type": "boolean",
+            "description": "If `True`, the media will be returned as a data URI.",
+            "title": "Sync Mode",
+            "default": false
           },
           "output_format": {
-            "title": "Output Format",
             "type": "string",
             "description": "The format of the output image",
-            "default": "png",
+            "title": "Output Format",
             "enum": [
               "png",
               "jpeg",
               "webp"
-            ]
-          },
-          "num_images": {
-            "title": "Num Images",
-            "type": "integer",
-            "description": "Number of images to generate",
-            "default": 1,
-            "maximum": 4,
-            "minimum": 1
-          },
-          "sync_mode": {
-            "title": "Sync Mode",
-            "type": "boolean",
-            "description": "If `True`, the media will be returned as a data URI.",
-            "default": false
-          },
-          "guidance_scale": {
-            "title": "Guidance Scale",
-            "type": "number",
-            "description": "The CFG (Classifier Free Guidance) scale.",
-            "default": 4.5,
-            "maximum": 20,
-            "minimum": 1
+            ],
+            "default": "png"
           },
           "seed": {
-            "title": "Seed",
             "anyOf": [
               {
                 "type": "integer"
@@ -185,10 +156,48 @@
                 "type": "null"
               }
             ],
-            "description": "Random seed for reproducibility."
+            "description": "Random seed for reproducibility.",
+            "title": "Seed"
+          },
+          "vertical_angle": {
+            "minimum": -30,
+            "maximum": 90,
+            "title": "Vertical Angle (Elevation °)",
+            "description": "Vertical camera angle in degrees. -30°=low-angle shot (looking up), 0°=eye-level, 30°=elevated, 60°=high-angle, 90°=bird's-eye view (looking down).",
+            "type": "number",
+            "default": 0
+          },
+          "num_images": {
+            "minimum": 1,
+            "maximum": 4,
+            "description": "Number of images to generate",
+            "title": "Num Images",
+            "type": "integer",
+            "default": 1
+          },
+          "num_inference_steps": {
+            "minimum": 1,
+            "maximum": 50,
+            "description": "The number of inference steps to perform.",
+            "title": "Num Inference Steps",
+            "type": "integer",
+            "default": 28
+          },
+          "lora_scale": {
+            "minimum": 0,
+            "maximum": 4,
+            "description": "The scale factor for the LoRA model. Controls the strength of the camera control effect.",
+            "title": "Lora Scale",
+            "type": "number",
+            "default": 1
+          },
+          "enable_safety_checker": {
+            "type": "boolean",
+            "description": "Whether to enable the safety checker. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "title": "Enable Safety Checker",
+            "default": true
           },
           "image_size": {
-            "title": "Image Size",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
@@ -208,33 +217,24 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the generated image. If not provided, the size of the input image will be used."
+            "description": "The size of the generated image. If not provided, the size of the input image will be used.",
+            "title": "Image Size"
           },
-          "enable_safety_checker": {
-            "title": "Enable Safety Checker",
-            "type": "boolean",
-            "description": "Whether to enable the safety checker. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "default": true
-          },
-          "acceleration": {
-            "title": "Acceleration",
-            "type": "string",
-            "description": "Acceleration level for image generation.",
-            "default": "regular",
-            "enum": [
-              "none",
-              "regular"
-            ]
-          },
-          "negative_prompt": {
-            "title": "Negative Prompt",
-            "type": "string",
-            "description": "The negative prompt for the generation",
-            "default": ""
+          "horizontal_angle": {
+            "minimum": 0,
+            "maximum": 360,
+            "title": "Horizontal Angle (Azimuth °)",
+            "description": "Horizontal rotation angle around the object in degrees. 0°=front view, 90°=right side, 180°=back view, 270°=left side, 360°=front view again.",
+            "type": "number",
+            "default": 0
           }
         },
         "type": "object",
+        "required": [
+          "image_urls"
+        ],
         "description": "Input model for Multiple Angles endpoint - Camera control with precise adjustments using <sks> trigger word.\nPrompt is built automatically from slider values.",
+        "title": "MultipleAnglesInput",
         "x-fal-order-properties": [
           "image_urls",
           "horizontal_angle",
@@ -255,41 +255,41 @@
         ]
       },
       "QwenImageEdit2511MultipleAnglesOutput": {
-        "title": "MultipleAnglesOutput",
-        "required": [
-          "images",
-          "seed",
-          "prompt"
-        ],
         "properties": {
-          "seed": {
-            "title": "Seed",
-            "type": "integer",
-            "description": "The seed used for generation"
-          },
-          "prompt": {
-            "title": "Prompt",
-            "type": "string",
-            "description": "The constructed prompt used for generation"
-          },
           "images": {
+            "type": "array",
+            "description": "The generated/edited images",
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            },
+            "title": "Images",
             "examples": [
               [
                 {
                   "url": "https://v3b.fal.media/files/b/0a8973d9/8Z0xxKdGnoJAWc2tKJ68f.png"
                 }
               ]
-            ],
-            "type": "array",
-            "title": "Images",
-            "items": {
-              "$ref": "#/components/schemas/Image"
-            },
-            "description": "The generated/edited images"
+            ]
+          },
+          "prompt": {
+            "type": "string",
+            "description": "The constructed prompt used for generation",
+            "title": "Prompt"
+          },
+          "seed": {
+            "type": "integer",
+            "description": "The seed used for generation",
+            "title": "Seed"
           }
         },
         "type": "object",
+        "required": [
+          "images",
+          "seed",
+          "prompt"
+        ],
         "description": "Output model for Multiple Angles endpoint",
+        "title": "MultipleAnglesOutput",
         "x-fal-order-properties": [
           "images",
           "seed",
@@ -297,41 +297,39 @@
         ]
       },
       "ImageSize": {
-        "title": "ImageSize",
-        "type": "object",
         "properties": {
-          "width": {
-            "title": "Width",
-            "type": "integer",
-            "description": "The width of the generated image.",
-            "default": 512,
-            "maximum": 14142,
-            "exclusiveMinimum": 0
-          },
           "height": {
-            "title": "Height",
-            "type": "integer",
-            "description": "The height of the generated image.",
-            "default": 512,
             "maximum": 14142,
-            "exclusiveMinimum": 0
+            "description": "The height of the generated image.",
+            "title": "Height",
+            "exclusiveMinimum": 0,
+            "type": "integer",
+            "default": 512
+          },
+          "width": {
+            "maximum": 14142,
+            "description": "The width of the generated image.",
+            "title": "Width",
+            "exclusiveMinimum": 0,
+            "type": "integer",
+            "default": 512
           }
         },
+        "type": "object",
+        "title": "ImageSize",
         "x-fal-order-properties": [
           "width",
           "height"
         ]
       },
       "Image": {
-        "title": "Image",
-        "required": [
-          "url"
-        ],
         "properties": {
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "content_type": {
             "anyOf": [
               {
                 "type": "string"
@@ -340,63 +338,13 @@
                 "type": "null"
               }
             ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "width": {
-            "examples": [
-              1024
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Width",
-            "description": "The width of the image in pixels."
-          },
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
-          },
-          "content_type": {
+            "description": "The mime type of the file.",
             "examples": [
               "image/png"
             ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type",
-            "description": "The mime type of the file."
+            "title": "Content Type"
           },
-          "height": {
-            "examples": [
-              1024
-            ],
+          "file_size": {
             "anyOf": [
               {
                 "type": "integer"
@@ -405,11 +353,64 @@
                 "type": "null"
               }
             ],
-            "title": "Height",
-            "description": "The height of the image in pixels."
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The height of the image in pixels.",
+            "examples": [
+              1024
+            ],
+            "title": "Height"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The width of the image in pixels.",
+            "examples": [
+              1024
+            ],
+            "title": "Width"
           }
         },
+        "type": "object",
+        "required": [
+          "url"
+        ],
         "description": "Represents an image file.",
+        "title": "Image",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -417,8 +418,7 @@
           "file_size",
           "width",
           "height"
-        ],
-        "type": "object"
+        ]
       }
     }
   },

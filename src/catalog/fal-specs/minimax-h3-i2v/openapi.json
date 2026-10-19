@@ -71,7 +71,126 @@
         ]
       },
       "H3ImageToVideoInput": {
-        "title": "ImageToVideoHailuo03Input",
+        "properties": {
+          "duration": {
+            "maximum": 15,
+            "type": "integer",
+            "default": 5,
+            "description": "The duration of the video in seconds.",
+            "title": "Duration",
+            "minimum": 5
+          },
+          "resolution": {
+            "enum": [
+              "480P",
+              "768P",
+              "2K",
+              "4K"
+            ],
+            "description": "The resolution of the generated video. 480P and 768P are native generation modes; 2K and 4K upscale a 768P base result.",
+            "type": "string",
+            "default": "2K",
+            "title": "Resolution"
+          },
+          "end_image_url": {
+            "description": "Optional URL of the image to use as the last frame. It may be provided alone for end-only keyframe generation; in that case the output canvas follows this image.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Image URL"
+          },
+          "target_audio_url": {
+            "description": "Optional URL of an audio clip at least 2 seconds long (maximum 15 MB) to pin to the generated soundtrack. Longer clips are trimmed to the generated video's length, keeping the beginning. The original audio replaces the output soundtrack, padded with silence if shorter than the video, without changing playback speed. Exceptionally high sample rates may be resampled to 96 kHz. Accepts an HTTP(S) URL or a base64 data URI.",
+            "anyOf": [
+              {
+                "pattern": "\\S",
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Audio Url"
+          },
+          "seed": {
+            "description": "Random seed. A random seed is selected when omitted.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "image_url": {
+            "title": "Image URL",
+            "description": "Optional URL of the image to use as the first frame. When provided, the output canvas follows this image. If only end_image_url is provided, the canvas follows that last frame instead. If both images are omitted, the request is handled as text-to-video (16:9 by default).",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "prompt_expansion_mode": {
+            "title": "Prompt Expansion Mode",
+            "description": "How much effort to spend rewriting the prompt before generation. 'disabled' skips prompt expansion. 'fast' returns in about a second. 'balanced' picks per request. 'quality' spends up to ~30s on a richer prompt.",
+            "default": "balanced",
+            "examples": [
+              "disabled",
+              "fast",
+              "balanced",
+              "quality"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sync_mode": {
+            "description": "Return the generated video as base64 instead of a CDN URL.",
+            "type": "boolean",
+            "default": false,
+            "title": "Sync Mode"
+          },
+          "enable_safety_checker": {
+            "description": "If set to true, the safety checker will be enabled.",
+            "type": "boolean",
+            "default": true,
+            "title": "Enable Safety Checker"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "description": "Text prompt for video generation",
+            "type": "string",
+            "minLength": 1,
+            "examples": [
+              "The camera slowly pulls back from the scene, revealing the full landscape as clouds drift overhead and light shifts across the terrain."
+            ],
+            "maxLength": 50000
+          }
+        },
+        "required": [
+          "prompt"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "duration",
@@ -84,9 +203,78 @@
           "image_url",
           "end_image_url"
         ],
+        "title": "ImageToVideoHailuo03Input"
+      },
+      "H3ImageToVideoOutput": {
         "properties": {
-          "seed": {
-            "title": "Seed",
+          "expanded_prompt": {
+            "description": "The prompt after expansion, as sent to the model. Null when prompt expansion was disabled, left the prompt unchanged, or was performed internally by MiniMax's hosted API.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expanded Prompt"
+          },
+          "video": {
+            "description": "The generated video",
+            "$ref": "#/components/schemas/File"
+          }
+        },
+        "required": [
+          "video"
+        ],
+        "type": "object",
+        "x-fal-order-properties": [
+          "video",
+          "expanded_prompt"
+        ],
+        "title": "ImageToVideoHailuo03Output"
+      },
+      "File": {
+        "title": "File",
+        "type": "object",
+        "properties": {
+          "file_name": {
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "content_type": {
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "file_size": {
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -95,146 +283,12 @@
                 "type": "null"
               }
             ],
-            "description": "Random seed. A random seed is selected when omitted."
-          },
-          "prompt": {
-            "maxLength": 50000,
-            "title": "Prompt",
-            "minLength": 1,
-            "description": "Text prompt for video generation",
+            "description": "The size of the file in bytes.",
             "examples": [
-              "The camera slowly pulls back from the scene, revealing the full landscape as clouds drift overhead and light shifts across the terrain."
-            ],
-            "type": "string"
-          },
-          "sync_mode": {
-            "title": "Sync Mode",
-            "default": false,
-            "description": "Return the generated video as base64 instead of a CDN URL.",
-            "type": "boolean"
-          },
-          "image_url": {
-            "title": "Image URL",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg"
-            ],
-            "description": "Optional URL of the image to use as the first frame. When provided, the output canvas follows this image. If only end_image_url is provided, the canvas follows that last frame instead. If both images are omitted, the request is handled as text-to-video (16:9 by default)."
-          },
-          "enable_safety_checker": {
-            "title": "Enable Safety Checker",
-            "default": true,
-            "description": "If set to true, the safety checker will be enabled.",
-            "type": "boolean"
-          },
-          "duration": {
-            "title": "Duration",
-            "default": 5,
-            "description": "The duration of the video in seconds.",
-            "minimum": 5,
-            "maximum": 15,
-            "type": "integer"
-          },
-          "resolution": {
-            "title": "Resolution",
-            "default": "2K",
-            "enum": [
-              "480P",
-              "768P",
-              "2K",
-              "4K"
-            ],
-            "description": "The resolution of the generated video. 480P and 768P are native generation modes; 2K and 4K upscale a 768P base result.",
-            "type": "string"
-          },
-          "target_audio_url": {
-            "title": "Target Audio Url",
-            "anyOf": [
-              {
-                "minLength": 1,
-                "pattern": "\\S",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Optional URL of an audio clip at least 2 seconds long (maximum 15 MB) to pin to the generated soundtrack. Longer clips are trimmed to the generated video's length, keeping the beginning. The original audio replaces the output soundtrack, padded with silence if shorter than the video, without changing playback speed. Exceptionally high sample rates may be resampled to 96 kHz. Accepts an HTTP(S) URL or a base64 data URI."
-          },
-          "prompt_expansion_mode": {
-            "title": "Prompt Expansion Mode",
-            "default": "balanced",
-            "examples": [
-              "disabled",
-              "fast",
-              "balanced",
-              "quality"
-            ],
-            "description": "How much effort to spend rewriting the prompt before generation. 'disabled' skips prompt expansion. 'fast' returns in about a second. 'balanced' picks per request. 'quality' spends up to ~30s on a richer prompt.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+              4404019
             ]
-          },
-          "end_image_url": {
-            "title": "End Image URL",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Optional URL of the image to use as the last frame. It may be provided alone for end-only keyframe generation; in that case the output canvas follows this image."
           }
         },
-        "required": [
-          "prompt"
-        ],
-        "type": "object"
-      },
-      "H3ImageToVideoOutput": {
-        "title": "ImageToVideoHailuo03Output",
-        "x-fal-order-properties": [
-          "video",
-          "expanded_prompt"
-        ],
-        "properties": {
-          "video": {
-            "description": "The generated video",
-            "$ref": "#/components/schemas/File"
-          },
-          "expanded_prompt": {
-            "title": "Expanded Prompt",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The prompt after expansion, as sent to the model. Null when prompt expansion was disabled, left the prompt unchanged, or was performed internally by MiniMax's hosted API."
-          }
-        },
-        "required": [
-          "video"
-        ],
-        "type": "object"
-      },
-      "File": {
         "required": [
           "url"
         ],
@@ -243,61 +297,7 @@
           "content_type",
           "file_name",
           "file_size"
-        ],
-        "properties": {
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name"
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type"
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          }
-        },
-        "title": "File",
-        "type": "object"
+        ]
       }
     }
   },

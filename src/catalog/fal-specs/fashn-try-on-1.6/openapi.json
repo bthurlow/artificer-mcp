@@ -71,7 +71,10 @@
         ]
       },
       "FashnTryonV16Input": {
-        "title": "V16Input",
+        "required": [
+          "model_image",
+          "garment_image"
+        ],
         "x-fal-order-properties": [
           "model_image",
           "garment_image",
@@ -86,63 +89,9 @@
           "output_format",
           "enable_safety_checker"
         ],
-        "required": [
-          "model_image",
-          "garment_image"
-        ],
+        "title": "V16Input",
         "type": "object",
         "properties": {
-          "model_image": {
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/model.png"
-            ],
-            "title": "Model Image",
-            "description": "URL or base64 of the model image",
-            "type": "string"
-          },
-          "segmentation_free": {
-            "title": "Segmentation Free",
-            "type": "boolean",
-            "description": "Disables human parsing on the model image.",
-            "default": true
-          },
-          "moderation_level": {
-            "enum": [
-              "none",
-              "permissive",
-              "conservative"
-            ],
-            "title": "Moderation Level",
-            "type": "string",
-            "description": "Content moderation level for garment images. 'permissive' blocks only explicit content; 'conservative' also blocks underwear and swimwear. 'none' disables moderation only for accounts authorized to disable safety filters; for all other accounts it is treated as 'permissive'.",
-            "default": "permissive"
-          },
-          "category": {
-            "enum": [
-              "tops",
-              "bottoms",
-              "one-pieces",
-              "auto"
-            ],
-            "title": "Category",
-            "type": "string",
-            "description": "Category of the garment to try-on. 'auto' will attempt to automatically detect the category of the garment.",
-            "default": "auto"
-          },
-          "sync_mode": {
-            "title": "Sync Mode",
-            "type": "boolean",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "default": false
-          },
-          "num_samples": {
-            "title": "Num Samples",
-            "type": "integer",
-            "description": "Number of images to generate in a single run. Image generation has a random element in it, so trying multiple images at once increases the chances of getting a good result.",
-            "default": 1,
-            "minimum": 1,
-            "maximum": 4
-          },
           "seed": {
             "title": "Seed",
             "anyOf": [
@@ -155,69 +104,116 @@
             ],
             "description": "Sets random operations to a fixed state. Use the same seed to reproduce results with the same inputs, or different seed to force different results."
           },
+          "num_samples": {
+            "type": "integer",
+            "title": "Num Samples",
+            "default": 1,
+            "description": "Number of images to generate in a single run. Image generation has a random element in it, so trying multiple images at once increases the chances of getting a good result.",
+            "minimum": 1,
+            "maximum": 4
+          },
+          "segmentation_free": {
+            "type": "boolean",
+            "title": "Segmentation Free",
+            "default": true,
+            "description": "Disables human parsing on the model image."
+          },
+          "sync_mode": {
+            "type": "boolean",
+            "title": "Sync Mode",
+            "default": false,
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "default": "auto",
+            "description": "Category of the garment to try-on. 'auto' will attempt to automatically detect the category of the garment.",
+            "enum": [
+              "tops",
+              "bottoms",
+              "one-pieces",
+              "auto"
+            ]
+          },
           "mode": {
+            "type": "string",
+            "title": "Mode",
+            "default": "balanced",
+            "description": "Specifies the mode of operation. 'performance' mode is faster but may sacrifice quality, 'balanced' mode is a balance between speed and quality, and 'quality' mode is slower but produces higher quality results.",
             "enum": [
               "performance",
               "balanced",
               "quality"
-            ],
-            "title": "Mode",
-            "type": "string",
-            "description": "Specifies the mode of operation. 'performance' mode is faster but may sacrifice quality, 'balanced' mode is a balance between speed and quality, and 'quality' mode is slower but produces higher quality results.",
-            "default": "balanced"
-          },
-          "output_format": {
-            "enum": [
-              "png",
-              "jpeg"
-            ],
-            "title": "Output Format",
-            "type": "string",
-            "description": "Output format of the generated images. 'png' is highest quality, while 'jpeg' is faster",
-            "default": "png"
-          },
-          "garment_photo_type": {
-            "enum": [
-              "auto",
-              "model",
-              "flat-lay"
-            ],
-            "title": "Garment Photo Type",
-            "type": "string",
-            "description": "Specifies the type of garment photo to optimize internal parameters for better performance. 'model' is for photos of garments on a model, 'flat-lay' is for flat-lay or ghost mannequin images, and 'auto' attempts to automatically detect the photo type.",
-            "default": "auto"
+            ]
           },
           "garment_image": {
+            "type": "string",
             "examples": [
               "https://storage.googleapis.com/falserverless/example_inputs/garment.webp"
             ],
             "title": "Garment Image",
-            "description": "URL or base64 of the garment image",
-            "type": "string"
+            "description": "URL or base64 of the garment image"
+          },
+          "model_image": {
+            "type": "string",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/model.png"
+            ],
+            "title": "Model Image",
+            "description": "URL or base64 of the model image"
           },
           "enable_safety_checker": {
-            "title": "Enable Safety Checker",
             "type": "boolean",
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "default": true
+            "title": "Enable Safety Checker",
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening."
+          },
+          "output_format": {
+            "type": "string",
+            "title": "Output Format",
+            "default": "png",
+            "description": "Output format of the generated images. 'png' is highest quality, while 'jpeg' is faster",
+            "enum": [
+              "png",
+              "jpeg"
+            ]
+          },
+          "garment_photo_type": {
+            "type": "string",
+            "title": "Garment Photo Type",
+            "default": "auto",
+            "description": "Specifies the type of garment photo to optimize internal parameters for better performance. 'model' is for photos of garments on a model, 'flat-lay' is for flat-lay or ghost mannequin images, and 'auto' attempts to automatically detect the photo type.",
+            "enum": [
+              "auto",
+              "model",
+              "flat-lay"
+            ]
+          },
+          "moderation_level": {
+            "type": "string",
+            "title": "Moderation Level",
+            "default": "permissive",
+            "description": "Content moderation level for garment images. 'permissive' blocks only explicit content; 'conservative' also blocks underwear and swimwear. 'none' disables moderation only for accounts authorized to disable safety filters; for all other accounts it is treated as 'permissive'.",
+            "enum": [
+              "none",
+              "permissive",
+              "conservative"
+            ]
           }
         }
       },
       "FashnTryonV16Output": {
-        "title": "V16Output",
-        "x-fal-order-properties": [
-          "images"
-        ],
         "required": [
           "images"
         ],
+        "x-fal-order-properties": [
+          "images"
+        ],
+        "title": "V16Output",
         "type": "object",
         "properties": {
           "images": {
-            "items": {
-              "$ref": "#/components/schemas/File"
-            },
-            "title": "Images",
             "examples": [
               [
                 {
@@ -225,28 +221,27 @@
                 }
               ]
             ],
-            "type": "array"
+            "type": "array",
+            "title": "Images",
+            "items": {
+              "$ref": "#/components/schemas/File"
+            }
           }
         }
       },
       "File": {
-        "title": "File",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "required": [
-          "url"
-        ],
+        "title": "File",
         "type": "object",
         "properties": {
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
-          },
           "file_name": {
             "examples": [
               "z9RV14K95DvU.png"
@@ -276,6 +271,11 @@
               }
             ],
             "description": "The mime type of the file."
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
           },
           "file_size": {
             "examples": [

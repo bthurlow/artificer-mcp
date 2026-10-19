@@ -71,6 +71,121 @@
         ]
       },
       "PixverseV6ImageToVideoInput": {
+        "type": "object",
+        "title": "ImageToVideoRequestV6",
+        "properties": {
+          "duration": {
+            "type": "integer",
+            "title": "Duration",
+            "maximum": 15,
+            "description": "The duration of the generated video in seconds. v6 supports values from 1 to 15 seconds",
+            "default": 5,
+            "minimum": 1
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "\n            The same seed and the same prompt given to the same version of the model\n            will output the same video every time.\n        "
+          },
+          "thinking_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "enabled",
+                  "disabled",
+                  "auto"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thinking Type",
+            "description": "Prompt optimization mode: 'enabled' to optimize, 'disabled' to turn off, 'auto' for model decision"
+          },
+          "image_url": {
+            "type": "string",
+            "title": "Image Url",
+            "description": "URL of the image to use as the first frame",
+            "examples": [
+              "https://v3.fal.media/files/zebra/qL93Je8ezvzQgDOEzTjKF_KhGKZTEebZcDw6T5rwQPK_output.png"
+            ]
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "Text prompt for the video generation. Limited to 2048 UTF-8 encoded bytes. Because the limit counts bytes rather than characters, emoji and non-Latin or accented characters (which use multiple bytes each) can push a visually short prompt over the cap.",
+            "examples": [
+              "A woman warrior with her hammer walking with his glacier wolf."
+            ]
+          },
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "360p",
+              "540p",
+              "720p",
+              "1080p"
+            ],
+            "title": "Resolution",
+            "description": "The resolution of the generated video",
+            "default": "720p"
+          },
+          "generate_multi_clip_switch": {
+            "type": "boolean",
+            "title": "Generate Multi Clip Switch",
+            "description": "Enable multi-clip generation with dynamic camera changes",
+            "default": false
+          },
+          "style": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "anime",
+                  "3d_animation",
+                  "clay",
+                  "comic",
+                  "cyberpunk"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Style",
+            "description": "The style of the generated video"
+          },
+          "enable_safety_checker": {
+            "type": "boolean",
+            "title": "Enable Safety Checker",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "default": true
+          },
+          "negative_prompt": {
+            "type": "string",
+            "title": "Negative Prompt",
+            "description": "Negative prompt to be used for the generation. Limited to 2048 UTF-8 encoded bytes. Because the limit counts bytes rather than characters, emoji and non-Latin or accented characters (which use multiple bytes each) can push a visually short prompt over the cap.",
+            "examples": [
+              "blurry, low quality, low resolution, pixelated, noisy, grainy, out of focus, poorly lit, poorly exposed, poorly composed, poorly framed, poorly cropped, poorly color corrected, poorly color graded"
+            ],
+            "default": ""
+          },
+          "generate_audio_switch": {
+            "type": "boolean",
+            "title": "Generate Audio Switch",
+            "description": "Enable audio generation (BGM, SFX, dialogue)",
+            "default": false
+          }
+        },
         "x-fal-order-properties": [
           "prompt",
           "resolution",
@@ -87,94 +202,72 @@
         "required": [
           "prompt",
           "image_url"
-        ],
+        ]
+      },
+      "PixverseV6ImageToVideoOutput": {
+        "type": "object",
+        "title": "I2VOutputV5_5",
         "properties": {
-          "generate_audio_switch": {
-            "description": "Enable audio generation (BGM, SFX, dialogue)",
-            "default": false,
-            "type": "boolean",
-            "title": "Generate Audio Switch"
+          "video": {
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video",
+            "examples": [
+              {
+                "url": "https://storage.googleapis.com/falserverless/model_tests/video_models/output-3.mp4",
+                "file_name": "output.mp4",
+                "content_type": "video/mp4",
+                "file_size": 6420765
+              }
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "required": [
+          "video"
+        ]
+      },
+      "File": {
+        "type": "object",
+        "title": "File",
+        "properties": {
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
           },
-          "thinking_type": {
-            "description": "Prompt optimization mode: 'enabled' to optimize, 'disabled' to turn off, 'auto' for model decision",
+          "file_name": {
             "anyOf": [
               {
-                "enum": [
-                  "enabled",
-                  "disabled",
-                  "auto"
-                ],
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Thinking Type"
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
           },
-          "style": {
-            "description": "The style of the generated video",
+          "content_type": {
             "anyOf": [
               {
-                "enum": [
-                  "anime",
-                  "3d_animation",
-                  "clay",
-                  "comic",
-                  "cyberpunk"
-                ],
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Style"
-          },
-          "resolution": {
-            "enum": [
-              "360p",
-              "540p",
-              "720p",
-              "1080p"
-            ],
-            "description": "The resolution of the generated video",
-            "default": "720p",
-            "type": "string",
-            "title": "Resolution"
-          },
-          "image_url": {
-            "description": "URL of the image to use as the first frame",
-            "type": "string",
+            "title": "Content Type",
+            "description": "The mime type of the file.",
             "examples": [
-              "https://v3.fal.media/files/zebra/qL93Je8ezvzQgDOEzTjKF_KhGKZTEebZcDw6T5rwQPK_output.png"
-            ],
-            "title": "Image Url"
+              "image/png"
+            ]
           },
-          "duration": {
-            "maximum": 15,
-            "description": "The duration of the generated video in seconds. v6 supports values from 1 to 15 seconds",
-            "minimum": 1,
-            "type": "integer",
-            "default": 5,
-            "title": "Duration"
-          },
-          "prompt": {
-            "description": "Text prompt for the video generation. Limited to 2048 UTF-8 encoded bytes. Because the limit counts bytes rather than characters, emoji and non-Latin or accented characters (which use multiple bytes each) can push a visually short prompt over the cap.",
-            "type": "string",
-            "examples": [
-              "A woman warrior with her hammer walking with his glacier wolf."
-            ],
-            "title": "Prompt"
-          },
-          "enable_safety_checker": {
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "default": true,
-            "type": "boolean",
-            "title": "Enable Safety Checker"
-          },
-          "seed": {
-            "description": "\n            The same seed and the same prompt given to the same version of the model\n            will output the same video every time.\n        ",
+          "file_size": {
             "anyOf": [
               {
                 "type": "integer"
@@ -183,52 +276,13 @@
                 "type": "null"
               }
             ],
-            "title": "Seed"
-          },
-          "negative_prompt": {
-            "type": "string",
-            "description": "Negative prompt to be used for the generation. Limited to 2048 UTF-8 encoded bytes. Because the limit counts bytes rather than characters, emoji and non-Latin or accented characters (which use multiple bytes each) can push a visually short prompt over the cap.",
-            "default": "",
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "examples": [
-              "blurry, low quality, low resolution, pixelated, noisy, grainy, out of focus, poorly lit, poorly exposed, poorly composed, poorly framed, poorly cropped, poorly color corrected, poorly color graded"
-            ],
-            "title": "Negative Prompt"
-          },
-          "generate_multi_clip_switch": {
-            "description": "Enable multi-clip generation with dynamic camera changes",
-            "default": false,
-            "type": "boolean",
-            "title": "Generate Multi Clip Switch"
-          }
-        },
-        "type": "object",
-        "title": "ImageToVideoRequestV6"
-      },
-      "PixverseV6ImageToVideoOutput": {
-        "x-fal-order-properties": [
-          "video"
-        ],
-        "required": [
-          "video"
-        ],
-        "properties": {
-          "video": {
-            "$ref": "#/components/schemas/File",
-            "description": "The generated video",
-            "examples": [
-              {
-                "content_type": "video/mp4",
-                "file_size": 6420765,
-                "url": "https://storage.googleapis.com/falserverless/model_tests/video_models/output-3.mp4",
-                "file_name": "output.mp4"
-              }
+              4404019
             ]
           }
         },
-        "type": "object",
-        "title": "I2VOutputV5_5"
-      },
-      "File": {
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -237,61 +291,7 @@
         ],
         "required": [
           "url"
-        ],
-        "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type"
-          },
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              4404019
-            ],
-            "title": "File Size"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name"
-          }
-        },
-        "type": "object",
-        "title": "File"
+        ]
       }
     }
   },

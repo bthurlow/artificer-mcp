@@ -71,11 +71,157 @@
         ]
       },
       "WanI2vInput": {
+        "properties": {
+          "acceleration": {
+            "enum": [
+              "none",
+              "regular"
+            ],
+            "description": "Acceleration level to use. The more acceleration, the faster the generation, but with lower quality. The recommended value is 'regular'.",
+            "type": "string",
+            "default": "regular",
+            "examples": [
+              "regular"
+            ],
+            "title": "Acceleration"
+          },
+          "num_inference_steps": {
+            "maximum": 40,
+            "type": "integer",
+            "default": 30,
+            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
+            "title": "Num Inference Steps",
+            "minimum": 2
+          },
+          "resolution": {
+            "enum": [
+              "480p",
+              "720p"
+            ],
+            "description": "Resolution of the generated video (480p or 720p). 480p is 0.5 billing units, and 720p is 1 billing unit.",
+            "type": "string",
+            "default": "720p",
+            "title": "Resolution"
+          },
+          "frames_per_second": {
+            "description": "Frames per second of the generated video. Must be between 5 to 24.",
+            "default": 16,
+            "title": "Frames Per Second",
+            "anyOf": [
+              {
+                "maximum": 24,
+                "type": "integer",
+                "minimum": 5
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "shift": {
+            "maximum": 10,
+            "type": "number",
+            "default": 5,
+            "description": "Shift parameter for video generation.",
+            "title": "Shift",
+            "minimum": 1
+          },
+          "prompt": {
+            "description": "The text prompt to guide video generation.",
+            "type": "string",
+            "examples": [
+              "Cars racing in slow motion"
+            ],
+            "title": "Prompt"
+          },
+          "enable_safety_checker": {
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "type": "boolean",
+            "default": false,
+            "examples": [
+              true
+            ],
+            "title": "Enable Safety Checker"
+          },
+          "aspect_ratio": {
+            "enum": [
+              "auto",
+              "16:9",
+              "9:16",
+              "1:1"
+            ],
+            "description": "Aspect ratio of the generated video. If 'auto', the aspect ratio will be determined automatically based on the input image.",
+            "type": "string",
+            "default": "auto",
+            "title": "Aspect Ratio"
+          },
+          "enable_prompt_expansion": {
+            "description": "Whether to enable prompt expansion.",
+            "type": "boolean",
+            "default": false,
+            "examples": [
+              false
+            ],
+            "title": "Enable Prompt Expansion"
+          },
+          "seed": {
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "negative_prompt": {
+            "description": "Negative prompt for video generation.",
+            "type": "string",
+            "default": "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards",
+            "examples": [
+              "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards"
+            ],
+            "title": "Negative Prompt"
+          },
+          "num_frames": {
+            "description": "Number of frames to generate. Must be between 81 to 100 (inclusive). If the number of frames is greater than 81, the video will be generated with 1.25x more billing units.",
+            "default": 81,
+            "title": "Num Frames",
+            "anyOf": [
+              {
+                "maximum": 100,
+                "type": "integer",
+                "minimum": 81
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "guide_scale": {
+            "maximum": 10,
+            "type": "number",
+            "default": 5,
+            "description": "Classifier-free guidance scale. Higher values give better adherence to the prompt but may decrease quality.",
+            "title": "Guide Scale",
+            "minimum": 1
+          },
+          "image_url": {
+            "description": "URL of the input image. If the input image does not match the chosen aspect ratio, it is resized and center cropped.",
+            "type": "string",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/gallery/car_720p.png"
+            ],
+            "title": "Image Url"
+          }
+        },
+        "type": "object",
         "required": [
           "prompt",
           "image_url"
         ],
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "negative_prompt",
@@ -92,9 +238,39 @@
           "acceleration",
           "aspect_ratio"
         ],
-        "title": "WanI2VRequest",
+        "title": "WanI2VRequest"
+      },
+      "WanI2vOutput": {
         "properties": {
           "seed": {
+            "description": "The seed used for generation.",
+            "type": "integer",
+            "title": "Seed"
+          },
+          "video": {
+            "description": "The generated video file.",
+            "$ref": "#/components/schemas/File",
+            "examples": [
+              {
+                "url": "https://storage.googleapis.com/falserverless/gallery/wan-i2v-example.mp4"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "video",
+          "seed"
+        ],
+        "x-fal-order-properties": [
+          "video",
+          "seed"
+        ],
+        "title": "WanI2VResponse"
+      },
+      "File": {
+        "properties": {
+          "file_size": {
             "anyOf": [
               {
                 "type": "integer"
@@ -103,198 +279,11 @@
                 "type": "null"
               }
             ],
-            "title": "Seed",
-            "description": "Random seed for reproducibility. If None, a random seed is chosen."
-          },
-          "aspect_ratio": {
-            "default": "auto",
-            "title": "Aspect Ratio",
-            "type": "string",
-            "enum": [
-              "auto",
-              "16:9",
-              "9:16",
-              "1:1"
-            ],
-            "description": "Aspect ratio of the generated video. If 'auto', the aspect ratio will be determined automatically based on the input image."
-          },
-          "shift": {
-            "minimum": 1,
-            "default": 5,
-            "title": "Shift",
-            "maximum": 10,
-            "type": "number",
-            "description": "Shift parameter for video generation."
-          },
-          "resolution": {
-            "default": "720p",
-            "title": "Resolution",
-            "type": "string",
-            "enum": [
-              "480p",
-              "720p"
-            ],
-            "description": "Resolution of the generated video (480p or 720p). 480p is 0.5 billing units, and 720p is 1 billing unit."
-          },
-          "guide_scale": {
-            "minimum": 1,
-            "default": 5,
-            "title": "Guide Scale",
-            "maximum": 10,
-            "type": "number",
-            "description": "Classifier-free guidance scale. Higher values give better adherence to the prompt but may decrease quality."
-          },
-          "num_inference_steps": {
-            "minimum": 2,
-            "default": 30,
-            "title": "Num Inference Steps",
-            "maximum": 40,
-            "type": "integer",
-            "description": "Number of inference steps for sampling. Higher values give better quality but take longer."
-          },
-          "image_url": {
-            "type": "string",
-            "title": "Image Url",
+            "description": "The size of the file in bytes.",
             "examples": [
-              "https://storage.googleapis.com/falserverless/gallery/car_720p.png"
+              4404019
             ],
-            "description": "URL of the input image. If the input image does not match the chosen aspect ratio, it is resized and center cropped."
-          },
-          "negative_prompt": {
-            "default": "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards",
-            "title": "Negative Prompt",
-            "type": "string",
-            "examples": [
-              "bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards"
-            ],
-            "description": "Negative prompt for video generation."
-          },
-          "enable_prompt_expansion": {
-            "default": false,
-            "title": "Enable Prompt Expansion",
-            "type": "boolean",
-            "examples": [
-              false
-            ],
-            "description": "Whether to enable prompt expansion."
-          },
-          "enable_safety_checker": {
-            "default": false,
-            "title": "Enable Safety Checker",
-            "type": "boolean",
-            "examples": [
-              true
-            ],
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked."
-          },
-          "prompt": {
-            "type": "string",
-            "title": "Prompt",
-            "examples": [
-              "Cars racing in slow motion"
-            ],
-            "description": "The text prompt to guide video generation."
-          },
-          "acceleration": {
-            "default": "regular",
-            "examples": [
-              "regular"
-            ],
-            "type": "string",
-            "enum": [
-              "none",
-              "regular"
-            ],
-            "description": "Acceleration level to use. The more acceleration, the faster the generation, but with lower quality. The recommended value is 'regular'.",
-            "title": "Acceleration"
-          },
-          "frames_per_second": {
-            "anyOf": [
-              {
-                "minimum": 5,
-                "type": "integer",
-                "maximum": 24
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": 16,
-            "title": "Frames Per Second",
-            "description": "Frames per second of the generated video. Must be between 5 to 24."
-          },
-          "num_frames": {
-            "anyOf": [
-              {
-                "minimum": 81,
-                "type": "integer",
-                "maximum": 100
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": 81,
-            "title": "Num Frames",
-            "description": "Number of frames to generate. Must be between 81 to 100 (inclusive). If the number of frames is greater than 81, the video will be generated with 1.25x more billing units."
-          }
-        }
-      },
-      "WanI2vOutput": {
-        "required": [
-          "video",
-          "seed"
-        ],
-        "type": "object",
-        "x-fal-order-properties": [
-          "video",
-          "seed"
-        ],
-        "title": "WanI2VResponse",
-        "properties": {
-          "seed": {
-            "type": "integer",
-            "title": "Seed",
-            "description": "The seed used for generation."
-          },
-          "video": {
-            "$ref": "#/components/schemas/File",
-            "examples": [
-              {
-                "url": "https://storage.googleapis.com/falserverless/gallery/wan-i2v-example.mp4"
-              }
-            ],
-            "description": "The generated video file."
-          }
-        }
-      },
-      "File": {
-        "required": [
-          "url"
-        ],
-        "type": "object",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
-        "title": "File",
-        "properties": {
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+            "title": "File Size"
           },
           "content_type": {
             "anyOf": [
@@ -305,33 +294,44 @@
                 "type": "null"
               }
             ],
-            "title": "Content Type",
+            "description": "The mime type of the file.",
             "examples": [
               "image/png"
             ],
-            "description": "The mime type of the file."
+            "title": "Content Type"
           },
-          "file_size": {
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "file_name": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "File Size",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
-              4404019
+              "z9RV14K95DvU.png"
             ],
-            "description": "The size of the file in bytes."
-          },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
+            "title": "File Name"
           }
-        }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "title": "File"
       }
     }
   },

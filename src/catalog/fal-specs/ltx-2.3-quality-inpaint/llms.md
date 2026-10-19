@@ -1,4 +1,4 @@
-# Ltx 2.3 Quality
+# LTX 2.3 Quality
 
 > Inpaint high-quality video using LTX-2.3  
 

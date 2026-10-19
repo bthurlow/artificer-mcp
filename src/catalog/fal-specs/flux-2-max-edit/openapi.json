@@ -71,7 +71,10 @@
         ]
       },
       "Flux2MaxEditInput": {
-        "title": "Flux2MaxImageEditInput",
+        "required": [
+          "prompt",
+          "image_urls"
+        ],
         "x-fal-order-properties": [
           "prompt",
           "image_size",
@@ -82,14 +85,68 @@
           "sync_mode",
           "image_urls"
         ],
-        "required": [
-          "prompt",
-          "image_urls"
-        ],
+        "title": "Flux2MaxImageEditInput",
+        "type": "object",
         "properties": {
+          "image_urls": {
+            "description": "List of URLs of input images for editing",
+            "title": "Image URLs",
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/example_inputs/flux2/max.jpg"
+              ]
+            ]
+          },
+          "safety_tolerance": {
+            "description": "The safety tolerance level for the generated image. 1 being the most strict and 5 being the most permissive.",
+            "title": "Safety Tolerance",
+            "enum": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5"
+            ],
+            "type": "string",
+            "default": "2"
+          },
+          "prompt": {
+            "description": "The prompt to generate an image from.",
+            "title": "Prompt",
+            "examples": [
+              "A high-fashion magazine cover featuring an android in an avant-garde geometric cloth dress, with logo prints from @Image1. The backdrop is an eye-catching scenery. The title text 'FAL MAGAZINE' spans the top in bold white serif font. Overlay text at the bottom right reads 'THE FUTURE OF AI' in a sleek, thin sans-serif font."
+            ],
+            "type": "string"
+          },
+          "seed": {
+            "description": "The seed to use for the generation.",
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "output_format": {
+            "description": "The format of the generated image.",
+            "title": "Output Format",
+            "enum": [
+              "jpeg",
+              "png"
+            ],
+            "type": "string",
+            "default": "jpeg"
+          },
           "image_size": {
+            "description": "The size of the generated image. If `auto`, the size will be determined by the model.",
             "title": "Image Size",
-            "default": "auto",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
@@ -107,141 +164,86 @@
                 "type": "string"
               }
             ],
-            "description": "The size of the generated image. If `auto`, the size will be determined by the model."
-          },
-          "prompt": {
-            "title": "Prompt",
-            "examples": [
-              "A high-fashion magazine cover featuring an android in an avant-garde geometric cloth dress, with logo prints from @Image1. The backdrop is an eye-catching scenery. The title text 'FAL MAGAZINE' spans the top in bold white serif font. Overlay text at the bottom right reads 'THE FUTURE OF AI' in a sleek, thin sans-serif font."
-            ],
-            "description": "The prompt to generate an image from.",
-            "type": "string"
-          },
-          "seed": {
-            "title": "Seed",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The seed to use for the generation."
-          },
-          "sync_mode": {
-            "title": "Sync Mode",
-            "default": false,
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "type": "boolean"
-          },
-          "image_urls": {
-            "title": "Image URLs",
-            "examples": [
-              [
-                "https://storage.googleapis.com/falserverless/example_inputs/flux2/max.jpg"
-              ]
-            ],
-            "description": "List of URLs of input images for editing",
-            "items": {
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "output_format": {
-            "title": "Output Format",
-            "default": "jpeg",
-            "enum": [
-              "jpeg",
-              "png"
-            ],
-            "description": "The format of the generated image.",
-            "type": "string"
+            "default": "auto"
           },
           "enable_safety_checker": {
-            "title": "Enable Safety Checker",
-            "default": true,
             "description": "Whether to enable the safety checker. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "type": "boolean"
+            "title": "Enable Safety Checker",
+            "type": "boolean",
+            "default": true
           },
-          "safety_tolerance": {
-            "title": "Safety Tolerance",
-            "default": "2",
-            "enum": [
-              "1",
-              "2",
-              "3",
-              "4",
-              "5"
-            ],
-            "description": "The safety tolerance level for the generated image. 1 being the most strict and 5 being the most permissive.",
-            "type": "string"
+          "sync_mode": {
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "title": "Sync Mode",
+            "type": "boolean",
+            "default": false
           }
-        },
-        "type": "object"
+        }
       },
       "Flux2MaxEditOutput": {
-        "title": "Flux2MaxEditOutput",
-        "x-fal-order-properties": [
-          "images",
-          "seed"
-        ],
         "required": [
           "images",
           "seed"
         ],
+        "x-fal-order-properties": [
+          "images",
+          "seed"
+        ],
+        "title": "Flux2MaxEditOutput",
+        "type": "object",
         "properties": {
           "seed": {
-            "title": "Seed",
             "description": "The seed used for the generation.",
+            "title": "Seed",
             "type": "integer"
           },
           "images": {
+            "description": "The generated images.",
             "title": "Images",
+            "items": {
+              "$ref": "#/components/schemas/ImageFile"
+            },
+            "type": "array",
             "examples": [
               [
                 {
                   "url": "https://storage.googleapis.com/falserverless/example_outputs/flux2/max_edit_output.jpg"
                 }
               ]
-            ],
-            "description": "The generated images.",
-            "items": {
-              "$ref": "#/components/schemas/ImageFile"
-            },
-            "type": "array"
+            ]
           }
-        },
-        "type": "object"
+        }
       },
       "ImageSize": {
-        "title": "ImageSize",
         "x-fal-order-properties": [
           "width",
           "height"
         ],
+        "title": "ImageSize",
+        "type": "object",
         "properties": {
           "height": {
-            "title": "Height",
-            "default": 512,
             "description": "The height of the generated image.",
-            "maximum": 14142,
+            "title": "Height",
+            "exclusiveMinimum": 0,
             "type": "integer",
-            "exclusiveMinimum": 0
+            "maximum": 14142,
+            "default": 512
           },
           "width": {
-            "title": "Width",
-            "default": 512,
             "description": "The width of the generated image.",
-            "maximum": 14142,
+            "title": "Width",
+            "exclusiveMinimum": 0,
             "type": "integer",
-            "exclusiveMinimum": 0
+            "maximum": 14142,
+            "default": 512
           }
-        },
-        "type": "object"
+        }
       },
       "ImageFile": {
-        "title": "ImageFile",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -250,11 +252,61 @@
           "width",
           "height"
         ],
-        "required": [
-          "url"
-        ],
+        "title": "ImageFile",
+        "type": "object",
         "properties": {
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "height": {
+            "description": "The height of the image",
             "title": "Height",
             "anyOf": [
               {
@@ -263,25 +315,10 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The height of the image"
-          },
-          "content_type": {
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file."
+            ]
           },
           "width": {
+            "description": "The width of the image",
             "title": "Width",
             "anyOf": [
               {
@@ -290,46 +327,9 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The width of the image"
-          },
-          "file_size": {
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes."
-          },
-          "file_name": {
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
+            ]
           }
-        },
-        "type": "object"
+        }
       }
     }
   },

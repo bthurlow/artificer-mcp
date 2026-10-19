@@ -15,9 +15,9 @@
 
 ## Pricing
 
-Video costs **$0.03** per second at **480p**, **$0.048** per second at **768p**, and **$0.096** per second at **1080p**.
+Video costs **$0.0325** per second at **480p**, **$0.052** per second at **768p**, and **$0.104** per second at **1080p**.
 
-Note: these are promotional rates, **40%** off for a limited time. The discount ends **October 15**, after which **480p** is **$0.05**/second, **768p** is **$0.08**/second, and **1080p** is **$0.16**/second.
+Note: these are promotional rates, **35%** off for a limited time. The discount ends **October 31**, after which **480p** is **$0.05**/second, **768p** is **$0.08**/second, and **1080p** is **$0.16**/second.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -101,7 +101,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"file_size":6463396,"content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4","file_name":"--prs89fkHtWW406fmEs__NRhTqNku.mp4"}
+  - Examples: {"file_name":"--prs89fkHtWW406fmEs__NRhTqNku.mp4","url":"https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4","content_type":"video/mp4","file_size":6463396}
 
 - **`expanded_prompt`** (`string`, _optional_):
   The prompt after expansion, as sent to the model. Null when prompt expansion was disabled, left the prompt unchanged, or was performed internally by MiniMax's hosted API.
@@ -116,10 +116,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_size": 6463396,
-    "content_type": "video/mp4",
+    "file_name": "--prs89fkHtWW406fmEs__NRhTqNku.mp4",
     "url": "https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4",
-    "file_name": "--prs89fkHtWW406fmEs__NRhTqNku.mp4"
+    "content_type": "video/mp4",
+    "file_size": 6463396
   }
 }
 ```
