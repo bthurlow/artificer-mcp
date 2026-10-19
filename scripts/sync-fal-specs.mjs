@@ -12,12 +12,17 @@
  *   node scripts/sync-fal-specs.mjs --model wan-2.7 # single slug
  *   node scripts/sync-fal-specs.mjs --dry-run       # print diff, no writes
  *
+ * A route whose OpenAPI and llms.txt BOTH return 404 is retired: removed
+ * from models.json, its spec dir deleted, and listed in the --report output
+ * with the guides and docs that still mention it. Up to MAX_AUTO_RETIRE per
+ * run; more than that at once is treated as a fal-side problem instead.
+ *
  * Committed alongside the specs so CI can detect drift by re-running and
  * failing on diff. Zod schema generation from OpenAPI lands in the Phase 1
  * tool PR — this script only handles fetching + pricing extraction.
  */
 
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, readdir, rm } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildMap as buildFalInputKeyMap, diffInputKeys } from './build-fal-input-keys.mjs';
@@ -110,12 +115,159 @@ function collectFalRoutes(catalog) {
   return out;
 }
 
+/** An HTTP failure that keeps its status, so a 404 can be told from an outage. */
+class FetchError extends Error {
+  /** @param {string} message @param {number} status */
+  constructor(message, status) {
+    super(message);
+    this.status = status;
+  }
+}
+
+/**
+ * Thrown by syncOne when BOTH of a route's surfaces answer 404. That is the
+ * only failure treated as "the route is gone": a 5xx, a timeout, or a 404 on
+ * just one surface can be fal having a bad day, and stays a plain failure.
+ */
+class RouteGoneError extends Error {}
+
 async function fetchText(url) {
   const res = await fetch(url);
   if (!res.ok) {
-    throw new Error(`GET ${url} → ${res.status} ${res.statusText}`);
+    throw new FetchError(`GET ${url} → ${res.status} ${res.statusText}`, res.status);
   }
   return await res.text();
+}
+
+/**
+ * Decide what two settled fetches (OpenAPI, llms.txt) mean.
+ *
+ * Exported for unit testing.
+ *
+ * @param {Array<PromiseSettledResult<string>>} results
+ * @returns {'ok' | 'gone' | 'failed'}
+ */
+export function classifyFetches(results) {
+  if (results.every((r) => r.status === 'fulfilled')) return 'ok';
+  const both404 = results.every(
+    (r) => r.status === 'rejected' && /** @type {any} */ (r.reason)?.status === 404,
+  );
+  return both404 ? 'gone' : 'failed';
+}
+
+/**
+ * Most routes the cron will auto-retire in one run. A few routes dying in a
+ * week is normal. Dozens at once is far more likely to be fal changing its
+ * spec URLs or serving 404s during an incident, and auto-removing them would
+ * gut the catalog. Above the cap, every gone route is reported as a plain
+ * (blocking) failure and nothing is removed.
+ */
+export const MAX_AUTO_RETIRE = 10;
+
+/**
+ * Split routes whose surfaces both 404 into ones to retire and ones to
+ * report as failures (when the cap is exceeded).
+ *
+ * Exported for unit testing.
+ *
+ * @param {Array<{slug: string, endpointId: string, error: string}>} gone
+ * @param {number} [cap]
+ * @returns {{retire: Array<{slug: string, endpointId: string, error: string}>, failures: Array<{slug: string, endpointId: string, error: string}>}}
+ */
+export function planRetirements(gone, cap = MAX_AUTO_RETIRE) {
+  if (gone.length <= cap) return { retire: gone, failures: [] };
+  return {
+    retire: [],
+    failures: gone.map((g) => ({
+      ...g,
+      error: `${g.error} (both surfaces 404, but ${gone.length} routes did at once, over the auto-retire cap of ${cap}. Likely a fal-side outage or URL change, so nothing was removed.)`,
+    })),
+  };
+}
+
+/**
+ * Remove dead fal routes from a loaded catalog, in place. A route goes; its
+ * entry goes too once it has no access routes left. Reports, per route,
+ * whether the entry went and whether that left its prompt guide with no
+ * model at all (that guide tool has to be deleted by hand).
+ *
+ * Exported for unit testing.
+ *
+ * @param {any} catalog
+ * @param {Array<{slug: string, endpointId: string}>} dead
+ * @returns {Array<{slug: string, endpointId: string, entryRemoved: boolean, promptGuide: string | null, guideOrphaned: boolean}>}
+ */
+export function retireRoutes(catalog, dead) {
+  const results = [];
+  for (const { slug, endpointId } of dead) {
+    let entryRemoved = false;
+    let promptGuide = null;
+    for (const capability of Object.values(catalog)) {
+      if (!capability || typeof capability !== 'object') continue;
+      for (const entries of Object.values(capability)) {
+        if (!Array.isArray(entries)) continue;
+        const i = entries.findIndex((e) => e?.slug === slug);
+        if (i < 0) continue;
+        const entry = entries[i];
+        promptGuide = entry.prompt_guide ?? null;
+        entry.access_routes = (entry.access_routes ?? []).filter(
+          (r) => !(r?.provider === 'fal' && r.model === endpointId),
+        );
+        if (entry.access_routes.length === 0) {
+          entries.splice(i, 1);
+          entryRemoved = true;
+        }
+      }
+    }
+    results.push({ slug, endpointId, entryRemoved, promptGuide, guideOrphaned: false });
+  }
+  // Orphan check after every removal, so two dead routes sharing a guide
+  // are judged against the final catalog, not each other.
+  const guidesInUse = new Set();
+  for (const capability of Object.values(catalog)) {
+    if (!capability || typeof capability !== 'object') continue;
+    for (const entries of Object.values(capability)) {
+      if (!Array.isArray(entries)) continue;
+      for (const e of entries) if (e?.prompt_guide) guidesInUse.add(e.prompt_guide);
+    }
+  }
+  for (const r of results) r.guideOrphaned = r.promptGuide !== null && !guidesInUse.has(r.promptGuide);
+  return results;
+}
+
+/**
+ * Files outside the catalog that still name a retired route (guides, docs,
+ * seed scripts). The cron can delete data, not rewrite prose, so these are
+ * listed in the PR for a human to fix.
+ *
+ * @param {string} slug
+ * @param {string} endpointId
+ * @returns {Promise<string[]>} repo-relative paths
+ */
+async function findReferences(slug, endpointId) {
+  const dirs = ['src/guides', 'docs', 'scripts'];
+  const files = ['README.md'];
+  for (const dir of dirs) {
+    try {
+      for (const name of await readdir(resolve(REPO_ROOT, dir))) {
+        if (/\.(ts|md|mjs)$/.test(name)) files.push(`${dir}/${name}`);
+      }
+    } catch {
+      // missing dir
+    }
+  }
+  const hits = [];
+  for (const rel of files) {
+    if (rel === 'scripts/sync-fal-specs.mjs') continue;
+    let text;
+    try {
+      text = await readFile(resolve(REPO_ROOT, rel), 'utf8');
+    } catch {
+      continue;
+    }
+    if (text.includes(slug) || text.includes(endpointId)) hits.push(rel);
+  }
+  return hits;
 }
 
 async function writeIfChanged(path, next, { dryRun, label }) {
@@ -152,10 +304,19 @@ async function syncOne({ slug, endpointId, route }, { dryRun }) {
   console.log(`\n[${slug}] ${endpointId}`);
   const specDir = resolve(SPECS_ROOT, slug);
 
-  const [openapiText, llmsText] = await Promise.all([
+  const settled = await Promise.allSettled([
     fetchText(OPENAPI_URL(endpointId)),
     fetchText(LLMS_URL(endpointId)),
   ]);
+  const verdict = classifyFetches(settled);
+  if (verdict !== 'ok') {
+    const reasons = settled
+      .filter((r) => r.status === 'rejected')
+      .map((r) => (r.reason instanceof Error ? r.reason.message : String(r.reason)))
+      .join('; ');
+    throw verdict === 'gone' ? new RouteGoneError(reasons) : new Error(reasons);
+  }
+  const [openapiText, llmsText] = settled.map((r) => /** @type {PromiseFulfilledResult<string>} */ (r).value);
 
   // Pretty-print OpenAPI for stable diffs.
   const openapiJson = JSON.parse(openapiText);
@@ -224,13 +385,16 @@ async function syncOne({ slug, endpointId, route }, { dryRun }) {
  * without hitting the network.
  *
  * `blocking` is the "something is wrong and there is nothing to review"
- * signal: a 404 produces no file diff, so it would otherwise vanish. The
- * cron fails the job on it rather than closing quietly.
+ * signal: a failed fetch produces no file diff, so it would otherwise
+ * vanish. The cron fails the job on it rather than closing quietly.
+ * Retired routes are NOT blocking: their removal is the diff, and the PR
+ * is the review.
  *
  * @param {Array<{slug: string, endpointId: string, outcome?: any, error?: string}>} entries
- * @returns {{routes: number, deprecated: Array<object>, failures: Array<object>, costChanges: Array<object>, undeprecated: Array<object>, blocking: boolean}}
+ * @param {Array<object>} [retired] output of retireRoutes, plus `references`
+ * @returns {{routes: number, retired: Array<object>, deprecated: Array<object>, failures: Array<object>, costChanges: Array<object>, undeprecated: Array<object>, blocking: boolean}}
  */
-export function buildReport(entries) {
+export function buildReport(entries, retired = []) {
   const deprecated = [];
   const failures = [];
   const costChanges = [];
@@ -258,6 +422,7 @@ export function buildReport(entries) {
 
   return {
     routes: entries.length,
+    retired,
     deprecated,
     failures,
     costChanges,
@@ -306,6 +471,8 @@ async function main() {
   );
 
   let catalogDirty = false;
+  /** @type {Array<{slug: string, endpointId: string, error: string}>} */
+  const gone = [];
   /** @type {Array<{slug: string, endpointId: string, outcome?: any, error?: string}>} */
   const entries = [];
   for (const r of routes) {
@@ -315,22 +482,47 @@ async function main() {
       entries.push({ slug: r.slug, endpointId: r.endpointId, outcome });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
+      if (err instanceof RouteGoneError) {
+        console.error(`[${r.slug}] GONE (404 on both surfaces):`, msg);
+        gone.push({ slug: r.slug, endpointId: r.endpointId, error: msg });
+        continue;
+      }
       console.error(`[${r.slug}] FAILED:`, msg);
       entries.push({ slug: r.slug, endpointId: r.endpointId, error: msg });
     }
   }
 
-  const report = buildReport(entries);
+  // Routes that 404 on both surfaces are retired: removed from the catalog
+  // with their spec dirs, inside the drift PR. A human still decides, by
+  // merging (or not) — the PR is the review. Over the cap, nothing is removed.
+  const plan = planRetirements(gone);
+  for (const f of plan.failures) entries.push(f);
+  for (const g of plan.retire) entries.push({ slug: g.slug, endpointId: g.endpointId });
+  const retired = retireRoutes(catalog, plan.retire);
+  for (const r of retired) {
+    if (!dryRun) await rm(resolve(SPECS_ROOT, r.slug), { recursive: true, force: true });
+    /** @type {any} */ (r).references = await findReferences(r.slug, r.endpointId);
+  }
+  if (retired.length > 0) catalogDirty = true;
+
+  const report = buildReport(entries, retired);
   const failures = report.failures;
+
+  if (retired.length > 0) {
+    console.log(`\n${retired.length} RETIRED route(s) — removed from the catalog${dryRun ? ' (dry run: not written)' : ''}:`);
+    for (const r of retired) {
+      console.log(`  ${r.slug} (${r.endpointId})${r.guideOrphaned ? ` — ${r.promptGuide} now has no model` : ''}`);
+    }
+  }
 
   if (catalogDirty) {
     const nextCatalog = JSON.stringify(catalog, null, 2) + '\n';
     if (nextCatalog !== catalogText) {
       if (dryRun) {
-        console.log('\nwould update src/catalog/models.json (cost / deprecated fields)');
+        console.log('\nwould update src/catalog/models.json (cost / deprecated / retired)');
       } else {
         await writeFile(MODELS_JSON, nextCatalog);
-        console.log('\nupdated src/catalog/models.json (cost / deprecated fields)');
+        console.log('\nupdated src/catalog/models.json (cost / deprecated / retired)');
       }
     }
   }
@@ -358,7 +550,8 @@ async function main() {
       console.log(`    ${f.error}`);
     }
     console.log(
-      '\nFix: remove failed slugs from src/catalog/models.json or correct the endpoint id.',
+      '\nFix: correct the endpoint id, or remove the slug if fal has really dropped it. ' +
+        '(Routes that 404 on both surfaces are retired automatically, up to the cap.)',
     );
   }
 
@@ -419,10 +612,11 @@ async function main() {
   }
 
   console.log('\ndone.');
-  // Non-zero on fetch failures only. Deprecations and price moves produce a
-  // models.json diff the cron can open a PR against, but a 404 writes
-  // nothing — so without this exit code a dead route would leave no trace
-  // at all and the job would close green.
+  // Non-zero on unresolved fetch failures only. Deprecations, price moves and
+  // retirements produce a models.json diff the cron can open a PR against,
+  // but a failed fetch (5xx, timeout, a 404 on one surface, or gone routes
+  // over the retire cap) writes nothing — so without this exit code it would
+  // leave no trace at all and the job would close green.
   //
   // `exitCode`, not `process.exit()`: calling exit() here races undici's
   // socket teardown and can abort the process with a libuv assertion

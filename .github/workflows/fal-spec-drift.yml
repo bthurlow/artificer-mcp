@@ -14,7 +14,13 @@ name: Fal Spec Drift
 #
 #   1. DEPRECATED routes — still return 200, but serve a different model.
 #      These produce a models.json diff, so they ride the PR.
-#   2. Fetch failures (404) — write no diff at all, so they would vanish
+#   2. RETIRED routes — 404 on BOTH the OpenAPI and llms.txt surfaces.
+#      The sync removes them from models.json (and their spec dirs), so
+#      the removal is the diff and the PR is the review. The PR is then
+#      titled as a breaking change so release-please bumps the version.
+#      Capped per run (MAX_AUTO_RETIRE): mass 404s look like a fal outage.
+#   3. Other fetch failures (5xx, timeouts, a 404 on one surface, gone
+#      routes over the cap) — write no diff at all, so they would vanish
 #      silently. The sync script exits non-zero and this job fails on it.
 
 on:
@@ -60,6 +66,7 @@ jobs:
             echo "::error::Sync produced no report (exit $code) — it failed before finishing. Nothing to review; investigate the log above."
             exit 1
           fi
+          echo "retired=$(jq '.retired | length' "$RUNNER_TEMP/drift-report.json")" >> "$GITHUB_OUTPUT"
 
       - name: Verify the synced catalog still passes its own guards
         # CI on the drift PR does trigger, but the run is bot-initiated and
@@ -97,7 +104,18 @@ jobs:
       - name: Open or update the drift PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RETIRED: ${{ steps.sync.outputs.retired }}
         run: |
+          # A retirement removes catalog slugs callers may use, so the PR is
+          # titled as breaking: squash-merging it makes release-please cut a
+          # minor (pre-1.0) bump and list it in the changelog. Recomputed each
+          # run, so the title drops back to chore once nothing is retired.
+          if [ "${RETIRED:-0}" -gt 0 ]; then
+            title="fix(catalog)!: retire ${RETIRED} dead fal route(s) + spec drift sync"
+          else
+            title="chore(catalog): fal spec drift sync"
+          fi
+
           # --porcelain, not `git diff --quiet`: a newly added route creates
           # an untracked spec dir, which `git diff` does not see.
           if [ -z "$(git status --porcelain)" ]; then
@@ -113,7 +131,7 @@ jobs:
           # is reviewable.
           git switch -C chore/fal-spec-drift
           git add -A
-          git commit -m "chore(catalog): weekly fal spec sync"
+          git commit -m "$title"
           git push -f origin chore/fal-spec-drift
 
           # Match OPEN PRs only. `gh pr view <branch>` also resolves a
@@ -123,26 +141,27 @@ jobs:
           open_pr=$(gh pr list --head chore/fal-spec-drift --state open --json number --jq '.[0].number // empty')
           if [ -n "$open_pr" ]; then
             gh pr edit "$open_pr" \
-              --title "chore(catalog): fal spec drift sync" \
+              --title "$title" \
               --body-file "$RUNNER_TEMP/pr-body.md"
             echo "Updated existing PR."
           else
             gh pr create \
               --base main \
               --head chore/fal-spec-drift \
-              --title "chore(catalog): fal spec drift sync" \
+              --title "$title" \
               --body-file "$RUNNER_TEMP/pr-body.md"
             echo "Opened new PR."
           fi
 
       - name: Fail on unresolvable routes or broken guards
         # Last step so the PR is already open and the summary already
-        # written before the job goes red. A 404 leaves no diff to review,
-        # so a red job is the only thing that will make anyone look.
+        # written before the job goes red. A failed fetch leaves no diff to
+        # review, so a red job is the only thing that will make anyone look.
+        # Retired routes do not land here: their removal is in the PR.
         if: steps.sync.outputs.exit_code != '0' || steps.verify.outputs.exit_code != '0'
         run: |
           if [ "${{ steps.sync.outputs.exit_code }}" != "0" ]; then
-            echo "::error::One or more fal routes could not be fetched. See the job summary — these produce no file diff and will not show up in any PR."
+            echo "::error::One or more fal routes could not be fetched and were not retired (not a clean 404 on both surfaces, or over the retire cap). See the job summary — these produce no file diff and will not show up in any PR."
           fi
           if [ "${{ steps.verify.outputs.exit_code }}" != "0" ]; then
             echo "::error::The synced catalog fails typecheck or the unit suite. The drift PR (if opened) is not safe to merge as-is."

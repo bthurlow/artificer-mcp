@@ -41,6 +41,8 @@ That makes the in-job checks **load-bearing rather than a nicety**: nobody watch
 
 **Fixed 2026-09-24 (#46): the cron only ever opened one PR.** The "open or update" step checked `gh pr view chore/fal-spec-drift`, which also matches a **merged** PR on that branch. After the first drift PR (#41) merged, every later run took the "update" path, edited the closed #41, and never opened a new one. The job went red every Monday from 2026-08-31 (three routes had started 404ing), but its findings reached no reviewer for five weeks. The lookup now matches open PRs only (`gh pr list --state open`). The first run after the fix opened #49, as expected.
 
+**Changed 2026-10-19: dead routes are retired automatically.** A route that 404s on both surfaces is now removed from `models.json` (with its spec dir) inside the drift PR, which is retitled `fix(catalog)!:` so release-please treats it as breaking; the PR body lists the guides and docs that still name it. Only other fetch failures (5xx, timeouts, a 404 on one surface, or more than `MAX_AUTO_RETIRE` = 10 gone at once) still turn the job red. Prompted by the Sora 2 routes keeping it red for three weeks.
+
 **Also hardened (same PR):** both `wget` calls in `ci.yml` now retry (`--tries=3 --timeout=30 --retry-connrefused`). That fetch failed twice on 2026-08-15 — once a genuine URL rot, once a transient blip — and the integration job is the *only* place ffmpeg- and ImageMagick-backed code is ever actually exercised, so a flaky red there trains everyone to ignore a signal that matters.
 
 ### Original filing (kept for history)

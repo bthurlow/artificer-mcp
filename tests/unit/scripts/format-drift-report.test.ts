@@ -167,3 +167,63 @@ describe('formatDriftReport — input-schema changes', () => {
     expect(md).toContain('Spec-text churn only');
   });
 });
+
+describe('formatDriftReport — retirements', () => {
+  const retired = [
+    {
+      slug: 'sora-2-t2v',
+      endpointId: 'fal-ai/sora-2/text-to-video',
+      entryRemoved: true,
+      promptGuide: 'sora_video_prompt_guide',
+      guideOrphaned: true,
+      references: ['src/guides/sora-video.ts', 'scripts/seed-video-catalog.mjs'],
+    },
+    {
+      slug: 'sora-2-i2v',
+      endpointId: 'fal-ai/sora-2/image-to-video',
+      entryRemoved: true,
+      promptGuide: 'sora_video_prompt_guide',
+      guideOrphaned: true,
+      references: ['src/guides/sora-video.ts'],
+    },
+  ];
+
+  it('leads with the breaking retirement section, ahead of fetch failures', () => {
+    const md = formatDriftReport({
+      ...EMPTY,
+      retired,
+      failures: [{ slug: 'flaky', endpointId: 'fal-ai/flaky', error: '503' }],
+      blocking: true,
+    });
+    expect(md).toContain('2 route(s) retired — BREAKING');
+    expect(md.indexOf('retired — BREAKING')).toBeLessThan(md.indexOf('failed to fetch'));
+    expect(md).not.toContain('Spec-text churn only');
+  });
+
+  it('lists each referencing file once, deletes an orphaned guide once, and asks for UPGRADING', () => {
+    const md = formatDriftReport({ ...EMPTY, retired });
+    expect(md.split('Update `src/guides/sora-video.ts`')).toHaveLength(2);
+    expect(md).toContain('Update `scripts/seed-video-catalog.mjs`');
+    expect(md.split('- [ ] Delete `sora_video_prompt_guide`')).toHaveLength(2);
+    expect(md).toContain('now has no model');
+    expect(md).toContain('UPGRADING.md');
+  });
+
+  it('notes an entry that survived on another route', () => {
+    const md = formatDriftReport({
+      ...EMPTY,
+      retired: [
+        {
+          slug: 'm',
+          endpointId: 'fal-ai/m',
+          entryRemoved: false,
+          promptGuide: 'g',
+          guideOrphaned: false,
+          references: [],
+        },
+      ],
+    });
+    expect(md).toContain('route removed, entry kept');
+    expect(md).not.toContain('Delete `g`');
+  });
+});
