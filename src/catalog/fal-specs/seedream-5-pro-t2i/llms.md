@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Tentative pricing is **$0.0675** per image for images of total area less than or equal to **1536x1536** pixels. For images with area in between **1536x1536** and **2048x2048** pixels, the price is **$0.135** per image.
+Tentative pricing is **$0.0675 per output image** for an area up to and including **1536 × 1536 pixels**, or **$0.135 per output image** for an area above **1536 × 1536** and up to **2048 × 2048 pixels**. For example, **2 images at 1536 × 1536 would cost $0.135**. Final pricing is not yet confirmed.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -35,7 +35,7 @@ The API accepts the following input parameters:
   - Examples: "Vibrant editorial of a model in contemporary fashion fused with West African textile patterns and beadwork, Campbell Addy bold aesthetic, saturated palette, dramatic studio lighting, celebratory cultural richness, striking contemporary portraiture"
 
 - **`image_size`** (`ImageSize | Enum`, _optional_):
-  The size of the generated image. Total pixels must be between 1024x1024 and 2048x2048, with aspect ratio between 1/16 and 16. Default value: `auto_2K`
+  The size of the generated image. Total pixels must be between 921600 and 4624220, with aspect ratio between 1/16 and 16. Default value: `auto_2K`
   - Default: `"auto_2K"`
   - One of: ImageSize | Enum
   - Examples: "auto_2K"
@@ -50,6 +50,14 @@ The API accepts the following input parameters:
   - Default: `"jpeg"`
   - Options: `"jpeg"`, `"png"`
   - Examples: "jpeg"
+
+- **`watermark`** (`boolean`, _optional_):
+  Whether to add the provider's visible watermark.
+  - Default: `false`
+
+- **`image_passthrough`** (`boolean`, _optional_):
+  Preserve original reference and output image bytes, formats, and dimensions without resizing or re-encoding.
+  - Default: `false`
 
 - **`sync_mode`** (`boolean`, _optional_):
   If `True`, the media will be returned as a data URI and the output data won't be available in the request history.

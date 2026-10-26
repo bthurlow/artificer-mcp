@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.04** per generated minute, rounded to the nearest 15 seconds. For **$1.00** you can generate up to 25 minutes of speech.
+Billing is calculated at **$0.04 per minute of generated speech**, with duration rounded to the nearest **15 seconds**. For example, **5 minutes cost $0.20**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

@@ -71,12 +71,16 @@
         ]
       },
       "HappyHorseV11ImageToVideoInput": {
-        "required": [
-          "image_url"
-        ],
-        "title": "HappyHorse15ImageToVideoInput",
         "properties": {
           "duration": {
+            "description": "Output video duration in seconds (3-15).",
+            "title": "Duration",
+            "default": 5,
+            "examples": [
+              5,
+              10,
+              15
+            ],
             "type": "integer",
             "enum": [
               3,
@@ -92,43 +96,25 @@
               13,
               14,
               15
-            ],
-            "title": "Duration",
-            "default": 5,
-            "examples": [
-              5,
-              10,
-              15
-            ],
-            "description": "Output video duration in seconds (3-15)."
-          },
-          "seed": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Seed",
-            "description": "Random seed for reproducibility (0-2147483647)."
+            ]
           },
           "image_url": {
-            "type": "string",
             "title": "Image Url",
             "description": "URL of the first frame image. Formats: JPEG, JPG, PNG, BMP, WEBP. Dimensions must be at least 300px. Aspect ratio must be between 1:2.5 and 2.5:1. Max 20 MB.",
             "examples": [
               "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/wpimhv/rap.png"
-            ]
+            ],
+            "type": "string"
           },
           "enable_safety_checker": {
-            "type": "boolean",
+            "default": true,
             "title": "Enable Safety Checker",
-            "description": "Enable content moderation for input and output. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "default": true
+            "type": "boolean",
+            "description": "Enable content moderation for input and output. Disabling it requires account authorization; unauthorized requests are always checked."
           },
           "prompt": {
+            "title": "Prompt",
+            "description": "Optional text prompt guiding the animation. Max 2500 characters.",
             "anyOf": [
               {
                 "type": "string"
@@ -137,23 +123,38 @@
                 "type": "null"
               }
             ],
-            "title": "Prompt",
-            "description": "Optional text prompt guiding the animation. Max 2500 characters.",
             "examples": [
               "Bring the scene in the image to life."
             ]
           },
           "resolution": {
+            "description": "Output video resolution tier.",
+            "default": "1080p",
+            "title": "Resolution",
             "type": "string",
             "enum": [
               "720p",
               "1080p"
+            ]
+          },
+          "seed": {
+            "description": "Random seed for reproducibility (0-2147483647).",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
             ],
-            "title": "Resolution",
-            "default": "1080p",
-            "description": "Output video resolution tier."
+            "title": "Seed"
           }
         },
+        "required": [
+          "image_url"
+        ],
+        "description": "Input for Happy Horse 1.1 image-to-video generation (first frame only).\n\nIdentical to 1.0 except the first-frame image may be up to 20 MB (1.0\ncaps at 10 MB).",
+        "title": "HappyHorse15ImageToVideoInput",
         "x-fal-order-properties": [
           "image_url",
           "prompt",
@@ -162,17 +163,11 @@
           "seed",
           "enable_safety_checker"
         ],
-        "type": "object",
-        "description": "Input for Happy Horse 1.1 image-to-video generation (first frame only).\n\nIdentical to 1.0 except the first-frame image may be up to 20 MB (1.0\ncaps at 10 MB)."
+        "type": "object"
       },
       "HappyHorseV11ImageToVideoOutput": {
         "description": "Output for Happy Horse video generation.",
         "x-fal-order-properties": [
-          "video",
-          "seed"
-        ],
-        "title": "HappyHorseOutput",
-        "required": [
           "video",
           "seed"
         ],
@@ -187,12 +182,14 @@
             "$ref": "#/components/schemas/VideoFile"
           }
         },
-        "type": "object"
+        "type": "object",
+        "required": [
+          "video",
+          "seed"
+        ],
+        "title": "HappyHorseOutput"
       },
       "VideoFile": {
-        "required": [
-          "url"
-        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -204,11 +201,36 @@
           "duration",
           "num_frames"
         ],
-        "title": "VideoFile",
         "properties": {
-          "height": {
-            "description": "The height of the video",
-            "title": "Height",
+          "duration": {
+            "description": "The duration of the video",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration"
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -216,11 +238,14 @@
               {
                 "type": "null"
               }
+            ],
+            "title": "File Size",
+            "examples": [
+              4404019
             ]
           },
           "width": {
             "description": "The width of the video",
-            "title": "Width",
             "anyOf": [
               {
                 "type": "integer"
@@ -228,96 +253,71 @@
               {
                 "type": "null"
               }
+            ],
+            "title": "Width"
+          },
+          "height": {
+            "description": "The height of the video",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height"
+          },
+          "num_frames": {
+            "description": "The number of frames in the video",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Num Frames"
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
             ]
+          },
+          "fps": {
+            "description": "The FPS of the video",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fps"
           },
           "url": {
             "description": "The URL where the file can be downloaded from.",
             "title": "Url",
             "type": "string"
-          },
-          "duration": {
-            "description": "The duration of the video",
-            "title": "Duration",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "fps": {
-            "description": "The FPS of the video",
-            "title": "Fps",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "num_frames": {
-            "description": "The number of frames in the video",
-            "title": "Num Frames",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
           }
         },
-        "type": "object"
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "VideoFile"
       }
     }
   },

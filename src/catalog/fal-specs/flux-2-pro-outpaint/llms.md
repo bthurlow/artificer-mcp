@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost $0.03 for the first megapixel of output, plus $0.015 per extra megapixel of input and output, rounded up to the nearest megapixel. For example, a 1024x1024 image will cost $0.03, and a 1920x1080 image will cost $0.045 ($0.03 for first megapixel + $0.015 for the second megapixel). Similarly, a 512x512 output will cost $0.03 ($0.03 for 0.25 megapixels, rounded to 1 megapixel).
+Your request will cost **$0.03** for the first megapixel of output, plus **$0.015** per extra megapixel of input and output, rounded up to the nearest megapixel. For example, a 1024x1024 image will cost **$0.03**, and a 1920x1080 image will cost **$0.045** (**$0.03** for first megapixel + **$0.015** for the second megapixel). Similarly, a 512x512 output will cost **$0.03** (**$0.03** for 0.25 megapixels, rounded to 1 megapixel).
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

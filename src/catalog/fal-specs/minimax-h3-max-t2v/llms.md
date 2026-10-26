@@ -101,7 +101,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"file_name":"--prs89fkHtWW406fmEs__NRhTqNku.mp4","url":"https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4","content_type":"video/mp4","file_size":6463396}
+  - Examples: {"file_name":"--prs89fkHtWW406fmEs__NRhTqNku.mp4","file_size":6463396,"content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4"}
 
 - **`expanded_prompt`** (`string`, _optional_):
   The prompt after expansion, as sent to the model. Null when prompt expansion was disabled, left the prompt unchanged, or was performed internally by MiniMax's hosted API.
@@ -117,9 +117,9 @@ The API returns the following output format:
 {
   "video": {
     "file_name": "--prs89fkHtWW406fmEs__NRhTqNku.mp4",
-    "url": "https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4",
+    "file_size": 6463396,
     "content_type": "video/mp4",
-    "file_size": 6463396
+    "url": "https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4"
   }
 }
 ```

@@ -13,7 +13,7 @@
 
 ## Pricing
 
-Text tokens (per 1M): $0.3125 input, $1.875 output. Image tokens (per 1M): $0.3125 input, $37.50 output. Output images are generated at a fixed 1K (1024x1024px)
+Text tokens (per 1M): **$0.3125** input, **$1.875** output. Image tokens (per 1M): **$0.3125** input, **$37.50** output. Output images are generated at a fixed 1K (1024x1024px)
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -102,7 +102,7 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated images.
   - Array of ImageFile
-  - Examples: [{"file_name":"nano-banana-lite-t2i-output.png","content_type":"image/png","url":"https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png"}]
+  - Examples: [{"content_type":"image/png","file_name":"nano-banana-lite-t2i-output.png","url":"https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png"}]
 
 - **`description`** (`string`, _required_):
   The description of the generated images.
@@ -115,8 +115,8 @@ The API returns the following output format:
 {
   "images": [
     {
-      "file_name": "nano-banana-lite-t2i-output.png",
       "content_type": "image/png",
+      "file_name": "nano-banana-lite-t2i-output.png",
       "url": "https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png"
     }
   ],

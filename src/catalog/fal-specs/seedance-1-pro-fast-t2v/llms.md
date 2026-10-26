@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Each 1080p 5 second video costs roughly **$0.245**. For other resolutions, 1 million video tokens costs **$1**. tokens(video)  = (height x width x FPS x duration) / 1024. 
+Each 1080p 5 second video costs roughly **$0.245**. For other resolutions, 1 million video tokens costs **$1**. tokens(video) = (height x width x FPS x duration) / 1024.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

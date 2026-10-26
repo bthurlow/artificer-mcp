@@ -13,7 +13,7 @@
 
 ## Pricing
 
-For every second of video you generated, you will be charged $0.07 (audio off) or $0.14 (audio on). For example, a 5s video with audio on will cost $0.70
+For every second of video you generated, you will be charged **$0.07** (audio off) or **$0.14** (audio on). For example, a 5s video with audio on will cost **$0.70**
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -90,7 +90,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"url":"https://v3b.fal.media/files/b/0a84ab71/8hPbLs7n59WhWY-BN69yX_output.mp4","file_name":"output.mp4","content_type":"video/mp4","file_size":8195664}
+  - Examples: {"content_type":"video/mp4","file_size":8195664,"url":"https://v3b.fal.media/files/b/0a84ab71/8hPbLs7n59WhWY-BN69yX_output.mp4","file_name":"output.mp4"}
 
 
 
@@ -99,10 +99,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "url": "https://v3b.fal.media/files/b/0a84ab71/8hPbLs7n59WhWY-BN69yX_output.mp4",
-    "file_name": "output.mp4",
     "content_type": "video/mp4",
-    "file_size": 8195664
+    "file_size": 8195664,
+    "url": "https://v3b.fal.media/files/b/0a84ab71/8hPbLs7n59WhWY-BN69yX_output.mp4",
+    "file_name": "output.mp4"
   }
 }
 ```

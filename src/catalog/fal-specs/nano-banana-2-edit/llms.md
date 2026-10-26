@@ -14,7 +14,7 @@
 
 ## Pricing
 
-Your request will cost **$0.08** per image. For **$1.00**, you can run this model **12** times. 2K and 4K outputs will be charged at **1.5** times and **2** times the standard rate, respectively. 0.5K (512px) resolution outputs will be charged at **0.75** times the standard rate. If web search is used, an additional $0.015 will be charged. If high thinking is used, an additional $0.002 will be charged. **Note: Pricing is subject to change.**
+Your request will cost **$0.08** per image. For **$1.00**, you can run this model **12** times. 2K and 4K outputs will be charged at **1.5** times and **2** times the standard rate, respectively. 0.5K (512px) resolution outputs will be charged at **0.75** times the standard rate. If web search is used, an additional **$0.015** will be charged. If high thinking is used, an additional **$0.002** will be charged. **Note: Pricing is subject to change.**
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -32,6 +32,46 @@ The API accepts the following input parameters:
 - **`prompt`** (`string`, _required_):
   The prompt for image editing.
   - Examples: "make a photo of the man driving the car down the california coastline"
+
+- **`image_urls`** (`list<string>`, _optional_):
+  The URLs of the images to use for image-to-image generation or image editing. Optional when at least one of `video_url`, `audio_url`, or `pdf_url` is provided.
+  - Array of string
+  - Examples: ["https://storage.googleapis.com/falserverless/example_inputs/nano-banana-edit-input.png","https://storage.googleapis.com/falserverless/example_inputs/nano-banana-edit-input-2.png"]
+
+- **`history`** (`list<GeminiVideoMessage>`, _optional_):
+  Previous native Gemini turns, including original parts and thought signatures from conversations. The current prompt starts a new user turn.
+  - Array of GeminiVideoMessage
+
+- **`context`** (`list<GeminiTextPart | GeminiImagePart | GeminiDocumentPart | GeminiVideoPart | GeminiSignaturePart>`, _optional_):
+  Ordered text, image, PDF, UTF-8 text-file or video parts appended to the current prompt. Original media bytes are preserved; images count toward the total 14-reference limit.
+  - Array of GeminiTextPart | GeminiImagePart | GeminiDocumentPart | GeminiVideoPart | GeminiSignaturePart
+
+- **`return_history`** (`boolean`, _optional_):
+  Return reusable native conversations with original image parts and provider thought signatures. Uses a native provider. Each generated conversation is independent; send its messages as history for the next turn.
+  - Default: `false`
+
+- **`thinking_level`** (`Enum`, _optional_):
+  Controls thinking effort ('minimal' or 'high') and requests thought summaries. Omit to use the provider default ('minimal'); thinking cannot be disabled.
+  - Options: `"minimal"`, `"high"`
+
+- **`image_passthrough`** (`boolean`, _optional_):
+  Send reference images and return provider images without resizing or re-encoding, preserving transparency and metadata. Uses direct Google or Vertex APIs; the returned image format may differ from output_format.
+  - Default: `false`
+
+- **`include_thoughts`** (`boolean`, _optional_):
+  Whether to include thought summaries. Omit to preserve the existing behavior: an explicit thinking_level requests summaries. Set limit_generations=false to return summary text in description. This does not disable thinking or return intermediate thought images.
+
+- **`temperature`** (`float`, _optional_):
+  Sampling temperature. Omit to use the provider default of 1. Explicit values use a direct Google or Vertex API.
+  - Range: `0` to `2`
+
+- **`top_p`** (`float`, _optional_):
+  Nucleus sampling probability. Omit to use the provider default of 0.95. Explicit values use a direct Google or Vertex API.
+  - Range: `0` to `1`
+
+- **`max_output_tokens`** (`integer`, _optional_):
+  Maximum output tokens for the generation. Omit to retain the provider default. Explicit values use a direct Google or Vertex API.
+  - Range: `1` to `32768`
 
 - **`num_images`** (`integer`, _optional_):
   The number of images to generate. Default value: `1`
@@ -60,11 +100,6 @@ The API accepts the following input parameters:
   If `True`, the media will be returned as a data URI and the output data won't be available in the request history.
   - Default: `false`
 
-- **`image_urls`** (`list<string>`, _optional_):
-  The URLs of the images to use for image-to-image generation or image editing. Optional when at least one of `video_url`, `audio_url`, or `pdf_url` is provided.
-  - Array of string
-  - Examples: ["https://storage.googleapis.com/falserverless/example_inputs/nano-banana-edit-input.png","https://storage.googleapis.com/falserverless/example_inputs/nano-banana-edit-input-2.png"]
-
 - **`system_prompt`** (`string`, _optional_):
   Optional system instruction that steers the model's persona and output style across the request. Leave blank to omit; when provided, it is sent as the system instruction to Gemini (or as a system message on OpenAI-compatible providers). Default value: `""`
   - Default: `""`
@@ -91,9 +126,9 @@ The API accepts the following input parameters:
   Enable web search for the image generation task. This will allow the model to use the latest information from the web to generate the image.
   - Default: `false`
 
-- **`thinking_level`** (`Enum`, _optional_):
-  When set, enables model thinking with the given level ('minimal' or 'high') and includes thoughts in the generation. Omit to disable.
-  - Options: `"minimal"`, `"high"`
+- **`enable_image_search`** (`boolean`, _optional_):
+  Ground image generation with Google Image Search. Can be combined with enable_web_search; source attribution is returned in grounding_metadata. Uses direct Google or Vertex APIs.
+  - Default: `false`
 
 
 
@@ -110,14 +145,31 @@ The API accepts the following input parameters:
 ```json
 {
   "prompt": "make a photo of the man driving the car down the california coastline",
-  "num_images": 1,
-  "aspect_ratio": "auto",
-  "output_format": "png",
-  "safety_tolerance": "4",
   "image_urls": [
     "https://storage.googleapis.com/falserverless/example_inputs/nano-banana-edit-input.png",
     "https://storage.googleapis.com/falserverless/example_inputs/nano-banana-edit-input-2.png"
   ],
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "type": "",
+          "text": ""
+        }
+      ]
+    }
+  ],
+  "context": [
+    {
+      "type": "",
+      "text": ""
+    }
+  ],
+  "num_images": 1,
+  "aspect_ratio": "auto",
+  "output_format": "png",
+  "safety_tolerance": "4",
   "resolution": "1K",
   "limit_generations": true
 }
@@ -136,6 +188,14 @@ The API returns the following output format:
 - **`description`** (`string`, _required_):
   The description of the generated images.
 
+- **`conversations`** (`list<GeminiConversation>`, _optional_):
+  Reusable per-generation conversations, populated only when return_history is true. Retain every part and thought signature when continuing a conversation.
+  - Array of GeminiConversation
+
+- **`grounding_metadata`** (`list<object>`, _optional_):
+  Provider grounding metadata for the generated images, including search queries, source pages and image-source attribution when available.
+  - Array of object
+
 
 
 **Example Response**:
@@ -149,7 +209,22 @@ The API returns the following output format:
       "content_type": "image/png"
     }
   ],
-  "description": ""
+  "description": "",
+  "conversations": [
+    {
+      "messages": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "type": "",
+              "text": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
 ```
 

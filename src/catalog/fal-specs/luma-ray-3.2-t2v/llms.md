@@ -15,7 +15,7 @@
 
 ## Pricing
 
-For **5s** video your request will cost **$0.50** for **540p**, **$1** for **720p** and **$2** for **1080p**. For **10s**, **$1** at **540p**, **$2** at **720p** and **$4** at **1080p**. For **$1** you can run this model approximately **2** times (**540p/5s**).
+Billing is calculated by video duration and resolution. A **5-second video** costs **$0.50 at 540p**, **$1.00 at 720p**, or **$2.00 at 1080p**; a **10-second video** costs **$1.00**, **$2.00**, or **$4.00**, respectively.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

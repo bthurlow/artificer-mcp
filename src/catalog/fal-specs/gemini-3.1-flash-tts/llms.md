@@ -52,7 +52,7 @@ The API accepts the following input parameters:
 - **`speakers`** (`list<SpeakerConfig> | array`, _optional_):
   Multi-speaker voice configuration. When set, enables multi-speaker synthesis where different parts of the text are spoken by different voices. Each speaker needs a voice and a speaker_id (alias) that matches prefixes in the prompt.
   - One of: list<SpeakerConfig> | array
-  - Examples: [{"speaker_id":"Host","voice":"Charon"},{"speaker_id":"DrChen","voice":"Kore"}]
+  - Examples: [{"voice":"Charon","speaker_id":"Host"},{"voice":"Kore","speaker_id":"DrChen"}]
 
 - **`temperature`** (`float`, _optional_):
   Controls the randomness of the speech output. Higher values produce more creative and varied delivery, while lower values make the output more predictable and focused. Default value: `1`
@@ -84,12 +84,12 @@ The API accepts the following input parameters:
   "language_code": "English (US)",
   "speakers": [
     {
-      "speaker_id": "Host",
-      "voice": "Charon"
+      "voice": "Charon",
+      "speaker_id": "Host"
     },
     {
-      "speaker_id": "DrChen",
-      "voice": "Kore"
+      "voice": "Kore",
+      "speaker_id": "DrChen"
     }
   ],
   "temperature": 1,

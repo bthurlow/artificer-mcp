@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Enable safety checks; disabling requires authorization. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _required_):
   Text prompt for video generation, max 1500 characters
   - Examples: "Dragon lands on a rock"
@@ -66,6 +70,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "Dragon lands on a rock",
   "start_image_url": "https://v3.fal.media/files/zebra/sgsdKvPigPhJ1S7Hl5bWc_first_frame_q1.png",
   "end_image_url": "https://v3.fal.media/files/kangaroo/CASBu_OmOnZ8IafirarFL_last_frame_q1.png",

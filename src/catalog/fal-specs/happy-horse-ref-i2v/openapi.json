@@ -81,51 +81,14 @@
           "seed",
           "enable_safety_checker"
         ],
-        "title": "HappyHorseReferenceToVideoInput",
-        "required": [
-          "prompt",
-          "image_urls"
-        ],
         "properties": {
-          "resolution": {
-            "description": "Output video resolution tier.",
-            "title": "Resolution",
-            "enum": [
-              "720p",
-              "1080p"
-            ],
-            "type": "string",
-            "default": "1080p"
-          },
-          "image_urls": {
-            "description": "Reference images for subject consistency (1-9 images). Formats: JPEG, JPG, PNG, WEBP. Shortest side must be at least 400 px (720P or higher recommended). Max 10 MB each.",
-            "title": "Image Urls",
-            "items": {
-              "_fal_ui_field": "image",
-              "type": "string"
-            },
-            "type": "array",
-            "examples": [
-              [
-                "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/wpimhv/rap.png"
-              ]
-            ]
-          },
-          "seed": {
-            "description": "Random seed for reproducibility (0-2147483647).",
-            "title": "Seed",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "duration": {
+            "examples": [
+              5,
+              10,
+              15
+            ],
             "description": "Output video duration in seconds (3-15).",
-            "title": "Duration",
             "enum": [
               3,
               4,
@@ -141,26 +104,62 @@
               14,
               15
             ],
-            "examples": [
-              5,
-              10,
-              15
-            ],
             "type": "integer",
-            "default": 5
+            "default": 5,
+            "title": "Duration"
+          },
+          "resolution": {
+            "enum": [
+              "720p",
+              "1080p"
+            ],
+            "description": "Output video resolution tier.",
+            "type": "string",
+            "default": "1080p",
+            "title": "Resolution"
+          },
+          "enable_safety_checker": {
+            "description": "Enable content moderation for input and output. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "title": "Enable Safety Checker",
+            "default": true,
+            "type": "boolean"
+          },
+          "image_urls": {
+            "description": "Reference images for subject consistency (1-9 images). Formats: JPEG, JPG, PNG, WEBP. Shortest side must be at least 400 px (720P or higher recommended). Max 10 MB each.",
+            "items": {
+              "_fal_ui_field": "image",
+              "type": "string"
+            },
+            "title": "Image Urls",
+            "examples": [
+              [
+                "https://help-static-aliyun-doc.aliyuncs.com/file-manage-files/zh-CN/20250925/wpimhv/rap.png"
+              ]
+            ],
+            "type": "array"
           },
           "prompt": {
             "description": "Text prompt describing the desired video. Reference subjects from your images using ``character1``, ``character2``, ... up to ``character9`` (the order matches the order of ``image_urls``). Max 2500 characters.",
+            "minLength": 1,
             "title": "Prompt",
             "examples": [
               "A dance battle between character1 and character2, cinematic lighting, smooth camera movement."
             ],
-            "type": "string",
-            "minLength": 1
+            "type": "string"
+          },
+          "seed": {
+            "description": "Random seed for reproducibility (0-2147483647).",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
           },
           "aspect_ratio": {
-            "description": "Aspect ratio of the generated video.",
-            "title": "Aspect Ratio",
             "enum": [
               "16:9",
               "9:16",
@@ -168,26 +167,22 @@
               "4:3",
               "3:4"
             ],
+            "description": "Aspect ratio of the generated video.",
             "type": "string",
-            "default": "16:9"
-          },
-          "enable_safety_checker": {
-            "description": "Enable content moderation for input and output. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "title": "Enable Safety Checker",
-            "type": "boolean",
-            "default": true
+            "default": "16:9",
+            "title": "Aspect Ratio"
           }
         },
-        "type": "object"
+        "type": "object",
+        "required": [
+          "prompt",
+          "image_urls"
+        ],
+        "title": "HappyHorseReferenceToVideoInput"
       },
       "HappyHorseReferenceToVideoOutput": {
         "description": "Output for Happy Horse video generation.",
         "x-fal-order-properties": [
-          "video",
-          "seed"
-        ],
-        "title": "HappyHorseOutput",
-        "required": [
           "video",
           "seed"
         ],
@@ -202,12 +197,14 @@
             "$ref": "#/components/schemas/VideoFile"
           }
         },
-        "type": "object"
+        "type": "object",
+        "required": [
+          "video",
+          "seed"
+        ],
+        "title": "HappyHorseOutput"
       },
       "VideoFile": {
-        "required": [
-          "url"
-        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -219,11 +216,36 @@
           "duration",
           "num_frames"
         ],
-        "title": "VideoFile",
         "properties": {
-          "height": {
-            "description": "The height of the video",
-            "title": "Height",
+          "duration": {
+            "description": "The duration of the video",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration"
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -231,11 +253,14 @@
               {
                 "type": "null"
               }
+            ],
+            "title": "File Size",
+            "examples": [
+              4404019
             ]
           },
           "width": {
             "description": "The width of the video",
-            "title": "Width",
             "anyOf": [
               {
                 "type": "integer"
@@ -243,96 +268,71 @@
               {
                 "type": "null"
               }
+            ],
+            "title": "Width"
+          },
+          "height": {
+            "description": "The height of the video",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height"
+          },
+          "num_frames": {
+            "description": "The number of frames in the video",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Num Frames"
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
             ]
+          },
+          "fps": {
+            "description": "The FPS of the video",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fps"
           },
           "url": {
             "description": "The URL where the file can be downloaded from.",
             "title": "Url",
             "type": "string"
-          },
-          "duration": {
-            "description": "The duration of the video",
-            "title": "Duration",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "fps": {
-            "description": "The FPS of the video",
-            "title": "Fps",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "num_frames": {
-            "description": "The number of frames in the video",
-            "title": "Num Frames",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
           }
         },
-        "type": "object"
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "VideoFile"
       }
     }
   },

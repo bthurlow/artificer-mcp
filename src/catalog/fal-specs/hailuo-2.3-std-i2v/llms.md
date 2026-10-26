@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.28** per **6 second** video generation, and a **$0.56** per **10 second** video generation.
+Your request will cost **$0.28** per **6 second** video generation, and **$0.56** per **10 second** video generation.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

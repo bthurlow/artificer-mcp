@@ -71,12 +71,12 @@ The API returns the following output format:
 
 - **`audio`** (`Audio`, _required_):
   The first generated music track, for quick preview/playback.
-  - Examples: {"content_type":"audio/mp4","url":"https://fal.media/files/lion/SI-MFSBz0WtUMW4dAhhQs_jazz1.m4a","file_name":"jazz1.m4a","file_size":3363482}
+  - Examples: {"file_name":"jazz1.m4a","url":"https://fal.media/files/lion/SI-MFSBz0WtUMW4dAhhQs_jazz1.m4a","content_type":"audio/mp4","file_size":3363482}
 
 - **`audios`** (`list<Audio>`, _required_):
   All generated music tracks (AAC/m4a), one per sample.
   - Array of Audio
-  - Examples: [{"content_type":"audio/mp4","url":"https://fal.media/files/lion/SI-MFSBz0WtUMW4dAhhQs_jazz1.m4a","file_name":"jazz1.m4a","file_size":3363482}]
+  - Examples: [{"file_name":"jazz1.m4a","url":"https://fal.media/files/lion/SI-MFSBz0WtUMW4dAhhQs_jazz1.m4a","content_type":"audio/mp4","file_size":3363482}]
 
 
 
@@ -85,16 +85,16 @@ The API returns the following output format:
 ```json
 {
   "audio": {
-    "content_type": "audio/mp4",
-    "url": "https://fal.media/files/lion/SI-MFSBz0WtUMW4dAhhQs_jazz1.m4a",
     "file_name": "jazz1.m4a",
+    "url": "https://fal.media/files/lion/SI-MFSBz0WtUMW4dAhhQs_jazz1.m4a",
+    "content_type": "audio/mp4",
     "file_size": 3363482
   },
   "audios": [
     {
-      "content_type": "audio/mp4",
-      "url": "https://fal.media/files/lion/SI-MFSBz0WtUMW4dAhhQs_jazz1.m4a",
       "file_name": "jazz1.m4a",
+      "url": "https://fal.media/files/lion/SI-MFSBz0WtUMW4dAhhQs_jazz1.m4a",
+      "content_type": "audio/mp4",
       "file_size": 3363482
     }
   ]

@@ -94,7 +94,7 @@ The API returns the following output format:
 - **`audio`** (`list<Audio>`, _required_):
   Generated SFX audio from a text prompt.
   - Array of Audio
-  - Examples: [{"url":"https://v3b.fal.media/files/b/kangaroo/text_to_audio_example.wav","content_type":"audio/wav","file_name":"text_to_audio_1.wav"}]
+  - Examples: [{"file_name":"text_to_audio_1.wav","url":"https://v3b.fal.media/files/b/kangaroo/text_to_audio_example.wav","content_type":"audio/wav"}]
 
 
 
@@ -105,9 +105,9 @@ The API returns the following output format:
   "model": "",
   "audio": [
     {
+      "file_name": "text_to_audio_1.wav",
       "url": "https://v3b.fal.media/files/b/kangaroo/text_to_audio_example.wav",
-      "content_type": "audio/wav",
-      "file_name": "text_to_audio_1.wav"
+      "content_type": "audio/wav"
     }
   ]
 }

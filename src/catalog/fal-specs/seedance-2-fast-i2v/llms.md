@@ -15,7 +15,7 @@
 
 ## Pricing
 
-For every second of 720p video you generated, you will be charged **$0.2419/second**. Your request will cost **$0.0112** per 1000 tokens. The number of tokens is given by (height of output video * width of output video * duration * 24) / 1024. 
+For every second of 720p video you generated, you will be charged **$0.2419/second**. Your request will cost **$0.0112** per 1,000 tokens. The number of tokens is given by (height of output video * width of output video * duration * 24) / 1024.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -35,11 +35,11 @@ The API accepts the following input parameters:
   - Examples: "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea."
 
 - **`image_url`** (`string`, _required_):
-  The URL of the starting frame image to animate. Supported formats: JPEG, PNG, WebP. Max 30 MB.
+  The URL of the starting frame image to animate. Supported formats: JPEG, PNG, WebP, BMP, TIFF, GIF, HEIC, HEIF. Max 30 MB.
   - Examples: "https://v3b.fal.media/files/b/0a8eba37/Cqg-4Uwzyz4DELfceT1CF_a17e588773ec45b1a9e6f100a787b80b.jpg"
 
 - **`end_image_url`** (`string`, _optional_):
-  The URL of the image to use as the last frame of the video. When provided, the generated video will transition from the starting image to this ending image. Supported formats: JPEG, PNG, WebP. Max 30 MB.
+  The URL of the image to use as the last frame of the video. When provided, the generated video will transition from the starting image to this ending image. Supported formats: JPEG, PNG, WebP, BMP, TIFF, GIF, HEIC, HEIF. Max 30 MB.
 
 - **`resolution`** (`ResolutionEnum`, _optional_):
   Video resolution - 480p for faster generation, 720p for balance. Default value: `"720p"`

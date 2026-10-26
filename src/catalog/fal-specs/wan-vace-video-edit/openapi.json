@@ -76,47 +76,51 @@
           "video_url"
         ],
         "properties": {
-          "video_url": {
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/vace-video-edit-input.mp4"
-            ],
-            "description": "URL of the input video.",
-            "title": "Video URL",
-            "type": "string"
-          },
-          "video_type": {
-            "default": "auto",
-            "examples": [
-              "auto"
-            ],
-            "description": "The type of video you're editing. Use 'general' for most videos, and 'human' for videos emphasizing human subjects and motions. The default value 'auto' means the model will guess based on the first frame of the video.",
-            "title": "Video Type",
-            "type": "string",
-            "enum": [
-              "auto",
-              "general",
-              "human"
-            ]
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "description": "Whether to enable the safety checker.",
-            "title": "Enable Safety Checker",
-            "type": "boolean"
+          "image_urls": {
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "URLs of the input images to use as a reference for the generation.",
+            "type": "array",
+            "title": "Image URLs"
           },
           "return_frames_zip": {
             "default": false,
             "description": "Whether to include a ZIP archive containing all generated frames.",
-            "title": "Return Frames ZIP",
-            "type": "boolean"
+            "type": "boolean",
+            "title": "Return Frames ZIP"
+          },
+          "prompt": {
+            "examples": [
+              "replace him with a large anthropomorphic polar bear"
+            ],
+            "description": "Prompt to edit the video.",
+            "type": "string",
+            "title": "Prompt"
+          },
+          "aspect_ratio": {
+            "default": "auto",
+            "examples": [
+              "auto"
+            ],
+            "description": "Aspect ratio of the edited video.",
+            "type": "string",
+            "enum": [
+              "auto",
+              "16:9",
+              "9:16",
+              "1:1"
+            ],
+            "title": "Aspect Ratio"
           },
           "resolution": {
+            "title": "Resolution",
             "default": "auto",
             "examples": [
               "auto"
             ],
             "description": "Resolution of the edited video.",
-            "title": "Resolution",
             "type": "string",
             "enum": [
               "auto",
@@ -127,8 +131,40 @@
               "720p"
             ]
           },
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Whether to enable the safety checker.",
+            "type": "boolean",
+            "title": "Enable Safety Checker"
+          },
+          "enable_auto_downsample": {
+            "default": true,
+            "description": "Whether to enable automatic downsampling. If your video has a high frame rate or is long, enabling longer sequences to be generated. The video will be interpolated back to the original frame rate after generation.",
+            "type": "boolean",
+            "title": "Enable Auto Downsampling"
+          },
+          "auto_downsample_min_fps": {
+            "maximum": 60,
+            "default": 15,
+            "description": "The minimum frames per second to downsample the video to.",
+            "type": "number",
+            "title": "Auto Downsample Min FPS",
+            "minimum": 1
+          },
+          "video_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/vace-video-edit-input.mp4"
+            ],
+            "description": "URL of the input video.",
+            "type": "string",
+            "title": "Video URL"
+          },
           "acceleration": {
             "default": "regular",
+            "examples": [
+              "regular"
+            ],
+            "description": "Acceleration to use for inference. Options are 'none' or 'regular'. Accelerated inference will very slightly affect output, but will be significantly faster.",
             "anyOf": [
               {
                 "type": "string",
@@ -142,60 +178,23 @@
                 "type": "null"
               }
             ],
-            "description": "Acceleration to use for inference. Options are 'none' or 'regular'. Accelerated inference will very slightly affect output, but will be significantly faster.",
-            "title": "Acceleration",
-            "examples": [
-              "regular"
-            ]
+            "title": "Acceleration"
           },
-          "auto_downsample_min_fps": {
-            "default": 15,
-            "minimum": 1,
-            "description": "The minimum frames per second to downsample the video to.",
-            "title": "Auto Downsample Min FPS",
-            "maximum": 60,
-            "type": "number"
-          },
-          "image_urls": {
-            "default": [],
-            "items": {
-              "type": "string"
-            },
-            "title": "Image URLs",
-            "type": "array",
-            "description": "URLs of the input images to use as a reference for the generation."
-          },
-          "prompt": {
-            "examples": [
-              "replace him with a large anthropomorphic polar bear"
-            ],
-            "description": "Prompt to edit the video.",
-            "title": "Prompt",
-            "type": "string"
-          },
-          "enable_auto_downsample": {
-            "default": true,
-            "description": "Whether to enable automatic downsampling. If your video has a high frame rate or is long, enabling longer sequences to be generated. The video will be interpolated back to the original frame rate after generation.",
-            "title": "Enable Auto Downsampling",
-            "type": "boolean"
-          },
-          "aspect_ratio": {
+          "video_type": {
             "default": "auto",
             "examples": [
               "auto"
             ],
-            "description": "Aspect ratio of the edited video.",
-            "title": "Aspect Ratio",
+            "description": "The type of video you're editing. Use 'general' for most videos, and 'human' for videos emphasizing human subjects and motions. The default value 'auto' means the model will guess based on the first frame of the video.",
             "type": "string",
             "enum": [
               "auto",
-              "16:9",
-              "9:16",
-              "1:1"
-            ]
+              "general",
+              "human"
+            ],
+            "title": "Video Type"
           }
         },
-        "title": "WanVACEVideoEditRequest",
         "x-fal-order-properties": [
           "prompt",
           "video_url",
@@ -209,7 +208,8 @@
           "enable_safety_checker",
           "return_frames_zip"
         ],
-        "type": "object"
+        "type": "object",
+        "title": "WanVACEVideoEditRequest"
       },
       "WanVaceAppsVideoEditOutput": {
         "required": [
@@ -217,15 +217,16 @@
         ],
         "properties": {
           "video": {
+            "$ref": "#/components/schemas/VideoFile",
             "examples": [
               {
                 "url": "https://storage.googleapis.com/falserverless/example_outputs/vace-video-edit-output.mp4"
               }
             ],
-            "$ref": "#/components/schemas/VideoFile",
             "description": "The edited video."
           },
           "frames_zip": {
+            "description": "ZIP archive of generated frames if requested.",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/File"
@@ -233,35 +234,26 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "ZIP archive of generated frames if requested."
+            ]
           }
         },
-        "title": "WanVACEVideoEditResponse",
         "x-fal-order-properties": [
           "video",
           "frames_zip"
         ],
-        "type": "object"
+        "type": "object",
+        "title": "WanVACEVideoEditResponse"
       },
       "VideoFile": {
         "required": [
           "url"
         ],
         "properties": {
-          "fps": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
+          "file_size": {
+            "examples": [
+              4404019
             ],
-            "description": "The FPS of the video",
-            "title": "Fps"
-          },
-          "width": {
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -270,10 +262,54 @@
                 "type": "null"
               }
             ],
+            "title": "File Size"
+          },
+          "height": {
+            "description": "The height of the video",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height"
+          },
+          "width": {
             "description": "The width of the video",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Width"
           },
-          "duration": {
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "fps": {
+            "description": "The FPS of the video",
             "anyOf": [
               {
                 "type": "number"
@@ -282,13 +318,25 @@
                 "type": "null"
               }
             ],
+            "title": "Fps"
+          },
+          "duration": {
             "description": "The duration of the video",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Duration"
           },
           "file_name": {
             "examples": [
               "z9RV14K95DvU.png"
             ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -297,70 +345,21 @@
                 "type": "null"
               }
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "title": "File Name"
           },
           "num_frames": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
             "description": "The number of frames in the video",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Num Frames"
-          },
-          "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The height of the video",
-            "title": "Height"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
           }
         },
-        "title": "VideoFile",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -372,22 +371,19 @@
           "duration",
           "num_frames"
         ],
-        "type": "object"
+        "type": "object",
+        "title": "VideoFile"
       },
       "File": {
         "required": [
           "url"
         ],
         "properties": {
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
-          "content_type": {
+          "file_name": {
             "examples": [
-              "image/png"
+              "z9RV14K95DvU.png"
             ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -396,13 +392,13 @@
                 "type": "null"
               }
             ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
+            "title": "File Name"
           },
           "file_size": {
             "examples": [
               4404019
             ],
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -411,13 +407,13 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
             "title": "File Size"
           },
-          "file_name": {
+          "content_type": {
             "examples": [
-              "z9RV14K95DvU.png"
+              "image/png"
             ],
+            "description": "The mime type of the file.",
             "anyOf": [
               {
                 "type": "string"
@@ -426,18 +422,22 @@
                 "type": "null"
               }
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
+            "title": "Content Type"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
           }
         },
-        "title": "File",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "type": "object"
+        "type": "object",
+        "title": "File"
       }
     }
   },

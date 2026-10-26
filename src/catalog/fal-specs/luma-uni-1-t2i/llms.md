@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Each image costs **$0.042**. For **$1** you can run this model approximately **23** times.
+Billing is calculated at **$0.042 per generated image**. For example, **10 images cost $0.42**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

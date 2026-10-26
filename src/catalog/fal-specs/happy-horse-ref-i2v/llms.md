@@ -15,7 +15,7 @@
 
 ## Pricing
 
-For every second of 720p video you generated, you will be charged **$0.14/second**.  For 1080p video you will be charged **$0.28/second**.
+For every second of 720p video you generated, you will be charged **$0.14/second**. For 1080p video you will be charged **$0.28/second**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

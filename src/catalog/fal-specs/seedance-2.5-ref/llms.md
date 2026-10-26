@@ -15,7 +15,7 @@
 
 ## Pricing
 
-For 480p, your request will cost roughly **$0.2205** per second of generated video, for 720p, you will be charged roughly **$0.4730** per second of generated video, and for 1080p, roughly **$1.164** per second of generated video. Your request will cost **$0.0214** per 1000 tokens for 480p and 720p video and roughly **$0.0234** per 1000 tokens for 1080p video. The number of tokens is roughly given by (height of output video * width of output video * (input video duration + output video duration) * 24) / 1024. If video inputs are provided the price is multiplied by 0.6. With video inputs and 720p resolution, the price is roughly **$0.2838** per second of generated video. With video references, you will be charged for both input and output videos.
+For 480p, your request will cost roughly **$0.2205** per second of generated video, for 720p, you will be charged roughly **$0.4730** per second of generated video, and for 1080p, roughly **$1.164** per second of generated video. Your request will cost **$0.0214** per 1,000 tokens for 480p and 720p video and roughly **$0.0234** per 1,000 tokens for 1080p video. The number of tokens is roughly given by (height of output video * width of output video * (input video duration + output video duration) * 24) / 1024. If video inputs are provided the price is multiplied by 0.6. With video inputs and 720p resolution, the price is roughly **$0.2838** per second of generated video. With video references, you will be charged for both input and output videos.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -35,9 +35,9 @@ The API accepts the following input parameters:
   - Examples: "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea."
 
 - **`task`** (`TaskEnum`, _optional_):
-  The type of video generation task. Reference uses the supplied media as guidance. Editing modifies a reference video and automatically coerces aspect_ratio and duration to auto. Extension continues a reference video and automatically coerces aspect_ratio to auto. Default value: `"reference"`
+  The type of video generation task. Reference uses the supplied media as guidance. Editing modifies a reference video and automatically coerces aspect_ratio and duration to auto. Extension continues a reference video and automatically coerces aspect_ratio to auto. Auto leaves the task type unset so the model decides it from the prompt and references. Default value: `"reference"`
   - Default: `"reference"`
-  - Options: `"reference"`, `"editing"`, `"extension"`
+  - Options: `"auto"`, `"reference"`, `"editing"`, `"extension"`
 
 - **`image_urls`** (`list<string>`, _optional_):
   Reference images to guide video generation. Refer to them in the prompt as @Image1, @Image2, etc. Supported formats: JPG, PNG, WebP, BMP, TIFF, GIF, HEIC, HEIF. Max 30 MB per image. Up to 30 images. Total files across all modalities must not exceed 50.

@@ -15,7 +15,7 @@
 
 ## Pricing
 
-For **5s** video your request will cost **$0.35**. For every aditional second you will be charged **$0.07.**
+For **5s** video your request will cost **$0.35**. For every additional second you will be charged **$0.07.**
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

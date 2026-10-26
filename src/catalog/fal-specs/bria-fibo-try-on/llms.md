@@ -21,7 +21,7 @@ Use cases include apparel e-commerce listings, digital lookbooks, seasonal catal
 
 ## Pricing
 
-Billing is calculated per generated image at a flat rate of **$0.04**, regardless of resolution. For example, **10 images cost $0.40**. For **$1**, the model generates **25 images**.
+Billing is calculated per generated image at **$0.04**, regardless of resolution. For example, **10 images cost $0.40**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

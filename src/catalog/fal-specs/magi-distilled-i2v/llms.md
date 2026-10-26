@@ -15,11 +15,11 @@
 
 ## Pricing
 
-Your request will cost $0.32 to generate one four-second video. For $1 you can run this model approximately 3 times. 
-
-Additional seconds will cost $0.08 each, calculated at 24 frames per second.
-
-Additional inference steps above 16 incur a 1/16 multiplier each, such that your total cost will be multiplied x2 at 32 steps.
+Your request will cost **$0.32** to generate one four-second video. For **$1** you can run this model approximately 3 times.
+ 
+ Additional seconds will cost **$0.08** each, calculated at 24 frames per second.
+ 
+ Additional inference steps above 16 incur a 1/16 multiplier each, such that your total cost will be multiplied x2 at 32 steps.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

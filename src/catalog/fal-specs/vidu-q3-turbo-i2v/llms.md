@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost 0.035 $ per video second for 360p and 540 p, cost will be 2.2x for 720p and 1080p resolution.
+Your request will cost **$0.035** per video second for 360p and 540 p, cost will be 2.2x for 720p and 1080p resolution.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -29,6 +29,10 @@ See the input and output schema below, as well as the usage examples.
 
 The API accepts the following input parameters:
 
+
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Enable safety checks; disabling requires authorization. Default value: `true`
+  - Default: `true`
 
 - **`prompt`** (`string`, _optional_):
   Text prompt for video generation, max 2000 characters Default value: `""`
@@ -73,6 +77,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "The astronaut waved and the camera moved up.",
   "image_url": "https://prod-ss-images.s3.cn-northwest-1.amazonaws.com.cn/vidu-maas/template/image2video.png",
   "duration": 5,

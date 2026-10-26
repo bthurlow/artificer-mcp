@@ -13,7 +13,7 @@
 
 ## Pricing
 
-Videos generated without audio cost $0.07 per second. Videos with native audio cost $0.14 per second, and videos with native audio and voice control cost $0.168 per second. For example, a 5-second video with audio costs $0.70, while a 10-second video with audio and voice control costs $1.68
+Videos generated without audio cost **$0.07** per second. Videos with native audio cost **$0.14** per second, and videos with native audio and voice control cost **$0.168** per second. For example, a 5-second video with audio costs **$0.70**, while a 10-second video with audio and voice control costs **$1.68**
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -90,7 +90,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"url":"https://v3b.fal.media/files/b/0a84ab51/Qr1twf8UgtD5rZHpNXC2P_output.mp4","file_name":"output.mp4","content_type":"video/mp4","file_size":11814817}
+  - Examples: {"content_type":"video/mp4","file_size":11814817,"url":"https://v3b.fal.media/files/b/0a84ab51/Qr1twf8UgtD5rZHpNXC2P_output.mp4","file_name":"output.mp4"}
 
 
 
@@ -99,10 +99,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "url": "https://v3b.fal.media/files/b/0a84ab51/Qr1twf8UgtD5rZHpNXC2P_output.mp4",
-    "file_name": "output.mp4",
     "content_type": "video/mp4",
-    "file_size": 11814817
+    "file_size": 11814817,
+    "url": "https://v3b.fal.media/files/b/0a84ab51/Qr1twf8UgtD5rZHpNXC2P_output.mp4",
+    "file_name": "output.mp4"
   }
 }
 ```

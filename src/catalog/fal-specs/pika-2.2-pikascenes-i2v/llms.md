@@ -15,7 +15,7 @@
 
 ## Pricing
 
-5 second video at 720p costs $0.20. 5 second video at 1080p costs $0.45.
+5 second video at 720p costs **$0.20**. 5 second video at 1080p costs **$0.45**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

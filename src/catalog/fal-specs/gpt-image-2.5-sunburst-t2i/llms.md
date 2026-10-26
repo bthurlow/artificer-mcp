@@ -66,6 +66,10 @@ The API accepts the following input parameters:
   Compression level from 0 to 100. Only supported when output_format is 'jpeg' or 'webp'.
   - Range: `0` to `100`
 
+- **`image_passthrough`** (`boolean`, _optional_):
+  Send reference images and masks without resizing or re-encoding, and return the provider's original image bytes and format. Requests use the direct OpenAI API. Masks must be PNGs with an alpha channel: transparent regions are edited, and dimensions must match the first reference.
+  - Default: `false`
+
 - **`sync_mode`** (`boolean`, _optional_):
   If `True`, the media will be returned as a data URI and the output data won't be available in the request history.
   - Default: `false`
@@ -106,7 +110,7 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated images.
   - Array of ImageFile
-  - Examples: [{"url":"https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png","file_name":"EnWrO3XWjPE0nxBDpaQrj.png","height":1024,"width":1024,"content_type":"image/png"}]
+  - Examples: [{"content_type":"image/png","url":"https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png","file_name":"EnWrO3XWjPE0nxBDpaQrj.png","height":1024,"width":1024}]
 
 
 
@@ -116,11 +120,11 @@ The API returns the following output format:
 {
   "images": [
     {
+      "content_type": "image/png",
       "url": "https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png",
       "file_name": "EnWrO3XWjPE0nxBDpaQrj.png",
       "height": 1024,
-      "width": 1024,
-      "content_type": "image/png"
+      "width": 1024
     }
   ]
 }

@@ -13,7 +13,7 @@
 
 ## Pricing
 
-The model will cost 0.1 $ for every 360p video, 0.2 $ for every 520p video, 0.3 $ for 720 p video. For 1080 p the cost would be 0.2 $ along with 0.1 $ for every video second.
+The model will cost **$0.10** for every 360p video, **$0.20** for every 520p video, **$0.30** for 720 p video. For 1080 p the cost would be **$0.20** along with **$0.10** for every video second.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -27,6 +27,10 @@ See the input and output schema below, as well as the usage examples.
 
 The API accepts the following input parameters:
 
+
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Enable safety checks; disabling requires authorization. Default value: `true`
+  - Default: `true`
 
 - **`prompt`** (`string`, _required_):
   Text prompt for video generation, max 2000 characters
@@ -82,6 +86,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "@Figure 1 Character Reference@Refer to the special effects, movements, and camera work of Video 1.",
   "reference_image_urls": [
     "https://storage.googleapis.com/falserverless/model_tests/video_models/vidu-image-3123041388101890.png"

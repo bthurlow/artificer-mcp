@@ -15,8 +15,8 @@
 
 ## Pricing
 
-Your request will cost $0.0005 per megapixel of video data (width × height × frames).
-For example, if your upscaled video is 1920×1080 with 121 frames, the total cost will be $0.125.
+Your request will cost **$0.0005** per megapixel of video data (width × height × frames).
+ For example, if your upscaled video is 1920×1080 with 121 frames, the total cost will be **$0.125**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

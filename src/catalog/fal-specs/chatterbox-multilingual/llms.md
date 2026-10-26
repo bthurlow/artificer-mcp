@@ -35,7 +35,7 @@ The API accepts the following input parameters:
   - Examples: "Last month, we reached a new milestone with two billion views on our YouTube channel.", "Le mois dernier, nous avons atteint un nouveau jalon avec deux milliards de vues sur notre chaîne YouTube."
 
 - **`voice`** (`string`, _optional_):
-  Language code for synthesis. In case using custom please provide audio url and select custom_audio_language. Default value: `"english"`
+  Language code for synthesis, or a reference audio URL with custom_audio_language selected. Invalid reference audio is rejected with a non-billable 422 error. Default value: `"english"`
   - Default: `"english"`
   - Examples: "english", "arabic", "danish", "german", "greek", "spanish", "finnish", "french", "hebrew", "hindi", "italian", "japanese", "korean", "malay", "dutch", "norwegian", "polish", "portuguese", "russian", "swedish", "swahili", "turkish", "chinese"
 

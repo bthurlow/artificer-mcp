@@ -54,7 +54,7 @@ The API accepts the following input parameters:
 - **`elements`** (`list<KlingV3ImageElementInput>`, _optional_):
   Elements (characters/objects) to include. Reference in prompt as @Element1, @Element2.
   - Array of KlingV3ImageElementInput
-  - Examples: [{"reference_image_urls":["https://storage.googleapis.com/falserverless/example_inputs/kling-o3/pro-v2v-edit/element1_reference1.png"],"frontal_image_url":"https://storage.googleapis.com/falserverless/example_inputs/kling-o3/pro-v2v-edit/element1_front.png"}]
+  - Examples: [{"frontal_image_url":"https://storage.googleapis.com/falserverless/example_inputs/kling-o3/pro-v2v-edit/element1_front.png","reference_image_urls":["https://storage.googleapis.com/falserverless/example_inputs/kling-o3/pro-v2v-edit/element1_reference1.png"]}]
 
 - **`shot_type`** (`string`, _optional_):
   The type of multi-shot video generation. Default value: `"customize"`
@@ -84,10 +84,10 @@ The API accepts the following input parameters:
   "keep_audio": true,
   "elements": [
     {
+      "frontal_image_url": "https://storage.googleapis.com/falserverless/example_inputs/kling-o3/pro-v2v-edit/element1_front.png",
       "reference_image_urls": [
         "https://storage.googleapis.com/falserverless/example_inputs/kling-o3/pro-v2v-edit/element1_reference1.png"
-      ],
-      "frontal_image_url": "https://storage.googleapis.com/falserverless/example_inputs/kling-o3/pro-v2v-edit/element1_front.png"
+      ]
     }
   ],
   "shot_type": "customize"
@@ -101,7 +101,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video.
-  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/kling-o3/pro-v2v-edit/output.mp4","file_name":"output.mp4","content_type":"video/mp4","file_size":4322769}
+  - Examples: {"content_type":"video/mp4","file_size":4322769,"url":"https://storage.googleapis.com/falserverless/example_outputs/kling-o3/pro-v2v-edit/output.mp4","file_name":"output.mp4"}
 
 
 
@@ -110,10 +110,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/kling-o3/pro-v2v-edit/output.mp4",
-    "file_name": "output.mp4",
     "content_type": "video/mp4",
-    "file_size": 4322769
+    "file_size": 4322769,
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/kling-o3/pro-v2v-edit/output.mp4",
+    "file_name": "output.mp4"
   }
 }
 ```

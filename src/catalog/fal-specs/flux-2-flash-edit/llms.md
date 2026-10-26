@@ -13,7 +13,7 @@
 
 ## Pricing
 
-Requests cost **$0.005** per megapixel of input and output. Input images will be resized to 1MP. For example, a 1024x1024 generation with 512*512 size image input will cost **0.010** (1 MP input + 1 MP output, each costing **0.005**).
+Requests cost **$0.005** per megapixel of input and output. Input images will be resized to 1MP. For example, a 1024x1024 generation with 512*512 size image input will cost **$0.010** (1 MP input + 1 MP output, each costing **$0.005**).
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Billing is calculated per second of generated video. Video costs **$0.05** per second at **480p**, **$0.08** per second at **768p**, **$0.16** per second at **1080p**, and **$0.32** per second at **2K**.  A 1.2x multiplier is added to videos over 15 seconds. A **5-second** video at **768p** costs **$0.40**. A **30-second** video at **768p** costs **$2.88**.
+Billing is calculated per second of generated video. Video costs **$0.05** per second at **480p**, **$0.08** per second at **768p**, **$0.16** per second at **1080p**, and **$0.32** per second at **2K**. A 1.2x multiplier is added to videos over 15 seconds. A **5-second** video at **768p** costs **$0.40**. A **30-second** video at **768p** costs **$2.88**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

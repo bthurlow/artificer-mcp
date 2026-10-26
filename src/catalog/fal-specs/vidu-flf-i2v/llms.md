@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Enable safety checks; disabling requires authorization. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _required_):
   Text prompt for video generation, max 1500 characters
   - Examples: "Transform the car frame into a complete vehicle."
@@ -66,6 +70,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "Transform the car frame into a complete vehicle.",
   "start_image_url": "https://storage.googleapis.com/falserverless/web-examples/vidu/2-carchasis.png",
   "end_image_url": "https://storage.googleapis.com/falserverless/web-examples/vidu/2-carbody.png",

@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Enable safety checks; disabling requires authorization. Default value: `true`
+  - Default: `true`
+
 - **`prompt`** (`string`, _required_):
   Text prompt for video generation, max 1500 characters
   - Examples: "A young woman and a monkey inside a colorful house"
@@ -75,6 +79,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "prompt": "A young woman and a monkey inside a colorful house",
   "reference_image_urls": [
     "https://v3.fal.media/files/panda/HDpZj0eLjWwCpjA5__0l1_0e6cd0b9eb7a4a968c0019a4eee15e46.png",

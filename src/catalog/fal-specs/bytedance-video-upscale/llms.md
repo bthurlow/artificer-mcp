@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Upscaling to 1080p costs $0.0072/s, 2K costs $0.0144/s, and 4K costs $0.0288/s, at a 30fps rate. Processing at 60fps doubles the cost for any resolution. Processing in `pro` mode makes the price 10 times of the normal price ($0.072/s, $0.144/s, $0.288/s for 1080p,2K, 4K at 30fps respectively, at 60fps these prices are further doubled.)
+Upscaling to 1080p costs **$0.0072**/s, 2K costs **$0.0144**/s, and 4K costs **$0.0288**/s, at a 30fps rate. Processing at 60fps doubles the cost for any resolution. Processing in `pro` mode makes the price 10 times of the normal price (**$0.072**/s, **$0.144**/s, **$0.288**/s for 1080p,2K, 4K at 30fps respectively, at 60fps these prices are further doubled.)
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

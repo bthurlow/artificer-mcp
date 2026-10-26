@@ -13,7 +13,7 @@
 
 ## Pricing
 
-For each second of video generated at 768P, it will cost **$0.045/sec**. For each second of video generated at 512P, it will cost roughly **$0.017/sec**. A single 6 second 768p video will cost **$0.27/video**. 
+For each second of video generated at 768P, it will cost **$0.045/sec**. For each second of video generated at 512P, it will cost roughly **$0.017/sec**. A single 6 second 768p video will cost **$0.27/video**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

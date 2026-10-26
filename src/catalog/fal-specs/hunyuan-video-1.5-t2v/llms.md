@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Current pricing is 0.075 cents/s of video, more resolutions arriving soon.
+Video costs **$0.075** per second. More resolutions are coming soon.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

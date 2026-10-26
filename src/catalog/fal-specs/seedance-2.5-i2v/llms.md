@@ -15,7 +15,7 @@
 
 ## Pricing
 
-For 480p, your request will cost roughly **$0.2205** per second of generated video, for 720p, you will be charged roughly **$0.4730** per second of generated video, and for 1080p, roughly **$1.164** per second of generated video. Your request will cost **$0.0214** per 1000 tokens for 480p and 720p video and roughly **$0.0234** per 1000 tokens for 1080p. The number of tokens is roughly given by (height of output video * width of output video * (input video duration + output video duration) * 24) / 1024.
+For 480p, your request will cost roughly **$0.2205** per second of generated video, for 720p, you will be charged roughly **$0.4730** per second of generated video, and for 1080p, roughly **$1.164** per second of generated video. Your request will cost **$0.0214** per 1,000 tokens for 480p and 720p video and roughly **$0.0234** per 1,000 tokens for 1080p. The number of tokens is roughly given by (height of output video * width of output video * (input video duration + output video duration) * 24) / 1024.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -35,11 +35,11 @@ The API accepts the following input parameters:
   - Examples: "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea."
 
 - **`image_url`** (`string`, _required_):
-  The URL of the starting frame image to animate. Supported formats: JPEG, PNG, WebP. Max 30 MB.
+  The URL of the starting frame image to animate. Supported formats: JPEG, PNG, WebP, BMP, TIFF, GIF, HEIC, HEIF. Max 30 MB.
   - Examples: "https://v3b.fal.media/files/b/0a8eba37/Cqg-4Uwzyz4DELfceT1CF_a17e588773ec45b1a9e6f100a787b80b.jpg"
 
 - **`end_image_url`** (`string`, _optional_):
-  The URL of the image to use as the last frame of the video. When provided, the generated video will transition from the starting image to this ending image. Supported formats: JPEG, PNG, WebP. Max 30 MB.
+  The URL of the image to use as the last frame of the video. When provided, the generated video will transition from the starting image to this ending image. Supported formats: JPEG, PNG, WebP, BMP, TIFF, GIF, HEIC, HEIF. Max 30 MB.
 
 - **`resolution`** (`ResolutionEnum`, _optional_):
   Video resolution - 480p for faster generation, 720p for balance, 1080p for high quality. Default value: `"720p"`

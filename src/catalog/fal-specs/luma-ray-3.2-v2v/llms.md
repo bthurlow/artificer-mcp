@@ -15,7 +15,7 @@
 
 ## Pricing
 
-For 5s video your request will cost **$0.72** for 540p, **$1.08** for 720p and **$2.16** for 1080p. For 10s, **$1.44** at 540p, **$2.16** at 720p and **$4.32** at 1080p. HDR (720p/1080p only) costs **$2.16**/**$4.32** at 5s and **$4.32**/**$8.64** at 10s; HDR + EXR costs **$3.24**/**$6.48** at 5s and **$6.48**/**$12.96** at 10s (540p not available in HDR). For $1 you can run this model approximately **1 time** (540p/5s).
+For 5s video your request will cost **$0.72** for 540p, **$1.08** for 720p and **$2.16** for 1080p. For 10s, **$1.44** at 540p, **$2.16** at 720p and **$4.32** at 1080p. HDR (720p/1080p only) costs **$2.16**/**$4.32** at 5s and **$4.32**/**$8.64** at 10s; HDR + EXR costs **$3.24**/**$6.48** at 5s and **$6.48**/**$12.96** at 10s (540p not available in HDR). For **$1** you can run this model approximately **1 time** (540p/5s).
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

@@ -71,46 +71,30 @@
         ]
       },
       "V2LargeTextToImageInput": {
-        "required": [
-          "prompt"
-        ],
+        "description": "Input for Krea-2 Large image generation.",
         "properties": {
-          "seed": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
+          "prompt": {
+            "examples": [
+              "A Van Gogh-tinged Provençal farmhouse under starry nights."
             ],
-            "title": "Seed",
-            "description": "Random seed for reproducible generation."
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "title": "Enable Safety Checker",
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "type": "boolean"
+            "type": "string",
+            "description": "Text description of the image to generate.",
+            "minLength": 1,
+            "maxLength": 5000,
+            "title": "Prompt"
           },
           "styles": {
             "default": [],
-            "title": "Styles",
+            "maxItems": 10,
+            "description": "Optional list of Krea preset styles (LoRA-based) to apply. Each entry references a style by `id` from the Krea styles catalog. At most 10 entries.",
             "items": {
               "$ref": "#/components/schemas/Style"
             },
-            "maxItems": 10,
             "type": "array",
-            "description": "Optional list of Krea preset styles (LoRA-based) to apply. Each entry references a style by `id` from the Krea styles catalog. At most 10 entries."
+            "title": "Styles"
           },
           "aspect_ratio": {
             "default": "1:1",
-            "examples": [
-              "1:1"
-            ],
-            "title": "Aspect Ratio",
-            "description": "Aspect ratio of the generated image.",
-            "type": "string",
             "enum": [
               "1:1",
               "4:3",
@@ -120,53 +104,68 @@
               "4:5",
               "2:3",
               "9:16"
-            ]
+            ],
+            "description": "Aspect ratio of the generated image.",
+            "examples": [
+              "1:1"
+            ],
+            "type": "string",
+            "title": "Aspect Ratio"
           },
           "moodboards": {
             "default": [],
-            "title": "Moodboards",
+            "maxItems": 1,
+            "description": "Optional moodboard to apply to the generation. Krea currently accepts at most one moodboard per request. Each entry references a moodboard by `id` (UUID).",
             "items": {
               "$ref": "#/components/schemas/Moodboard"
             },
-            "maxItems": 1,
             "type": "array",
-            "description": "Optional moodboard to apply to the generation. Krea currently accepts at most one moodboard per request. Each entry references a moodboard by `id` (UUID)."
+            "title": "Moodboards"
+          },
+          "image_style_references": {
+            "default": [],
+            "maxItems": 10,
+            "description": "Optional list of reference images that guide the style of the generated image. At most 10 entries.",
+            "items": {
+              "$ref": "#/components/schemas/ImageStyleReference"
+            },
+            "type": "array",
+            "title": "Image Style References"
+          },
+          "seed": {
+            "description": "Random seed for reproducible generation.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
           },
           "creativity": {
             "default": "medium",
-            "title": "Creativity",
-            "description": "Controls how loosely the model interprets the prompt. Higher values produce more creative results that may drift from the prompt; lower values stay closer to the prompt.",
-            "type": "string",
             "enum": [
               "raw",
               "low",
               "medium",
               "high"
-            ]
-          },
-          "prompt": {
-            "examples": [
-              "A Van Gogh-tinged Provençal farmhouse under starry nights."
             ],
-            "title": "Prompt",
-            "minLength": 1,
-            "description": "Text description of the image to generate.",
+            "description": "Controls how loosely the model interprets the prompt. Higher values produce more creative results that may drift from the prompt; lower values stay closer to the prompt.",
             "type": "string",
-            "maxLength": 5000
+            "title": "Creativity"
           },
-          "image_style_references": {
-            "default": [],
-            "title": "Image Style References",
-            "items": {
-              "$ref": "#/components/schemas/ImageStyleReference"
-            },
-            "maxItems": 10,
-            "type": "array",
-            "description": "Optional list of reference images that guide the style of the generated image. At most 10 entries."
+          "enable_safety_checker": {
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "type": "boolean",
+            "title": "Enable Safety Checker"
           }
         },
-        "title": "Krea2LargeInput",
-        "description": "Input for Krea-2 Large image generation.",
+        "required": [
+          "prompt"
+        ],
         "x-fal-order-properties": [
           "prompt",
           "aspect_ratio",
@@ -177,13 +176,10 @@
           "moodboards",
           "enable_safety_checker"
         ],
-        "type": "object"
+        "type": "object",
+        "title": "Krea2LargeInput"
       },
       "V2LargeTextToImageOutput": {
-        "required": [
-          "images",
-          "seed"
-        ],
         "properties": {
           "images": {
             "examples": [
@@ -193,146 +189,119 @@
                 }
               ]
             ],
-            "title": "Images",
+            "description": "The generated images.",
             "items": {
               "$ref": "#/components/schemas/Image"
             },
-            "description": "The generated images.",
-            "type": "array"
+            "type": "array",
+            "title": "Images"
           },
           "seed": {
             "examples": [
               12345
             ],
-            "title": "Seed",
             "description": "The seed used to generate the image.",
-            "type": "integer"
+            "type": "integer",
+            "title": "Seed"
           }
         },
-        "title": "Krea2Output",
+        "required": [
+          "images",
+          "seed"
+        ],
         "x-fal-order-properties": [
           "images",
           "seed"
         ],
-        "type": "object"
+        "type": "object",
+        "title": "Krea2Output"
       },
       "Style": {
+        "properties": {
+          "id": {
+            "description": "Krea style identifier (a LoRA-based preset style) returned by the Krea styles catalog.",
+            "type": "string",
+            "title": "Id"
+          },
+          "strength": {
+            "default": 1,
+            "description": "How strongly the style influences the generated image. Negative values push away from the style.",
+            "maximum": 2,
+            "minimum": -2,
+            "type": "number",
+            "title": "Strength"
+          }
+        },
         "required": [
           "id"
         ],
+        "x-fal-order-properties": [
+          "id",
+          "strength"
+        ],
+        "type": "object",
+        "title": "Style"
+      },
+      "Moodboard": {
+        "properties": {
+          "id": {
+            "description": "Krea moodboard identifier (UUID).",
+            "type": "string",
+            "title": "Id"
+          },
+          "strength": {
+            "default": 0.23,
+            "description": "How strongly the moodboard influences the generated image.",
+            "maximum": 1,
+            "minimum": 0,
+            "type": "number",
+            "title": "Strength"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "x-fal-order-properties": [
+          "id",
+          "strength"
+        ],
+        "type": "object",
+        "title": "Moodboard"
+      },
+      "ImageStyleReference": {
         "properties": {
           "strength": {
             "default": 1,
+            "description": "How strongly the reference influences the generated image. Negative values push away from the reference.",
+            "maximum": 2,
             "minimum": -2,
-            "title": "Strength",
-            "description": "How strongly the style influences the generated image. Negative values push away from the style.",
             "type": "number",
-            "maximum": 2
+            "title": "Strength"
           },
-          "id": {
-            "title": "Id",
-            "description": "Krea style identifier (a LoRA-based preset style) returned by the Krea styles catalog.",
-            "type": "string"
+          "image_url": {
+            "description": "Publicly accessible URL of a reference image.",
+            "type": "string",
+            "title": "Image Url"
           }
         },
-        "title": "Style",
-        "x-fal-order-properties": [
-          "id",
-          "strength"
-        ],
-        "type": "object"
-      },
-      "Moodboard": {
-        "required": [
-          "id"
-        ],
-        "properties": {
-          "strength": {
-            "default": 0.23,
-            "minimum": 0,
-            "title": "Strength",
-            "description": "How strongly the moodboard influences the generated image.",
-            "type": "number",
-            "maximum": 1
-          },
-          "id": {
-            "title": "Id",
-            "description": "Krea moodboard identifier (UUID).",
-            "type": "string"
-          }
-        },
-        "title": "Moodboard",
-        "x-fal-order-properties": [
-          "id",
-          "strength"
-        ],
-        "type": "object"
-      },
-      "ImageStyleReference": {
         "required": [
           "image_url"
         ],
-        "properties": {
-          "strength": {
-            "default": 1,
-            "minimum": -2,
-            "title": "Strength",
-            "description": "How strongly the reference influences the generated image. Negative values push away from the reference.",
-            "type": "number",
-            "maximum": 2
-          },
-          "image_url": {
-            "title": "Image Url",
-            "description": "Publicly accessible URL of a reference image.",
-            "type": "string"
-          }
-        },
-        "title": "ImageStyleReference",
         "x-fal-order-properties": [
           "image_url",
           "strength"
         ],
-        "type": "object"
+        "type": "object",
+        "title": "ImageStyleReference"
       },
       "Image": {
-        "required": [
-          "url"
-        ],
+        "description": "Represents an image file.",
         "properties": {
-          "width": {
+          "file_name": {
             "examples": [
-              1024
+              "z9RV14K95DvU.png"
             ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Width",
-            "description": "The width of the image in pixels."
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -341,18 +310,13 @@
                 "type": "null"
               }
             ],
-            "title": "Content Type",
-            "description": "The mime type of the file."
-          },
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
+            "title": "File Name"
           },
           "height": {
             "examples": [
               1024
             ],
+            "description": "The height of the image in pixels.",
             "anyOf": [
               {
                 "type": "integer"
@@ -361,13 +325,33 @@
                 "type": "null"
               }
             ],
-            "title": "Height",
-            "description": "The height of the image in pixels."
+            "title": "Height"
           },
-          "file_name": {
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "width": {
             "examples": [
-              "z9RV14K95DvU.png"
+              1024
             ],
+            "description": "The width of the image in pixels.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width"
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
             "anyOf": [
               {
                 "type": "string"
@@ -376,12 +360,24 @@
                 "type": "null"
               }
             ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
+            "title": "Content Type"
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Size"
           }
         },
-        "title": "Image",
-        "description": "Represents an image file.",
         "type": "object",
         "x-fal-order-properties": [
           "url",
@@ -390,7 +386,11 @@
           "file_size",
           "width",
           "height"
-        ]
+        ],
+        "required": [
+          "url"
+        ],
+        "title": "Image"
       }
     }
   },

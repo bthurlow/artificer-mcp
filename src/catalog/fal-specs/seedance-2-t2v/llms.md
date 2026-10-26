@@ -15,7 +15,7 @@
 
 ## Pricing
 
-For every second of 720p video you generated, you will be charged **$0.3034/second** and for 1080p you will be charged **$0.682/second**. Your request will cost **$0.014** per 1000 tokens for **480p, 720p and 1080p**. Your request will cost **$0.008** per 1000 tokens for **4k** . The number of tokens is given by (height of output video * width of output video * duration * 24) / 1024. 
+For every second of 720p video you generated, you will be charged **$0.3034/second** and for 1080p you will be charged **$0.682/second**. Your request will cost **$0.014** per 1,000 tokens for **480p, 720p and 1080p**. Your request will cost **$0.008** per 1,000 tokens for **4k** . The number of tokens is given by (height of output video * width of output video * duration * 24) / 1024.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

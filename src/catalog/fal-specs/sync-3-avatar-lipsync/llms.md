@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+   Default value: `true`
+  - Default: `true`
+
 - **`image_url`** (`string`, _required_):
   URL of the input image. sync-3 animates the face in the image so it lip-syncs to the provided audio (image-to-video). Supported image formats: JPEG, PNG and WebP.
   - Examples: "https://storage.googleapis.com/falserverless/example_inputs/echo-mimic-input-image.png"
@@ -44,6 +48,16 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "image_url": "https://storage.googleapis.com/falserverless/example_inputs/echo-mimic-input-image.png",
+  "audio_url": "https://fal.media/files/lion/vyFWygmZsIZlUO4s0nr2n.wav"
+}
+```
+
+**Full Example**:
+
+```json
+{
+  "enable_safety_checker": true,
   "image_url": "https://storage.googleapis.com/falserverless/example_inputs/echo-mimic-input-image.png",
   "audio_url": "https://fal.media/files/lion/vyFWygmZsIZlUO4s0nr2n.wav"
 }

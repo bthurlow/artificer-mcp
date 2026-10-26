@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost $**0.04** per generated image at 1K resolution, and $**0.075** per generated image at 2K resolution.
+Your request will cost **$0.04** per generated image at 1K resolution, and **$0.075** per generated image at 2K resolution.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

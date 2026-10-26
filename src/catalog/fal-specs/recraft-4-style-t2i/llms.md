@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **0.035** when a **style_id** is provided. If no **style_id** is provided, a new one will be generated from the provided images and you will be charged **0.005** extra. You will be given a style_id for such a generation.
+Each image costs **$0.035** when a **style_id** is provided. If no **style_id** is provided, a new one will be generated from the provided images and you will be charged **$0.005** extra. You will be given a style_id for such a generation.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -90,7 +90,7 @@ The API returns the following output format:
 
 - **`images`** (`list<File>`, _required_)
   - Array of File
-  - Examples: [{"file_name":"image.webp","url":"https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/standard-output.webp","content_type":"image/webp","file_size":272628}]
+  - Examples: [{"file_name":"image.webp","content_type":"image/webp","file_size":272628,"url":"https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/standard-output.webp"}]
 
 - **`style_id`** (`string`, _optional_):
   The custom style used or created for this generation.
@@ -104,9 +104,9 @@ The API returns the following output format:
   "images": [
     {
       "file_name": "image.webp",
-      "url": "https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/standard-output.webp",
       "content_type": "image/webp",
-      "file_size": 272628
+      "file_size": 272628,
+      "url": "https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/standard-output.webp"
     }
   ]
 }

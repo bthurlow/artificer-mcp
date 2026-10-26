@@ -15,7 +15,6 @@
 
 Your request will cost **$0.04** per **512P** video second and **$0.12** per **1024P** video second.
 
-
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
 ## API Information
@@ -97,7 +96,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _optional_):
   The generated video file.
-  - Examples: {"content_type":"application/octet-stream","file_name":"output.mp4","file_size":22253751,"url":"https://v3b.fal.media/files/b/0a877276/Bg24FK_awlNAYKn962Vm0_output.mp4"}
+  - Examples: {"file_size":22253751,"content_type":"application/octet-stream","file_name":"output.mp4","url":"https://v3b.fal.media/files/b/0a877276/Bg24FK_awlNAYKn962Vm0_output.mp4"}
 
 - **`seed`** (`integer`, _required_):
   The seed used for generation.
@@ -109,9 +108,9 @@ The API returns the following output format:
 ```json
 {
   "video": {
+    "file_size": 22253751,
     "content_type": "application/octet-stream",
     "file_name": "output.mp4",
-    "file_size": 22253751,
     "url": "https://v3b.fal.media/files/b/0a877276/Bg24FK_awlNAYKn962Vm0_output.mp4"
   }
 }

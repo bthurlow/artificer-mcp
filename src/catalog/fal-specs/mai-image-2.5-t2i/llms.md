@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Text tokens (per 1M): $5.00 input. Image output: ~$0.05 per generated image (billed as 1024 output tokens). Each requested image is billed separately. Token cost is rounded up to the nearest $0.0001. Note: Pricing is subject to change.
+Text tokens (per 1M): **$5.00** input. Image output: ~**$0.05** per generated image (billed as 1024 output tokens). Each requested image is billed separately. Token cost is rounded up to the nearest **$0.0001**. Note: Pricing is subject to change.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

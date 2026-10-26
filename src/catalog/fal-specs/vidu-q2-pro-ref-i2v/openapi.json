@@ -72,6 +72,7 @@
       },
       "ViduQ2ReferenceToVideoProInput": {
         "x-fal-order-properties": [
+          "enable_safety_checker",
           "prompt",
           "reference_image_urls",
           "reference_video_urls",
@@ -83,7 +84,65 @@
           "bgm"
         ],
         "properties": {
+          "prompt": {
+            "maxLength": 2000,
+            "description": "Text prompt for video generation, max 2000 characters",
+            "type": "string",
+            "examples": [
+              "@Figure 1 Character Reference@Refer to the special effects, movements, and camera work of Video 1."
+            ],
+            "title": "Prompt"
+          },
+          "duration": {
+            "title": "Duration",
+            "description": "Duration of the video in seconds (0 for automatic duration)",
+            "maximum": 8,
+            "type": "integer",
+            "default": 4,
+            "minimum": 1
+          },
+          "reference_image_urls": {
+            "description": "URLs of the reference images for subject appearance. If videos are provided, up to 4 images are allowed; otherwise up to 7 images.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/model_tests/video_models/vidu-image-3123041388101890.png"
+              ]
+            ],
+            "title": "Reference Image Urls"
+          },
+          "enable_safety_checker": {
+            "description": "Enable safety checks; disabling requires authorization.",
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enable Safety Checker",
+            "default": true,
+            "hidden": true
+          },
+          "reference_video_urls": {
+            "description": "URLs of the reference videos for video editing or motion reference. Supports up to 2 videos.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/model_tests/video_models/vidu-video-3123002003131623.mp4"
+              ]
+            ],
+            "title": "Reference Video Urls"
+          },
           "seed": {
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
             "anyOf": [
               {
                 "type": "integer"
@@ -92,93 +151,49 @@
                 "type": "null"
               }
             ],
-            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
             "title": "Seed"
           },
-          "reference_video_urls": {
-            "examples": [
-              [
-                "https://storage.googleapis.com/falserverless/model_tests/video_models/vidu-video-3123002003131623.mp4"
-              ]
-            ],
-            "items": {
-              "type": "string"
-            },
-            "description": "URLs of the reference videos for video editing or motion reference. Supports up to 2 videos.",
-            "type": "array",
-            "title": "Reference Video Urls"
+          "aspect_ratio": {
+            "description": "Aspect ratio of the output video (e.g., auto, 16:9, 9:16, 1:1, or any W:H)",
+            "type": "string",
+            "default": "16:9",
+            "title": "Aspect Ratio"
           },
           "resolution": {
-            "default": "720p",
-            "description": "Output video resolution",
-            "title": "Resolution",
-            "type": "string",
             "enum": [
               "540p",
               "720p",
               "1080p"
-            ]
+            ],
+            "description": "Output video resolution",
+            "type": "string",
+            "default": "720p",
+            "title": "Resolution"
           },
-          "duration": {
-            "default": 4,
-            "minimum": 1,
-            "description": "Duration of the video in seconds (0 for automatic duration)",
-            "title": "Duration",
-            "maximum": 8,
-            "type": "integer"
-          },
-          "aspect_ratio": {
-            "default": "16:9",
-            "description": "Aspect ratio of the output video (e.g., auto, 16:9, 9:16, 1:1, or any W:H)",
-            "title": "Aspect Ratio",
-            "type": "string"
+          "bgm": {
+            "description": "Whether to add background music to the generated video",
+            "type": "boolean",
+            "default": false,
+            "title": "Bgm"
           },
           "movement_amplitude": {
-            "default": "auto",
-            "description": "The movement amplitude of objects in the frame",
-            "title": "Movement Amplitude",
-            "type": "string",
             "enum": [
               "auto",
               "small",
               "medium",
               "large"
-            ]
-          },
-          "prompt": {
-            "examples": [
-              "@Figure 1 Character Reference@Refer to the special effects, movements, and camera work of Video 1."
             ],
-            "description": "Text prompt for video generation, max 2000 characters",
-            "title": "Prompt",
+            "description": "The movement amplitude of objects in the frame",
             "type": "string",
-            "maxLength": 2000
-          },
-          "bgm": {
-            "default": false,
-            "description": "Whether to add background music to the generated video",
-            "title": "Bgm",
-            "type": "boolean"
-          },
-          "reference_image_urls": {
-            "examples": [
-              [
-                "https://storage.googleapis.com/falserverless/model_tests/video_models/vidu-image-3123041388101890.png"
-              ]
-            ],
-            "items": {
-              "type": "string"
-            },
-            "description": "URLs of the reference images for subject appearance. If videos are provided, up to 4 images are allowed; otherwise up to 7 images.",
-            "type": "array",
-            "title": "Reference Image Urls"
+            "default": "auto",
+            "title": "Movement Amplitude"
           }
         },
-        "title": "Q2ProReferenceToVideoRequest",
+        "type": "object",
         "required": [
           "prompt"
         ],
-        "type": "object"
+        "title": "Q2ProReferenceToVideoRequest"
       },
       "ViduQ2ReferenceToVideoProOutput": {
         "x-fal-order-properties": [
@@ -186,20 +201,20 @@
         ],
         "properties": {
           "video": {
+            "description": "The generated video with video/image references using the Q2 Pro model",
             "examples": [
               {
                 "url": "https://v3b.fal.media/files/b/0a8aa38a/_nfU-t1qY1HEVcDqct-M__output.mp4"
               }
             ],
-            "$ref": "#/components/schemas/File",
-            "description": "The generated video with video/image references using the Q2 Pro model"
+            "$ref": "#/components/schemas/File"
           }
         },
-        "title": "Q2ProReferenceToVideoOutput",
+        "type": "object",
         "required": [
           "video"
         ],
-        "type": "object"
+        "title": "Q2ProReferenceToVideoOutput"
       },
       "File": {
         "x-fal-order-properties": [
@@ -209,10 +224,38 @@
           "file_size"
         ],
         "properties": {
-          "file_size": {
-            "examples": [
-              4404019
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
             ],
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -221,50 +264,22 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
-          },
-          "content_type": {
+            "title": "File Size",
             "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
+              4404019
+            ]
           },
           "url": {
             "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
+            "type": "string",
+            "title": "Url"
           }
         },
-        "title": "File",
+        "type": "object",
         "required": [
           "url"
         ],
-        "type": "object"
+        "title": "File"
       }
     }
   },

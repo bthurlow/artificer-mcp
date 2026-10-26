@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.08** for each started 24 megapixels with the classic sharpen models (Standard, Strong, Lens Blur V2, Motion Blur, Natural, Refocus, Wildlife, Portrait, Auto Sharpen), and **$0.08** for each started 20 megapixels with Super Focus V3 or V2 (generative deblur). Output keeps the source resolution. For example, a 12-megapixel image costs **$0.08** with either family; a 24-megapixel image costs **$0.08** with a classic model or **$0.16** with Super Focus.
+Billing is calculated at **$0.08 per started 24 megapixels** for classic sharpening models, or **$0.08 per started 20 megapixels** for Super Focus V2 and V3. Output keeps the source resolution. For example, a **24-megapixel image costs $0.08 with a classic model or $0.16 with Super Focus**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

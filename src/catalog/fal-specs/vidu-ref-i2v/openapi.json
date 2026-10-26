@@ -72,6 +72,7 @@
       },
       "ViduReferenceToVideoInput": {
         "x-fal-order-properties": [
+          "enable_safety_checker",
           "prompt",
           "reference_image_urls",
           "seed",
@@ -79,18 +80,46 @@
           "movement_amplitude"
         ],
         "properties": {
-          "aspect_ratio": {
-            "default": "16:9",
-            "description": "The aspect ratio of the output video",
-            "title": "Aspect Ratio",
+          "prompt": {
+            "maxLength": 1500,
+            "description": "Text prompt for video generation, max 1500 characters",
             "type": "string",
-            "enum": [
-              "16:9",
-              "9:16",
-              "1:1"
-            ]
+            "examples": [
+              "The little devil is looking at the apple on the beach and walking around it."
+            ],
+            "title": "Prompt"
+          },
+          "reference_image_urls": {
+            "description": "URLs of the reference images to use for consistent subject appearance",
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference1.png",
+                "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference2.png",
+                "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference3.png"
+              ]
+            ],
+            "title": "Reference Image Urls"
+          },
+          "enable_safety_checker": {
+            "description": "Enable safety checks; disabling requires authorization.",
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enable Safety Checker",
+            "default": true,
+            "hidden": true
           },
           "seed": {
+            "description": "Random seed for generation",
             "anyOf": [
               {
                 "type": "integer"
@@ -99,52 +128,38 @@
                 "type": "null"
               }
             ],
-            "description": "Random seed for generation",
             "title": "Seed"
           },
           "movement_amplitude": {
-            "default": "auto",
-            "description": "The movement amplitude of objects in the frame",
-            "title": "Movement Amplitude",
-            "type": "string",
             "enum": [
               "auto",
               "small",
               "medium",
               "large"
-            ]
-          },
-          "prompt": {
-            "examples": [
-              "The little devil is looking at the apple on the beach and walking around it."
             ],
-            "description": "Text prompt for video generation, max 1500 characters",
-            "title": "Prompt",
+            "description": "The movement amplitude of objects in the frame",
             "type": "string",
-            "maxLength": 1500
+            "default": "auto",
+            "title": "Movement Amplitude"
           },
-          "reference_image_urls": {
-            "examples": [
-              [
-                "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference1.png",
-                "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference2.png",
-                "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference3.png"
-              ]
+          "aspect_ratio": {
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1"
             ],
-            "items": {
-              "type": "string"
-            },
-            "description": "URLs of the reference images to use for consistent subject appearance",
-            "title": "Reference Image Urls",
-            "type": "array"
+            "description": "The aspect ratio of the output video",
+            "type": "string",
+            "default": "16:9",
+            "title": "Aspect Ratio"
           }
         },
-        "title": "ReferenceToVideoRequest",
+        "type": "object",
         "required": [
           "prompt",
           "reference_image_urls"
         ],
-        "type": "object"
+        "title": "ReferenceToVideoRequest"
       },
       "ViduReferenceToVideoOutput": {
         "x-fal-order-properties": [
@@ -152,20 +167,20 @@
         ],
         "properties": {
           "video": {
+            "description": "The generated video with consistent subjects from reference images",
             "examples": [
               {
                 "url": "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/referencevideo.mp4"
               }
             ],
-            "$ref": "#/components/schemas/File",
-            "description": "The generated video with consistent subjects from reference images"
+            "$ref": "#/components/schemas/File"
           }
         },
-        "title": "ReferenceToVideoOutput",
+        "type": "object",
         "required": [
           "video"
         ],
-        "type": "object"
+        "title": "ReferenceToVideoOutput"
       },
       "File": {
         "x-fal-order-properties": [
@@ -175,10 +190,38 @@
           "file_size"
         ],
         "properties": {
-          "file_size": {
-            "examples": [
-              4404019
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
             ],
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -187,50 +230,22 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
-          },
-          "content_type": {
+            "title": "File Size",
             "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
+              4404019
+            ]
           },
           "url": {
             "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
+            "type": "string",
+            "title": "Url"
           }
         },
-        "title": "File",
+        "type": "object",
         "required": [
           "url"
         ],
-        "type": "object"
+        "title": "File"
       }
     }
   },

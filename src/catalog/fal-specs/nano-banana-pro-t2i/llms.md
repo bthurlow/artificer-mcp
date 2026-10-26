@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.15** per image. For **$1.00**, you can run this model **7** times. 4K outputs will be charged at double the standard rate. If web search is used, an additional $0.015 will be charged. Note: Pricing may change in the future.
+Your request will cost **$0.15** per image. For **$1.00**, you can generate **6** standard images. 4K outputs will be charged at double the standard rate. If web search is used, an additional **$0.015** will be charged. Note: Pricing may change in the future.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -34,6 +34,40 @@ The API accepts the following input parameters:
   The text prompt to generate an image from.
   - Examples: "An action shot of a black lab swimming in an inground suburban swimming pool. The camera is placed meticulously on the water line, dividing the image in half, revealing both the dogs head above water holding a tennis ball in it's mouth, and it's paws paddling underwater."
 
+- **`history`** (`list<GeminiMessage>`, _optional_):
+  Previous native user/model turns. Replay a returned conversation's messages unchanged, including thought signatures; the current prompt is appended as a new user turn.
+  - Array of GeminiMessage
+
+- **`context`** (`list<GeminiTextPart | GeminiImagePart | GeminiDocumentPart | GeminiSignaturePart>`, _optional_):
+  Ordered text, original images, PDF or UTF-8 text documents appended to the current prompt. Uses a native provider. Images count toward the total 14-reference limit.
+  - Array of GeminiTextPart | GeminiImagePart | GeminiDocumentPart | GeminiSignaturePart
+
+- **`return_history`** (`boolean`, _optional_):
+  Return reusable native conversations with original image parts and provider thought signatures. Uses a native provider. Each generated conversation is independent; send its messages as history for the next turn.
+  - Default: `false`
+
+- **`thinking_level`** (`string`, _optional_):
+  Thinking effort. Pro Image supports only high; omit to retain its provider default. An explicit level requests summaries unless include_thoughts overrides it. Thinking cannot be disabled.
+
+- **`image_passthrough`** (`boolean`, _optional_):
+  Send reference images and return provider images without resizing or re-encoding, preserving transparency and metadata. Uses direct Google or Vertex APIs; the returned image format may differ from output_format.
+  - Default: `false`
+
+- **`include_thoughts`** (`boolean`, _optional_):
+  Whether to include thought summaries. Omit to preserve the existing behavior: an explicit thinking_level requests summaries. Set limit_generations=false to return summary text in description. This does not disable thinking or return intermediate thought images.
+
+- **`temperature`** (`float`, _optional_):
+  Sampling temperature. Omit to use the provider default of 1. Explicit values use a direct Google or Vertex API.
+  - Range: `0` to `2`
+
+- **`top_p`** (`float`, _optional_):
+  Nucleus sampling probability. Omit to use the provider default of 0.95. Explicit values use a direct Google or Vertex API.
+  - Range: `0` to `1`
+
+- **`max_output_tokens`** (`integer`, _optional_):
+  Maximum output tokens for the generation. Omit to retain the provider default. Explicit values use a direct Google or Vertex API.
+  - Range: `1` to `32768`
+
 - **`num_images`** (`integer`, _optional_):
   The number of images to generate. Default value: `1`
   - Default: `1`
@@ -45,7 +79,7 @@ The API accepts the following input parameters:
 - **`aspect_ratio`** (`Enum`, _optional_):
   The aspect ratio of the generated image. Default value: `1:1`
   - Default: `"1:1"`
-  - Options: `"auto"`, `"21:9"`, `"16:9"`, `"3:2"`, `"4:3"`, `"5:4"`, `"1:1"`, `"4:5"`, `"3:4"`, `"2:3"`, `"9:16"`
+  - Options: `"auto"`, `"21:9"`, `"16:9"`, `"3:2"`, `"4:3"`, `"5:4"`, `"1:1"`, `"4:5"`, `"3:4"`, `"2:3"`, `"9:16"`, `"4:1"`, `"1:4"`, `"8:1"`, `"1:8"`
 
 - **`output_format`** (`OutputFormatEnum`, _optional_):
   The format of the generated image. Default value: `"png"`
@@ -93,6 +127,23 @@ The API accepts the following input parameters:
 ```json
 {
   "prompt": "An action shot of a black lab swimming in an inground suburban swimming pool. The camera is placed meticulously on the water line, dividing the image in half, revealing both the dogs head above water holding a tennis ball in it's mouth, and it's paws paddling underwater.",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "type": "",
+          "text": ""
+        }
+      ]
+    }
+  ],
+  "context": [
+    {
+      "type": "",
+      "text": ""
+    }
+  ],
   "num_images": 1,
   "aspect_ratio": "1:1",
   "output_format": "png",
@@ -110,10 +161,18 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated images.
   - Array of ImageFile
-  - Examples: [{"content_type":"image/png","url":"https://storage.googleapis.com/falserverless/example_outputs/nano-banana-pro-t2i-output.png","file_name":"nano-banana-pro-t2i-output.png"}]
+  - Examples: [{"url":"https://storage.googleapis.com/falserverless/example_outputs/nano-banana-pro-t2i-output.png","file_name":"nano-banana-pro-t2i-output.png","content_type":"image/png"}]
 
 - **`description`** (`string`, _required_):
   The description of the generated images.
+
+- **`conversations`** (`list<GeminiConversation>`, _optional_):
+  Reusable per-generation conversations, populated only when return_history is true. Retain every part and thought signature when continuing a conversation.
+  - Array of GeminiConversation
+
+- **`grounding_metadata`** (`list<object>`, _optional_):
+  Provider grounding metadata for the generated images, including search queries, source pages and image-source attribution when available.
+  - Array of object
 
 
 
@@ -123,12 +182,27 @@ The API returns the following output format:
 {
   "images": [
     {
-      "content_type": "image/png",
       "url": "https://storage.googleapis.com/falserverless/example_outputs/nano-banana-pro-t2i-output.png",
-      "file_name": "nano-banana-pro-t2i-output.png"
+      "file_name": "nano-banana-pro-t2i-output.png",
+      "content_type": "image/png"
     }
   ],
-  "description": ""
+  "description": "",
+  "conversations": [
+    {
+      "messages": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "type": "",
+              "text": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
 ```
 

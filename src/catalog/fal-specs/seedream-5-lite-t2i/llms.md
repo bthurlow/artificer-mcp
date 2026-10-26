@@ -34,10 +34,10 @@ The API accepts the following input parameters:
   The text prompt used to generate the image
   - Examples: "Realistic DSLR photograph of anthropomorphic Penkingese dog enjoying a bowl of ramen on the Great Wall of China with the words \"Seedream 5.0 Lite available on fal\" visible at the top."
 
-- **`image_size`** (`ImageSize | Enum`, _optional_):
-  The size of the generated image. Total pixels must be between 2560x1440 and 4096x4096. In case the image size does not fall within these parameters, the image size will be adjusted to by scaling. Default value: `auto_2K`
+- **`image_size`** (`SeedreamLiteImageSize | Enum`, _optional_):
+  The size of the generated image. Custom dimensions within the provider's pixel and aspect limits are sent unchanged. Other sizes use compatible scaling. The provider's native pixel range is 2560x1440 to 4096x4096, with aspect ratio between 1/16 and 16. Default value: `auto_2K`
   - Default: `"auto_2K"`
-  - One of: ImageSize | Enum
+  - One of: SeedreamLiteImageSize | Enum
 
 - **`num_images`** (`integer`, _optional_):
   Number of separate model generations to be run with the prompt. Default value: `1`
@@ -45,9 +45,9 @@ The API accepts the following input parameters:
   - Range: `1` to `6`
 
 - **`max_images`** (`integer`, _optional_):
-  If set to a number greater than one, enables multi-image generation. The model will potentially return up to `max_images` images every generation, and in total, `num_images` generations will be carried out. In total, the number of images generated will be between `num_images` and `max_images*num_images`. Default value: `1`
+  Maximum images per generation in sequential mode. Ignored when sequential generation is disabled. Combined input references and outputs per generation cannot exceed 15. Default value: `1`
   - Default: `1`
-  - Range: `1` to `6`
+  - Range: `1` to `15`
 
 - **`sync_mode`** (`boolean`, _optional_):
   If `True`, the media will be returned as a data URI and the output data won't be available in the request history.
@@ -57,6 +57,23 @@ The API accepts the following input parameters:
   If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked. Default value: `true`
   - Default: `true`
   - Examples: true
+
+- **`output_format`** (`OutputFormatEnum`, _optional_):
+  The file format of the generated images. Default value: `"jpeg"`
+  - Default: `"jpeg"`
+  - Options: `"jpeg"`, `"png"`
+
+- **`watermark`** (`boolean`, _optional_):
+  Whether to add the provider's visible watermark.
+  - Default: `false`
+
+- **`image_passthrough`** (`boolean`, _optional_):
+  Preserve original reference and output image bytes, formats, and dimensions without resizing or re-encoding.
+  - Default: `false`
+
+- **`sequential_image_generation`** (`Enum`, _optional_):
+  Generate related images with `auto`, or one image per generation with `disabled`. When omitted, values of `max_images` above one enable `auto`.
+  - Options: `"auto"`, `"disabled"`
 
 - **`return_byteplus_urls`** (`boolean`, _optional_):
   If set to true returns seedance-2 trusted URLs. Please note these urls expire in 24 hours.
@@ -80,7 +97,8 @@ The API accepts the following input parameters:
   "image_size": "auto_2K",
   "num_images": 1,
   "max_images": 1,
-  "enable_safety_checker": true
+  "enable_safety_checker": true,
+  "output_format": "jpeg"
 }
 ```
 

@@ -37,17 +37,17 @@ The API accepts the following input parameters:
 - **`num_images`** (`integer`, _optional_):
   Number of images to generate. Default value: `1`
   - Default: `1`
-  - Range: `1` to `4`
+  - Range: `1` to `10`
 
 - **`aspect_ratio`** (`AspectRatioEnum`, _optional_):
-  Aspect ratio of the generated image. Default value: `"1:1"`
+  Aspect ratio of the generated image. Use auto to let the provider choose. Default value: `"1:1"`
   - Default: `"1:1"`
-  - Options: `"2:1"`, `"20:9"`, `"19.5:9"`, `"16:9"`, `"4:3"`, `"3:2"`, `"1:1"`, `"2:3"`, `"3:4"`, `"9:16"`, `"9:19.5"`, `"9:20"`, `"1:2"`
+  - Options: `"2:1"`, `"20:9"`, `"19.5:9"`, `"16:9"`, `"4:3"`, `"3:2"`, `"1:1"`, `"2:3"`, `"3:4"`, `"9:16"`, `"9:19.5"`, `"9:20"`, `"1:2"`, `"auto"`, `"21:9"`, `"5:2"`
 
 - **`resolution`** (`ResolutionEnum`, _optional_):
-  Resolution of the generated image. `1k` for standard resolution, `2k` for high resolution. Default value: `"1k"`
+  Resolution of the generated image: 1k, 1.5k, or 2k. Default value: `"1k"`
   - Default: `"1k"`
-  - Options: `"1k"`, `"2k"`
+  - Options: `"1k"`, `"1.5k"`, `"2k"`
 
 - **`output_format`** (`OutputFormatEnum`, _optional_):
   The format of the generated image. Default value: `"jpeg"`
@@ -62,10 +62,14 @@ The API accepts the following input parameters:
   Authorized callers may set false to request relaxed screening. Default value: `true`
   - Default: `true`
 
+- **`image_passthrough`** (`boolean`, _optional_):
+  Send edit references and return provider images without resizing or re-encoding, preserving transparency and metadata. The returned native format may differ from output_format.
+  - Default: `false`
+
 - **`quality`** (`QualityEnum`, _optional_):
-  Quality level of the generated image. Default value: `"medium"`
+  Quality level of the generated image. `auto` lets xAI choose; it currently uses `low` for generation. Default value: `"medium"`
   - Default: `"medium"`
-  - Options: `"low"`, `"medium"`
+  - Options: `"low"`, `"medium"`, `"auto"`
 
 
 

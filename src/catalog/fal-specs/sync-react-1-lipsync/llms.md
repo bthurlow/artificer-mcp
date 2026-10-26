@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+   Default value: `true`
+  - Default: `true`
+
 - **`video_url`** (`string`, _required_):
   URL to the input video. Must be **15 seconds or shorter**.
   - Examples: "https://storage.googleapis.com/falserverless/example_inputs/react_1/input.mp4"
@@ -77,6 +81,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "video_url": "https://storage.googleapis.com/falserverless/example_inputs/react_1/input.mp4",
   "audio_url": "https://storage.googleapis.com/falserverless/example_inputs/react_1/input.mp3",
   "emotion": "neutral",
@@ -93,7 +98,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video with synchronized lip and facial movements.
-  - Examples: {"num_frames":169,"content_type":"video/mp4","width":1920,"file_name":"output.mp4","height":1088,"fps":24,"duration":7.041667,"url":"https://storage.googleapis.com/falserverless/example_outputs/react_1/output.mp4"}
+  - Examples: {"fps":24,"file_name":"output.mp4","height":1088,"duration":7.041667,"width":1920,"content_type":"video/mp4","num_frames":169,"url":"https://storage.googleapis.com/falserverless/example_outputs/react_1/output.mp4"}
 
 
 
@@ -102,13 +107,13 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "num_frames": 169,
-    "content_type": "video/mp4",
-    "width": 1920,
+    "fps": 24,
     "file_name": "output.mp4",
     "height": 1088,
-    "fps": 24,
     "duration": 7.041667,
+    "width": 1920,
+    "content_type": "video/mp4",
+    "num_frames": 169,
     "url": "https://storage.googleapis.com/falserverless/example_outputs/react_1/output.mp4"
   }
 }

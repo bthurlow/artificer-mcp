@@ -93,7 +93,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video.
-  - Examples: {"duration":8,"content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0a8b90e4/r2v_output.mp4","width":1280,"fps":24,"file_name":"r2v_output.mp4","num_frames":192,"height":720}
+  - Examples: {"file_name":"r2v_output.mp4","height":720,"duration":8,"fps":24,"content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0a8b90e4/r2v_output.mp4","num_frames":192,"width":1280}
 
 
 
@@ -102,14 +102,14 @@ The API returns the following output format:
 ```json
 {
   "video": {
+    "file_name": "r2v_output.mp4",
+    "height": 720,
     "duration": 8,
+    "fps": 24,
     "content_type": "video/mp4",
     "url": "https://v3b.fal.media/files/b/0a8b90e4/r2v_output.mp4",
-    "width": 1280,
-    "fps": 24,
-    "file_name": "r2v_output.mp4",
     "num_frames": 192,
-    "height": 720
+    "width": 1280
   }
 }
 ```

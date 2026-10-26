@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Image output: ~**$0.05** per generated image, billed as ~**1024** output image tokens. Each requested image is billed separately. Total token cost is rounded up to the nearest **$0.0001**. Text tokens: **$5.00** per **1M** input tokens. Image input tokens: **$8.00** per **1M** input tokens. Note: Pricing is subject to change.
+Billing uses the provider-reported cost when available. Otherwise, token-based pricing is **$5 per million text input tokens**, **$8 per million image input tokens**, and **$47 per million image output tokens**. At the fallback rate, **1,024 image output tokens cost $0.048128** before input costs. Each requested image is billed separately, and total cost is rounded up to the next **$0.0001**. Pricing is subject to change.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

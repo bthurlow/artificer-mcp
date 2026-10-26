@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Billing is calculated per second of the input audio. At **1080p**, your request will cost **$0.13** per second. Native audio is included. For **$1** you can run this model for approximately **7 seconds** of input audio at **1080p**.
+Billing is calculated at **$0.13 per second of input audio at 1080p**. Native audio is included. For example, **10 seconds of input audio cost $1.30**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

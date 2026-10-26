@@ -79,7 +79,7 @@ The API returns the following output format:
 
 - **`images`** (`list<File>`, _required_)
   - Array of File
-  - Examples: [{"file_name":"image.svg","url":"https://v3b.fal.media/files/b/0a8ee4fd/sw8YD36iblpO64JeQZEDt_image.svg","content_type":"image/svg+xml","file_size":1722022}]
+  - Examples: [{"file_name":"image.svg","content_type":"image/svg+xml","file_size":1722022,"url":"https://v3b.fal.media/files/b/0a8ee4fd/sw8YD36iblpO64JeQZEDt_image.svg"}]
 
 
 
@@ -90,9 +90,9 @@ The API returns the following output format:
   "images": [
     {
       "file_name": "image.svg",
-      "url": "https://v3b.fal.media/files/b/0a8ee4fd/sw8YD36iblpO64JeQZEDt_image.svg",
       "content_type": "image/svg+xml",
-      "file_size": 1722022
+      "file_size": 1722022,
+      "url": "https://v3b.fal.media/files/b/0a8ee4fd/sw8YD36iblpO64JeQZEDt_image.svg"
     }
   ]
 }

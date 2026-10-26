@@ -42,7 +42,7 @@ The API accepts the following input parameters:
   - Examples: ["https://v3b.fal.media/files/b/0a8691af/9Se_1_VX1wzTjjTOpWbs9_bb39c2eb-1a41-4749-b1d0-cf134abc8bbf.png"]
 
 - **`mask_url`** (`string`, _optional_):
-  The URL of the mask image to use for the generation. This indicates what part of the image to edit.
+  Mask image URL. Standard processing treats white as edit and black as keep. With image_passthrough or provider_options, supply an OpenAI-native PNG alpha mask: transparent regions are edited, and dimensions must match the first reference.
 
 - **`image_size`** (`ImageSize | Enum`, _optional_):
   The size of the generated image. Use 'auto' to infer from input images. Default value: `auto`
@@ -73,6 +73,10 @@ The API accepts the following input parameters:
 - **`output_compression`** (`integer`, _optional_):
   Compression level from 0 to 100. Only supported when output_format is 'jpeg' or 'webp'.
   - Range: `0` to `100`
+
+- **`image_passthrough`** (`boolean`, _optional_):
+  Send reference images and masks without resizing or re-encoding, and return the provider's original image bytes and format. Requests use the direct OpenAI API. Masks must be PNGs with an alpha channel: transparent regions are edited, and dimensions must match the first reference.
+  - Default: `false`
 
 - **`sync_mode`** (`boolean`, _optional_):
   If `True`, the media will be returned as a data URI and the output data won't be available in the request history.
@@ -120,7 +124,7 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated images.
   - Array of ImageFile
-  - Examples: [{"height":1024,"url":"https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png","content_type":"image/png","width":1024,"file_name":"yUt7tifLSbg1WzWWgfj2o.png"}]
+  - Examples: [{"height":1024,"width":1024,"url":"https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png","file_name":"yUt7tifLSbg1WzWWgfj2o.png","content_type":"image/png"}]
 
 
 
@@ -131,10 +135,10 @@ The API returns the following output format:
   "images": [
     {
       "height": 1024,
-      "url": "https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png",
-      "content_type": "image/png",
       "width": 1024,
-      "file_name": "yUt7tifLSbg1WzWWgfj2o.png"
+      "url": "https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png",
+      "file_name": "yUt7tifLSbg1WzWWgfj2o.png",
+      "content_type": "image/png"
     }
   ]
 }

@@ -15,7 +15,7 @@
 
 ## Pricing
 
-You will be charged for both input and output images. The first input image is not charged, and every additional input image will cost **$0.0045**.   Tentative pricing is **$0.0675+ $(0.0045 x number of additional input images)** per output image for images of total area less than or equal to **1536x1536** pixels. For output images with area in between **1536x1536** and **2048x2048** pixels, the price is **$0.135 + $(0.0045 x number of additional input images)** per image.
+You will be charged for both input and output images. The first input image is not charged, and every additional input image will cost **$0.0045**. Tentative pricing is **$0.0675+ $(0.0045 x number of additional input images)** per output image for images of total area less than or equal to **1536x1536** pixels. For output images with area in between **1536x1536** and **2048x2048** pixels, the price is **$0.135 + $(0.0045 x number of additional input images)** per image.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -35,7 +35,7 @@ The API accepts the following input parameters:
   - Examples: "Replace the product in Figure 1 with that in Figure 2. Seamlessly render the logo in Figure 3 into the product design, in a frosted glass texture."
 
 - **`image_size`** (`ImageSize | Enum`, _optional_):
-  The size of the generated image. Total pixels must be between 1024x1024 and 2048x2048, with aspect ratio between 1/16 and 16. Default value: `auto_2K`
+  The size of the generated image. Total pixels must be between 921600 and 4624220, with aspect ratio between 1/16 and 16. Default value: `auto_2K`
   - Default: `"auto_2K"`
   - One of: ImageSize | Enum
   - Examples: "auto_2K"
@@ -51,6 +51,14 @@ The API accepts the following input parameters:
   - Options: `"jpeg"`, `"png"`
   - Examples: "jpeg"
 
+- **`watermark`** (`boolean`, _optional_):
+  Whether to add the provider's visible watermark.
+  - Default: `false`
+
+- **`image_passthrough`** (`boolean`, _optional_):
+  Preserve original reference and output image bytes, formats, and dimensions without resizing or re-encoding.
+  - Default: `false`
+
 - **`sync_mode`** (`boolean`, _optional_):
   If `True`, the media will be returned as a data URI and the output data won't be available in the request history.
   - Default: `false`
@@ -59,6 +67,11 @@ The API accepts the following input parameters:
   If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked. Default value: `true`
   - Default: `true`
   - Examples: true
+
+- **`background`** (`BackgroundEnum`, _optional_):
+  Use `transparent` with exactly one alpha-channel reference and PNG output to preserve transparency. Default value: `"opaque"`
+  - Default: `"opaque"`
+  - Options: `"opaque"`, `"transparent"`
 
 - **`enhance_prompt_mode`** (`EnhancePromptModeEnum`, _optional_):
   Prompt optimization mode. `standard` prioritizes image quality; `fast` reduces generation time. Default value: `"standard"`
@@ -94,6 +107,7 @@ The API accepts the following input parameters:
   "num_images": 1,
   "output_format": "jpeg",
   "enable_safety_checker": true,
+  "background": "opaque",
   "enhance_prompt_mode": "standard",
   "image_urls": [
     "https://storage.googleapis.com/falserverless/example_inputs/seedreamv45/seedream_v45_edit_input_1.png",

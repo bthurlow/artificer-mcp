@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.03375 per generated layer** for total pixel area under 1536x1536. For total pixel area over 1536x1536, each request will cost **$0.0675 per generated layer** .  Please note that total pixel area is determined from the size of the generated base layer.
+Your request will cost **$0.03375 per generated layer** for total pixel area under 1536x1536. For total pixel area over 1536x1536, each request will cost **$0.0675 per generated layer** . Please note that total pixel area is determined from the size of the generated base layer.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -44,6 +44,19 @@ The API accepts the following input parameters:
   - Default: `"auto"`
   - Options: `"auto"`, `"auto_1K"`, `"auto_1.5K"`, `"auto_2K"`
   - Examples: "auto"
+
+- **`output_format`** (`OutputFormatEnum`, _optional_):
+  Format of the base image. Separated layers always use PNG. Default value: `"png"`
+  - Default: `"png"`
+  - Options: `"jpeg"`, `"png"`
+
+- **`watermark`** (`boolean`, _optional_):
+  Whether to add the provider's visible watermark.
+  - Default: `false`
+
+- **`image_passthrough`** (`boolean`, _optional_):
+  Preserve original input and output image bytes without resizing or re-encoding.
+  - Default: `false`
 
 - **`sync_mode`** (`boolean`, _optional_):
   If `True`, the media will be returned as a data URI and the output data won't be available in the request history.
@@ -76,6 +89,7 @@ The API accepts the following input parameters:
   "prompt": "Return name and description in english.",
   "image_url": "https://storage.googleapis.com/falserverless/example_inputs/kontext_example_input.webp",
   "image_size": "auto",
+  "output_format": "png",
   "enable_safety_checker": true,
   "enhance_prompt_mode": "standard"
 }

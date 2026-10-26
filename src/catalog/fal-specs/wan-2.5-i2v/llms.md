@@ -106,7 +106,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video file
-  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/wan-25-i2v-output.mp4","content_type":"video/mp4"}
+  - Examples: {"content_type":"video/mp4","url":"https://storage.googleapis.com/falserverless/example_outputs/wan-25-i2v-output.mp4"}
 
 - **`seed`** (`integer`, _required_):
   The seed used for generation
@@ -123,8 +123,8 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/wan-25-i2v-output.mp4",
-    "content_type": "video/mp4"
+    "content_type": "video/mp4",
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/wan-25-i2v-output.mp4"
   },
   "seed": 175932751,
   "actual_prompt": "The white dragon warrior stands still in a grand cathedral-like structure, its glowing golden eyes fixed forward. The camera slowly moves closer, focusing on the warrior's armored chest and face. It then begins to circle around the warrior, capturing the intricate details of the white scale armor with gold accents. The warrior maintains a strong, determined posture. Ambient sounds and soft choral tones fill the background, enhancing the majestic atmosphere. The camera continues its slow circular motion, emphasizing the warrior's heroic presence before ending with a close-up of the face."

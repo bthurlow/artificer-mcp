@@ -71,9 +71,6 @@
         ]
       },
       "Lyria35Input": {
-        "required": [
-          "prompt"
-        ],
         "x-fal-order-properties": [
           "prompt",
           "negative_prompt",
@@ -81,27 +78,31 @@
           "enable_safety_checker"
         ],
         "type": "object",
-        "title": "TextToMusicInput",
         "properties": {
-          "negative_prompt": {
-            "default": "",
-            "type": "string",
-            "deprecated": true,
-            "title": "Negative Prompt",
-            "description": "Negative prompting is not supported by Lyria 3.5."
-          },
           "prompt": {
-            "description": "The text prompt describing the music you want to generate. Include genre, mood, instrumentation, tempo, vocals, and structure for best results. Lyria 3.5 supports full-length songs up to a few minutes — use timestamps or duration hints in your prompt to control song length, e.g. 'a 2-minute track' or section markers like '[0:00-0:30] Intro: ...' / '[0:30-1:00] Verse: ...'. Supports English, German, Spanish, French, Hindi, Japanese, Korean, and Portuguese.",
             "examples": [
               "An uplifting pop song with driving electric guitar, energetic drums, and a catchy chorus singing 'Rise up and shine today'. 120 BPM. Two minutes long with a verse-chorus-verse-chorus-bridge-chorus structure."
             ],
             "type": "string",
             "minLength": 1,
+            "description": "The text prompt describing the music you want to generate. Include genre, mood, instrumentation, tempo, vocals, and structure for best results. Lyria 3.5 supports full-length songs up to a few minutes — use timestamps or duration hints in your prompt to control song length, e.g. 'a 2-minute track' or section markers like '[0:00-0:30] Intro: ...' / '[0:30-1:00] Verse: ...'. Supports English, German, Spanish, French, Hindi, Japanese, Korean, and Portuguese.",
             "title": "Prompt",
             "maxLength": 5000
           },
+          "enable_safety_checker": {
+            "default": true,
+            "type": "boolean",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "title": "Enable Safety Checker"
+          },
+          "negative_prompt": {
+            "default": "",
+            "type": "string",
+            "description": "Negative prompting is not supported by Lyria 3.5.",
+            "title": "Negative Prompt",
+            "deprecated": true
+          },
           "image_url": {
-            "description": "Optional image URL to use as visual inspiration for music generation. The model will create music that matches the mood and theme of the image.",
             "anyOf": [
               {
                 "type": "string"
@@ -110,32 +111,33 @@
                 "type": "null"
               }
             ],
+            "description": "Optional image URL to use as visual inspiration for music generation. The model will create music that matches the mood and theme of the image.",
             "title": "Image Url",
             "examples": [
               "https://v3b.fal.media/files/b/0a93b559/qjT9o0CId1B65PbD6Yp06_9c94501900464c5aa98f302fa4b00375.png"
             ]
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "type": "boolean",
-            "title": "Enable Safety Checker",
-            "description": "Authorized callers may set false to request relaxed screening."
           }
-        }
+        },
+        "required": [
+          "prompt"
+        ],
+        "title": "TextToMusicInput"
       },
       "Lyria35Output": {
-        "required": [
-          "audio"
-        ],
         "x-fal-order-properties": [
           "audio",
           "lyrics"
         ],
         "type": "object",
-        "title": "TextToMusicOutput",
         "properties": {
+          "audio": {
+            "$ref": "#/components/schemas/File",
+            "description": "The generated music as an MP3 file.",
+            "examples": [
+              "https://v3b.fal.media/files/b/0a93b550/klduxmeWsmi304M3zsAlr_output.mp3"
+            ]
+          },
           "lyrics": {
-            "description": "The generated or provided lyrics for the track, if applicable.",
             "anyOf": [
               {
                 "type": "string"
@@ -144,24 +146,19 @@
                 "type": "null"
               }
             ],
+            "description": "The generated or provided lyrics for the track, if applicable.",
             "title": "Lyrics",
             "examples": [
               "[[A0]]\n[[B1]]\n[12.0:] Dust motes dancing in the light,\n[:] Morning breaks so soft and white."
             ]
-          },
-          "audio": {
-            "description": "The generated music as an MP3 file.",
-            "$ref": "#/components/schemas/File",
-            "examples": [
-              "https://v3b.fal.media/files/b/0a93b550/klduxmeWsmi304M3zsAlr_output.mp3"
-            ]
           }
-        }
+        },
+        "required": [
+          "audio"
+        ],
+        "title": "TextToMusicOutput"
       },
       "File": {
-        "required": [
-          "url"
-        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -169,10 +166,8 @@
           "file_size"
         ],
         "type": "object",
-        "title": "File",
         "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
+          "file_name": {
             "anyOf": [
               {
                 "type": "string"
@@ -181,13 +176,18 @@
                 "type": "null"
               }
             ],
-            "title": "Content Type",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
             "examples": [
-              "image/png"
+              "z9RV14K95DvU.png"
             ]
           },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
           "file_size": {
-            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -196,18 +196,13 @@
                 "type": "null"
               }
             ],
+            "description": "The size of the file in bytes.",
             "title": "File Size",
             "examples": [
               4404019
             ]
           },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
+          "content_type": {
             "anyOf": [
               {
                 "type": "string"
@@ -216,12 +211,17 @@
                 "type": "null"
               }
             ],
-            "title": "File Name",
+            "description": "The mime type of the file.",
+            "title": "Content Type",
             "examples": [
-              "z9RV14K95DvU.png"
+              "image/png"
             ]
           }
-        }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "File"
       }
     }
   },

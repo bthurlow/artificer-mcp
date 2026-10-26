@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost $0.08 per second for 1080p, $0.16 per second for 1440p or $0.32 per second for 2160p.
+Your request will cost **$0.08** per second for 1080p, **$0.16** per second for 1440p or **$0.32** per second for 2160p.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -102,7 +102,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video file
-  - Examples: {"file_name":"VUCTD0YYJIp_K4qQkkneL_wMVDWNRn.mp4","url":"https://v3b.fal.media/files/b/0a90dd31/VUCTD0YYJIp_K4qQkkneL_wMVDWNRn.mp4","content_type":"video/mp4"}
+  - Examples: {"file_name":"VUCTD0YYJIp_K4qQkkneL_wMVDWNRn.mp4","content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0a90dd31/VUCTD0YYJIp_K4qQkkneL_wMVDWNRn.mp4"}
 
 
 
@@ -112,8 +112,8 @@ The API returns the following output format:
 {
   "video": {
     "file_name": "VUCTD0YYJIp_K4qQkkneL_wMVDWNRn.mp4",
-    "url": "https://v3b.fal.media/files/b/0a90dd31/VUCTD0YYJIp_K4qQkkneL_wMVDWNRn.mp4",
-    "content_type": "video/mp4"
+    "content_type": "video/mp4",
+    "url": "https://v3b.fal.media/files/b/0a90dd31/VUCTD0YYJIp_K4qQkkneL_wMVDWNRn.mp4"
   }
 }
 ```

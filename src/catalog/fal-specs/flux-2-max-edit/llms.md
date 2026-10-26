@@ -15,7 +15,7 @@
 
 ## Pricing
 
-The first processed megapixel will cost **$0.07**. Each additional megapixel will cost **0.03**. Input images counted as processed megapixel.
+The first processed megapixel will cost **$0.07**. Each additional megapixel will cost **$0.03**. Input images counted as processed megapixel.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

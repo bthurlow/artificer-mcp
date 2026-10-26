@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+   Default value: `true`
+  - Default: `true`
+
 - **`video_url`** (`string`, _required_):
   URL of the input video
   - Examples: "https://v3.fal.media/files/tiger/IugLCDJRIoGqvqTa-EJTr_3wg74vCqyNuQ-IiBd77MM_output.mp4"
@@ -61,6 +65,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "video_url": "https://v3.fal.media/files/tiger/IugLCDJRIoGqvqTa-EJTr_3wg74vCqyNuQ-IiBd77MM_output.mp4",
   "audio_url": "https://fal.media/files/lion/vyFWygmZsIZlUO4s0nr2n.wav",
   "sync_mode": "cut_off"

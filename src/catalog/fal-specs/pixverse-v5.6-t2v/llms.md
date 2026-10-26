@@ -15,7 +15,7 @@
 
 ## Pricing
 
-For a 5s video without audio, your request will cost $0.35 for 360p and 540p, $0.45 for 720p, and $0.75 for 1080p. Enabling audio adds $0.45 for 360p/540p/720p, and $0.75 for 1080p. For 8-second videos, costs are 2x the 5-second base; for 10-second videos, costs are 2.2x the 5-second base for 360p/540p and 720p (1080p not supported for 10s). 
+For a 5s video without audio, your request will cost **$0.35** for 360p and 540p, **$0.45** for 720p, and **$0.75** for 1080p. Enabling audio adds **$0.45** for 360p/540p/720p, and **$0.75** for 1080p. For 8-second videos, costs are 2x the 5-second base; for 10-second videos, costs are 2.2x the 5-second base for 360p/540p and 720p (1080p not supported for 10s).
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -104,7 +104,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"url":"https://storage.googleapis.com/falserverless/model_tests/video_models/output-4.mp4","file_name":"output.mp4","content_type":"video/mp4","file_size":5485412}
+  - Examples: {"file_name":"output.mp4","url":"https://storage.googleapis.com/falserverless/model_tests/video_models/output-4.mp4","file_size":5485412,"content_type":"video/mp4"}
 
 
 
@@ -113,10 +113,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "url": "https://storage.googleapis.com/falserverless/model_tests/video_models/output-4.mp4",
     "file_name": "output.mp4",
-    "content_type": "video/mp4",
-    "file_size": 5485412
+    "url": "https://storage.googleapis.com/falserverless/model_tests/video_models/output-4.mp4",
+    "file_size": 5485412,
+    "content_type": "video/mp4"
   }
 }
 ```

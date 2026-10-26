@@ -63,7 +63,7 @@ The API accepts the following input parameters:
 - **`elements`** (`list<KlingV3ComboElementInput>`, _optional_):
   Elements (characters/objects) to include in the video. Each example can either be an image set (frontal + reference images) or a video. Reference in prompt as @Element1, @Element2, etc.
   - Array of KlingV3ComboElementInput
-  - Examples: [{"reference_image_urls":["https://v3b.fal.media/files/b/0a8cfd62/psPCmzrD1y9vDgdyNfKAL_glasses_back.png"],"frontal_image_url":"https://v3b.fal.media/files/b/0a8cfd5f/-kZL-ha3Iuelku5IHXC-A_glasses.png"},{"video_url":"https://v3b.fal.media/files/b/0a8cfd66/b03SOiQvKLlFx_jqdNZ9z_child_video.mp4"}]
+  - Examples: [{"frontal_image_url":"https://v3b.fal.media/files/b/0a8cfd5f/-kZL-ha3Iuelku5IHXC-A_glasses.png","reference_image_urls":["https://v3b.fal.media/files/b/0a8cfd62/psPCmzrD1y9vDgdyNfKAL_glasses_back.png"]},{"video_url":"https://v3b.fal.media/files/b/0a8cfd66/b03SOiQvKLlFx_jqdNZ9z_child_video.mp4"}]
 
 - **`shot_type`** (`ShotTypeEnum`, _optional_):
   The type of multi-shot video generation. 'intelligent' lets the model automatically determine shot structure. Default value: `"customize"`
@@ -102,10 +102,10 @@ The API accepts the following input parameters:
   "generate_audio": true,
   "elements": [
     {
+      "frontal_image_url": "https://v3b.fal.media/files/b/0a8cfd5f/-kZL-ha3Iuelku5IHXC-A_glasses.png",
       "reference_image_urls": [
         "https://v3b.fal.media/files/b/0a8cfd62/psPCmzrD1y9vDgdyNfKAL_glasses_back.png"
-      ],
-      "frontal_image_url": "https://v3b.fal.media/files/b/0a8cfd5f/-kZL-ha3Iuelku5IHXC-A_glasses.png"
+      ]
     },
     {
       "video_url": "https://v3b.fal.media/files/b/0a8cfd66/b03SOiQvKLlFx_jqdNZ9z_child_video.mp4"
@@ -124,7 +124,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/kling-v3/pro-i2v/out.mp4","file_name":"out.mp4","content_type":"video/mp4","file_size":8431922}
+  - Examples: {"content_type":"video/mp4","file_size":8431922,"url":"https://storage.googleapis.com/falserverless/example_outputs/kling-v3/pro-i2v/out.mp4","file_name":"out.mp4"}
 
 
 
@@ -133,10 +133,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/kling-v3/pro-i2v/out.mp4",
-    "file_name": "out.mp4",
     "content_type": "video/mp4",
-    "file_size": 8431922
+    "file_size": 8431922,
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/kling-v3/pro-i2v/out.mp4",
+    "file_name": "out.mp4"
   }
 }
 ```

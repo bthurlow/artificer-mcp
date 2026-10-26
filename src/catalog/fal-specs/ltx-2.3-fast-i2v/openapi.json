@@ -71,32 +71,58 @@
         ]
       },
       "Ltx23ImageToVideoFastInput": {
-        "type": "object",
-        "title": "LTXV23ImageToVideoFastRequest",
         "properties": {
-          "duration": {
-            "type": "integer",
-            "title": "Duration",
-            "description": "The duration of the generated video in seconds. The fast model supports 6-20 seconds. Note: Durations longer than 10 seconds (12, 14, 16, 18, 20) are only supported with 25 FPS and 1080p resolution.",
-            "enum": [
-              6,
-              8,
-              10,
-              12,
-              14,
-              16,
-              18,
-              20
-            ],
-            "default": 6
-          },
           "image_url": {
-            "type": "string",
-            "title": "Start Image URL",
             "description": "URL of the image to generate the video from. Must be publicly accessible or base64 data URI. Supports PNG, JPEG, WebP, AVIF, and HEIF formats.",
             "examples": [
               "https://v3b.fal.media/files/b/0a90dd09/SnnnNct-o_zpGVEHDNVQ0_image_049.png"
-            ]
+            ],
+            "title": "Start Image URL",
+            "type": "string"
+          },
+          "aspect_ratio": {
+            "default": "auto",
+            "description": "The aspect ratio of the generated video",
+            "title": "Aspect Ratio",
+            "enum": [
+              "auto",
+              "16:9",
+              "9:16"
+            ],
+            "type": "string"
+          },
+          "resolution": {
+            "default": "1080p",
+            "description": "The resolution of the generated video",
+            "title": "Resolution",
+            "enum": [
+              "1080p",
+              "1440p",
+              "2160p"
+            ],
+            "type": "string"
+          },
+          "fps": {
+            "default": 25,
+            "description": "The frames per second of the generated video",
+            "title": "Frames per Second",
+            "enum": [
+              24,
+              25,
+              48,
+              50
+            ],
+            "type": "integer"
+          },
+          "prompt": {
+            "examples": [
+              "Snorkel lens ground-scraping tracking shot following a barefoot Ethiopian long-distance runner training on a dirt road at dawn, camera inches from the ground racing alongside, her feet kicking up red dust in slow motion at 240fps, Rift Valley landscape blurred in the background, the texture of earth and callused skin in hyper-detail, 40mm snorkel lens at ground height, Nike Running documentary meets Lubezki natural light, the poetry of human endurance"
+            ],
+            "description": "The prompt to generate the video from",
+            "minLength": 1,
+            "title": "Prompt",
+            "maxLength": 5000,
+            "type": "string"
           },
           "end_image_url": {
             "anyOf": [
@@ -107,66 +133,43 @@
                 "type": "null"
               }
             ],
-            "title": "End Image URL",
-            "description": "The URL of the end image to use for the generated video. When provided, generates a transition video between start and end frames."
-          },
-          "prompt": {
-            "type": "string",
-            "title": "Prompt",
-            "minLength": 1,
-            "description": "The prompt to generate the video from",
-            "examples": [
-              "Snorkel lens ground-scraping tracking shot following a barefoot Ethiopian long-distance runner training on a dirt road at dawn, camera inches from the ground racing alongside, her feet kicking up red dust in slow motion at 240fps, Rift Valley landscape blurred in the background, the texture of earth and callused skin in hyper-detail, 40mm snorkel lens at ground height, Nike Running documentary meets Lubezki natural light, the poetry of human endurance"
-            ],
-            "maxLength": 5000
-          },
-          "resolution": {
-            "type": "string",
-            "title": "Resolution",
-            "description": "The resolution of the generated video",
-            "enum": [
-              "1080p",
-              "1440p",
-              "2160p"
-            ],
-            "default": "1080p"
-          },
-          "fps": {
-            "type": "integer",
-            "title": "Frames per Second",
-            "description": "The frames per second of the generated video",
-            "enum": [
-              24,
-              25,
-              48,
-              50
-            ],
-            "default": 25
-          },
-          "generate_audio": {
-            "type": "boolean",
-            "title": "Generate Audio",
-            "description": "Whether to generate audio for the generated video",
-            "default": true
-          },
-          "aspect_ratio": {
-            "type": "string",
-            "title": "Aspect Ratio",
-            "description": "The aspect ratio of the generated video",
-            "enum": [
-              "auto",
-              "16:9",
-              "9:16"
-            ],
-            "default": "auto"
+            "description": "The URL of the end image to use for the generated video. When provided, generates a transition video between start and end frames.",
+            "title": "End Image URL"
           },
           "enable_safety_checker": {
-            "type": "boolean",
-            "title": "Enable Safety Checker",
             "description": "Authorized callers may set false to request relaxed screening.",
-            "default": true
+            "title": "Enable Safety Checker",
+            "default": true,
+            "type": "boolean"
+          },
+          "generate_audio": {
+            "description": "Whether to generate audio for the generated video",
+            "title": "Generate Audio",
+            "default": true,
+            "type": "boolean"
+          },
+          "duration": {
+            "default": 6,
+            "description": "The duration of the generated video in seconds. The fast model supports 6-20 seconds. Note: Durations longer than 10 seconds (12, 14, 16, 18, 20) are only supported with 25 FPS and 1080p resolution.",
+            "title": "Duration",
+            "enum": [
+              6,
+              8,
+              10,
+              12,
+              14,
+              16,
+              18,
+              20
+            ],
+            "type": "integer"
           }
         },
+        "required": [
+          "prompt",
+          "image_url"
+        ],
+        "title": "LTXV23ImageToVideoFastRequest",
         "x-fal-order-properties": [
           "image_url",
           "end_image_url",
@@ -178,54 +181,44 @@
           "generate_audio",
           "enable_safety_checker"
         ],
-        "required": [
-          "prompt",
-          "image_url"
-        ]
+        "type": "object"
       },
       "Ltx23ImageToVideoFastOutput": {
-        "type": "object",
-        "title": "LTXV23ImageToVideoFastResponse",
         "properties": {
           "video": {
-            "$ref": "#/components/schemas/VideoFile",
             "description": "The generated video file",
             "examples": [
               {
                 "file_name": "JCP0MJDH3ioOFzRd7GsGi_aB0OxLmA.mp4",
-                "url": "https://v3b.fal.media/files/b/0a90dd0b/JCP0MJDH3ioOFzRd7GsGi_aB0OxLmA.mp4",
-                "content_type": "video/mp4"
+                "content_type": "video/mp4",
+                "url": "https://v3b.fal.media/files/b/0a90dd0b/JCP0MJDH3ioOFzRd7GsGi_aB0OxLmA.mp4"
               }
-            ]
+            ],
+            "$ref": "#/components/schemas/VideoFile"
           }
         },
+        "required": [
+          "video"
+        ],
+        "title": "LTXV23ImageToVideoFastResponse",
         "x-fal-order-properties": [
           "video"
         ],
-        "required": [
-          "video"
-        ]
+        "type": "object"
       },
       "VideoFile": {
-        "type": "object",
-        "title": "VideoFile",
         "properties": {
-          "duration": {
+          "height": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Duration",
-            "description": "The duration of the video"
-          },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
+            "description": "The height of the video",
+            "title": "Height"
           },
           "content_type": {
             "anyOf": [
@@ -236,38 +229,11 @@
                 "type": "null"
               }
             ],
-            "title": "Content Type",
             "description": "The mime type of the file.",
             "examples": [
               "image/png"
-            ]
-          },
-          "num_frames": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
             ],
-            "title": "Num Frames",
-            "description": "The number of frames in the video"
-          },
-          "file_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ]
+            "title": "Content Type"
           },
           "fps": {
             "anyOf": [
@@ -278,10 +244,15 @@
                 "type": "null"
               }
             ],
-            "title": "Fps",
-            "description": "The FPS of the video"
+            "description": "The FPS of the video",
+            "title": "Fps"
           },
-          "height": {
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "num_frames": {
             "anyOf": [
               {
                 "type": "integer"
@@ -290,8 +261,8 @@
                 "type": "null"
               }
             ],
-            "title": "Height",
-            "description": "The height of the video"
+            "description": "The number of frames in the video",
+            "title": "Num Frames"
           },
           "file_name": {
             "anyOf": [
@@ -302,11 +273,11 @@
                 "type": "null"
               }
             ],
-            "title": "File Name",
             "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
-            ]
+            ],
+            "title": "File Name"
           },
           "width": {
             "anyOf": [
@@ -317,10 +288,41 @@
                 "type": "null"
               }
             ],
-            "title": "Width",
-            "description": "The width of the video"
+            "description": "The width of the video",
+            "title": "Width"
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size"
+          },
+          "duration": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The duration of the video",
+            "title": "Duration"
           }
         },
+        "required": [
+          "url"
+        ],
+        "title": "VideoFile",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -332,9 +334,7 @@
           "duration",
           "num_frames"
         ],
-        "required": [
-          "url"
-        ]
+        "type": "object"
       }
     }
   },

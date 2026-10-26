@@ -81,7 +81,7 @@ The API returns the following output format:
 
 - **`audio`** (`AudioFile`, _required_):
   The generated speech audio file.
-  - Examples: {"file_name":"W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav","content_type":"audio/wav","channels":1,"duration":3.44,"url":"https://v3b.fal.media/files/b/0aa31e93/W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav","sample_rate":24000}
+  - Examples: {"file_name":"W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav","sample_rate":24000,"channels":1,"content_type":"audio/wav","url":"https://v3b.fal.media/files/b/0aa31e93/W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav","duration":3.44}
 
 
 
@@ -91,11 +91,11 @@ The API returns the following output format:
 {
   "audio": {
     "file_name": "W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav",
-    "content_type": "audio/wav",
+    "sample_rate": 24000,
     "channels": 1,
-    "duration": 3.44,
+    "content_type": "audio/wav",
     "url": "https://v3b.fal.media/files/b/0aa31e93/W1mDF9_5NWnOPVZzccqP2_njpi6QRK.wav",
-    "sample_rate": 24000
+    "duration": 3.44
   }
 }
 ```

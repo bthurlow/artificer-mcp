@@ -13,7 +13,7 @@
 
 ## Pricing
 
-The model will cost 0.1 $ for every 360p video, 0.2 $ for every 520p video, 0.3 $ for 720 p video. For 1080 p the cost would be 0.2 $ along with 0.1 $ for every video second.
+The model will cost **$0.10** for every 360p video, **$0.20** for every 520p video, **$0.30** for 720 p video. For 1080 p the cost would be **$0.20** along with **$0.10** for every video second.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

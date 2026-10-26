@@ -15,7 +15,7 @@
 
 ## Pricing
 
-For every second of 720p video you generated, you will be charged **$0.3034/second** and for 1080p you will be charged **$0.682/second**. Your request will cost **$0.014** per 1000 tokens for **480p, 720p and 1080p**. Your request will cost **$0.008** per 1000 tokens for **4k**. The number of tokens is given by (height of output video * width of output video * (input video duration + output video duration) * 24) / 1024.  **If video inputs are provided the price is multiplied by 0.6**. With video inputs and 720p resolution the price is **$0.1814** per second.
+Billing is calculated per 1,000 video tokens. At **480p, 720p and 1080p**, the rate is **$0.014 without video references** or **$0.0086016 with video references**. At **4K**, the corresponding rates are approximately **$0.008** and **$0.0048**. With video references, the reduced rate applies to the combined input and output video token usage; image references alone do not trigger this reduction. Provider-reported usage is used when available; otherwise, usage is estimated from resolution and combined video duration, subject to minimum usage rules. For example, **100,000 provider-reported tokens at 720p** cost **$1.40 without video references** or approximately **$0.8602 with video references**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -35,7 +35,7 @@ The API accepts the following input parameters:
   - Examples: "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea."
 
 - **`image_urls`** (`list<string>`, _optional_):
-  Reference images to guide video generation. Refer to them in the prompt as @Image1, @Image2, etc. Supported formats: JPEG, PNG, WebP. Max 30 MB per image. Up to 9 images. Total files across all modalities must not exceed 12.
+  Reference images to guide video generation. Refer to them in the prompt as @Image1, @Image2, etc. Supported formats: JPEG, PNG, WebP, BMP, TIFF, GIF, HEIC, HEIF. Max 30 MB per image. Up to 9 images. Total files across all modalities must not exceed 12.
   - Array of string
   - Examples: ["https://v3b.fal.media/files/b/0a8eba37/Cqg-4Uwzyz4DELfceT1CF_a17e588773ec45b1a9e6f100a787b80b.jpg"]
 

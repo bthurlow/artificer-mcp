@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.0075** per megapixel. For example, a 2048 x 2048 image will cost  **$0.03**.
+Your request will cost **$0.0075** per megapixel. For example, a 2048 x 2048 image will cost **$0.03**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

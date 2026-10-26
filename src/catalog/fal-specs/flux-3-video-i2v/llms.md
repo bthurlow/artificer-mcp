@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will be charged at **0.17** $ per second of generated video at 720p, **0.29** $ per second at 1080p,  **0.32** $ per second at 2K (1440p), and **0.47** $ per second at 4K (2160p).
+Your request will be charged at **$0.17** per second of generated video at 720p, **$0.29** per second at 1080p, **$0.32** per second at 2K (1440p), and **$0.47** per second at 4K (2160p).
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

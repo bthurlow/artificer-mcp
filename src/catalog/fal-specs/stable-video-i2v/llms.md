@@ -28,6 +28,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+   Default value: `true`
+  - Default: `true`
+
 - **`image_url`** (`string`, _required_):
   The URL of the image to use as a starting point for the generation.
   - Examples: "https://storage.googleapis.com/falserverless/model_tests/svd/rocket.png", "https://storage.googleapis.com/falserverless/model_tests/svd/mustang.png", "https://storage.googleapis.com/falserverless/model_tests/svd/ship.png", "https://storage.googleapis.com/falserverless/model_tests/svd/rocket2.png"
@@ -69,6 +73,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "image_url": "https://storage.googleapis.com/falserverless/model_tests/svd/rocket.png",
   "motion_bucket_id": 127,
   "cond_aug": 0.02,

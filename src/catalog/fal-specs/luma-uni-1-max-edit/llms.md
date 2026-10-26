@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Each edit costs **$0.102** plus **$0.003** per reference/source image. A single-image edit runs **$0.105**. For **$1** you can run this model approximately **9** times.
+Each edit costs **$0.102**, plus **$0.003 per reference or source image**. For example, an edit using **1 source image costs $0.105**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

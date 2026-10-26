@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Billing is calculated per second of output video, by resolution. For **360p**, your request will cost **$0.03** per second; for **720p**, **$0.10** per second; for **1080p**, **$0.15** per second; and for **4K**, **$0.30** per second. A 10-second **1080p** clip costs **$1.50**, while the same clip at **360p** costs **$0.30**. 
+Billing is calculated per second of output video, by resolution. For **360p**, your request will cost **$0.03** per second; for **720p**, **$0.10** per second; for **1080p**, **$0.15** per second; and for **4K**, **$0.30** per second. A 10-second **1080p** clip costs **$1.50**, while the same clip at **360p** costs **$0.30**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

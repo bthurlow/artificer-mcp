@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.18** with Express, **$0.27** with Standard, and **$0.36** with Premium.
+Each image costs **$0.18** with Express, **$0.27** with Standard, and **$0.36** with Premium.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

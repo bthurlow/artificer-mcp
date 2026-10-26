@@ -15,7 +15,7 @@
 
 ## Pricing
 
-480p - $0.08 per second, 720p - $0.15 per second
+480p - **$0.08** per second, 720p - **$0.15** per second
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

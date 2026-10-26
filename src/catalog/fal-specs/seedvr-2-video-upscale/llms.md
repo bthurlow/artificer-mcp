@@ -15,8 +15,8 @@
 
 ## Pricing
 
-Your request will cost $0.001 per megapixel of video data (width × height × frames).
-For example, if your upscaled video is 1920×1080 with 121 frames, the total cost will be $0.25.
+Your request will cost **$0.001** per megapixel of video data (width × height × frames).
+ For example, if your upscaled video is 1920×1080 with 121 frames, the total cost will be **$0.25**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 
 The API accepts the following input parameters:
 
+
+- **`enable_safety_checker`** (`boolean`, _optional_):
+   Default value: `true`
+  - Default: `true`
 
 - **`video_url`** (`string`, _required_):
   The input video to be processed
@@ -91,6 +95,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "video_url": "https://storage.googleapis.com/falserverless/example_inputs/seedvr-input.mp4",
   "upscale_mode": "factor",
   "upscale_factor": 2,

@@ -71,9 +71,58 @@
         ]
       },
       "AgentRayV32TextToVideoInput": {
-        "type": "object",
-        "title": "RayTextToVideoRequest",
         "properties": {
+          "prompt": {
+            "examples": [
+              "A herd of wild horses galloping across a dusty desert plain under a blazing midday sun, their manes flying in the wind; wide tracking shot."
+            ],
+            "minLength": 1,
+            "title": "Prompt",
+            "description": "Text prompt describing the video to generate.",
+            "type": "string",
+            "maxLength": 6000
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "type": "boolean",
+            "default": true
+          },
+          "loop": {
+            "title": "Loop",
+            "description": "Generate a seamless loop. Only valid for 5s, standard-dynamic-range generations without an end frame.",
+            "type": "boolean",
+            "default": false
+          },
+          "exr_export": {
+            "title": "Exr Export",
+            "description": "Also export an EXR file alongside the MP4. Requires hdr=true and HDR access.",
+            "type": "boolean",
+            "default": false
+          },
+          "hdr": {
+            "title": "Hdr",
+            "description": "Generate an HDR-encoded MP4. Requires HDR access on the account and a resolution of 720p or 1080p; not supported with 10s or loop.",
+            "type": "boolean",
+            "default": false
+          },
+          "aspect_ratio": {
+            "type": "string",
+            "examples": [
+              "16:9"
+            ],
+            "title": "Aspect Ratio",
+            "description": "Aspect ratio of the generated video.",
+            "enum": [
+              "3:4",
+              "4:3",
+              "1:1",
+              "9:16",
+              "16:9",
+              "21:9"
+            ],
+            "default": "16:9"
+          },
           "duration": {
             "type": "string",
             "title": "Duration",
@@ -83,16 +132,6 @@
               "10s"
             ],
             "default": "5s"
-          },
-          "prompt": {
-            "minLength": 1,
-            "title": "Prompt",
-            "type": "string",
-            "description": "Text prompt describing the video to generate.",
-            "examples": [
-              "A herd of wild horses galloping across a dusty desert plain under a blazing midday sun, their manes flying in the wind; wide tracking shot."
-            ],
-            "maxLength": 6000
           },
           "resolution": {
             "type": "string",
@@ -104,47 +143,6 @@
               "1080p"
             ],
             "default": "540p"
-          },
-          "hdr": {
-            "type": "boolean",
-            "title": "Hdr",
-            "description": "Generate an HDR-encoded MP4. Requires HDR access on the account and a resolution of 720p or 1080p; not supported with 10s or loop.",
-            "default": false
-          },
-          "loop": {
-            "type": "boolean",
-            "title": "Loop",
-            "description": "Generate a seamless loop. Only valid for 5s, standard-dynamic-range generations without an end frame.",
-            "default": false
-          },
-          "aspect_ratio": {
-            "type": "string",
-            "title": "Aspect Ratio",
-            "description": "Aspect ratio of the generated video.",
-            "enum": [
-              "3:4",
-              "4:3",
-              "1:1",
-              "9:16",
-              "16:9",
-              "21:9"
-            ],
-            "examples": [
-              "16:9"
-            ],
-            "default": "16:9"
-          },
-          "enable_safety_checker": {
-            "type": "boolean",
-            "title": "Enable Safety Checker",
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "default": true
-          },
-          "exr_export": {
-            "type": "boolean",
-            "title": "Exr Export",
-            "description": "Also export an EXR file alongside the MP4. Requires hdr=true and HDR access.",
-            "default": false
           }
         },
         "x-fal-order-properties": [
@@ -157,15 +155,20 @@
           "exr_export",
           "enable_safety_checker"
         ],
+        "title": "RayTextToVideoRequest",
+        "type": "object",
         "required": [
           "prompt"
         ]
       },
       "AgentRayV32TextToVideoOutput": {
-        "type": "object",
-        "title": "VideoOutput",
         "properties": {
+          "video": {
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video."
+          },
           "exr_file": {
+            "description": "The generated EXR sidecar when exr_export is true. This may be a single EXR file or a ZIP package depending on Luma's export shape.",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/File"
@@ -173,47 +176,27 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The generated EXR sidecar when exr_export is true. This may be a single EXR file or a ZIP package depending on Luma's export shape."
-          },
-          "video": {
-            "$ref": "#/components/schemas/File",
-            "description": "The generated video."
+            ]
           }
         },
         "x-fal-order-properties": [
           "video",
           "exr_file"
         ],
+        "title": "VideoOutput",
+        "type": "object",
         "required": [
           "video"
         ]
       },
       "File": {
-        "type": "object",
-        "title": "File",
         "properties": {
           "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+            "examples": [
+              "z9RV14K95DvU.png"
             ],
             "title": "File Name",
             "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
-          },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "content_type": {
             "anyOf": [
               {
                 "type": "string"
@@ -221,14 +204,14 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Content Type",
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
             ]
           },
           "file_size": {
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -236,12 +219,27 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
             ]
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
           }
         },
         "x-fal-order-properties": [
@@ -250,6 +248,8 @@
           "file_name",
           "file_size"
         ],
+        "title": "File",
+        "type": "object",
         "required": [
           "url"
         ]

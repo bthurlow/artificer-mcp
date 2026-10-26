@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.01** per 1000 character.
+Your request will cost **$0.01** per 1,000 characters.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

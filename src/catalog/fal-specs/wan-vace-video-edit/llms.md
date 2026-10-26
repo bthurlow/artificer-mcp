@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost $0.10 per video second for 720p, $0.075 per video second for 580p, $0.05 per video second for 480p. Video seconds are calculated at 16 frames per second after downsampling.
+Your request will cost **$0.10** per video second for 720p, **$0.075** per video second for 580p, **$0.05** per video second for 480p. Video seconds are calculated at 16 frames per second after downsampling.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

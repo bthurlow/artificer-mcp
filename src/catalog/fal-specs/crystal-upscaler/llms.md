@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+   Default value: `true`
+  - Default: `true`
+
 - **`image_url`** (`string`, _required_):
   URL to the input image
   - Examples: "https://v3b.fal.media/files/b/zebra/eW3waMFDT-2_7Pq8j3r9d_upscaled.png"
@@ -63,6 +67,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "image_url": "https://v3b.fal.media/files/b/zebra/eW3waMFDT-2_7Pq8j3r9d_upscaled.png",
   "scale_factor": 2,
   "output_format": "jpg"

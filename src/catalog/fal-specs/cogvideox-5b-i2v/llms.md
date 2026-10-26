@@ -34,7 +34,7 @@ The API accepts the following input parameters:
 
 - **`video_size`** (`ImageSize | Enum`, _optional_):
   The size of the generated video.
-  - Default: `{"height":480,"width":720}`
+  - Default: `{"width":720,"height":480}`
   - One of: ImageSize | Enum
 
 - **`negative_prompt`** (`string`, _optional_):
@@ -71,6 +71,10 @@ The API accepts the following input parameters:
   - Default: `16`
   - Range: `4` to `32`
 
+- **`sync_mode`** (`boolean`, _optional_):
+  If `True`, the media will be returned as a data URI and the output data won't be available in the request history.
+  - Default: `false`
+
 - **`enable_safety_checker`** (`boolean`, _optional_):
   Authorized callers may set false to request relaxed screening. Default value: `true`
   - Default: `true`
@@ -96,8 +100,8 @@ The API accepts the following input parameters:
 {
   "prompt": "A low angle shot of a man walking down a street, illuminated by the neon signs of the bars around him",
   "video_size": {
-    "height": 480,
-    "width": 720
+    "width": 720,
+    "height": 480
   },
   "negative_prompt": "Distorted, discontinuous, Ugly, blurry, low resolution, motionless, static, disfigured, disconnected limbs, Ugly faces, incomplete arms",
   "num_inference_steps": 50,

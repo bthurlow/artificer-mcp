@@ -15,7 +15,7 @@
 
 ## Pricing
 
-For 5s video your request will cost **$0.15** for 360p and 540p, **$0.2** for 720p and **$0.4** for 1080p. For **$1** you can run this model with approximately 2 times.
+For 5s video your request will cost **$0.15** for 360p and 540p, **$0.20** for 720p and **$0.40** for 1080p. For **$1** you can generate **6** clips at 360p/540p, **5** at 720p or **2** at 1080p.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -96,7 +96,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"url":"https://fal.media/files/lion/_fVEU5nzHND_fHGQUhXEm_output.mp4","file_name":"output.mp4","content_type":"video/mp4","file_size":5485412}
+  - Examples: {"file_name":"output.mp4","url":"https://fal.media/files/lion/_fVEU5nzHND_fHGQUhXEm_output.mp4","file_size":5485412,"content_type":"video/mp4"}
 
 
 
@@ -105,10 +105,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "url": "https://fal.media/files/lion/_fVEU5nzHND_fHGQUhXEm_output.mp4",
     "file_name": "output.mp4",
-    "content_type": "video/mp4",
-    "file_size": 5485412
+    "url": "https://fal.media/files/lion/_fVEU5nzHND_fHGQUhXEm_output.mp4",
+    "file_size": 5485412,
+    "content_type": "video/mp4"
   }
 }
 ```

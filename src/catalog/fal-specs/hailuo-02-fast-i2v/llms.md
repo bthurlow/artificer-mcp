@@ -15,7 +15,7 @@
 
 ## Pricing
 
-For each second of video generated at **512P**, it will cost roughly **$0.017/sec**
+Estimated pricing is **$0.017 per second of video generated at 512p**. For example, **6 seconds would cost approximately $0.102**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

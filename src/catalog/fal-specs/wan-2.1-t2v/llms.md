@@ -15,7 +15,7 @@
 
 ## Pricing
 
-For a video generation, your request will cost **$0.2** at 480p resolution and **0.4$** at 720p resolution. For **$1** you can run this model **approximately 5 times**. More than the default frames will cost 1.25x more.
+For a video generation, your request will cost **$0.20** at 480p resolution and **$0.40** at 720p resolution. For **$1** you can generate **5** videos at 480p or **2** at 720p with the default frames. More than the default frames will cost 1.25x more.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

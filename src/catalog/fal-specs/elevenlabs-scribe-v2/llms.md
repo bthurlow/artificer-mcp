@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.008 per input audio minutes**. If keyterm is used, you request will cost %30 more.
+Your request will cost **$0.008** per minute of input audio. If keyterm is used, your request will cost 30% more.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -93,7 +93,7 @@ The API returns the following output format:
 - **`words`** (`list<TranscriptionWord>`, _required_):
   Word-level transcription details
   - Array of TranscriptionWord
-  - Examples: {"text":"Hey,","type":"word","end":0.539,"speaker_id":"speaker_0","start":0.079}, {"text":" ","type":"spacing","end":0.599,"speaker_id":"speaker_0","start":0.539}, {"text":"this","type":"word","end":0.679,"speaker_id":"speaker_0","start":0.599}, {"text":" ","type":"spacing","end":0.739,"speaker_id":"speaker_0","start":0.679}, {"text":"is","type":"word","end":0.799,"speaker_id":"speaker_0","start":0.739}, {"text":" ","type":"spacing","end":0.939,"speaker_id":"speaker_0","start":0.799}, {"text":"a","type":"word","end":0.939,"speaker_id":"speaker_0","start":0.939}, {"text":" ","type":"spacing","end":0.959,"speaker_id":"speaker_0","start":0.939}, {"text":"test","type":"word","end":1.179,"speaker_id":"speaker_0","start":0.959}, {"text":" ","type":"spacing","end":1.219,"speaker_id":"speaker_0","start":1.179}, {"text":"recording","type":"word","end":1.719,"speaker_id":"speaker_0","start":1.22}, {"text":" ","type":"spacing","end":1.719,"speaker_id":"speaker_0","start":1.719}, {"text":"for","type":"word","end":1.86,"speaker_id":"speaker_0","start":1.719}, {"text":" ","type":"spacing","end":1.879,"speaker_id":"speaker_0","start":1.86}, {"text":"Scribe","type":"word","end":2.24,"speaker_id":"speaker_0","start":1.879}, {"text":" ","type":"spacing","end":2.319,"speaker_id":"speaker_0","start":2.24}, {"text":"version","type":"word","end":2.759,"speaker_id":"speaker_0","start":2.319}, {"text":" ","type":"spacing","end":2.779,"speaker_id":"speaker_0","start":2.759}, {"text":"two,","type":"word","end":3.379,"speaker_id":"speaker_0","start":2.779}, {"text":" ","type":"spacing","end":3.399,"speaker_id":"speaker_0","start":3.379}, {"text":"which","type":"word","end":3.519,"speaker_id":"speaker_0","start":3.399}, {"text":" ","type":"spacing","end":3.539,"speaker_id":"speaker_0","start":3.519}, {"text":"is","type":"word","end":3.659,"speaker_id":"speaker_0","start":3.539}, {"text":" ","type":"spacing","end":3.699,"speaker_id":"speaker_0","start":3.659}, {"text":"now","type":"word","end":3.839,"speaker_id":"speaker_0","start":3.699}, {"text":" ","type":"spacing","end":3.839,"speaker_id":"speaker_0","start":3.839}, {"text":"available","type":"word","end":4.319,"speaker_id":"speaker_0","start":3.839}, {"text":" ","type":"spacing","end":4.339,"speaker_id":"speaker_0","start":4.319}, {"text":"on","type":"word","end":4.579,"speaker_id":"speaker_0","start":4.339}, {"text":" ","type":"spacing","end":4.599,"speaker_id":"speaker_0","start":4.579}, {"text":"fal.ai.","type":"word","end":5.699,"speaker_id":"speaker_0","start":4.599}
+  - Examples: {"end":0.539,"speaker_id":"speaker_0","start":0.079,"text":"Hey,","type":"word"}, {"end":0.599,"speaker_id":"speaker_0","start":0.539,"text":" ","type":"spacing"}, {"end":0.679,"speaker_id":"speaker_0","start":0.599,"text":"this","type":"word"}, {"end":0.739,"speaker_id":"speaker_0","start":0.679,"text":" ","type":"spacing"}, {"end":0.799,"speaker_id":"speaker_0","start":0.739,"text":"is","type":"word"}, {"end":0.939,"speaker_id":"speaker_0","start":0.799,"text":" ","type":"spacing"}, {"end":0.939,"speaker_id":"speaker_0","start":0.939,"text":"a","type":"word"}, {"end":0.959,"speaker_id":"speaker_0","start":0.939,"text":" ","type":"spacing"}, {"end":1.179,"speaker_id":"speaker_0","start":0.959,"text":"test","type":"word"}, {"end":1.219,"speaker_id":"speaker_0","start":1.179,"text":" ","type":"spacing"}, {"end":1.719,"speaker_id":"speaker_0","start":1.22,"text":"recording","type":"word"}, {"end":1.719,"speaker_id":"speaker_0","start":1.719,"text":" ","type":"spacing"}, {"end":1.86,"speaker_id":"speaker_0","start":1.719,"text":"for","type":"word"}, {"end":1.879,"speaker_id":"speaker_0","start":1.86,"text":" ","type":"spacing"}, {"end":2.24,"speaker_id":"speaker_0","start":1.879,"text":"Scribe","type":"word"}, {"end":2.319,"speaker_id":"speaker_0","start":2.24,"text":" ","type":"spacing"}, {"end":2.759,"speaker_id":"speaker_0","start":2.319,"text":"version","type":"word"}, {"end":2.779,"speaker_id":"speaker_0","start":2.759,"text":" ","type":"spacing"}, {"end":3.379,"speaker_id":"speaker_0","start":2.779,"text":"two,","type":"word"}, {"end":3.399,"speaker_id":"speaker_0","start":3.379,"text":" ","type":"spacing"}, {"end":3.519,"speaker_id":"speaker_0","start":3.399,"text":"which","type":"word"}, {"end":3.539,"speaker_id":"speaker_0","start":3.519,"text":" ","type":"spacing"}, {"end":3.659,"speaker_id":"speaker_0","start":3.539,"text":"is","type":"word"}, {"end":3.699,"speaker_id":"speaker_0","start":3.659,"text":" ","type":"spacing"}, {"end":3.839,"speaker_id":"speaker_0","start":3.699,"text":"now","type":"word"}, {"end":3.839,"speaker_id":"speaker_0","start":3.839,"text":" ","type":"spacing"}, {"end":4.319,"speaker_id":"speaker_0","start":3.839,"text":"available","type":"word"}, {"end":4.339,"speaker_id":"speaker_0","start":4.319,"text":" ","type":"spacing"}, {"end":4.579,"speaker_id":"speaker_0","start":4.339,"text":"on","type":"word"}, {"end":4.599,"speaker_id":"speaker_0","start":4.579,"text":" ","type":"spacing"}, {"end":5.699,"speaker_id":"speaker_0","start":4.599,"text":"fal.ai.","type":"word"}
 
 
 
@@ -105,11 +105,11 @@ The API returns the following output format:
   "language_code": "eng",
   "language_probability": 1,
   "words": {
-    "text": "Hey,",
-    "type": "word",
     "end": 0.539,
     "speaker_id": "speaker_0",
-    "start": 0.079
+    "start": 0.079,
+    "text": "Hey,",
+    "type": "word"
   }
 }
 ```

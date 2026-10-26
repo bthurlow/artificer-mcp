@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.10** per 10 seconds of output at 720p, **$0.20** at 1080p, and **$0.60** at 4K with the precision models (Proteus, Artemis, Iris, Dione, Theia, Gaia HQ/CG, and Rhea). Proteus Natural (2x only) costs **$0.10** per 10 seconds at 720p, **$0.20** at 1080p, and **$0.50** at 4K. Gaia 2 (2x, animation) costs **$0.10** at 720p or 1080p and **$0.30** at 4K. Longer clips scale with duration, with credits rounded once per job: a 1-minute upscale with the standard precision models costs **$0.40** at 720p, **$0.80** at 1080p, and **$3.10** at 4K. These examples assume 30 fps. The final cost depends on output resolution, duration, and frame rate.
+Your request will cost **$0.10** per 10 seconds of output at 720p, **$0.20** at 1080p, and **$0.60** at 4K with the precision models (Proteus, Artemis, Iris, Dione, Theia, Gaia HQ/CG, and Rhea). Proteus Natural (2x only) costs **$0.10** per 10 seconds at 720p, **$0.20** at 1080p, and **$0.50** at 4K. Gaia 2 (2x, animation) costs **$0.10** at 720p or 1080p and **$0.30** at 4K. Longer clips scale with duration, with credits rounded once per job: a 1-minute upscale with the standard precision models costs **$0.40** at 720p, **$0.80** at 1080p, and **$3.10** at 4K. The per-10-second amounts are rounded examples. These examples assume 30 fps. The final cost depends on output resolution, duration, and frame rate.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -29,6 +29,10 @@ See the input and output schema below, as well as the usage examples.
 
 The API accepts the following input parameters:
 
+
+- **`enable_safety_checker`** (`boolean`, _optional_):
+   Default value: `true`
+  - Default: `true`
 
 - **`video_url`** (`string`, _required_):
   URL of the video to upscale
@@ -86,6 +90,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "video_url": "https://v3.fal.media/files/kangaroo/y5-1YTGpun17eSeggZMzX_video-1733468228.mp4",
   "model": "Proteus",
   "upscale_factor": 2

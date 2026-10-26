@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.03** with TURBO, **$0.06** with BALANCED, and **$0.09** with QUALITY.
+Each image costs **$0.03** with TURBO, **$0.06** with BALANCED, and **$0.09** with QUALITY.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

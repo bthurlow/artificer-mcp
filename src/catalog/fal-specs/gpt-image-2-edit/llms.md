@@ -59,13 +59,21 @@ The API accepts the following input parameters:
 - **`num_images`** (`integer`, _optional_):
   Number of images to generate Default value: `1`
   - Default: `1`
-  - Range: `1` to `4`
+  - Range: `1` to `10`
   - Examples: 1
 
 - **`output_format`** (`OutputFormatEnum`, _optional_):
   Output format for the images Default value: `"png"`
   - Default: `"png"`
   - Options: `"jpeg"`, `"png"`, `"webp"`
+
+- **`output_compression`** (`integer`, _optional_):
+  Compression level from 0 to 100. Only supported when output_format is 'jpeg' or 'webp'.
+  - Range: `0` to `100`
+
+- **`image_passthrough`** (`boolean`, _optional_):
+  Send reference images and masks without resizing or re-encoding, and return the provider's original image bytes and format. Requests use the direct OpenAI API. Masks must be PNGs with an alpha channel: transparent regions are edited, and dimensions must match the first reference.
+  - Default: `false`
 
 - **`sync_mode`** (`boolean`, _optional_):
   If `True`, the media will be returned as a data URI and the output data won't be available in the request history.
@@ -76,7 +84,7 @@ The API accepts the following input parameters:
   - Default: `true`
 
 - **`mask_url`** (`string`, _optional_):
-  The URL of the mask image to use for the generation. This indicates what part of the image to edit.
+  Mask image URL. Standard processing treats white as edit and black as keep. With image_passthrough or provider_options, supply an OpenAI-native PNG alpha mask: transparent regions are edited, and dimensions must match the first reference.
 
 
 
@@ -116,7 +124,7 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated images.
   - Array of ImageFile
-  - Examples: [{"content_type":"image/png","width":1024,"file_name":"yUt7tifLSbg1WzWWgfj2o.png","height":1024,"url":"https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png"}]
+  - Examples: [{"file_name":"yUt7tifLSbg1WzWWgfj2o.png","width":1024,"content_type":"image/png","url":"https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png","height":1024}]
 
 
 
@@ -126,11 +134,11 @@ The API returns the following output format:
 {
   "images": [
     {
-      "content_type": "image/png",
-      "width": 1024,
       "file_name": "yUt7tifLSbg1WzWWgfj2o.png",
-      "height": 1024,
-      "url": "https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png"
+      "width": 1024,
+      "content_type": "image/png",
+      "url": "https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png",
+      "height": 1024
     }
   ]
 }

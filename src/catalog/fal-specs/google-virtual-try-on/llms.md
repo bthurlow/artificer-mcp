@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost  **$0.075** per generated image.
+Your request will cost **$0.075** per generated image.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

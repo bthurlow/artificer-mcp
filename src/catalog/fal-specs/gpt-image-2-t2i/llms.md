@@ -54,13 +54,21 @@ The API accepts the following input parameters:
 - **`num_images`** (`integer`, _optional_):
   Number of images to generate Default value: `1`
   - Default: `1`
-  - Range: `1` to `4`
+  - Range: `1` to `10`
   - Examples: 1
 
 - **`output_format`** (`OutputFormatEnum`, _optional_):
   Output format for the images Default value: `"png"`
   - Default: `"png"`
   - Options: `"jpeg"`, `"png"`, `"webp"`
+
+- **`output_compression`** (`integer`, _optional_):
+  Compression level from 0 to 100. Only supported when output_format is 'jpeg' or 'webp'.
+  - Range: `0` to `100`
+
+- **`image_passthrough`** (`boolean`, _optional_):
+  Send reference images and masks without resizing or re-encoding, and return the provider's original image bytes and format. Requests use the direct OpenAI API. Masks must be PNGs with an alpha channel: transparent regions are edited, and dimensions must match the first reference.
+  - Default: `false`
 
 - **`sync_mode`** (`boolean`, _optional_):
   If `True`, the media will be returned as a data URI and the output data won't be available in the request history.
@@ -102,7 +110,7 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated images.
   - Array of ImageFile
-  - Examples: [{"content_type":"image/png","width":1024,"file_name":"EnWrO3XWjPE0nxBDpaQrj.png","height":1024,"url":"https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png"}]
+  - Examples: [{"file_name":"EnWrO3XWjPE0nxBDpaQrj.png","width":1024,"content_type":"image/png","url":"https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png","height":1024}]
 
 
 
@@ -112,11 +120,11 @@ The API returns the following output format:
 {
   "images": [
     {
-      "content_type": "image/png",
-      "width": 1024,
       "file_name": "EnWrO3XWjPE0nxBDpaQrj.png",
-      "height": 1024,
-      "url": "https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png"
+      "width": 1024,
+      "content_type": "image/png",
+      "url": "https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png",
+      "height": 1024
     }
   ]
 }

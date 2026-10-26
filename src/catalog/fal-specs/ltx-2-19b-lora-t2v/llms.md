@@ -173,7 +173,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video.
-  - Examples: {"content_type":"video/mp4","file_name":"sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4","width":1248,"height":704,"duration":6.44,"fps":25,"num_frames":161,"url":"https://v3b.fal.media/files/b/0a8824b1/sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4"}
+  - Examples: {"fps":25,"url":"https://v3b.fal.media/files/b/0a8824b1/sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4","num_frames":161,"content_type":"video/mp4","width":1248,"duration":6.44,"file_name":"sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4","height":704}
 
 - **`seed`** (`integer`, _required_):
   The seed used for the random number generator.
@@ -190,14 +190,14 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "video/mp4",
-    "file_name": "sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4",
-    "width": 1248,
-    "height": 704,
-    "duration": 6.44,
     "fps": 25,
+    "url": "https://v3b.fal.media/files/b/0a8824b1/sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4",
     "num_frames": 161,
-    "url": "https://v3b.fal.media/files/b/0a8824b1/sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4"
+    "content_type": "video/mp4",
+    "width": 1248,
+    "duration": 6.44,
+    "file_name": "sdm0KfmenrlywesfzY1Y1_if6euPp1.mp4",
+    "height": 704
   },
   "seed": 149063119,
   "prompt": "A cowboy walking through a dusty town at high noon, camera following from behind, cinematic depth, realistic lighting, western mood, 4K film grain."

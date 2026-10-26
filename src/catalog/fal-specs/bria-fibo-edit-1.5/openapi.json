@@ -71,7 +71,6 @@
         ]
       },
       "FiboEdit15EditInput": {
-        "title": "FiboEditInputModel",
         "x-fal-order-properties": [
           "image_urls",
           "instruction",
@@ -81,75 +80,10 @@
           "sync_mode",
           "structured_instruction"
         ],
+        "type": "object",
+        "title": "FiboEditInputModel",
         "properties": {
-          "seed": {
-            "title": "Seed",
-            "description": "Random seed for reproducibility.",
-            "default": 5555,
-            "type": "integer"
-          },
-          "structured_instruction": {
-            "description": "A pre-built structured prompt, used verbatim instead of having VGL build one when no instruction is sent. Accepts what a previous edit returned.",
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/StructuredInstruction"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "instruction": {
-            "title": "Instruction",
-            "description": "Instruction for image editing.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "Uncross her arms and place the serum bottle in her right hand raised beside her face, label toward the camera."
-            ]
-          },
-          "image_urls": {
-            "title": "Image Urls",
-            "description": "1-4 reference images (files or URLs). Order is significant: the instruction is resolved against the images in the order they are sent.",
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              [
-                "https://v3b.fal.media/files/b/0aa69153/6d2UFjgrQCRM6BoWpXpZ3_126_1.jpg",
-                "https://v3b.fal.media/files/b/0aa69153/Gy-fjFofCbQP9w3lsfc2e_126_2.jpg"
-              ]
-            ]
-          },
-          "mask_url": {
-            "title": "Mask Url",
-            "description": "Mask (file or URL) marking the region to regenerate: white where the model should edit, black elsewhere. Single-reference requests only, and it must be the same size as that image. A masked edit comes back at the reference's own resolution.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "aspect_ratio": {
-            "title": "Aspect Ratio",
-            "description": "Output aspect ratio. Left unset, the output keeps the ratio of the first reference image. A chosen ratio applies only with two or more reference images; with a single reference the output keeps that image's ratio either way.",
             "anyOf": [
               {
                 "type": "string",
@@ -168,37 +102,101 @@
               {
                 "type": "null"
               }
+            ],
+            "description": "Output aspect ratio. Left unset, the output keeps the ratio of the first reference image. A chosen ratio applies only with two or more reference images; with a single reference the output keeps that image's ratio either way.",
+            "title": "Aspect Ratio"
+          },
+          "instruction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Instruction for image editing.",
+            "title": "Instruction",
+            "examples": [
+              "Uncross her arms and place the serum bottle in her right hand raised beside her face, label toward the camera."
             ]
           },
+          "structured_instruction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StructuredInstruction"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A pre-built structured prompt, used verbatim instead of having VGL build one when no instruction is sent. Accepts what a previous edit returned."
+          },
+          "mask_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mask (file or URL) marking the region to regenerate: white where the model should edit, black elsewhere. Single-reference requests only, and it must be the same size as that image. A masked edit comes back at the reference's own resolution.",
+            "title": "Mask Url"
+          },
+          "image_urls": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "1-4 reference images (files or URLs). Order is significant: the instruction is resolved against the images in the order they are sent.",
+            "title": "Image Urls",
+            "examples": [
+              [
+                "https://v3b.fal.media/files/b/0aa69153/6d2UFjgrQCRM6BoWpXpZ3_126_1.jpg",
+                "https://v3b.fal.media/files/b/0aa69153/Gy-fjFofCbQP9w3lsfc2e_126_2.jpg"
+              ]
+            ]
+          },
+          "seed": {
+            "type": "integer",
+            "description": "Random seed for reproducibility.",
+            "default": 5555,
+            "title": "Seed"
+          },
           "sync_mode": {
-            "title": "Sync Mode",
+            "type": "boolean",
             "description": "If true, returns the image directly in the response (increases latency).",
             "default": false,
-            "type": "boolean"
+            "title": "Sync Mode"
           }
-        },
-        "type": "object"
+        }
       },
       "FiboEdit15EditOutput": {
-        "title": "FiboEditOutputModel",
         "x-fal-order-properties": [
           "image",
           "images",
           "structured_instruction"
         ],
+        "type": "object",
+        "title": "FiboEditOutputModel",
         "required": [
           "image",
           "structured_instruction"
         ],
         "properties": {
-          "structured_instruction": {
-            "title": "Structured Instruction",
-            "description": "The structured instruction the model ran, expanded from the built-in instruction plus anything passed in `instruction`. Returned so you can see how the brief was interpreted.",
-            "additionalProperties": true,
-            "type": "object"
-          },
           "images": {
-            "title": "Images",
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            },
+            "type": "array",
             "description": "Single-element list holding the same image, kept for callers of the earlier Fibo Edit endpoint.",
             "default": [],
             "examples": [
@@ -208,20 +206,22 @@
                 }
               ]
             ],
-            "items": {
-              "$ref": "#/components/schemas/Image"
-            },
-            "type": "array"
+            "title": "Images"
           },
           "image": {
-            "$ref": "#/components/schemas/Image",
-            "description": "The edited image, in the source aspect ratio unless aspect_ratio was set."
+            "description": "The edited image, in the source aspect ratio unless aspect_ratio was set.",
+            "$ref": "#/components/schemas/Image"
+          },
+          "structured_instruction": {
+            "additionalProperties": true,
+            "type": "object",
+            "description": "The structured instruction the model ran, expanded from the built-in instruction plus anything passed in `instruction`. Returned so you can see how the brief was interpreted.",
+            "title": "Structured Instruction"
           }
-        },
-        "type": "object"
+        }
       },
       "StructuredInstruction": {
-        "title": "StructuredInstruction",
+        "additionalProperties": true,
         "x-fal-order-properties": [
           "short_description",
           "objects",
@@ -235,10 +235,60 @@
           "artistic_style",
           "edit_instruction"
         ],
-        "additionalProperties": true,
+        "type": "object",
+        "title": "StructuredInstruction",
         "properties": {
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The context of the image to be generated.",
+            "title": "Context"
+          },
+          "edit_instruction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The edit instruction for the image.",
+            "title": "Edit Instruction"
+          },
+          "text_render": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {}
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A list of text to be rendered in the image.",
+            "default": [],
+            "title": "Text Render"
+          },
+          "background_setting": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The background setting of the image to be generated.",
+            "title": "Background Setting"
+          },
           "photographic_characteristics": {
-            "description": "The photographic characteristics of the image to be generated.",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/PhotographicCharacteristics"
@@ -246,45 +296,10 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "background_setting": {
-            "title": "Background Setting",
-            "description": "The background setting of the image to be generated.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "lighting": {
-            "description": "The lighting of the image to be generated.",
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Lighting"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "style_medium": {
-            "title": "Style Medium",
-            "description": "The style medium of the image to be generated.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            ],
+            "description": "The photographic characteristics of the image to be generated."
           },
           "aesthetics": {
-            "description": "The aesthetics of the image to be generated.",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/Aesthetics"
@@ -292,92 +307,75 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "objects": {
-            "title": "Objects",
-            "description": "A list of objects in the image to be generated, along with their attributes and relationships to other objects in the image.",
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/PromptObject"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
             ],
-            "default": []
-          },
-          "context": {
-            "title": "Context",
-            "description": "The context of the image to be generated.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "artistic_style": {
-            "title": "Artistic Style",
-            "description": "The artistic style of the image to be generated.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "description": "The aesthetics of the image to be generated."
           },
           "short_description": {
-            "title": "Short Description",
-            "description": "A short description of the image to be generated.",
             "anyOf": [
               {
                 "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "edit_instruction": {
-            "title": "Edit Instruction",
-            "description": "The edit instruction for the image.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "text_render": {
-            "title": "Text Render",
-            "description": "A list of text to be rendered in the image.",
-            "anyOf": [
-              {
-                "items": {},
-                "type": "array"
               },
               {
                 "type": "null"
               }
             ],
-            "default": []
+            "description": "A short description of the image to be generated.",
+            "title": "Short Description"
+          },
+          "objects": {
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/PromptObject"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A list of objects in the image to be generated, along with their attributes and relationships to other objects in the image.",
+            "default": [],
+            "title": "Objects"
+          },
+          "artistic_style": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The artistic style of the image to be generated.",
+            "title": "Artistic Style"
+          },
+          "lighting": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Lighting"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The lighting of the image to be generated."
+          },
+          "style_medium": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The style medium of the image to be generated.",
+            "title": "Style Medium"
           }
-        },
-        "type": "object"
+        }
       },
       "Image": {
-        "title": "Image",
-        "description": "Represents an image file.",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -386,13 +384,13 @@
           "width",
           "height"
         ],
+        "type": "object",
+        "description": "Represents an image file.",
         "required": [
           "url"
         ],
         "properties": {
-          "file_size": {
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
+          "width": {
             "anyOf": [
               {
                 "type": "integer"
@@ -401,28 +399,33 @@
                 "type": "null"
               }
             ],
+            "description": "The width of the image in pixels.",
+            "title": "Width",
+            "examples": [
+              1024
+            ]
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "examples": [
               4404019
             ]
           },
-          "width": {
-            "title": "Width",
-            "description": "The width of the image in pixels.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              1024
-            ]
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
           },
           "height": {
-            "title": "Height",
-            "description": "The height of the image in pixels.",
             "anyOf": [
               {
                 "type": "integer"
@@ -431,33 +434,13 @@
                 "type": "null"
               }
             ],
+            "description": "The height of the image in pixels.",
+            "title": "Height",
             "examples": [
               1024
             ]
           },
-          "file_name": {
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
-          },
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
-          },
           "content_type": {
-            "title": "Content Type",
-            "description": "The mime type of the file.",
             "anyOf": [
               {
                 "type": "string"
@@ -466,25 +449,41 @@
                 "type": "null"
               }
             ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
             "examples": [
               "image/png"
             ]
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
           }
         },
-        "type": "object"
+        "title": "Image"
       },
       "PhotographicCharacteristics": {
-        "title": "PhotographicCharacteristics",
         "x-fal-order-properties": [
           "depth_of_field",
           "focus",
           "camera_angle",
           "lens_focal_length"
         ],
+        "type": "object",
+        "title": "PhotographicCharacteristics",
         "properties": {
-          "focus": {
-            "title": "Focus",
-            "description": "The focus in the image to be generated.",
+          "lens_focal_length": {
             "anyOf": [
               {
                 "type": "string"
@@ -492,35 +491,23 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "depth_of_field": {
-            "title": "Depth Of Field",
-            "description": "The depth of field in the image to be generated.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            ],
+            "description": "The focal length of the lens in the image to be generated.",
+            "title": "Lens Focal Length"
           },
           "camera_angle": {
-            "title": "Camera Angle",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "The angle of the camera in the image to be generated.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "title": "Camera Angle"
           },
-          "lens_focal_length": {
-            "title": "Lens Focal Length",
-            "description": "The focal length of the lens in the image to be generated.",
+          "focus": {
             "anyOf": [
               {
                 "type": "string"
@@ -528,60 +515,25 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The focus in the image to be generated.",
+            "title": "Focus"
+          },
+          "depth_of_field": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The depth of field in the image to be generated.",
+            "title": "Depth Of Field"
           }
-        },
-        "type": "object"
-      },
-      "Lighting": {
-        "title": "Lighting",
-        "x-fal-order-properties": [
-          "conditions",
-          "direction",
-          "shadows"
-        ],
-        "properties": {
-          "direction": {
-            "title": "Direction",
-            "description": "The direction of the lighting in the image to be generated.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "conditions": {
-            "title": "Conditions",
-            "description": "The conditions of the lighting in the image to be generated.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "shadows": {
-            "title": "Shadows",
-            "description": "The shadows in the image to be generated.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "type": "object"
+        }
       },
       "Aesthetics": {
-        "title": "Aesthetics",
         "x-fal-order-properties": [
           "composition",
           "color_scheme",
@@ -589,46 +541,10 @@
           "aesthetic_score",
           "preference_score"
         ],
+        "type": "object",
+        "title": "Aesthetics",
         "properties": {
-          "aesthetic_score": {
-            "title": "Aesthetic Score",
-            "description": "The aesthetic score of the image to be generated.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "composition": {
-            "title": "Composition",
-            "description": "The composition of the image to be generated.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "mood_atmosphere": {
-            "title": "Mood Atmosphere",
-            "description": "The mood and atmosphere of the image to be generated.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "color_scheme": {
-            "title": "Color Scheme",
-            "description": "The color scheme of the image to be generated.",
             "anyOf": [
               {
                 "type": "string"
@@ -636,11 +552,11 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The color scheme of the image to be generated.",
+            "title": "Color Scheme"
           },
           "preference_score": {
-            "title": "Preference Score",
-            "description": "The preference score of the image to be generated.",
             "anyOf": [
               {
                 "type": "string"
@@ -648,13 +564,49 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The preference score of the image to be generated.",
+            "title": "Preference Score"
+          },
+          "mood_atmosphere": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mood and atmosphere of the image to be generated.",
+            "title": "Mood Atmosphere"
+          },
+          "aesthetic_score": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The aesthetic score of the image to be generated.",
+            "title": "Aesthetic Score"
+          },
+          "composition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The composition of the image to be generated.",
+            "title": "Composition"
           }
-        },
-        "type": "object"
+        }
       },
       "PromptObject": {
-        "title": "PromptObject",
         "x-fal-order-properties": [
           "description",
           "location",
@@ -672,13 +624,13 @@
           "skin_tone_and_texture",
           "orientation"
         ],
+        "type": "object",
+        "title": "PromptObject",
         "required": [
           "relationship"
         ],
         "properties": {
-          "location": {
-            "title": "Location",
-            "description": "The location of the object in the image.",
+          "skin_tone_and_texture": {
             "anyOf": [
               {
                 "type": "string"
@@ -686,160 +638,35 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "gender": {
-            "title": "Gender",
-            "description": "The gender of the object in the image.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "relative_size": {
-            "title": "Relative Size",
-            "description": "The relative size of the object in the image.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "relationship": {
-            "title": "Relationship",
-            "description": "The relationship of the object to other objects in the image.",
-            "type": "string"
+            ],
+            "description": "The skin tone and texture of the object in the image.",
+            "title": "Skin Tone And Texture"
           },
           "appearance_details": {
-            "title": "Appearance Details",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "The appearance details of the object.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "clothing": {
-            "title": "Clothing",
-            "description": "The clothing of the object in the image.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "title": "Appearance Details"
           },
           "action": {
-            "title": "Action",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "The action of the object in the image.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "pose": {
-            "title": "Pose",
-            "description": "The pose of the object in the image.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "shape_and_color": {
-            "title": "Shape And Color",
-            "description": "The shape and color of the object.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "orientation": {
-            "title": "Orientation",
-            "description": "The orientation of the object in the image.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "skin_tone_and_texture": {
-            "title": "Skin Tone And Texture",
-            "description": "The skin tone and texture of the object in the image.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "description": {
-            "title": "Description",
-            "description": "A description of the object to be generated.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "texture": {
-            "title": "Texture",
-            "description": "The texture of the object.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "expression": {
-            "title": "Expression",
-            "description": "The expression of the object in the image.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "title": "Action"
           },
           "number_of_objects": {
-            "title": "Number Of Objects",
-            "description": "The number of objects in the image.",
             "anyOf": [
               {
                 "type": "integer"
@@ -847,10 +674,183 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The number of objects in the image.",
+            "title": "Number Of Objects"
+          },
+          "relative_size": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The relative size of the object in the image.",
+            "title": "Relative Size"
+          },
+          "relationship": {
+            "type": "string",
+            "description": "The relationship of the object to other objects in the image.",
+            "title": "Relationship"
+          },
+          "texture": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The texture of the object.",
+            "title": "Texture"
+          },
+          "shape_and_color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The shape and color of the object.",
+            "title": "Shape And Color"
+          },
+          "pose": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The pose of the object in the image.",
+            "title": "Pose"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The gender of the object in the image.",
+            "title": "Gender"
+          },
+          "orientation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The orientation of the object in the image.",
+            "title": "Orientation"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The location of the object in the image.",
+            "title": "Location"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A description of the object to be generated.",
+            "title": "Description"
+          },
+          "clothing": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The clothing of the object in the image.",
+            "title": "Clothing"
+          },
+          "expression": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The expression of the object in the image.",
+            "title": "Expression"
           }
-        },
-        "type": "object"
+        }
+      },
+      "Lighting": {
+        "x-fal-order-properties": [
+          "conditions",
+          "direction",
+          "shadows"
+        ],
+        "type": "object",
+        "title": "Lighting",
+        "properties": {
+          "shadows": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The shadows in the image to be generated.",
+            "title": "Shadows"
+          },
+          "direction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The direction of the lighting in the image to be generated.",
+            "title": "Direction"
+          },
+          "conditions": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The conditions of the lighting in the image to be generated.",
+            "title": "Conditions"
+          }
+        }
       }
     }
   },

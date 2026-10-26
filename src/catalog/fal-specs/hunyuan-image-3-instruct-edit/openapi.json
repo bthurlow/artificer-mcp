@@ -71,10 +71,6 @@
         ]
       },
       "HunyuanImageV3InstructEditInput": {
-        "required": [
-          "prompt",
-          "image_urls"
-        ],
         "x-fal-order-properties": [
           "prompt",
           "image_size",
@@ -87,11 +83,64 @@
           "output_format",
           "image_urls"
         ],
+        "required": [
+          "prompt",
+          "image_urls"
+        ],
         "title": "HunyuanImageEditRequest",
-        "type": "object",
         "properties": {
+          "prompt": {
+            "description": "The text prompt to generate an image from.",
+            "examples": [
+              "Turn this artwork into a realistic image"
+            ],
+            "title": "Prompt",
+            "type": "string"
+          },
+          "guidance_scale": {
+            "type": "number",
+            "maximum": 20,
+            "description": "Controls how much the model adheres to the prompt. Higher values mean stricter adherence.",
+            "title": "Guidance Scale",
+            "default": 3.5,
+            "exclusiveMinimum": 1
+          },
+          "output_format": {
+            "default": "png",
+            "description": "The format of the generated image.",
+            "title": "Output Format",
+            "enum": [
+              "jpeg",
+              "png"
+            ],
+            "type": "string"
+          },
+          "enable_safety_checker": {
+            "description": "If set to true, the safety checker will be enabled.",
+            "title": "Enable Safety Checker",
+            "default": true,
+            "type": "boolean"
+          },
+          "image_urls": {
+            "description": "The URLs of the images to use as a reference for the generation. A maximum of 3 images are supported.",
+            "examples": [
+              [
+                "https://v3b.fal.media/files/b/0a8c3cf9/voXcX8hd5maRSrSvZalXh_jAMqrScj.png"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "title": "Image Urls",
+            "type": "array"
+          },
+          "enable_prompt_expansion": {
+            "description": "If set to true, the prompt will be expanded through the model's internal recaptioning step.",
+            "title": "Enable Prompt Expansion",
+            "default": true,
+            "type": "boolean"
+          },
           "seed": {
-            "title": "Seed",
             "anyOf": [
               {
                 "type": "integer"
@@ -100,24 +149,23 @@
                 "type": "null"
               }
             ],
-            "description": "Random seed for reproducible results. If None, a random seed is used."
+            "description": "Random seed for reproducible results. If None, a random seed is used.",
+            "title": "Seed"
           },
-          "enable_prompt_expansion": {
-            "type": "boolean",
-            "title": "Enable Prompt Expansion",
-            "default": true,
-            "description": "If set to true, the prompt will be expanded through the model's internal recaptioning step."
+          "num_images": {
+            "minimum": 1,
+            "maximum": 4,
+            "description": "The number of images to generate.",
+            "title": "Num Images",
+            "default": 1,
+            "type": "integer"
           },
           "image_size": {
-            "title": "Image Size",
-            "default": "auto",
-            "description": "The desired size of the generated image. If auto, image size will be determined by the model.",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
               },
               {
-                "type": "string",
                 "enum": [
                   "auto",
                   "square_hd",
@@ -126,137 +174,90 @@
                   "portrait_16_9",
                   "landscape_4_3",
                   "landscape_16_9"
-                ]
+                ],
+                "type": "string"
               }
-            ]
+            ],
+            "description": "The desired size of the generated image. If auto, image size will be determined by the model.",
+            "title": "Image Size",
+            "default": "auto"
           },
           "sync_mode": {
-            "type": "boolean",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
             "title": "Sync Mode",
             "default": false,
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
-          },
-          "guidance_scale": {
-            "type": "number",
-            "exclusiveMinimum": 1,
-            "default": 3.5,
-            "description": "Controls how much the model adheres to the prompt. Higher values mean stricter adherence.",
-            "title": "Guidance Scale",
-            "maximum": 20
-          },
-          "enable_safety_checker": {
-            "type": "boolean",
-            "title": "Enable Safety Checker",
-            "default": true,
-            "description": "If set to true, the safety checker will be enabled."
-          },
-          "image_urls": {
-            "type": "array",
-            "examples": [
-              [
-                "https://v3b.fal.media/files/b/0a8c3cf9/voXcX8hd5maRSrSvZalXh_jAMqrScj.png"
-              ]
-            ],
-            "title": "Image Urls",
-            "items": {
-              "type": "string"
-            },
-            "description": "The URLs of the images to use as a reference for the generation. A maximum of 3 images are supported."
-          },
-          "output_format": {
-            "type": "string",
-            "title": "Output Format",
-            "default": "png",
-            "description": "The format of the generated image.",
-            "enum": [
-              "jpeg",
-              "png"
-            ]
-          },
-          "prompt": {
-            "type": "string",
-            "examples": [
-              "Turn this artwork into a realistic image"
-            ],
-            "title": "Prompt",
-            "description": "The text prompt to generate an image from."
-          },
-          "num_images": {
-            "type": "integer",
-            "title": "Num Images",
-            "default": 1,
-            "description": "The number of images to generate.",
-            "minimum": 1,
-            "maximum": 4
+            "type": "boolean"
           }
-        }
+        },
+        "type": "object"
       },
       "HunyuanImageV3InstructEditOutput": {
+        "x-fal-order-properties": [
+          "images",
+          "seed"
+        ],
         "required": [
           "images",
           "seed"
         ],
-        "x-fal-order-properties": [
-          "images",
-          "seed"
-        ],
         "title": "HunyuanImageEditResponse",
-        "type": "object",
         "properties": {
           "seed": {
-            "type": "integer",
+            "description": "The base seed used for the generation process.",
             "title": "Seed",
-            "description": "The base seed used for the generation process."
+            "type": "integer"
           },
           "images": {
-            "type": "array",
+            "description": "A list of the generated images.",
             "examples": [
               [
                 {
+                  "height": 1024,
                   "width": 1024,
-                  "content_type": "image/png",
                   "url": "https://v3b.fal.media/files/b/0a8c3d5f/K7ecUzkFaxU-5hvzdhvG-_SOvArpR4.png",
-                  "height": 1024
+                  "content_type": "image/png"
                 }
               ]
             ],
-            "title": "Images",
             "items": {
               "$ref": "#/components/schemas/Image"
             },
-            "description": "A list of the generated images."
-          }
-        }
-      },
-      "ImageSize": {
-        "properties": {
-          "width": {
-            "maximum": 14142,
-            "type": "integer",
-            "default": 512,
-            "exclusiveMinimum": 0,
-            "title": "Width",
-            "description": "The width of the generated image."
-          },
-          "height": {
-            "maximum": 14142,
-            "type": "integer",
-            "default": 512,
-            "exclusiveMinimum": 0,
-            "title": "Height",
-            "description": "The height of the generated image."
+            "title": "Images",
+            "type": "array"
           }
         },
-        "type": "object",
-        "title": "ImageSize",
+        "type": "object"
+      },
+      "ImageSize": {
         "x-fal-order-properties": [
           "width",
           "height"
-        ]
+        ],
+        "title": "ImageSize",
+        "type": "object",
+        "properties": {
+          "height": {
+            "default": 512,
+            "exclusiveMinimum": 0,
+            "description": "The height of the generated image.",
+            "title": "Height",
+            "type": "integer",
+            "maximum": 14142
+          },
+          "width": {
+            "default": 512,
+            "exclusiveMinimum": 0,
+            "description": "The width of the generated image.",
+            "title": "Width",
+            "type": "integer",
+            "maximum": 14142
+          }
+        }
       },
       "Image": {
         "properties": {
           "file_size": {
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -265,13 +266,13 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ],
             "title": "File Size"
           },
           "content_type": {
+            "description": "The mime type of the file.",
             "anyOf": [
               {
                 "type": "string"
@@ -280,48 +281,13 @@
                 "type": "null"
               }
             ],
-            "description": "The mime type of the file.",
             "examples": [
               "image/png"
             ],
             "title": "Content Type"
           },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
-          },
-          "width": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The width of the image in pixels.",
-            "examples": [
-              1024
-            ],
-            "title": "Width"
-          },
-          "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The height of the image in pixels.",
-            "examples": [
-              1024
-            ],
-            "title": "Height"
-          },
           "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -330,19 +296,48 @@
                 "type": "null"
               }
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
             "title": "File Name"
+          },
+          "height": {
+            "description": "The height of the image in pixels.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              1024
+            ],
+            "title": "Height"
+          },
+          "width": {
+            "description": "The width of the image in pixels.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              1024
+            ],
+            "title": "Width"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
           }
         },
         "description": "Represents an image file.",
-        "type": "object",
-        "required": [
-          "url"
-        ],
-        "title": "Image",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -350,7 +345,12 @@
           "file_size",
           "width",
           "height"
-        ]
+        ],
+        "required": [
+          "url"
+        ],
+        "title": "Image",
+        "type": "object"
       }
     }
   },

@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Billing is calculated per second of video generated. For **720p**, your request will cost **$0.09** per second; for **1080p**, **$0.13** per second; for **1440p**, **$0.19** per second; and for **4K**, **$0.30** per second. Native audio is included at every resolution. For **$1** you can run this model for approximately **11 seconds** at **720p** or about **3 seconds** at **4K**.
+Billing is calculated per second of video generated: **$0.09 at 720p**, **$0.13 at 1080p**, **$0.19 at 1440p**, and **$0.30 at 4K**. Native audio is included at every resolution. For example, a **10-second video at 1080p costs $1.30**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

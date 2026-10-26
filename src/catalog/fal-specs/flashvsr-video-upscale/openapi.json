@@ -71,11 +71,6 @@
         ]
       },
       "FlashvsrUpscaleVideoInput": {
-        "title": "FlashVSRPlusVideoInput",
-        "type": "object",
-        "required": [
-          "video_url"
-        ],
         "x-fal-order-properties": [
           "upscale_factor",
           "seed",
@@ -91,14 +86,40 @@
           "enable_safety_checker"
         ],
         "properties": {
-          "sync_mode": {
-            "default": false,
-            "title": "Sync Mode",
-            "description": "If `True`, the media will be returned inline and not stored in history.",
+          "output_format": {
+            "enum": [
+              "X264 (.mp4)",
+              "VP9 (.webm)",
+              "PRORES4444 (.mov)",
+              "GIF (.gif)"
+            ],
+            "description": "The format of the output video.",
+            "title": "Output Format",
+            "default": "X264 (.mp4)",
+            "type": "string"
+          },
+          "color_fix": {
+            "description": "Color correction enabled.",
+            "title": "Color Fix",
+            "default": true,
             "type": "boolean"
           },
+          "enable_safety_checker": {
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "title": "Enable Safety Checker",
+            "default": true,
+            "type": "boolean"
+          },
+          "upscale_factor": {
+            "type": "number",
+            "description": "Upscaling factor to be used.",
+            "maximum": 4,
+            "title": "Upscale Factor",
+            "default": 2,
+            "minimum": 1
+          },
           "seed": {
-            "title": "Seed",
+            "description": "The random seed used for the generation process.",
             "anyOf": [
               {
                 "type": "integer"
@@ -107,128 +128,102 @@
                 "type": "null"
               }
             ],
-            "description": "The random seed used for the generation process."
+            "title": "Seed"
           },
-          "upscale_factor": {
-            "default": 2,
-            "title": "Upscale Factor",
-            "maximum": 4,
-            "description": "Upscaling factor to be used.",
-            "type": "number",
-            "minimum": 1
-          },
-          "color_fix": {
-            "default": true,
-            "title": "Color Fix",
-            "description": "Color correction enabled.",
+          "preserve_audio": {
+            "description": "Copy the original audio tracks into the upscaled video using FFmpeg when possible.",
+            "title": "Preserve Audio",
+            "default": false,
             "type": "boolean"
           },
-          "output_write_mode": {
-            "default": "balanced",
-            "title": "Output Write Mode",
-            "description": "The write mode of the output video.",
-            "type": "string",
-            "enum": [
-              "fast",
-              "balanced",
-              "small"
-            ]
+          "quality": {
+            "type": "integer",
+            "description": "Quality level for tile blending (0-100). Controls overlap between tiles to prevent grid artifacts. Higher values provide better quality with more overlap. Recommended: 70-85 for high-res videos, 50-70 for faster processing.",
+            "maximum": 100,
+            "title": "Quality",
+            "default": 70,
+            "minimum": 0
+          },
+          "video_url": {
+            "_fal_ui_field": "video",
+            "description": "The input video to be upscaled",
+            "title": "Video Url",
+            "examples": [
+              "https://v3b.fal.media/files/b/0a959993/ev11uf0rrsKkBafCw9QKe_video.mp4"
+            ],
+            "type": "string"
           },
           "acceleration": {
-            "default": "regular",
-            "title": "Acceleration",
-            "description": "Acceleration mode for VAE decoding. Options: regular (best quality), high (balanced), full (fastest). More accerleation means longer duration videos can be processed too.",
-            "type": "string",
             "enum": [
               "regular",
               "high",
               "full"
-            ]
-          },
-          "preserve_audio": {
-            "default": false,
-            "title": "Preserve Audio",
-            "description": "Copy the original audio tracks into the upscaled video using FFmpeg when possible.",
-            "type": "boolean"
-          },
-          "output_format": {
-            "default": "X264 (.mp4)",
-            "title": "Output Format",
-            "description": "The format of the output video.",
-            "type": "string",
-            "enum": [
-              "X264 (.mp4)",
-              "VP9 (.webm)",
-              "PRORES4444 (.mov)",
-              "GIF (.gif)"
-            ]
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "title": "Enable Safety Checker",
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "type": "boolean"
-          },
-          "video_url": {
-            "title": "Video Url",
-            "description": "The input video to be upscaled",
-            "type": "string",
-            "examples": [
-              "https://v3b.fal.media/files/b/0a959993/ev11uf0rrsKkBafCw9QKe_video.mp4"
             ],
-            "_fal_ui_field": "video"
+            "description": "Acceleration mode for VAE decoding. Options: regular (best quality), high (balanced), full (fastest). More accerleation means longer duration videos can be processed too.",
+            "title": "Acceleration",
+            "default": "regular",
+            "type": "string"
+          },
+          "sync_mode": {
+            "description": "If `True`, the media will be returned inline and not stored in history.",
+            "title": "Sync Mode",
+            "default": false,
+            "type": "boolean"
           },
           "output_quality": {
-            "default": "high",
-            "title": "Output Quality",
-            "description": "The quality of the output video.",
-            "type": "string",
             "enum": [
               "low",
               "medium",
               "high",
               "maximum"
-            ]
+            ],
+            "description": "The quality of the output video.",
+            "title": "Output Quality",
+            "default": "high",
+            "type": "string"
           },
-          "quality": {
-            "default": 70,
-            "title": "Quality",
-            "maximum": 100,
-            "description": "Quality level for tile blending (0-100). Controls overlap between tiles to prevent grid artifacts. Higher values provide better quality with more overlap. Recommended: 70-85 for high-res videos, 50-70 for faster processing.",
-            "type": "integer",
-            "minimum": 0
+          "output_write_mode": {
+            "enum": [
+              "fast",
+              "balanced",
+              "small"
+            ],
+            "description": "The write mode of the output video.",
+            "title": "Output Write Mode",
+            "default": "balanced",
+            "type": "string"
           }
-        }
+        },
+        "title": "FlashVSRPlusVideoInput",
+        "required": [
+          "video_url"
+        ],
+        "type": "object"
       },
       "FlashvsrUpscaleVideoOutput": {
-        "title": "FlashVSRPlusVideoOutput",
-        "type": "object",
-        "required": [
-          "video",
-          "seed"
-        ],
         "x-fal-order-properties": [
           "video",
           "seed"
         ],
         "properties": {
           "seed": {
-            "title": "Seed",
             "description": "The random seed used for the generation process.",
+            "title": "Seed",
             "type": "integer"
           },
           "video": {
             "description": "Upscaled video file after processing",
             "$ref": "#/components/schemas/File"
           }
-        }
+        },
+        "title": "FlashVSRPlusVideoOutput",
+        "required": [
+          "video",
+          "seed"
+        ],
+        "type": "object"
       },
       "File": {
-        "title": "File",
-        "type": "object",
-        "required": [
-          "url"
-        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -236,8 +231,8 @@
           "file_size"
         ],
         "properties": {
-          "content_type": {
-            "title": "Content Type",
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -246,13 +241,28 @@
                 "type": "null"
               }
             ],
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "content_type": {
             "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
             "examples": [
               "image/png"
             ]
           },
           "file_size": {
-            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -261,32 +271,22 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "examples": [
               4404019
             ]
           },
-          "file_name": {
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
-          },
           "url": {
-            "title": "Url",
             "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
             "type": "string"
           }
-        }
+        },
+        "title": "File",
+        "required": [
+          "url"
+        ],
+        "type": "object"
       }
     }
   },

@@ -71,7 +71,6 @@
         ]
       },
       "FiboEdit15VirtualTryOnInput": {
-        "title": "VirtualTryOnInputModel",
         "x-fal-order-properties": [
           "person_image_url",
           "garment_image_urls",
@@ -80,59 +79,14 @@
           "seed",
           "sync_mode"
         ],
+        "type": "object",
+        "title": "VirtualTryOnInputModel",
         "required": [
           "person_image_url",
           "garment_image_urls"
         ],
         "properties": {
-          "person_image_url": {
-            "title": "Person Image Url",
-            "description": "Photo of the person who will wear the garments. Their identity, face, hair, body shape, pose and the background are preserved.",
-            "examples": [
-              "https://labs-assets.bria.ai/fal-examples/fibo-edit-1.5/virtual-try-on/person.jpg"
-            ],
-            "type": "string"
-          },
-          "seed": {
-            "title": "Seed",
-            "description": "Random seed. The same seed with the same inputs returns the same image.",
-            "default": 5555,
-            "type": "integer"
-          },
-          "garment_image_urls": {
-            "maxItems": 3,
-            "items": {
-              "type": "string"
-            },
-            "minItems": 1,
-            "title": "Garment Image Urls",
-            "description": "One to three garment or accessory images. They are worn together and layered, each replacing the corresponding item the person currently wears. Fabric, color, texture, pattern and print placement, closures and proportions are reproduced as given.",
-            "examples": [
-              [
-                "https://labs-assets.bria.ai/fal-examples/fibo-edit-1.5/virtual-try-on/garment-1.jpg",
-                "https://labs-assets.bria.ai/fal-examples/fibo-edit-1.5/virtual-try-on/garment-2.jpg"
-              ]
-            ],
-            "type": "array"
-          },
-          "instruction": {
-            "title": "Instruction",
-            "description": "Optional. A complete try-on instruction already runs; this is appended to it. Use it to say what layers over what, or which items stay untouched.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "He wears the navy blazer over the white t-shirt he already has, and the grey tailored trousers instead of his jeans; his sneakers stay unchanged."
-            ]
-          },
           "aspect_ratio": {
-            "title": "Aspect Ratio",
-            "description": "Output aspect ratio. Left unset, the output keeps the ratio of the person image.",
             "anyOf": [
               {
                 "type": "string",
@@ -151,37 +105,81 @@
               {
                 "type": "null"
               }
+            ],
+            "description": "Output aspect ratio. Left unset, the output keeps the ratio of the person image.",
+            "title": "Aspect Ratio"
+          },
+          "instruction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional. A complete try-on instruction already runs; this is appended to it. Use it to say what layers over what, or which items stay untouched.",
+            "title": "Instruction",
+            "examples": [
+              "He wears the navy blazer over the white t-shirt he already has, and the grey tailored trousers instead of his jeans; his sneakers stay unchanged."
             ]
           },
+          "garment_image_urls": {
+            "maxItems": 3,
+            "items": {
+              "type": "string"
+            },
+            "title": "Garment Image Urls",
+            "minItems": 1,
+            "type": "array",
+            "description": "One to three garment or accessory images. They are worn together and layered, each replacing the corresponding item the person currently wears. Fabric, color, texture, pattern and print placement, closures and proportions are reproduced as given.",
+            "examples": [
+              [
+                "https://labs-assets.bria.ai/fal-examples/fibo-edit-1.5/virtual-try-on/garment-1.jpg",
+                "https://labs-assets.bria.ai/fal-examples/fibo-edit-1.5/virtual-try-on/garment-2.jpg"
+              ]
+            ]
+          },
+          "seed": {
+            "type": "integer",
+            "description": "Random seed. The same seed with the same inputs returns the same image.",
+            "default": 5555,
+            "title": "Seed"
+          },
           "sync_mode": {
-            "title": "Sync Mode",
+            "type": "boolean",
             "description": "Return the image inline in the response instead of as a hosted URL. Adds latency.",
             "default": false,
-            "type": "boolean"
+            "title": "Sync Mode"
+          },
+          "person_image_url": {
+            "type": "string",
+            "description": "Photo of the person who will wear the garments. Their identity, face, hair, body shape, pose and the background are preserved.",
+            "title": "Person Image Url",
+            "examples": [
+              "https://labs-assets.bria.ai/fal-examples/fibo-edit-1.5/virtual-try-on/person.jpg"
+            ]
           }
-        },
-        "type": "object"
+        }
       },
       "FiboEdit15VirtualTryOnOutput": {
-        "title": "FiboEditOutputModel",
         "x-fal-order-properties": [
           "image",
           "images",
           "structured_instruction"
         ],
+        "type": "object",
+        "title": "FiboEditOutputModel",
         "required": [
           "image",
           "structured_instruction"
         ],
         "properties": {
-          "structured_instruction": {
-            "title": "Structured Instruction",
-            "description": "The structured instruction the model ran, expanded from the built-in instruction plus anything passed in `instruction`. Returned so you can see how the brief was interpreted.",
-            "additionalProperties": true,
-            "type": "object"
-          },
           "images": {
-            "title": "Images",
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            },
+            "type": "array",
             "description": "Single-element list holding the same image, kept for callers of the earlier Fibo Edit endpoint.",
             "default": [],
             "examples": [
@@ -191,21 +189,21 @@
                 }
               ]
             ],
-            "items": {
-              "$ref": "#/components/schemas/Image"
-            },
-            "type": "array"
+            "title": "Images"
           },
           "image": {
-            "$ref": "#/components/schemas/Image",
-            "description": "The edited image, in the source aspect ratio unless aspect_ratio was set."
+            "description": "The edited image, in the source aspect ratio unless aspect_ratio was set.",
+            "$ref": "#/components/schemas/Image"
+          },
+          "structured_instruction": {
+            "additionalProperties": true,
+            "type": "object",
+            "description": "The structured instruction the model ran, expanded from the built-in instruction plus anything passed in `instruction`. Returned so you can see how the brief was interpreted.",
+            "title": "Structured Instruction"
           }
-        },
-        "type": "object"
+        }
       },
       "Image": {
-        "title": "Image",
-        "description": "Represents an image file.",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -214,13 +212,13 @@
           "width",
           "height"
         ],
+        "type": "object",
+        "description": "Represents an image file.",
         "required": [
           "url"
         ],
         "properties": {
-          "file_size": {
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
+          "width": {
             "anyOf": [
               {
                 "type": "integer"
@@ -229,28 +227,33 @@
                 "type": "null"
               }
             ],
+            "description": "The width of the image in pixels.",
+            "title": "Width",
+            "examples": [
+              1024
+            ]
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "examples": [
               4404019
             ]
           },
-          "width": {
-            "title": "Width",
-            "description": "The width of the image in pixels.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              1024
-            ]
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
           },
           "height": {
-            "title": "Height",
-            "description": "The height of the image in pixels.",
             "anyOf": [
               {
                 "type": "integer"
@@ -259,33 +262,13 @@
                 "type": "null"
               }
             ],
+            "description": "The height of the image in pixels.",
+            "title": "Height",
             "examples": [
               1024
             ]
           },
-          "file_name": {
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
-          },
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
-          },
           "content_type": {
-            "title": "Content Type",
-            "description": "The mime type of the file.",
             "anyOf": [
               {
                 "type": "string"
@@ -294,12 +277,29 @@
                 "type": "null"
               }
             ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
             "examples": [
               "image/png"
             ]
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
           }
         },
-        "type": "object"
+        "title": "Image"
       }
     }
   },

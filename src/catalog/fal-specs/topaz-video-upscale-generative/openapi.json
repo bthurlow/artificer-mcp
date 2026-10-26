@@ -72,6 +72,7 @@
       },
       "UpscaleVideoGenerativeInput": {
         "x-fal-order-properties": [
+          "enable_safety_checker",
           "video_url",
           "model",
           "upscale_factor",
@@ -79,58 +80,17 @@
           "softness",
           "H264_output"
         ],
+        "type": "object",
         "required": [
           "video_url"
         ],
-        "type": "object",
         "properties": {
-          "softness": {
-            "anyOf": [
-              {
-                "maximum": 5,
-                "type": "number",
-                "minimum": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "How much softening the model applies to the output, from 1 (sharpest) to 5 (softest). Starlight Precise 2.6 only; leave unset for Topaz's default.",
-            "title": "Softness"
-          },
-          "H264_output": {
-            "description": "Whether to use H264 codec for output video. Default is H265.",
-            "default": false,
-            "type": "boolean",
-            "title": "H264 Output"
-          },
-          "model": {
-            "description": "Generative diffusion enhancement model. Starlight Precise 2.6 adds realism to AI-generated video; Starlight HQ maximizes quality on high-resolution sources; Starlight Mini restores archival footage; Starlight Sharp is fast restoration with sharper detail; Starlight Fast 2 is the fastest, cheapest diffusion upscaler.",
-            "enum": [
-              "Starlight Precise 2.6",
-              "Starlight HQ",
-              "Starlight Mini",
-              "Starlight Sharp",
-              "Starlight Fast 2"
-            ],
-            "default": "Starlight Precise 2.6",
-            "type": "string",
-            "title": "Model"
-          },
-          "upscale_factor": {
-            "minimum": 1,
-            "description": "Factor to upscale the video by (e.g. 2.0 doubles width and height)",
-            "maximum": 4,
-            "default": 2,
-            "type": "number",
-            "title": "Upscale Factor"
-          },
           "target_fps": {
             "anyOf": [
               {
-                "maximum": 60,
+                "minimum": 16,
                 "type": "integer",
-                "minimum": 16
+                "maximum": 60
               },
               {
                 "type": "null"
@@ -139,12 +99,58 @@
             "description": "Target FPS for the output. Frame interpolation is enabled only when this differs from the source FPS.",
             "title": "Target Fps"
           },
+          "enable_safety_checker": {
+            "default": true,
+            "type": "boolean",
+            "title": "Enable Safety Checker"
+          },
+          "softness": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "number",
+                "maximum": 5
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "How much softening the model applies to the output, from 1 (sharpest) to 5 (softest). Starlight Precise 2.6 only; leave unset for Topaz's default.",
+            "title": "Softness"
+          },
+          "model": {
+            "default": "Starlight Precise 2.6",
+            "type": "string",
+            "description": "Generative diffusion enhancement model. Starlight Precise 2.6 adds realism to AI-generated video; Starlight HQ maximizes quality on high-resolution sources; Starlight Mini restores archival footage; Starlight Sharp is fast restoration with sharper detail; Starlight Fast 2 is the fastest, cheapest diffusion upscaler.",
+            "enum": [
+              "Starlight Precise 2.6",
+              "Starlight HQ",
+              "Starlight Mini",
+              "Starlight Sharp",
+              "Starlight Fast 2"
+            ],
+            "title": "Model"
+          },
+          "upscale_factor": {
+            "type": "number",
+            "description": "Factor to upscale the video by (e.g. 2.0 doubles width and height)",
+            "maximum": 4,
+            "default": 2,
+            "minimum": 1,
+            "title": "Upscale Factor"
+          },
+          "H264_output": {
+            "default": false,
+            "type": "boolean",
+            "description": "Whether to use H264 codec for output video. Default is H265.",
+            "title": "H264 Output"
+          },
           "video_url": {
+            "type": "string",
             "description": "URL of the video to upscale",
             "examples": [
               "https://v3.fal.media/files/kangaroo/y5-1YTGpun17eSeggZMzX_video-1733468228.mp4"
             ],
-            "type": "string",
             "title": "Video Url"
           }
         },
@@ -154,14 +160,14 @@
         "x-fal-order-properties": [
           "video"
         ],
+        "type": "object",
         "required": [
           "video"
         ],
-        "type": "object",
         "properties": {
           "video": {
-            "$ref": "#/components/schemas/File",
             "description": "The upscaled video file",
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v3.fal.media/files/penguin/ztj_LB4gQlW6HIfVs8zX4_upscaled.mp4"
@@ -178,15 +184,30 @@
           "file_name",
           "file_size"
         ],
+        "type": "object",
         "required": [
           "url"
         ],
-        "type": "object",
         "properties": {
           "url": {
-            "description": "The URL where the file can be downloaded from.",
             "type": "string",
+            "description": "The URL where the file can be downloaded from.",
             "title": "Url"
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size"
           },
           "file_name": {
             "anyOf": [
@@ -217,21 +238,6 @@
               "image/png"
             ],
             "title": "Content Type"
-          },
-          "file_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
-            "title": "File Size"
           }
         },
         "title": "File"

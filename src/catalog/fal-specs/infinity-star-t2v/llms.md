@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost 0.07 $ per video.
+Your request will cost **$0.07** per video.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

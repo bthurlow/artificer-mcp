@@ -13,7 +13,7 @@
 
 ## Pricing
 
-Your request will cost  **$0.05** per second for **720p**, **$0.075** per second for **1080p**.
+Your request will cost **$0.05** per second for **720p**, **$0.075** per second for **1080p**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

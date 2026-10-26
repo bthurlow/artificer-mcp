@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.04** per video. For $1 you can run this model approximately **25 times**.
+Your request will cost **$0.04** per video. For **$1** you can run this model approximately **25 times**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

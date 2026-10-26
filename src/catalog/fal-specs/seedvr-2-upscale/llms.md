@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 The API accepts the following input parameters:
 
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  If set to true, the safety checker will be enabled. Default value: `true`
+  - Default: `true`
+
 - **`image_url`** (`string`, _required_):
   The input image to be processed
   - Examples: "https://storage.googleapis.com/falserverless/example_inputs/seedvr2/image_in.png"
@@ -80,6 +84,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "image_url": "https://storage.googleapis.com/falserverless/example_inputs/seedvr2/image_in.png",
   "upscale_mode": "factor",
   "upscale_factor": 2,

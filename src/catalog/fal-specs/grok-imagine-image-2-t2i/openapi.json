@@ -72,39 +72,71 @@
       },
       "GrokImagineImageV20TextToImageInput": {
         "properties": {
-          "resolution": {
-            "enum": [
-              "1k",
-              "2k"
-            ],
-            "description": "Resolution of the generated image. `1k` for standard resolution, `2k` for high resolution.",
-            "type": "string",
-            "default": "1k",
-            "title": "Resolution"
-          },
           "quality": {
+            "title": "Quality",
+            "type": "string",
+            "description": "Quality level of the generated image. `auto` lets xAI choose; it currently uses `low` for generation.",
             "enum": [
               "low",
-              "medium"
+              "medium",
+              "auto"
             ],
-            "description": "Quality level of the generated image.",
-            "default": "medium",
+            "default": "medium"
+          },
+          "prompt": {
             "type": "string",
-            "title": "Quality"
+            "description": "Text description of the desired image.",
+            "title": "Prompt",
+            "maxLength": 8000,
+            "examples": [
+              "Abstract human silhouette, golden particles ready to burst outward representing joy, data visualization style, emotional expression through particles, artistic scientific"
+            ]
+          },
+          "image_passthrough": {
+            "type": "boolean",
+            "description": "Send edit references and return provider images without resizing or re-encoding, preserving transparency and metadata. The returned native format may differ from output_format.",
+            "default": false,
+            "title": "Image Passthrough"
+          },
+          "output_format": {
+            "type": "string",
+            "description": "The format of the generated image.",
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
+            ],
+            "default": "jpeg",
+            "title": "Output Format"
+          },
+          "resolution": {
+            "title": "Resolution",
+            "type": "string",
+            "description": "Resolution of the generated image: 1k, 1.5k, or 2k.",
+            "enum": [
+              "1k",
+              "1.5k",
+              "2k"
+            ],
+            "default": "1k"
+          },
+          "num_images": {
+            "minimum": 1,
+            "description": "Number of images to generate.",
+            "type": "integer",
+            "title": "Number of Images",
+            "default": 1,
+            "maximum": 10
           },
           "sync_mode": {
+            "type": "boolean",
             "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "type": "boolean",
-            "default": false,
-            "title": "Sync Mode"
-          },
-          "enable_safety_checker": {
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "type": "boolean",
-            "default": true,
-            "title": "Enable Safety Checker"
+            "title": "Sync Mode",
+            "default": false
           },
           "aspect_ratio": {
+            "type": "string",
+            "description": "Aspect ratio of the generated image. Use auto to let the provider choose.",
             "enum": [
               "2:1",
               "20:9",
@@ -118,47 +150,22 @@
               "9:16",
               "9:19.5",
               "9:20",
-              "1:2"
+              "1:2",
+              "auto",
+              "21:9",
+              "5:2"
             ],
-            "description": "Aspect ratio of the generated image.",
-            "type": "string",
             "default": "1:1",
             "title": "Aspect Ratio"
           },
-          "prompt": {
-            "title": "Prompt",
-            "description": "Text description of the desired image.",
-            "type": "string",
-            "examples": [
-              "Abstract human silhouette, golden particles ready to burst outward representing joy, data visualization style, emotional expression through particles, artistic scientific"
-            ],
-            "maxLength": 8000
-          },
-          "output_format": {
-            "enum": [
-              "jpeg",
-              "png",
-              "webp"
-            ],
-            "description": "The format of the generated image.",
-            "type": "string",
-            "default": "jpeg",
-            "title": "Output Format"
-          },
-          "num_images": {
-            "description": "Number of images to generate.",
-            "type": "integer",
-            "default": 1,
-            "maximum": 4,
-            "title": "Number of Images",
-            "minimum": 1
+          "enable_safety_checker": {
+            "type": "boolean",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "title": "Enable Safety Checker",
+            "default": true
           }
         },
         "type": "object",
-        "required": [
-          "prompt"
-        ],
-        "title": "XAIImageV2Input",
         "x-fal-order-properties": [
           "prompt",
           "num_images",
@@ -167,13 +174,17 @@
           "output_format",
           "sync_mode",
           "enable_safety_checker",
+          "image_passthrough",
           "quality"
+        ],
+        "title": "XAIImageV2Input",
+        "required": [
+          "prompt"
         ]
       },
       "GrokImagineImageV20TextToImageOutput": {
         "properties": {
           "revised_prompt": {
-            "description": "The enhanced prompt that was used to generate the image.",
             "anyOf": [
               {
                 "type": "string"
@@ -182,57 +193,53 @@
                 "type": "null"
               }
             ],
+            "description": "The enhanced prompt that was used to generate the image.",
             "title": "Revised Prompt"
           },
           "images": {
-            "title": "Images",
-            "description": "The URL of the generated image.",
             "type": "array",
+            "description": "The URL of the generated image.",
+            "items": {
+              "$ref": "#/components/schemas/ImageFile"
+            },
+            "title": "Images",
             "examples": [
               [
                 {
                   "url": "https://v3b.fal.media/files/b/0a8b90b7/9avg_nKJmcVinjQHJR_Ja.jpg"
                 }
               ]
-            ],
-            "items": {
-              "$ref": "#/components/schemas/ImageFile"
-            }
+            ]
           }
         },
         "type": "object",
-        "required": [
-          "images"
-        ],
-        "title": "XAIImageOutput",
         "x-fal-order-properties": [
           "images",
           "revised_prompt"
+        ],
+        "title": "XAIImageOutput",
+        "required": [
+          "images"
         ]
       },
       "ImageFile": {
         "properties": {
-          "file_size": {
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
+          "file_name": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string"
               },
               {
                 "type": "null"
               }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
             ]
           },
           "content_type": {
-            "title": "Content Type",
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
             "anyOf": [
               {
                 "type": "string"
@@ -240,15 +247,19 @@
               {
                 "type": "null"
               }
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "examples": [
+              "image/png"
             ]
           },
           "url": {
-            "description": "The URL where the file can be downloaded from.",
             "type": "string",
+            "description": "The URL where the file can be downloaded from.",
             "title": "Url"
           },
-          "width": {
-            "description": "The width of the image",
+          "file_size": {
             "anyOf": [
               {
                 "type": "integer"
@@ -257,25 +268,13 @@
                 "type": "null"
               }
             ],
-            "title": "Width"
-          },
-          "file_name": {
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+              4404019
             ]
           },
-          "height": {
-            "description": "The height of the image",
+          "width": {
             "anyOf": [
               {
                 "type": "integer"
@@ -284,14 +283,23 @@
                 "type": "null"
               }
             ],
+            "description": "The width of the image",
+            "title": "Width"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The height of the image",
             "title": "Height"
           }
         },
         "type": "object",
-        "required": [
-          "url"
-        ],
-        "title": "ImageFile",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -299,6 +307,10 @@
           "file_size",
           "width",
           "height"
+        ],
+        "title": "ImageFile",
+        "required": [
+          "url"
         ]
       }
     }

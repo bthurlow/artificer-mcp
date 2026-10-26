@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Reframe is billed per started source second: **$0.06/s** at 540p, **$0.12/s** at 720p and **$0.36/s** at 1080p. A 5s source will cost **$0.30** for 540p, **$0.60** for 720p and **$1.80** for 1080p. A 10s source costs **$0.60** at 540p, **$1.20** at 720p and **$3.60** at 1080p. For $1 you can reframe approximately **3 five-second clips** (540p).
+Reframe is billed per started source second: **$0.06/s** at 540p, **$0.12/s** at 720p and **$0.36/s** at 1080p. A 5s source will cost **$0.30** for 540p, **$0.60** for 720p and **$1.80** for 1080p. A 10s source costs **$0.60** at 540p, **$1.20** at 720p and **$3.60** at 1080p. For **$1** you can reframe approximately **3 five-second clips** (540p).
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

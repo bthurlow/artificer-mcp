@@ -13,7 +13,7 @@
 
 ## Pricing
 
-For each second of video generated, it will cost **$0.08/sec**. A single 6 second video will cost **$0.48/video**. 
+For each second of video generated, it will cost **$0.08/sec**. A single 6 second video will cost **$0.48/video**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

@@ -71,111 +71,61 @@
         ]
       },
       "StableVideoInput": {
-        "required": [
-          "image_url"
-        ],
         "x-fal-order-properties": [
+          "enable_safety_checker",
           "image_url",
           "seed",
           "motion_bucket_id",
           "cond_aug",
           "fps"
         ],
+        "required": [
+          "image_url"
+        ],
         "title": "ImageInput",
         "properties": {
-          "seed": {
-            "description": "\n            The same seed and the same prompt given to the same version of Stable Diffusion\n            will output the same image every time.\n        ",
-            "title": "Seed",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "image_url": {
             "description": "The URL of the image to use as a starting point for the generation.",
-            "title": "Image Url",
             "examples": [
               "https://storage.googleapis.com/falserverless/model_tests/svd/rocket.png",
               "https://storage.googleapis.com/falserverless/model_tests/svd/mustang.png",
               "https://storage.googleapis.com/falserverless/model_tests/svd/ship.png",
               "https://storage.googleapis.com/falserverless/model_tests/svd/rocket2.png"
             ],
-            "type": "string",
-            "minLength": 1
+            "title": "Image Url",
+            "minLength": 1,
+            "type": "string"
           },
-          "fps": {
-            "default": 25,
-            "description": "The frames per second of the generated video.",
-            "title": "Fps",
-            "type": "integer",
-            "maximum": 100,
-            "minimum": 10
-          },
-          "motion_bucket_id": {
-            "default": 127,
-            "description": "\n            The motion bucket id determines the motion of the generated video. The\n            higher the number, the more motion there will be.\n        ",
-            "title": "Motion Bucket Id",
-            "type": "integer",
-            "maximum": 255,
-            "minimum": 1
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "default": true,
+            "type": "boolean"
           },
           "cond_aug": {
-            "default": 0.02,
+            "minimum": 0,
+            "maximum": 10,
             "description": "\n            The conditoning augmentation determines the amount of noise that will be\n            added to the conditioning frame. The higher the number, the more noise\n            there will be, and the less the video will look like the initial image.\n            Increase it for more motion.\n        ",
             "title": "Cond Aug",
-            "type": "number",
-            "maximum": 10,
-            "minimum": 0
-          }
-        },
-        "type": "object"
-      },
-      "StableVideoOutput": {
-        "required": [
-          "video",
-          "seed"
-        ],
-        "x-fal-order-properties": [
-          "video",
-          "seed"
-        ],
-        "title": "VideoOutput",
-        "properties": {
-          "seed": {
-            "description": "Seed for random number generator",
-            "title": "Seed",
+            "default": 0.02,
+            "type": "number"
+          },
+          "fps": {
+            "minimum": 10,
+            "maximum": 100,
+            "description": "The frames per second of the generated video.",
+            "title": "Fps",
+            "default": 25,
             "type": "integer"
           },
-          "video": {
-            "description": "Generated video",
-            "title": "Video",
-            "$ref": "#/components/schemas/File"
-          }
-        },
-        "type": "object"
-      },
-      "File": {
-        "required": [
-          "url"
-        ],
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
-        "title": "File",
-        "properties": {
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "examples": [
-              4404019
-            ],
+          "motion_bucket_id": {
+            "minimum": 1,
+            "maximum": 255,
+            "description": "\n            The motion bucket id determines the motion of the generated video. The\n            higher the number, the more motion there will be.\n        ",
+            "title": "Motion Bucket Id",
+            "default": 127,
+            "type": "integer"
+          },
+          "seed": {
             "anyOf": [
               {
                 "type": "integer"
@@ -183,14 +133,50 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
-            "examples": [
-              "image/png"
             ],
+            "description": "\n            The same seed and the same prompt given to the same version of Stable Diffusion\n            will output the same image every time.\n        ",
+            "title": "Seed"
+          }
+        },
+        "type": "object"
+      },
+      "StableVideoOutput": {
+        "x-fal-order-properties": [
+          "video",
+          "seed"
+        ],
+        "required": [
+          "video",
+          "seed"
+        ],
+        "title": "VideoOutput",
+        "properties": {
+          "video": {
+            "description": "Generated video",
+            "$ref": "#/components/schemas/File",
+            "title": "Video"
+          },
+          "seed": {
+            "description": "Seed for random number generator",
+            "title": "Seed",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "File": {
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "required": [
+          "url"
+        ],
+        "title": "File",
+        "properties": {
+          "file_name": {
             "anyOf": [
               {
                 "type": "string"
@@ -198,27 +184,47 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type"
           },
           "url": {
             "description": "The URL where the file can be downloaded from.",
             "title": "Url",
             "type": "string"
           },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
+          "file_size": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size"
           }
         },
         "type": "object"

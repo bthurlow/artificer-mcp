@@ -71,32 +71,9 @@
         ]
       },
       "ElevenlabsTextToDialogueElevenV3Input": {
-        "required": [
-          "inputs"
-        ],
-        "title": "TextToDialogueRequest",
         "properties": {
-          "inputs": {
-            "items": {
-              "$ref": "#/components/schemas/DialogueBlock"
-            },
-            "title": "Inputs",
-            "examples": [
-              [
-                {
-                  "voice": "Aria",
-                  "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us."
-                },
-                {
-                  "voice": "Charlotte",
-                  "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day."
-                }
-              ]
-            ],
-            "description": "A list of dialogue inputs, each containing text and a voice ID which will be converted into speech.",
-            "type": "array"
-          },
           "use_speaker_boost": {
+            "description": "This setting boosts the similarity to the original speaker. Using this setting requires a slightly higher computational load, which in turn increases latency.",
             "anyOf": [
               {
                 "type": "boolean"
@@ -105,10 +82,19 @@
                 "type": "null"
               }
             ],
-            "title": "Use Speaker Boost",
-            "description": "This setting boosts the similarity to the original speaker. Using this setting requires a slightly higher computational load, which in turn increases latency."
+            "title": "Use Speaker Boost"
+          },
+          "pronunciation_dictionary_locators": {
+            "description": "A list of pronunciation dictionary locators (id, version_id) to be applied to the text. They will be applied in order. You may have up to 3 locators per request",
+            "items": {
+              "$ref": "#/components/schemas/PronunciationDictionaryLocator"
+            },
+            "default": [],
+            "type": "array",
+            "title": "Pronunciation Dictionary Locators"
           },
           "language_code": {
+            "description": "Language code (ISO 639-1) used to enforce a language for the model. An error will be returned if language code is not supported by the model.",
             "anyOf": [
               {
                 "type": "string"
@@ -117,10 +103,10 @@
                 "type": "null"
               }
             ],
-            "title": "Language Code",
-            "description": "Language code (ISO 639-1) used to enforce a language for the model. An error will be returned if language code is not supported by the model."
+            "title": "Language Code"
           },
           "seed": {
+            "description": "Random seed for reproducibility.",
             "anyOf": [
               {
                 "type": "integer"
@@ -129,10 +115,30 @@
                 "type": "null"
               }
             ],
-            "title": "Seed",
-            "description": "Random seed for reproducibility."
+            "title": "Seed"
+          },
+          "inputs": {
+            "description": "A list of dialogue inputs, each containing text and a voice ID which will be converted into speech.",
+            "items": {
+              "$ref": "#/components/schemas/DialogueBlock"
+            },
+            "examples": [
+              [
+                {
+                  "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us.",
+                  "voice": "Aria"
+                },
+                {
+                  "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day.",
+                  "voice": "Charlotte"
+                }
+              ]
+            ],
+            "type": "array",
+            "title": "Inputs"
           },
           "stability": {
+            "description": "Determines how stable the voice is and the randomness between each generation. Lower values introduce broader emotional range for the voice. Higher values can result in a monotonous voice with limited emotion. Must be one of 0.0, 0.5, 1.0, else it will be rounded to the nearest value.",
             "anyOf": [
               {
                 "maximum": 1,
@@ -143,19 +149,12 @@
                 "type": "null"
               }
             ],
-            "title": "Stability",
-            "description": "Determines how stable the voice is and the randomness between each generation. Lower values introduce broader emotional range for the voice. Higher values can result in a monotonous voice with limited emotion. Must be one of 0.0, 0.5, 1.0, else it will be rounded to the nearest value."
-          },
-          "pronunciation_dictionary_locators": {
-            "items": {
-              "$ref": "#/components/schemas/PronunciationDictionaryLocator"
-            },
-            "title": "Pronunciation Dictionary Locators",
-            "default": [],
-            "description": "A list of pronunciation dictionary locators (id, version_id) to be applied to the text. They will be applied in order. You may have up to 3 locators per request",
-            "type": "array"
+            "title": "Stability"
           }
         },
+        "required": [
+          "inputs"
+        ],
         "x-fal-order-properties": [
           "inputs",
           "stability",
@@ -164,19 +163,15 @@
           "seed",
           "language_code"
         ],
-        "type": "object"
+        "type": "object",
+        "title": "TextToDialogueRequest"
       },
       "ElevenlabsTextToDialogueElevenV3Output": {
-        "required": [
-          "audio",
-          "seed"
-        ],
-        "title": "TextToDialogueOutput",
         "properties": {
           "seed": {
-            "title": "Seed",
             "description": "Random seed for reproducibility.",
-            "type": "integer"
+            "type": "integer",
+            "title": "Seed"
           },
           "audio": {
             "examples": [
@@ -188,20 +183,60 @@
             "$ref": "#/components/schemas/File"
           }
         },
+        "required": [
+          "audio",
+          "seed"
+        ],
         "x-fal-order-properties": [
           "audio",
           "seed"
         ],
-        "type": "object"
+        "type": "object",
+        "title": "TextToDialogueOutput"
+      },
+      "PronunciationDictionaryLocator": {
+        "properties": {
+          "version_id": {
+            "description": "The ID of the version of the pronunciation dictionary. If not provided, the latest version will be used.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version Id"
+          },
+          "pronunciation_dictionary_id": {
+            "description": "The ID of the pronunciation dictionary.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pronunciation Dictionary Id"
+          }
+        },
+        "x-fal-order-properties": [
+          "pronunciation_dictionary_id",
+          "version_id"
+        ],
+        "type": "object",
+        "title": "PronunciationDictionaryLocator"
       },
       "DialogueBlock": {
-        "required": [
-          "text",
-          "voice"
-        ],
-        "title": "DialogueBlock",
         "properties": {
+          "text": {
+            "description": "The dialogue text",
+            "type": "string",
+            "title": "Text"
+          },
           "voice": {
+            "description": "The name or the ID of the voice to be used for the generation.",
             "examples": [
               "Aria",
               "Roger",
@@ -224,78 +259,63 @@
               "Lily",
               "Bill"
             ],
-            "description": "The name or the ID of the voice to be used for the generation.",
-            "title": "Voice",
-            "type": "string"
-          },
-          "text": {
-            "title": "Text",
-            "description": "The dialogue text",
-            "type": "string"
+            "type": "string",
+            "title": "Voice"
           }
         },
+        "required": [
+          "text",
+          "voice"
+        ],
         "x-fal-order-properties": [
           "text",
           "voice"
         ],
-        "type": "object"
-      },
-      "PronunciationDictionaryLocator": {
-        "title": "PronunciationDictionaryLocator",
-        "properties": {
-          "pronunciation_dictionary_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pronunciation Dictionary Id",
-            "description": "The ID of the pronunciation dictionary."
-          },
-          "version_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Version Id",
-            "description": "The ID of the version of the pronunciation dictionary. If not provided, the latest version will be used."
-          }
-        },
-        "x-fal-order-properties": [
-          "pronunciation_dictionary_id",
-          "version_id"
-        ],
-        "type": "object"
+        "type": "object",
+        "title": "DialogueBlock"
       },
       "File": {
-        "required": [
-          "url"
-        ],
-        "title": "File",
         "properties": {
           "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
           },
           "file_size": {
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
             "anyOf": [
               {
                 "type": "integer"
@@ -304,40 +324,20 @@
                 "type": "null"
               }
             ],
-            "title": "File Size",
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes."
-          },
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file."
+            "title": "File Size"
           }
         },
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "type": "object"
+        "type": "object",
+        "title": "File"
       }
     }
   },

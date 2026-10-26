@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost $0.0024075 per megapixel of generated video data (width × height × frames), rounded up. For example, if you generate a video that is 121 frames long at 1280 × 720, your total generated video is ≈112 MP, and your request will cost $0.270.
+Your request will cost **$0.0024075** per megapixel of generated video data (width × height × frames), rounded up. For example, if you generate a video that is 121 frames long at 1280 × 720, your total generated video is ≈112 MP, and your request will cost **$0.270**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

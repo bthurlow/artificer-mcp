@@ -16,8 +16,7 @@
 
 ## Pricing
 
-Priced per second of output video, by resolution: 480p at $0.08/sec, 720p at $0.14/sec, 1080p at $0.25/sec. A 5-second clip costs $0.40 at 480p, $0.70 at 720p, and $1.25 at 1080p. Cost scales linearly with duration. Each reference image adds $0.01 (1–7 supported). A reference audio clip, if provided, is included at no extra cost.
-
+Priced per second of output video, by resolution: 480p at **$0.08**/sec, 720p at **$0.14**/sec, 1080p at **$0.25**/sec. A 5-second clip costs **$0.40** at 480p, **$0.70** at 720p, and **$1.25** at 1080p. Cost scales linearly with duration. Each reference image adds **$0.01** (1–7 supported). A reference audio clip, if provided, is included at no extra cost.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -84,7 +83,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video.
-  - Examples: {"duration":6.041667,"content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","width":1280,"fps":24,"file_name":"0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","num_frames":145,"height":720}
+  - Examples: {"file_name":"0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","height":720,"duration":6.041667,"fps":24,"content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","num_frames":145,"width":1280}
 
 
 
@@ -93,14 +92,14 @@ The API returns the following output format:
 ```json
 {
   "video": {
+    "file_name": "0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4",
+    "height": 720,
     "duration": 6.041667,
+    "fps": 24,
     "content_type": "video/mp4",
     "url": "https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4",
-    "width": 1280,
-    "fps": 24,
-    "file_name": "0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4",
     "num_frames": 145,
-    "height": 720
+    "width": 1280
   }
 }
 ```

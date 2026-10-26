@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost $0.01 per request.
+Your request will cost **$0.01** per request.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Billing is calculated per second of video generated. For 360p, your request will cost **$0.030** per second without audio and **$0.040** per second with audio. For 540p, it will cost **$0.040** per second without audio and **$0.050** per second with audio. For 720p, it will cost **$0.050** per second without audio and **$0.065** per second with audio. For 1080p, it will cost **$0.095** per second without audio and **$0.120** per second with audio. For **$1** you can run this model for approximately **33 seconds** at 360p (no audio) or about **10 seconds** at 1080p (no audio).
+Billing is calculated per second of video generated. Rates **without audio / with audio** are **360p: $0.030 / $0.040**; **540p: $0.040 / $0.050**; **720p: $0.050 / $0.065**; **1080p: $0.095 / $0.120**. For example, a **5-second video at 720p** costs **$0.250 without audio** or **$0.325 with audio**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 

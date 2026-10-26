@@ -13,7 +13,7 @@
 
 ## Pricing
 
-Your request will cost $0.20 per video. Videos have a fixed size of 1280x704 and a fixed duration of 93 frames at 16 frames per second (5.8 seconds.)
+Your request will cost **$0.20** per video. Videos have a fixed size of 1280x704 and a fixed duration of 93 frames at 16 frames per second (5.8 seconds.)
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -110,7 +110,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video file.
-  - Examples: {"url":"https://v3b.fal.media/files/b/0a8fabc5/qAi19s0dSuQHDZ3O7D_HV_FkSwbls1.mp4","content_type":"video/mp4"}
+  - Examples: {"content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0a8fabc5/qAi19s0dSuQHDZ3O7D_HV_FkSwbls1.mp4"}
 
 - **`seed`** (`integer`, _required_):
   The random seed used for generation.
@@ -122,8 +122,8 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "url": "https://v3b.fal.media/files/b/0a8fabc5/qAi19s0dSuQHDZ3O7D_HV_FkSwbls1.mp4",
-    "content_type": "video/mp4"
+    "content_type": "video/mp4",
+    "url": "https://v3b.fal.media/files/b/0a8fabc5/qAi19s0dSuQHDZ3O7D_HV_FkSwbls1.mp4"
   }
 }
 ```
