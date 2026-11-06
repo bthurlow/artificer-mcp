@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.14.0](https://github.com/bthurlow/artificer-mcp/compare/v0.13.0...v0.14.0) (2026-11-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* **catalog:** the 16 catalog slugs above and the mochi_prompt_guide tool are removed. See UPGRADING.md (0.13.x -> 0.14.0) for replacements.
+
+### Features
+
+* **omni:** gemini-omni-1.2-flash default, with resolution, first/last frame, and video edit/extend ([#68](https://github.com/bthurlow/artificer-mcp/issues/68)) ([8edc486](https://github.com/bthurlow/artificer-mcp/commit/8edc486d0029e943fe3e7e02f7a464b47cd59875))
+
+
+### Bug Fixes
+
+* **catalog:** retire 16 fal routes culled upstream, and mochi_prompt_guide ([#67](https://github.com/bthurlow/artificer-mcp/issues/67)) ([1da6d8e](https://github.com/bthurlow/artificer-mcp/commit/1da6d8e4297ee75aeb1e9f4831f2f008b47ed489))
+* **ci:** keep the drift PR body under GitHub's limit, and scale the retire cap ([#66](https://github.com/bthurlow/artificer-mcp/issues/66)) ([02de5b2](https://github.com/bthurlow/artificer-mcp/commit/02de5b2ae3b547b2e745ff4d8e8646a6e00bab7f))
+
 ## [0.13.0](https://github.com/bthurlow/artificer-mcp/compare/v0.12.0...v0.13.0) (2026-10-19)
 
 
