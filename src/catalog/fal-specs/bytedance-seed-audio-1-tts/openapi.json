@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for bytedance/seed-audio-1.0",
     "version": "1.0.0",
@@ -71,10 +71,42 @@
         ]
       },
       "SeedAudio10Input": {
-        "required": [
-          "prompt"
-        ],
         "properties": {
+          "image_url": {
+            "title": "Image URL",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A single reference image URL (jpeg/png/webp, up to 10MB). Cannot be combined with audio references."
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "default": true,
+            "type": "boolean"
+          },
+          "prompt": {
+            "maxLength": 2048,
+            "examples": [
+              "Here's a quick look at your day: you've got three meetings, one lunch, and just enough time in between to grab a coffee and relax."
+            ],
+            "title": "Prompt",
+            "description": "Prompt or text to synthesize. Reference audio inputs by order with @Audio1, @Audio2, @Audio3.",
+            "type": "string"
+          },
+          "volume": {
+            "maximum": 2,
+            "title": "Volume",
+            "description": "Volume. 1.0 is normal volume, 0.5 is half, 2.0 is double.",
+            "default": 1,
+            "type": "number",
+            "minimum": 0.5
+          },
           "voice": {
             "examples": [
               "stokie_en",
@@ -100,6 +132,8 @@
               "monkey_king_zh",
               null
             ],
+            "title": "Voice",
+            "description": "Voice to use for synthesis: either a preset voice name or a cloned voice id.",
             "anyOf": [
               {
                 "type": "string"
@@ -107,66 +141,9 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "Voice to use for synthesis: either a preset voice name or a cloned voice id.",
-            "title": "Voice"
-          },
-          "pitch": {
-            "default": 0,
-            "minimum": -12,
-            "description": "Voice pitch shift in semitones. 0 is normal pitch, -12 lowers by one octave, 12 raises by one octave.",
-            "title": "Pitch",
-            "type": "integer",
-            "maximum": 12
-          },
-          "audio_urls": {
-            "description": "Up to 3 reference audio URLs, referenced in prompt as @Audio1, @Audio2, @Audio3. Each clip: up to 30s, 10MB, wav/mp3/pcm/ogg_opus.",
-            "items": {
-              "type": "string"
-            },
-            "maxItems": 3,
-            "type": "array",
-            "title": "Audio URLs"
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "title": "Enable Safety Checker",
-            "type": "boolean"
-          },
-          "volume": {
-            "default": 1,
-            "minimum": 0.5,
-            "description": "Volume. 1.0 is normal volume, 0.5 is half, 2.0 is double.",
-            "title": "Volume",
-            "type": "number",
-            "maximum": 2
-          },
-          "output_format": {
-            "default": "mp3",
-            "description": "Output audio format.",
-            "title": "Output Format",
-            "type": "string",
-            "enum": [
-              "wav",
-              "mp3",
-              "pcm",
-              "ogg_opus"
             ]
           },
-          "speed": {
-            "default": 1,
-            "minimum": 0.5,
-            "description": "Speech speed. 1.0 is normal speed, 0.5 is half speed, 2.0 is double speed.",
-            "title": "Speed",
-            "type": "number",
-            "maximum": 2
-          },
           "sample_rate": {
-            "default": 24000,
-            "description": "Sample rate of the output audio in Hz.",
-            "title": "Sample Rate",
-            "type": "integer",
             "enum": [
               8000,
               16000,
@@ -174,34 +151,54 @@
               32000,
               44100,
               48000
-            ]
-          },
-          "prompt": {
-            "examples": [
-              "Here's a quick look at your day: you've got three meetings, one lunch, and just enough time in between to grab a coffee and relax."
             ],
-            "description": "Prompt or text to synthesize. Reference audio inputs by order with @Audio1, @Audio2, @Audio3.",
-            "title": "Prompt",
-            "type": "string",
-            "maxLength": 2048
+            "title": "Sample Rate",
+            "description": "Sample rate of the output audio in Hz.",
+            "default": 24000,
+            "type": "integer"
+          },
+          "audio_urls": {
+            "maxItems": 3,
+            "title": "Audio URLs",
+            "description": "Up to 3 reference audio URLs, referenced in prompt as @Audio1, @Audio2, @Audio3. Each clip: up to 30s, 10MB, wav/mp3/pcm/ogg_opus.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "speed": {
+            "maximum": 2,
+            "title": "Speed",
+            "description": "Speech speed. 1.0 is normal speed, 0.5 is half speed, 2.0 is double speed.",
+            "default": 1,
+            "type": "number",
+            "minimum": 0.5
           },
           "multilingual": {
-            "default": false,
-            "description": "Use the multilingual model variant, which handles non-English and mixed-language prompts better.",
             "title": "Multilingual",
+            "description": "Use the multilingual model variant, which handles non-English and mixed-language prompts better.",
+            "default": false,
             "type": "boolean"
           },
-          "image_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+          "output_format": {
+            "enum": [
+              "wav",
+              "mp3",
+              "pcm",
+              "ogg_opus"
             ],
-            "description": "A single reference image URL (jpeg/png/webp, up to 10MB). Cannot be combined with audio references.",
-            "title": "Image URL"
+            "title": "Output Format",
+            "description": "Output audio format.",
+            "default": "mp3",
+            "type": "string"
+          },
+          "pitch": {
+            "maximum": 12,
+            "title": "Pitch",
+            "description": "Voice pitch shift in semitones. 0 is normal pitch, -12 lowers by one octave, 12 raises by one octave.",
+            "default": 0,
+            "type": "integer",
+            "minimum": -12
           }
         },
         "title": "SeedAudioInput",
@@ -218,20 +215,20 @@
           "multilingual",
           "enable_safety_checker"
         ],
+        "required": [
+          "prompt"
+        ],
         "type": "object"
       },
       "SeedAudio10Output": {
-        "required": [
-          "audio"
-        ],
         "properties": {
           "audio": {
+            "$ref": "#/components/schemas/AudioFile",
             "examples": [
               {
                 "url": "https://v3b.fal.media/files/b/0aa97081/TYxWX8Yp1jjq9qObOdSRn_speech.mp3"
               }
             ],
-            "$ref": "#/components/schemas/AudioFile",
             "description": "The generated audio file."
           }
         },
@@ -239,14 +236,35 @@
         "x-fal-order-properties": [
           "audio"
         ],
+        "required": [
+          "audio"
+        ],
         "type": "object"
       },
       "AudioFile": {
-        "required": [
-          "url"
-        ],
         "properties": {
-          "channels": {
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "sample_rate": {
+            "title": "Sample Rate",
             "anyOf": [
               {
                 "type": "integer"
@@ -255,37 +273,37 @@
                 "type": "null"
               }
             ],
-            "description": "The number of channels in the audio",
-            "title": "Channels"
+            "description": "The sample rate of the audio"
           },
-          "bitrate": {
+          "channels": {
+            "title": "Channels",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The number of channels in the audio"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
               },
               {
-                "type": "integer"
-              },
-              {
                 "type": "null"
               }
-            ],
-            "description": "The bitrate of the audio (e.g., '192k' or 192000)",
-            "title": "Bitrate"
-          },
-          "sample_rate": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The sample rate of the audio",
-            "title": "Sample Rate"
+            ]
           },
           "duration": {
+            "title": "Duration",
             "anyOf": [
               {
                 "type": "number"
@@ -294,13 +312,14 @@
                 "type": "null"
               }
             ],
-            "description": "The duration of the audio",
-            "title": "Duration"
+            "description": "The duration of the audio"
           },
-          "file_name": {
+          "content_type": {
             "examples": [
-              "z9RV14K95DvU.png"
+              "image/png"
             ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
             "anyOf": [
               {
                 "type": "string"
@@ -308,15 +327,14 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
+            ]
           },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
+          "bitrate": {
+            "title": "Bitrate",
             "anyOf": [
+              {
+                "type": "string"
+              },
               {
                 "type": "integer"
               },
@@ -324,28 +342,7 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
+            "description": "The bitrate of the audio (e.g., '192k' or 192000)"
           }
         },
         "title": "AudioFile",
@@ -358,6 +355,9 @@
           "channels",
           "sample_rate",
           "bitrate"
+        ],
+        "required": [
+          "url"
         ],
         "type": "object"
       }

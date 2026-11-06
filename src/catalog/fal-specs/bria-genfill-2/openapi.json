@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for bria/genfill/v2",
     "version": "1.0.0",
@@ -71,7 +71,6 @@
         ]
       },
       "GenfillV2Input": {
-        "title": "GenFillInput",
         "x-fal-order-properties": [
           "image_url",
           "mask_url",
@@ -86,55 +85,55 @@
           "instruction"
         ],
         "properties": {
-          "image_url": {
-            "title": "Image Url",
-            "description": "The source image.",
-            "examples": [
-              "https://bria-datasets.s3.us-east-1.amazonaws.com/Fibo_edit/flower.png"
-            ],
-            "type": "string"
-          },
-          "seed": {
-            "title": "Seed",
-            "description": "Random seed for reproducibility.",
-            "default": 5555,
-            "type": "integer"
-          },
           "mask_url": {
             "title": "Mask Url",
-            "description": "The mask image.",
             "examples": [
               "https://bria-datasets.s3.us-east-1.amazonaws.com/Fibo_edit/flower_input_mask.png"
             ],
-            "type": "string"
-          },
-          "instruction": {
-            "title": "Instruction",
-            "description": "Instruct what elements you would like to fill in your image based on the mask.",
-            "examples": [
-              "A beautiful colorful butterfly"
-            ],
-            "type": "string"
+            "type": "string",
+            "description": "The mask image."
           },
           "steps_num": {
             "title": "Steps Num",
-            "description": "Number of inference steps.",
-            "maximum": 50,
             "default": 30,
+            "maximum": 50,
+            "type": "integer",
             "minimum": 20,
-            "type": "integer"
+            "description": "Number of inference steps."
           },
           "sync_mode": {
             "title": "Sync Mode",
-            "description": "If true, returns the image directly in the response (increases latency).",
+            "type": "boolean",
             "default": false,
-            "type": "boolean"
+            "description": "If true, returns the image directly in the response (increases latency)."
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "integer",
+            "default": 5555,
+            "description": "Random seed for reproducibility."
+          },
+          "instruction": {
+            "title": "Instruction",
+            "examples": [
+              "A beautiful colorful butterfly"
+            ],
+            "type": "string",
+            "description": "Instruct what elements you would like to fill in your image based on the mask."
+          },
+          "image_url": {
+            "title": "Image Url",
+            "examples": [
+              "https://bria-datasets.s3.us-east-1.amazonaws.com/Fibo_edit/flower.png"
+            ],
+            "type": "string",
+            "description": "The source image."
           }
         },
+        "title": "GenFillInput",
         "type": "object"
       },
       "GenfillV2Output": {
-        "title": "GenFillOutputModel",
         "x-fal-order-properties": [
           "image",
           "images",
@@ -147,10 +146,24 @@
           "structured_instruction"
         ],
         "properties": {
+          "vgl": {
+            "title": "Vgl",
+            "type": "object",
+            "additionalProperties": true,
+            "description": "The VGL document the image was generated from."
+          },
+          "structured_instruction": {
+            "title": "Structured Instruction",
+            "additionalProperties": true,
+            "type": "object",
+            "deprecated": true,
+            "description": "Deprecated, use `vgl`. The same document under the old name."
+          },
           "images": {
             "title": "Images",
-            "description": "Generated images.",
-            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            },
             "examples": [
               [
                 {
@@ -158,34 +171,19 @@
                 }
               ]
             ],
-            "items": {
-              "$ref": "#/components/schemas/Image"
-            },
-            "type": "array"
-          },
-          "structured_instruction": {
-            "title": "Structured Instruction",
-            "description": "Deprecated, use `vgl`. The same document under the old name.",
-            "additionalProperties": true,
-            "deprecated": true,
-            "type": "object"
-          },
-          "vgl": {
-            "title": "Vgl",
-            "description": "The VGL document the image was generated from.",
-            "additionalProperties": true,
-            "type": "object"
+            "type": "array",
+            "default": [],
+            "description": "Generated images."
           },
           "image": {
             "$ref": "#/components/schemas/Image",
             "description": "Generated image."
           }
         },
+        "title": "GenFillOutputModel",
         "type": "object"
       },
       "Image": {
-        "title": "Image",
-        "description": "Represents an image file.",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -199,8 +197,6 @@
         ],
         "properties": {
           "file_size": {
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -209,28 +205,13 @@
                 "type": "null"
               }
             ],
+            "title": "File Size",
             "examples": [
               4404019
-            ]
-          },
-          "width": {
-            "title": "Width",
-            "description": "The width of the image in pixels.",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
             ],
-            "examples": [
-              1024
-            ]
+            "description": "The size of the file in bytes."
           },
           "height": {
-            "title": "Height",
-            "description": "The height of the image in pixels.",
             "anyOf": [
               {
                 "type": "integer"
@@ -239,47 +220,66 @@
                 "type": "null"
               }
             ],
+            "title": "Height",
             "examples": [
               1024
-            ]
+            ],
+            "description": "The height of the image in pixels."
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "examples": [
+              1024
+            ],
+            "description": "The width of the image in pixels."
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
           },
           "url": {
             "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
-          },
-          "file_name": {
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
-          },
-          "content_type": {
-            "title": "Content Type",
-            "description": "The mime type of the file.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ]
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
           }
         },
-        "type": "object"
+        "title": "Image",
+        "type": "object",
+        "description": "Represents an image file."
       }
     }
   },

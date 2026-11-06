@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/ovi",
     "version": "1.0.0",
@@ -71,6 +71,7 @@
         ]
       },
       "OviInput": {
+        "title": "OviT2VRequest",
         "x-fal-order-properties": [
           "prompt",
           "negative_prompt",
@@ -80,30 +81,21 @@
           "resolution",
           "enable_safety_checker"
         ],
+        "type": "object",
         "required": [
           "prompt"
         ],
-        "type": "object",
         "properties": {
-          "negative_prompt": {
-            "description": "Negative prompt for video generation.",
-            "default": "jitter, bad hands, blur, distortion",
-            "type": "string",
-            "title": "Negative Prompt"
-          },
-          "audio_negative_prompt": {
-            "description": "Negative prompt for audio generation.",
-            "default": "robotic, muffled, echo, distorted",
-            "type": "string",
-            "title": "Audio Negative Prompt"
-          },
-          "enable_safety_checker": {
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "default": true,
-            "type": "boolean",
-            "title": "Enable Safety Checker"
+          "prompt": {
+            "examples": [
+              "A close-up of someone's face as they pet a cat, their hands stroking the soft fur in the foreground. Their affectionate expression shows as the cat purrs contentedly in their lap. They say, <S>This little guy has been with me for eight years now. He knows exactly when I need comfort. Animals are pretty amazing that way.<E>.<AUDCAP>Affectionate voice with cat purring and gentle petting sounds<ENDAUDCAP>"
+            ],
+            "description": "The text prompt to guide video generation.",
+            "title": "Prompt",
+            "type": "string"
           },
           "seed": {
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
             "anyOf": [
               {
                 "type": "integer"
@@ -112,24 +104,25 @@
                 "type": "null"
               }
             ],
-            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
             "title": "Seed"
           },
-          "num_inference_steps": {
-            "minimum": 1,
-            "description": "The number of inference steps.",
-            "maximum": 50,
-            "default": 30,
-            "type": "integer",
-            "title": "Num Inference Steps"
+          "negative_prompt": {
+            "description": "Negative prompt for video generation.",
+            "title": "Negative Prompt",
+            "default": "jitter, bad hands, blur, distortion",
+            "type": "string"
           },
-          "prompt": {
-            "description": "The text prompt to guide video generation.",
-            "examples": [
-              "A close-up of someone's face as they pet a cat, their hands stroking the soft fur in the foreground. Their affectionate expression shows as the cat purrs contentedly in their lap. They say, <S>This little guy has been with me for eight years now. He knows exactly when I need comfort. Animals are pretty amazing that way.<E>.<AUDCAP>Affectionate voice with cat purring and gentle petting sounds<ENDAUDCAP>"
-            ],
-            "type": "string",
-            "title": "Prompt"
+          "enable_safety_checker": {
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "title": "Enable Safety Checker",
+            "default": true,
+            "type": "boolean"
+          },
+          "audio_negative_prompt": {
+            "description": "Negative prompt for audio generation.",
+            "title": "Audio Negative Prompt",
+            "default": "robotic, muffled, echo, distorted",
+            "type": "string"
           },
           "resolution": {
             "description": "Resolution of the generated video in W:H format. One of (512x992, 992x512, 960x512, 512x960, 720x720, or 448x1120).",
@@ -142,24 +135,38 @@
               "448x1120",
               "1120x448"
             ],
+            "title": "Resolution",
             "default": "992x512",
-            "type": "string",
-            "title": "Resolution"
+            "type": "string"
+          },
+          "num_inference_steps": {
+            "description": "The number of inference steps.",
+            "maximum": 50,
+            "title": "Num Inference Steps",
+            "default": 30,
+            "type": "integer",
+            "minimum": 1
           }
-        },
-        "title": "OviT2VRequest"
+        }
       },
       "OviOutput": {
+        "title": "OviT2VResponse",
         "x-fal-order-properties": [
           "video",
           "seed"
         ],
+        "type": "object",
         "required": [
           "seed"
         ],
-        "type": "object",
         "properties": {
           "video": {
+            "examples": [
+              {
+                "url": "https://storage.googleapis.com/falserverless/example_inputs/ovi_t2v_output.mp4"
+              }
+            ],
+            "description": "The generated video file.",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/File"
@@ -167,70 +174,33 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The generated video file.",
-            "examples": [
-              {
-                "url": "https://storage.googleapis.com/falserverless/example_inputs/ovi_t2v_output.mp4"
-              }
             ]
           },
           "seed": {
             "description": "The seed used for generation.",
-            "type": "integer",
-            "title": "Seed"
+            "title": "Seed",
+            "type": "integer"
           }
-        },
-        "title": "OviT2VResponse"
+        }
       },
       "File": {
+        "title": "File",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
+        "type": "object",
         "required": [
           "url"
         ],
-        "type": "object",
         "properties": {
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type"
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name"
-          },
           "file_size": {
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -239,14 +209,44 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
             "title": "File Size"
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name"
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
           }
-        },
-        "title": "File"
+        }
       }
     }
   },

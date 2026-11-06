@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/vidu/template-to-video",
     "version": "1.0.0",
@@ -71,53 +71,8 @@
         ]
       },
       "ViduTemplateToVideoInput": {
-        "x-fal-order-properties": [
-          "template",
-          "input_image_urls",
-          "seed",
-          "aspect_ratio"
-        ],
         "properties": {
-          "aspect_ratio": {
-            "default": "16:9",
-            "description": "The aspect ratio of the output video",
-            "title": "Aspect Ratio",
-            "type": "string",
-            "enum": [
-              "16:9",
-              "9:16"
-            ]
-          },
-          "seed": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Random seed for generation",
-            "title": "Seed"
-          },
-          "input_image_urls": {
-            "examples": [
-              [
-                "https://storage.googleapis.com/falserverless/web-examples/vidu/hug.PNG"
-              ]
-            ],
-            "items": {
-              "type": "string"
-            },
-            "description": "URLs of the images to use with the template. Number of images required varies by template: 'dynasty_dress' and 'shop_frame' accept 1-2 images, 'wish_sender' requires exactly 3 images, all other templates accept only 1 image.",
-            "title": "Input Image Urls",
-            "type": "array"
-          },
           "template": {
-            "default": "hug",
-            "description": "AI video template to use. Pricing varies by template: Standard templates (hug, kiss, love_pose, etc.) cost 4 credits ($0.20), Premium templates (lunar_newyear, dynasty_dress, dreamy_wedding, etc.) cost 6 credits ($0.30), and Advanced templates (live_photo) cost 10 credits ($0.50).",
-            "title": "Template",
-            "type": "string",
             "enum": [
               "dreamy_wedding",
               "romantic_lift",
@@ -300,19 +255,76 @@
               "creatice_product_up",
               "run_fast",
               "background_explosion"
-            ]
+            ],
+            "title": "Template",
+            "description": "AI video template to use. Pricing varies by template: Standard templates (hug, kiss, love_pose, etc.) cost 4 credits ($0.20), Premium templates (lunar_newyear, dynasty_dress, dreamy_wedding, etc.) cost 6 credits ($0.30), and Advanced templates (live_photo) cost 10 credits ($0.50).",
+            "default": "hug",
+            "type": "string"
+          },
+          "input_image_urls": {
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/web-examples/vidu/hug.PNG"
+              ]
+            ],
+            "title": "Input Image Urls",
+            "description": "URLs of the images to use with the template. Number of images required varies by template: 'dynasty_dress' and 'shop_frame' accept 1-2 images, 'wish_sender' requires exactly 3 images, all other templates accept only 1 image.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": true,
+            "description": "Enable safety checks; disabling requires authorization.",
+            "hidden": true
+          },
+          "aspect_ratio": {
+            "enum": [
+              "16:9",
+              "9:16"
+            ],
+            "title": "Aspect Ratio",
+            "description": "The aspect ratio of the output video",
+            "default": "16:9",
+            "type": "string"
+          },
+          "seed": {
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Random seed for generation"
           }
         },
         "title": "TemplateToVideoRequest",
+        "x-fal-order-properties": [
+          "enable_safety_checker",
+          "template",
+          "input_image_urls",
+          "seed",
+          "aspect_ratio"
+        ],
         "required": [
           "input_image_urls"
         ],
         "type": "object"
       },
       "ViduTemplateToVideoOutput": {
-        "x-fal-order-properties": [
-          "video"
-        ],
         "properties": {
           "video": {
             "examples": [
@@ -325,23 +337,21 @@
           }
         },
         "title": "TemplateToVideoOutput",
+        "x-fal-order-properties": [
+          "video"
+        ],
         "required": [
           "video"
         ],
         "type": "object"
       },
       "File": {
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
         "properties": {
           "file_size": {
             "examples": [
               4404019
             ],
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -350,33 +360,18 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
+            "description": "The size of the file in bytes."
           },
           "url": {
-            "description": "The URL where the file can be downloaded from.",
             "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
             "type": "string"
           },
           "file_name": {
             "examples": [
               "z9RV14K95DvU.png"
             ],
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -385,11 +380,31 @@
                 "type": "null"
               }
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file."
           }
         },
         "title": "File",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
         "required": [
           "url"
         ],

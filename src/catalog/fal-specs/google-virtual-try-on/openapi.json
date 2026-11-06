@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for google/virtual-try-on",
     "version": "1.0.0",
@@ -71,77 +71,87 @@
         ]
       },
       "VirtualTryOnInput": {
-        "properties": {
-          "num_images": {
-            "description": "The number of virtual try-on images to generate.",
-            "default": 1,
-            "minimum": 1,
-            "type": "integer",
-            "title": "Num Images",
-            "maximum": 4
-          },
-          "product_image_url": {
-            "examples": [
-              "https://storage.googleapis.com/falserverless/model_tests/leffa/tshirt_image.jpg"
-            ],
-            "type": "string",
-            "title": "Product Image Url",
-            "description": "The URL of the product image to try on."
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "type": "boolean",
-            "title": "Enable Safety Checker",
-            "description": "Authorized callers may set false to request relaxed screening."
-          },
-          "person_image_url": {
-            "examples": [
-              "https://storage.googleapis.com/falserverless/model_tests/leffa/person_image.jpg"
-            ],
-            "type": "string",
-            "title": "Person Image Url",
-            "description": "The URL of the image of the person trying on the product."
-          }
-        },
-        "type": "object",
         "required": [
           "person_image_url",
           "product_image_url"
         ],
-        "title": "VirtualTryOnInput",
         "x-fal-order-properties": [
           "person_image_url",
           "product_image_url",
           "num_images",
           "enable_safety_checker"
-        ]
+        ],
+        "title": "VirtualTryOnInput",
+        "type": "object",
+        "properties": {
+          "person_image_url": {
+            "title": "Person Image Url",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/model_tests/leffa/person_image.jpg"
+            ],
+            "type": "string",
+            "description": "The URL of the image of the person trying on the product."
+          },
+          "product_image_url": {
+            "title": "Product Image Url",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/model_tests/leffa/tshirt_image.jpg"
+            ],
+            "type": "string",
+            "description": "The URL of the product image to try on."
+          },
+          "num_images": {
+            "minimum": 1,
+            "type": "integer",
+            "maximum": 4,
+            "title": "Num Images",
+            "description": "The number of virtual try-on images to generate.",
+            "default": 1
+          },
+          "enable_safety_checker": {
+            "type": "boolean",
+            "title": "Enable Safety Checker",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "default": true
+          }
+        }
       },
       "VirtualTryOnOutput": {
+        "required": [
+          "images"
+        ],
+        "x-fal-order-properties": [
+          "images"
+        ],
+        "title": "VirtualTryOnOutput",
+        "type": "object",
         "properties": {
           "images": {
             "items": {
               "$ref": "#/components/schemas/ImageFile"
             },
-            "type": "array",
             "title": "Images",
-            "description": "The generated virtual try-on images."
+            "description": "The generated virtual try-on images.",
+            "type": "array"
           }
-        },
-        "type": "object",
-        "required": [
-          "images"
-        ],
-        "title": "VirtualTryOnOutput",
-        "x-fal-order-properties": [
-          "images"
-        ]
+        }
       },
       "ImageFile": {
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "title": "ImageFile",
+        "type": "object",
         "properties": {
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
+          "file_name": {
             "anyOf": [
               {
                 "type": "string"
@@ -149,24 +159,44 @@
               {
                 "type": "null"
               }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
             ],
             "title": "Content Type",
             "description": "The mime type of the file."
           },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "height": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
+            "title": "Height",
+            "description": "The height of the image"
           },
           "width": {
             "anyOf": [
@@ -180,52 +210,22 @@
             "title": "Width",
             "description": "The width of the image"
           },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
           "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "examples": [
               4404019
             ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
             "title": "File Size",
             "description": "The size of the file in bytes."
-          },
-          "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Height",
-            "description": "The height of the image"
           }
-        },
-        "type": "object",
-        "required": [
-          "url"
-        ],
-        "title": "ImageFile",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size",
-          "width",
-          "height"
-        ]
+        }
       }
     }
   },

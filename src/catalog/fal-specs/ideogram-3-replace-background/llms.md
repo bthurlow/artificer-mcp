@@ -13,7 +13,7 @@
 
 ## Pricing
 
-Your request will cost **$0.03** with TURBO, **$0.06** with BALANCED, and **$0.09** with QUALITY.
+Each image costs **$0.03** with TURBO, **$0.06** with BALANCED, and **$0.09** with QUALITY.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -48,7 +48,7 @@ The API accepts the following input parameters:
   The style type to generate with. Cannot be used with style_codes.
   - Options: `"AUTO"`, `"GENERAL"`, `"REALISTIC"`, `"DESIGN"`
 
-- **`expand_prompt`** (`boolean`, _optional_):
+- **`enable_prompt_expansion`** (`boolean`, _optional_):
   Determine if MagicPrompt should be used in generating the request or not. Default value: `true`
   - Default: `true`
 
@@ -76,6 +76,10 @@ The API accepts the following input parameters:
   The image URL whose background needs to be replaced
   - Examples: "https://v3.fal.media/files/rabbit/F6dvKPFL9VzKiM8asJOgm_MJj6yUB6rGjTsv_1YHIcA_image.webp"
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -92,10 +96,11 @@ The API accepts the following input parameters:
 ```json
 {
   "rendering_speed": "BALANCED",
-  "expand_prompt": true,
+  "enable_prompt_expansion": true,
   "num_images": 1,
   "prompt": "A beautiful sunset over mountains that writes Ideogram v3 in fal.ai",
-  "image_url": "https://v3.fal.media/files/rabbit/F6dvKPFL9VzKiM8asJOgm_MJj6yUB6rGjTsv_1YHIcA_image.webp"
+  "image_url": "https://v3.fal.media/files/rabbit/F6dvKPFL9VzKiM8asJOgm_MJj6yUB6rGjTsv_1YHIcA_image.webp",
+  "enable_safety_checker": true
 }
 ```
 
@@ -203,6 +208,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -224,4 +233,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/minimax-music/v2.6",
     "version": "1.0.0",
@@ -71,54 +71,6 @@
         ]
       },
       "MinimaxMusicV26Input": {
-        "properties": {
-          "enable_safety_checker": {
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "type": "boolean",
-            "default": true,
-            "title": "Enable Safety Checker"
-          },
-          "lyrics_optimizer": {
-            "description": "When true and lyrics is empty, auto-generates lyrics from the prompt.",
-            "type": "boolean",
-            "default": false,
-            "title": "Lyrics Optimizer"
-          },
-          "audio_setting": {
-            "description": "Audio configuration settings",
-            "$ref": "#/components/schemas/AudioSetting25"
-          },
-          "lyrics": {
-            "examples": [
-              "[verse]\nStreetlights flicker, the night breeze sighs\nShadows stretch as I walk alone\n[chorus]\nWandering, longing, where should I go"
-            ],
-            "description": "Lyrics of the song. Use \\n to separate lines. Supports structure tags: [Intro], [Verse], [Pre Chorus], [Chorus], [Post Chorus], [Hook], [Bridge], [Interlude], [Transition], [Build Up], [Break], [Inst], [Solo], [Outro]. Max 3500 characters. Required when is_instrumental is false.",
-            "type": "string",
-            "default": "",
-            "title": "Lyrics",
-            "maxLength": 3500
-          },
-          "is_instrumental": {
-            "description": "When true, generates vocal-free instrumental music.",
-            "type": "boolean",
-            "default": false,
-            "title": "Is Instrumental"
-          },
-          "prompt": {
-            "examples": [
-              "City Pop, 80s retro, groovy synth bass, warm female vocal, 104 BPM, nostalgic urban night"
-            ],
-            "description": "A description of the music style, mood, genre, and scenario. 10-2000 characters.",
-            "type": "string",
-            "minLength": 10,
-            "title": "Prompt",
-            "maxLength": 2000
-          }
-        },
-        "required": [
-          "prompt"
-        ],
-        "type": "object",
         "title": "TextToMusic26Request",
         "x-fal-order-properties": [
           "prompt",
@@ -127,78 +79,140 @@
           "is_instrumental",
           "audio_setting",
           "enable_safety_checker"
+        ],
+        "type": "object",
+        "properties": {
+          "is_instrumental": {
+            "title": "Is Instrumental",
+            "type": "boolean",
+            "default": false,
+            "description": "When true, generates vocal-free instrumental music."
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 2000,
+            "examples": [
+              "City Pop, 80s retro, groovy synth bass, warm female vocal, 104 BPM, nostalgic urban night"
+            ],
+            "description": "A description of the music style, mood, genre, and scenario. 10-2000 characters."
+          },
+          "lyrics": {
+            "title": "Lyrics",
+            "type": "string",
+            "default": "",
+            "maxLength": 3500,
+            "examples": [
+              "[verse]\nStreetlights flicker, the night breeze sighs\nShadows stretch as I walk alone\n[chorus]\nWandering, longing, where should I go"
+            ],
+            "description": "Lyrics of the song. Use \\n to separate lines. Supports structure tags: [Intro], [Verse], [Pre Chorus], [Chorus], [Post Chorus], [Hook], [Bridge], [Interlude], [Transition], [Build Up], [Break], [Inst], [Solo], [Outro]. Max 3500 characters. Required when is_instrumental is false."
+          },
+          "lyrics_optimizer": {
+            "title": "Lyrics Optimizer",
+            "type": "boolean",
+            "default": false,
+            "description": "When true and lyrics is empty, auto-generates lyrics from the prompt."
+          },
+          "audio_setting": {
+            "$ref": "#/components/schemas/AudioSetting25",
+            "description": "Audio configuration settings"
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "type": "boolean",
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening."
+          }
+        },
+        "required": [
+          "prompt"
         ]
       },
       "MinimaxMusicV26Output": {
+        "title": "MusicV26Output",
+        "x-fal-order-properties": [
+          "audio"
+        ],
+        "type": "object",
         "properties": {
           "audio": {
-            "description": "The generated music",
             "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v3b.fal.media/files/b/kangaroo/GJe3sQehFteUTmpDROzOs_output.mp3"
               }
-            ]
+            ],
+            "description": "The generated music"
           }
         },
         "required": [
           "audio"
-        ],
-        "type": "object",
-        "title": "MusicV26Output",
-        "x-fal-order-properties": [
-          "audio"
         ]
       },
       "AudioSetting25": {
+        "title": "AudioSetting25",
+        "x-fal-order-properties": [
+          "sample_rate",
+          "bitrate",
+          "format"
+        ],
+        "type": "object",
         "properties": {
-          "sample_rate": {
-            "enum": [
-              16000,
-              24000,
-              32000,
-              44100
-            ],
-            "description": "Sample rate of generated audio",
-            "type": "integer",
-            "default": 44100,
-            "title": "Sample Rate"
-          },
-          "format": {
-            "enum": [
-              "mp3",
-              "wav",
-              "pcm"
-            ],
-            "description": "Audio format",
-            "type": "string",
-            "default": "mp3",
-            "title": "Format"
-          },
           "bitrate": {
+            "title": "Bitrate",
+            "type": "integer",
+            "default": 256000,
             "enum": [
               32000,
               64000,
               128000,
               256000
             ],
-            "description": "Bitrate of generated audio",
+            "description": "Bitrate of generated audio"
+          },
+          "sample_rate": {
+            "title": "Sample Rate",
             "type": "integer",
-            "default": 256000,
-            "title": "Bitrate"
+            "default": 44100,
+            "enum": [
+              16000,
+              24000,
+              32000,
+              44100
+            ],
+            "description": "Sample rate of generated audio"
+          },
+          "format": {
+            "title": "Format",
+            "type": "string",
+            "default": "mp3",
+            "enum": [
+              "mp3",
+              "wav",
+              "pcm"
+            ],
+            "description": "Audio format"
           }
-        },
-        "type": "object",
-        "title": "AudioSetting25",
-        "x-fal-order-properties": [
-          "sample_rate",
-          "bitrate",
-          "format"
-        ]
+        }
       },
       "File": {
+        "title": "File",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object",
         "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
           "file_size": {
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -207,13 +221,13 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
             "examples": [
               4404019
-            ]
+            ],
+            "description": "The size of the file in bytes."
           },
           "content_type": {
+            "title": "Content Type",
             "anyOf": [
               {
                 "type": "string"
@@ -222,18 +236,13 @@
                 "type": "null"
               }
             ],
-            "description": "The mime type of the file.",
-            "title": "Content Type",
             "examples": [
               "image/png"
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
+            ],
+            "description": "The mime type of the file."
           },
           "file_name": {
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -242,23 +251,14 @@
                 "type": "null"
               }
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
-            ]
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
           }
         },
         "required": [
           "url"
-        ],
-        "type": "object",
-        "title": "File",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
         ]
       }
     }

@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for bria/increase-resolution",
     "version": "1.0.0",
@@ -71,9 +71,55 @@
         ]
       },
       "IncreaseResolutionInput": {
-        "required": [
-          "image_url"
-        ],
+        "type": "object",
+        "properties": {
+          "desired_increase": {
+            "title": "Desired Increase",
+            "type": "integer",
+            "description": "Upscale factor. Each factor is its own SwinIR checkpoint.",
+            "default": 2,
+            "enum": [
+              2,
+              4
+            ]
+          },
+          "sync_mode": {
+            "type": "boolean",
+            "description": "Return the image inline instead of as a URL.",
+            "default": false,
+            "title": "Sync Mode"
+          },
+          "preserve_alpha": {
+            "type": "boolean",
+            "description": "Reattach the source alpha channel to the result.",
+            "default": true,
+            "title": "Preserve Alpha"
+          },
+          "image_url": {
+            "type": "string",
+            "examples": [
+              "https://bria-test-images.s3.amazonaws.com/increase_res/playground/sample_input_1000x1250.png"
+            ],
+            "description": "URL of the image to upscale.",
+            "title": "Image Url"
+          },
+          "preserve_color": {
+            "type": "boolean",
+            "description": "Correct the upscaled result's color cast against the source image.",
+            "default": false,
+            "title": "Preserve Color"
+          },
+          "output_type": {
+            "title": "Output Type",
+            "type": "string",
+            "description": "Image format. JPEG carries no alpha, so preserve_alpha does not apply.",
+            "default": "png",
+            "enum": [
+              "png",
+              "jpeg"
+            ]
+          }
+        },
         "x-fal-order-properties": [
           "image_url",
           "desired_increase",
@@ -82,110 +128,42 @@
           "output_type",
           "sync_mode"
         ],
-        "properties": {
-          "output_type": {
-            "default": "png",
-            "enum": [
-              "png",
-              "jpeg"
-            ],
-            "description": "Image format. JPEG carries no alpha, so preserve_alpha does not apply.",
-            "type": "string",
-            "title": "Output Type"
-          },
-          "preserve_alpha": {
-            "default": true,
-            "description": "Reattach the source alpha channel to the result.",
-            "type": "boolean",
-            "title": "Preserve Alpha"
-          },
-          "preserve_color": {
-            "default": false,
-            "description": "Correct the upscaled result's color cast against the source image.",
-            "type": "boolean",
-            "title": "Preserve Color"
-          },
-          "sync_mode": {
-            "default": false,
-            "description": "Return the image inline instead of as a URL.",
-            "type": "boolean",
-            "title": "Sync Mode"
-          },
-          "image_url": {
-            "examples": [
-              "https://bria-test-images.s3.amazonaws.com/increase_res/playground/sample_input_1000x1250.png"
-            ],
-            "description": "URL of the image to upscale.",
-            "type": "string",
-            "title": "Image Url"
-          },
-          "desired_increase": {
-            "default": 2,
-            "enum": [
-              2,
-              4
-            ],
-            "description": "Upscale factor. Each factor is its own SwinIR checkpoint.",
-            "type": "integer",
-            "title": "Desired Increase"
-          }
-        },
-        "type": "object",
-        "title": "IncreaseResolutionInput"
+        "title": "IncreaseResolutionInput",
+        "required": [
+          "image_url"
+        ]
       },
       "IncreaseResolutionOutput": {
-        "required": [
-          "image"
-        ],
-        "x-fal-order-properties": [
-          "image"
-        ],
+        "type": "object",
         "properties": {
           "image": {
             "examples": [
               {
-                "height": 2500,
                 "url": "https://bria-test-images.s3.amazonaws.com/increase_res/playground/sample_upscaled_2x_2000x2500.png",
+                "width": 2000,
                 "content_type": "image/png",
-                "width": 2000
+                "height": 2500
               }
             ],
             "description": "The upscaled image.",
             "$ref": "#/components/schemas/Image"
           }
         },
-        "type": "object",
-        "title": "IncreaseResolutionOutput"
+        "x-fal-order-properties": [
+          "image"
+        ],
+        "title": "IncreaseResolutionOutput",
+        "required": [
+          "image"
+        ]
       },
       "Image": {
         "required": [
           "url"
         ],
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size",
-          "width",
-          "height"
-        ],
+        "type": "object",
         "description": "Represents an image file.",
         "properties": {
-          "height": {
-            "examples": [
-              1024
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The height of the image in pixels.",
-            "title": "Height"
-          },
           "file_size": {
             "examples": [
               4404019
@@ -202,24 +180,9 @@
             "title": "File Size"
           },
           "url": {
-            "description": "The URL where the file can be downloaded from.",
             "type": "string",
+            "description": "The URL where the file can be downloaded from.",
             "title": "Url"
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
           },
           "width": {
             "examples": [
@@ -250,9 +213,46 @@
             ],
             "description": "The mime type of the file.",
             "title": "Content Type"
+          },
+          "height": {
+            "examples": [
+              1024
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The height of the image in pixels.",
+            "title": "Height"
+          },
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
           }
         },
-        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
         "title": "Image"
       }
     }

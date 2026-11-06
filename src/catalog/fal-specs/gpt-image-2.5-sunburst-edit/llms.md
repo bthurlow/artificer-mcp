@@ -42,7 +42,7 @@ The API accepts the following input parameters:
   - Examples: ["https://v3b.fal.media/files/b/0a8691af/9Se_1_VX1wzTjjTOpWbs9_bb39c2eb-1a41-4749-b1d0-cf134abc8bbf.png"]
 
 - **`mask_url`** (`string`, _optional_):
-  The URL of the mask image to use for the generation. This indicates what part of the image to edit.
+  Mask image URL. White marks regions to edit and black marks regions to keep.
 
 - **`image_size`** (`ImageSize | Enum`, _optional_):
   The size of the generated image. Use 'auto' to infer from input images. Default value: `auto`
@@ -120,7 +120,7 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated images.
   - Array of ImageFile
-  - Examples: [{"url":"https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png","file_name":"yUt7tifLSbg1WzWWgfj2o.png","height":1024,"width":1024,"content_type":"image/png"}]
+  - Examples: [{"content_type":"image/png","file_name":"yUt7tifLSbg1WzWWgfj2o.png","height":1024,"width":1024,"url":"https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png"}]
 
 
 
@@ -130,11 +130,11 @@ The API returns the following output format:
 {
   "images": [
     {
-      "url": "https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png",
+      "content_type": "image/png",
       "file_name": "yUt7tifLSbg1WzWWgfj2o.png",
       "height": 1024,
       "width": 1024,
-      "content_type": "image/png"
+      "url": "https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png"
     }
   ]
 }
@@ -218,6 +218,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -239,4 +243,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

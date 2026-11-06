@@ -109,7 +109,7 @@ The API returns the following output format:
 
 - **`image`** (`ImageFile`, _required_):
   Image with background removed. When `mask_only` is `True`, this contains the segmentation mask instead.
-  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/birefnet-output.png","file_name":"birefnet-output.png","content_type":"image/png","width":1024,"height":1024}
+  - Examples: {"file_name":"birefnet-output.png","url":"https://storage.googleapis.com/falserverless/example_outputs/birefnet-output.png","height":1024,"width":1024,"content_type":"image/png"}
 
 - **`mask_image`** (`ImageFile`, _optional_):
   Mask used to remove the background
@@ -121,11 +121,11 @@ The API returns the following output format:
 ```json
 {
   "image": {
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/birefnet-output.png",
     "file_name": "birefnet-output.png",
-    "content_type": "image/png",
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/birefnet-output.png",
+    "height": 1024,
     "width": 1024,
-    "height": 1024
+    "content_type": "image/png"
   }
 }
 ```
@@ -203,6 +203,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -224,4 +228,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

@@ -16,13 +16,12 @@
 ## Pricing
 
 Pricing is **$0.10 per megapixel per second**. The total cost is multiplied based on the video’s frame rate (FPS), using **30-FPS increments**:
-- Up to **30 FPS** → **1× multiplier**
-- Up to **60 FPS** → **2× multiplier**
-- Up to **90 FPS** → **3× multiplier**
-
-
-For instance, a video upscaled to a resolution of 2440 × 1440, with a frame rate of 30 FPS and a duration of 4 seconds, is priced as follows: 
-3.5 (megapixels) × 4 (seconds) × 1 (FPS multiplier for 0–30 FPS) × $0.10 = $1.40
+ - Up to **30 FPS** → **1× multiplier**
+ - Up to **60 FPS** → **2× multiplier**
+ - Up to **90 FPS** → **3× multiplier**
+ 
+ For instance, a video upscaled to a resolution of 2440 × 1440, with a frame rate of 30 FPS and a duration of 4 seconds, is priced as follows:
+ about 3.5 (megapixels; exactly 3.5136) × 4 (seconds) × 1 (FPS multiplier for 0–30 FPS) × **$0.10** = about **$1.40** (exactly **$1.40544**)
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -36,6 +35,10 @@ See the input and output schema below, as well as the usage examples.
 
 The API accepts the following input parameters:
 
+
+- **`enable_safety_checker`** (`boolean`, _optional_):
+   Default value: `true`
+  - Default: `true`
 
 - **`video_url`** (`string`, _required_):
   URL to the input video.
@@ -61,6 +64,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "video_url": "https://storage.googleapis.com/falserverless/example_inputs/crystal_upscaler/video_upscaling/video_in.mp4",
   "scale_factor": 2
 }
@@ -73,7 +77,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   URL to the upscaled video
-  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/crystal_upscaler/video_upscaling/video_out.mp4","width":4096,"height":2160,"content_type":"video/mp4","file_name":"w0VQQvPdwvV2GSCtRTMzh_hDH8SPrB.mp4","num_frames":302,"duration":13.056527,"fps":23.130193905817176}
+  - Examples: {"content_type":"video/mp4","height":2160,"url":"https://storage.googleapis.com/falserverless/example_outputs/crystal_upscaler/video_upscaling/video_out.mp4","width":4096,"duration":13.056527,"file_name":"w0VQQvPdwvV2GSCtRTMzh_hDH8SPrB.mp4","fps":23.130193905817176,"num_frames":302}
 
 
 
@@ -82,14 +86,14 @@ The API returns the following output format:
 ```json
 {
   "video": {
+    "content_type": "video/mp4",
+    "height": 2160,
     "url": "https://storage.googleapis.com/falserverless/example_outputs/crystal_upscaler/video_upscaling/video_out.mp4",
     "width": 4096,
-    "height": 2160,
-    "content_type": "video/mp4",
-    "file_name": "w0VQQvPdwvV2GSCtRTMzh_hDH8SPrB.mp4",
-    "num_frames": 302,
     "duration": 13.056527,
-    "fps": 23.130193905817176
+    "file_name": "w0VQQvPdwvV2GSCtRTMzh_hDH8SPrB.mp4",
+    "fps": 23.130193905817176,
+    "num_frames": 302
   }
 }
 ```
@@ -167,6 +171,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -188,4 +196,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

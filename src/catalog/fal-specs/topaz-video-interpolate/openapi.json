@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for topaz/interpolate/video",
     "version": "1.0.0",
@@ -71,101 +71,102 @@
         ]
       },
       "InterpolateVideoInput": {
-        "x-fal-order-properties": [
-          "video_url",
-          "model",
-          "target_fps",
-          "slowdown_factor",
-          "H264_output"
-        ],
+        "title": "VideoFrameInterpolationRequest",
         "required": [
           "video_url"
         ],
-        "type": "object",
         "properties": {
-          "slowdown_factor": {
-            "minimum": 1,
-            "description": "Slow-motion factor: 2 makes the output twice as long at the target FPS (2x slow motion), up to 8x. 1 keeps the original speed. The extra generated frames are billed like interpolated frames.",
-            "maximum": 8,
-            "default": 1,
-            "type": "integer",
-            "title": "Slowdown Factor"
-          },
-          "H264_output": {
-            "description": "Whether to use H264 codec for output video. Default is H265.",
-            "default": false,
-            "type": "boolean",
-            "title": "H264 Output"
-          },
           "model": {
-            "description": "Frame interpolation model. Apollo is general-purpose; Chronos targets real-world motion; Aion handles extreme/complex motion.",
+            "title": "Model",
+            "type": "string",
             "enum": [
               "Apollo",
               "Chronos",
               "Aion"
             ],
             "default": "Apollo",
-            "type": "string",
-            "title": "Model"
+            "description": "Frame interpolation model. Apollo is general-purpose; Chronos targets real-world motion; Aion handles extreme/complex motion."
+          },
+          "slowdown_factor": {
+            "maximum": 8,
+            "title": "Slowdown Factor",
+            "description": "Slow-motion factor: 2 makes the output twice as long at the target FPS (2x slow motion), up to 8x. 1 keeps the original speed. The extra generated frames are billed like interpolated frames.",
+            "type": "integer",
+            "default": 1,
+            "minimum": 1
           },
           "target_fps": {
-            "minimum": 16,
-            "description": "Target frames per second for the interpolated output.",
             "maximum": 120,
-            "default": 60,
+            "title": "Target Fps",
+            "description": "Target frames per second for the interpolated output.",
             "type": "integer",
-            "title": "Target Fps"
+            "default": 60,
+            "minimum": 16
+          },
+          "H264_output": {
+            "title": "H264 Output",
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to use H264 codec for output video. Default is H265."
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "type": "boolean",
+            "default": true
           },
           "video_url": {
-            "description": "URL of the video to retime / interpolate",
+            "title": "Video Url",
+            "type": "string",
             "examples": [
               "https://v3.fal.media/files/kangaroo/y5-1YTGpun17eSeggZMzX_video-1733468228.mp4"
             ],
-            "type": "string",
-            "title": "Video Url"
+            "description": "URL of the video to retime / interpolate"
           }
         },
-        "title": "VideoFrameInterpolationRequest"
+        "x-fal-order-properties": [
+          "enable_safety_checker",
+          "video_url",
+          "model",
+          "target_fps",
+          "slowdown_factor",
+          "H264_output"
+        ],
+        "type": "object"
       },
       "InterpolateVideoOutput": {
-        "x-fal-order-properties": [
-          "video"
-        ],
+        "title": "VideoUpscaleOutput",
         "required": [
           "video"
         ],
-        "type": "object",
         "properties": {
           "video": {
-            "$ref": "#/components/schemas/File",
-            "description": "The upscaled video file",
             "examples": [
               {
                 "url": "https://v3.fal.media/files/penguin/ztj_LB4gQlW6HIfVs8zX4_upscaled.mp4"
               }
-            ]
+            ],
+            "$ref": "#/components/schemas/File",
+            "description": "The upscaled video file"
           }
         },
-        "title": "VideoUpscaleOutput"
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "type": "object"
       },
       "File": {
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
+        "title": "File",
         "required": [
           "url"
         ],
-        "type": "object",
         "properties": {
           "url": {
-            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
             "type": "string",
-            "title": "Url"
+            "description": "The URL where the file can be downloaded from."
           },
           "file_name": {
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -174,28 +175,13 @@
                 "type": "null"
               }
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "title": "File Name"
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type"
+            "description": "The name of the file. It will be auto-generated if not provided."
           },
           "file_size": {
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -204,14 +190,34 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ],
-            "title": "File Size"
+            "description": "The size of the file in bytes."
+          },
+          "content_type": {
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
           }
         },
-        "title": "File"
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object"
       }
     }
   },

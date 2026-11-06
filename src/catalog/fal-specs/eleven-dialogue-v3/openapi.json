@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/elevenlabs/text-to-dialogue/eleven-v3",
     "version": "1.0.0",
@@ -71,56 +71,27 @@
         ]
       },
       "ElevenlabsTextToDialogueElevenV3Input": {
+        "title": "TextToDialogueRequest",
         "required": [
           "inputs"
         ],
-        "title": "TextToDialogueRequest",
         "properties": {
-          "inputs": {
-            "items": {
-              "$ref": "#/components/schemas/DialogueBlock"
-            },
-            "title": "Inputs",
-            "examples": [
-              [
-                {
-                  "voice": "Aria",
-                  "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us."
-                },
-                {
-                  "voice": "Charlotte",
-                  "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day."
-                }
-              ]
-            ],
-            "description": "A list of dialogue inputs, each containing text and a voice ID which will be converted into speech.",
-            "type": "array"
-          },
-          "use_speaker_boost": {
+          "stability": {
+            "title": "Stability",
             "anyOf": [
               {
-                "type": "boolean"
+                "maximum": 1,
+                "type": "number",
+                "minimum": 0
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Use Speaker Boost",
-            "description": "This setting boosts the similarity to the original speaker. Using this setting requires a slightly higher computational load, which in turn increases latency."
-          },
-          "language_code": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Language Code",
-            "description": "Language code (ISO 639-1) used to enforce a language for the model. An error will be returned if language code is not supported by the model."
+            "description": "Determines how stable the voice is and the randomness between each generation. Lower values introduce broader emotional range for the voice. Higher values can result in a monotonous voice with limited emotion. Must be one of 0.0, 0.5, 1.0, else it will be rounded to the nearest value."
           },
           "seed": {
+            "title": "Seed",
             "anyOf": [
               {
                 "type": "integer"
@@ -129,31 +100,60 @@
                 "type": "null"
               }
             ],
-            "title": "Seed",
             "description": "Random seed for reproducibility."
           },
-          "stability": {
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/DialogueBlock"
+            },
+            "examples": [
+              [
+                {
+                  "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us.",
+                  "voice": "Aria"
+                },
+                {
+                  "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day.",
+                  "voice": "Charlotte"
+                }
+              ]
+            ],
+            "title": "Inputs",
+            "type": "array",
+            "description": "A list of dialogue inputs, each containing text and a voice ID which will be converted into speech."
+          },
+          "use_speaker_boost": {
+            "title": "Use Speaker Boost",
             "anyOf": [
               {
-                "maximum": 1,
-                "minimum": 0,
-                "type": "number"
+                "type": "boolean"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Stability",
-            "description": "Determines how stable the voice is and the randomness between each generation. Lower values introduce broader emotional range for the voice. Higher values can result in a monotonous voice with limited emotion. Must be one of 0.0, 0.5, 1.0, else it will be rounded to the nearest value."
+            "description": "This setting boosts the similarity to the original speaker. Using this setting requires a slightly higher computational load, which in turn increases latency."
           },
           "pronunciation_dictionary_locators": {
             "items": {
               "$ref": "#/components/schemas/PronunciationDictionaryLocator"
             },
             "title": "Pronunciation Dictionary Locators",
+            "type": "array",
             "default": [],
-            "description": "A list of pronunciation dictionary locators (id, version_id) to be applied to the text. They will be applied in order. You may have up to 3 locators per request",
-            "type": "array"
+            "description": "A list of pronunciation dictionary locators (id, version_id) to be applied to the text. They will be applied in order. You may have up to 3 locators per request"
+          },
+          "language_code": {
+            "title": "Language Code",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Language code (ISO 639-1) used to enforce a language for the model. An error will be returned if language code is not supported by the model."
           }
         },
         "x-fal-order-properties": [
@@ -167,25 +167,25 @@
         "type": "object"
       },
       "ElevenlabsTextToDialogueElevenV3Output": {
+        "title": "TextToDialogueOutput",
         "required": [
           "audio",
           "seed"
         ],
-        "title": "TextToDialogueOutput",
         "properties": {
-          "seed": {
-            "title": "Seed",
-            "description": "Random seed for reproducibility.",
-            "type": "integer"
-          },
           "audio": {
             "examples": [
               {
                 "url": "https://v3.fal.media/files/zebra/XFeGS8Fq-q1eAPG2sSAo__output.mp3"
               }
             ],
-            "description": "The generated audio file",
-            "$ref": "#/components/schemas/File"
+            "$ref": "#/components/schemas/File",
+            "description": "The generated audio file"
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "integer",
+            "description": "Random seed for reproducibility."
           }
         },
         "x-fal-order-properties": [
@@ -195,13 +195,19 @@
         "type": "object"
       },
       "DialogueBlock": {
+        "title": "DialogueBlock",
         "required": [
           "text",
           "voice"
         ],
-        "title": "DialogueBlock",
         "properties": {
+          "text": {
+            "title": "Text",
+            "type": "string",
+            "description": "The dialogue text"
+          },
           "voice": {
+            "title": "Voice",
             "examples": [
               "Aria",
               "Roger",
@@ -224,14 +230,8 @@
               "Lily",
               "Bill"
             ],
-            "description": "The name or the ID of the voice to be used for the generation.",
-            "title": "Voice",
-            "type": "string"
-          },
-          "text": {
-            "title": "Text",
-            "description": "The dialogue text",
-            "type": "string"
+            "type": "string",
+            "description": "The name or the ID of the voice to be used for the generation."
           }
         },
         "x-fal-order-properties": [
@@ -242,20 +242,10 @@
       },
       "PronunciationDictionaryLocator": {
         "title": "PronunciationDictionaryLocator",
+        "type": "object",
         "properties": {
-          "pronunciation_dictionary_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pronunciation Dictionary Id",
-            "description": "The ID of the pronunciation dictionary."
-          },
           "version_id": {
+            "title": "Version Id",
             "anyOf": [
               {
                 "type": "string"
@@ -264,23 +254,41 @@
                 "type": "null"
               }
             ],
-            "title": "Version Id",
             "description": "The ID of the version of the pronunciation dictionary. If not provided, the latest version will be used."
+          },
+          "pronunciation_dictionary_id": {
+            "title": "Pronunciation Dictionary Id",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The ID of the pronunciation dictionary."
           }
         },
         "x-fal-order-properties": [
           "pronunciation_dictionary_id",
           "version_id"
-        ],
-        "type": "object"
+        ]
       },
       "File": {
+        "title": "File",
         "required": [
           "url"
         ],
-        "title": "File",
         "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
           "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
             "anyOf": [
               {
                 "type": "string"
@@ -290,12 +298,12 @@
               }
             ],
             "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
             "description": "The name of the file. It will be auto-generated if not provided."
           },
           "file_size": {
+            "examples": [
+              4404019
+            ],
             "anyOf": [
               {
                 "type": "integer"
@@ -305,17 +313,12 @@
               }
             ],
             "title": "File Size",
-            "examples": [
-              4404019
-            ],
             "description": "The size of the file in bytes."
           },
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
-          },
           "content_type": {
+            "examples": [
+              "image/png"
+            ],
             "anyOf": [
               {
                 "type": "string"
@@ -325,9 +328,6 @@
               }
             ],
             "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
             "description": "The mime type of the file."
           }
         },

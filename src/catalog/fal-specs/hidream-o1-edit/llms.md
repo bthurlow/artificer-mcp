@@ -39,7 +39,7 @@ The API accepts the following input parameters:
 
 - **`image_size`** (`ImageSize | Enum`, _optional_):
   Requested output image size. Reference-image outputs use the nearest model-supported resolution up to about 2048x2048 pixels.
-  - Default: `{"width":2048,"height":2048}`
+  - Default: `{"height":2048,"width":2048}`
   - One of: ImageSize | Enum
 
 - **`num_inference_steps`** (`integer`, _optional_):
@@ -99,8 +99,8 @@ The API accepts the following input parameters:
     "https://storage.googleapis.com/falserverless/model_tests/hidream/woman.png"
   ],
   "image_size": {
-    "width": 2048,
-    "height": 2048
+    "height": 2048,
+    "width": 2048
   },
   "num_inference_steps": 50,
   "guidance_scale": 5,
@@ -228,6 +228,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -249,4 +253,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

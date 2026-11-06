@@ -15,9 +15,7 @@
 
 ## Pricing
 
-Video costs **$0.01625** per second at **480p**, **$0.026** per second at **768p**, and **$0.052** per second at **1080p**.
-
-Note: these are promotional rates, **35%** off for a limited time. The discount ends **October 31**, after which **480p** is **$0.025**/second, **768p** is **$0.04**/second, and **1080p** is **$0.08**/second.
+Billing is calculated per second of video generated. Through **October 31, 2026**, the **35%** promotional discount applies: **$0.01625** at **480p**, **$0.026** at **768p**, and **$0.052** at **1080p** per second. From **November 1 through November 15, 2026**, get **30% off** standard rates: **$0.0175** at **480p**, **$0.028** at **768p**, and **$0.056** at **1080p** per second. During the November promotion, **5 seconds** of video at **768p** costs **$0.14**. From **November 16, 2026**, standard rates are **$0.025**, **$0.04**, and **$0.08** per second at **480p**, **768p**, and **1080p**, respectively. Contact your sales representative to discuss permanent discounted pricing.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -101,7 +99,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"file_name":"--prs89fkHtWW406fmEs__NRhTqNku.mp4","url":"https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4","content_type":"video/mp4","file_size":6463396}
+  - Examples: {"content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4","file_name":"--prs89fkHtWW406fmEs__NRhTqNku.mp4","file_size":6463396}
 
 - **`expanded_prompt`** (`string`, _optional_):
   The prompt after expansion, as sent to the model. Null when prompt expansion was disabled, left the prompt unchanged, or was performed internally by MiniMax's hosted API.
@@ -116,9 +114,9 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_name": "--prs89fkHtWW406fmEs__NRhTqNku.mp4",
-    "url": "https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4",
     "content_type": "video/mp4",
+    "url": "https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4",
+    "file_name": "--prs89fkHtWW406fmEs__NRhTqNku.mp4",
     "file_size": 6463396
   }
 }
@@ -200,6 +198,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -221,4 +223,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

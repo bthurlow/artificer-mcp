@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for luma/agent/uni-1/v1/max/edit",
     "version": "1.0.0",
@@ -71,76 +71,10 @@
         ]
       },
       "AgentUni1V1MaxEditInput": {
-        "type": "object",
-        "title": "ImageEditRequest",
-        "properties": {
-          "style": {
-            "type": "string",
-            "title": "Style",
-            "description": "Visual style of the edited image.",
-            "enum": [
-              "auto",
-              "manga"
-            ],
-            "default": "auto"
-          },
-          "output_format": {
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "png",
-                  "jpeg"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Output Format",
-            "description": "Encoding format of the edited image."
-          },
-          "image_url": {
-            "type": "string",
-            "title": "Image Url",
-            "description": "URL of the source image to edit.",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/gallery/example_inputs_liuyifei.png"
-            ]
-          },
-          "reference_image_urls": {
-            "anyOf": [
-              {
-                "type": "array",
-                "maxItems": 8,
-                "items": {
-                  "type": "string"
-                }
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reference Image Urls",
-            "description": "Optional list of reference image URLs used to guide the edit."
-          },
-          "enable_safety_checker": {
-            "type": "boolean",
-            "title": "Enable Safety Checker",
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "default": true
-          },
-          "prompt": {
-            "minLength": 1,
-            "title": "Prompt",
-            "type": "string",
-            "description": "Text prompt describing the edit to apply.",
-            "examples": [
-              "Replace the background with a sunset over the ocean."
-            ],
-            "maxLength": 6000
-          }
-        },
+        "required": [
+          "prompt",
+          "image_url"
+        ],
         "x-fal-order-properties": [
           "prompt",
           "image_url",
@@ -149,69 +83,114 @@
           "reference_image_urls",
           "enable_safety_checker"
         ],
-        "required": [
-          "prompt",
-          "image_url"
-        ]
+        "type": "object",
+        "title": "ImageEditRequest",
+        "properties": {
+          "style": {
+            "enum": [
+              "auto",
+              "manga"
+            ],
+            "description": "Visual style of the edited image.",
+            "type": "string",
+            "title": "Style",
+            "default": "auto"
+          },
+          "reference_image_urls": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array",
+                "maxItems": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional list of reference image URLs used to guide the edit.",
+            "title": "Reference Image Urls"
+          },
+          "output_format": {
+            "anyOf": [
+              {
+                "enum": [
+                  "png",
+                  "jpeg"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Encoding format of the edited image.",
+            "title": "Output Format"
+          },
+          "prompt": {
+            "maxLength": 6000,
+            "type": "string",
+            "description": "Text prompt describing the edit to apply.",
+            "examples": [
+              "Replace the background with a sunset over the ocean."
+            ],
+            "title": "Prompt",
+            "minLength": 1
+          },
+          "enable_safety_checker": {
+            "type": "boolean",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "title": "Enable Safety Checker",
+            "default": true
+          },
+          "image_url": {
+            "type": "string",
+            "description": "URL of the source image to edit.",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/gallery/example_inputs_liuyifei.png"
+            ],
+            "title": "Image Url"
+          }
+        }
       },
       "AgentUni1V1MaxEditOutput": {
+        "required": [
+          "images"
+        ],
+        "x-fal-order-properties": [
+          "images"
+        ],
         "type": "object",
         "title": "ImageOutput",
         "properties": {
           "images": {
-            "type": "array",
-            "title": "Images",
-            "description": "The generated image(s).",
             "items": {
               "$ref": "#/components/schemas/File"
-            }
+            },
+            "type": "array",
+            "description": "The generated image(s).",
+            "title": "Images"
           }
-        },
-        "x-fal-order-properties": [
-          "images"
-        ],
-        "required": [
-          "images"
-        ]
+        }
       },
       "File": {
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
         "type": "object",
         "title": "File",
         "properties": {
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
-          },
           "url": {
             "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type",
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ]
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
           },
           "file_size": {
             "anyOf": [
@@ -222,22 +201,43 @@
                 "type": "null"
               }
             ],
-            "title": "File Size",
             "description": "The size of the file in bytes.",
             "examples": [
               4404019
-            ]
+            ],
+            "title": "File Size"
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name"
           }
-        },
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
-        "required": [
-          "url"
-        ]
+        }
       }
     }
   },

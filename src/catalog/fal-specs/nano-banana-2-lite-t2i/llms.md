@@ -13,7 +13,7 @@
 
 ## Pricing
 
-Text tokens (per 1M): $0.3125 input, $1.875 output. Image tokens (per 1M): $0.3125 input, $37.50 output. Output images are generated at a fixed 1K (1024x1024px)
+Text tokens (per 1M): **$0.3125** input, **$1.875** output. Image tokens (per 1M): **$0.3125** input, **$37.50** output. Output images are generated at a fixed 1K (1024x1024px)
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -102,7 +102,7 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated images.
   - Array of ImageFile
-  - Examples: [{"file_name":"nano-banana-lite-t2i-output.png","content_type":"image/png","url":"https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png"}]
+  - Examples: [{"url":"https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png","content_type":"image/png","file_name":"nano-banana-lite-t2i-output.png"}]
 
 - **`description`** (`string`, _required_):
   The description of the generated images.
@@ -115,9 +115,9 @@ The API returns the following output format:
 {
   "images": [
     {
-      "file_name": "nano-banana-lite-t2i-output.png",
+      "url": "https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png",
       "content_type": "image/png",
-      "url": "https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png"
+      "file_name": "nano-banana-lite-t2i-output.png"
     }
   ],
   "description": ""
@@ -197,6 +197,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -218,4 +222,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

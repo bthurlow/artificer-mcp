@@ -52,7 +52,7 @@ The API accepts the following input parameters:
 - **`speakers`** (`list<SpeakerConfig> | array`, _optional_):
   Multi-speaker voice configuration. When set, enables multi-speaker synthesis where different parts of the text are spoken by different voices. Each speaker needs a voice and a speaker_id (alias) that matches prefixes in the prompt.
   - One of: list<SpeakerConfig> | array
-  - Examples: [{"speaker_id":"Host","voice":"Charon"},{"speaker_id":"DrChen","voice":"Kore"}]
+  - Examples: [{"voice":"Charon","speaker_id":"Host"},{"voice":"Kore","speaker_id":"DrChen"}]
 
 - **`temperature`** (`float`, _optional_):
   Controls the randomness of the speech output. Higher values produce more creative and varied delivery, while lower values make the output more predictable and focused. Default value: `1`
@@ -63,6 +63,10 @@ The API accepts the following input parameters:
   Audio output format. mp3: compressed, small file size (recommended). wav: uncompressed PCM wrapped in WAV (24 kHz, 16-bit mono). ogg_opus: Ogg container with Opus codec, good quality-to-size ratio. Default value: `"mp3"`
   - Default: `"mp3"`
   - Options: `"wav"`, `"mp3"`, `"ogg_opus"`
+
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Check input content for safety. Disabling requires account authorization. Default value: `true`
+  - Default: `true`
 
 
 
@@ -84,16 +88,17 @@ The API accepts the following input parameters:
   "language_code": "English (US)",
   "speakers": [
     {
-      "speaker_id": "Host",
-      "voice": "Charon"
+      "voice": "Charon",
+      "speaker_id": "Host"
     },
     {
-      "speaker_id": "DrChen",
-      "voice": "Kore"
+      "voice": "Kore",
+      "speaker_id": "DrChen"
     }
   ],
   "temperature": 1,
-  "output_format": "mp3"
+  "output_format": "mp3",
+  "enable_safety_checker": true
 }
 ```
 
@@ -191,6 +196,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -212,4 +221,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

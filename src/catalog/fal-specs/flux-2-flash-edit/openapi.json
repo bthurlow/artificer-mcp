@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/flux-2/flash/edit",
     "version": "1.0.0",
@@ -71,8 +71,6 @@
         ]
       },
       "Flux2FlashEditInput": {
-        "title": "Flux2FlashEditImageInput",
-        "type": "object",
         "required": [
           "prompt",
           "image_urls"
@@ -89,15 +87,32 @@
           "output_format",
           "image_urls"
         ],
+        "title": "Flux2FlashEditImageInput",
         "properties": {
           "sync_mode": {
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
             "default": false,
             "title": "Sync Mode",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "type": "boolean"
+          },
+          "guidance_scale": {
+            "description": "Guidance Scale is a measure of how close you want the model to stick to your prompt when looking for a related image to show you.",
+            "default": 2.5,
+            "maximum": 20,
+            "minimum": 0,
+            "title": "Guidance Scale",
+            "type": "number"
+          },
+          "enable_prompt_expansion": {
+            "description": "If set to true, the prompt will be expanded for better results.",
+            "default": false,
+            "title": "Enable Prompt Expansion",
             "type": "boolean"
           },
           "image_size": {
+            "description": "The size of the image to generate. The width and height must be between 512 and 2048 pixels.",
             "default": "square_hd",
+            "title": "Image Size",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
@@ -116,24 +131,11 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Image Size",
-            "description": "The size of the image to generate. The width and height must be between 512 and 2048 pixels."
-          },
-          "image_urls": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Image URLs",
-            "examples": [
-              [
-                "https://storage.googleapis.com/falserverless/example_outputs/flux-2-flash-edit-input.png"
-              ]
-            ],
-            "type": "array",
-            "description": "The URLs of the images for editing. A maximum of 4 images are allowed, if more are provided, only the first 4 will be used."
+            ]
           },
           "seed": {
+            "description": "The seed to use for the generation. If not provided, a random seed will be used.",
+            "title": "Seed",
             "anyOf": [
               {
                 "type": "integer"
@@ -141,14 +143,25 @@
               {
                 "type": "null"
               }
+            ]
+          },
+          "image_urls": {
+            "items": {
+              "type": "string"
+            },
+            "description": "The URLs of the images for editing. A maximum of 4 images are allowed, if more are provided, only the first 4 will be used.",
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/example_outputs/flux-2-flash-edit-input.png"
+              ]
             ],
-            "title": "Seed",
-            "description": "The seed to use for the generation. If not provided, a random seed will be used."
+            "title": "Image URLs",
+            "type": "array"
           },
           "output_format": {
+            "description": "The format of the generated image.",
             "default": "png",
             "title": "Output Format",
-            "description": "The format of the generated image.",
             "type": "string",
             "enum": [
               "jpeg",
@@ -157,71 +170,63 @@
             ]
           },
           "prompt": {
-            "title": "Prompt",
+            "description": "The prompt to edit the image.",
             "examples": [
               "Remove the meat from the hamburger"
             ],
-            "type": "string",
-            "description": "The prompt to edit the image."
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "title": "Enable Safety Checker",
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked, and images flagged as unsafe are returned as black images.",
-            "type": "boolean"
-          },
-          "enable_prompt_expansion": {
-            "default": false,
-            "title": "Enable Prompt Expansion",
-            "description": "If set to true, the prompt will be expanded for better results.",
-            "type": "boolean"
+            "title": "Prompt",
+            "type": "string"
           },
           "num_images": {
-            "default": 1,
-            "title": "Number of Images",
-            "maximum": 4,
             "description": "The number of images to generate.",
-            "type": "integer",
-            "minimum": 1
+            "default": 1,
+            "maximum": 4,
+            "minimum": 1,
+            "title": "Number of Images",
+            "type": "integer"
           },
-          "guidance_scale": {
-            "default": 2.5,
-            "title": "Guidance Scale",
-            "maximum": 20,
-            "description": "Guidance Scale is a measure of how close you want the model to stick to your prompt when looking for a related image to show you.",
-            "type": "number",
-            "minimum": 0
+          "enable_safety_checker": {
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked, and images flagged as unsafe are returned as black images.",
+            "default": true,
+            "title": "Enable Safety Checker",
+            "type": "boolean"
           }
-        }
+        },
+        "type": "object"
       },
       "Flux2FlashEditOutput": {
-        "required": [
-          "images",
-          "timings",
-          "seed",
-          "has_nsfw_concepts",
-          "prompt"
-        ],
-        "title": "Flux2FlashEditImageOutput",
-        "x-fal-order-properties": [
-          "images",
-          "timings",
-          "seed",
-          "has_nsfw_concepts",
-          "prompt"
-        ],
-        "type": "object",
         "properties": {
           "seed": {
             "title": "Seed",
             "type": "integer",
             "description": "\n            Seed of the generated Image. It will be the same value of the one passed in the\n            input or the randomly generated that was used in case none was passed.\n        "
           },
+          "timings": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Timings",
+            "type": "object"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string",
+            "description": "The prompt used for generating the image."
+          },
+          "has_nsfw_concepts": {
+            "items": {
+              "type": "boolean"
+            },
+            "title": "Has Nsfw Concepts",
+            "type": "array",
+            "description": "Whether the generated images contain NSFW concepts."
+          },
           "images": {
-            "title": "Images",
             "items": {
               "$ref": "#/components/schemas/ImageFile"
             },
+            "title": "Images",
+            "type": "array",
             "examples": [
               [
                 {
@@ -229,62 +234,129 @@
                 }
               ]
             ],
-            "type": "array",
             "description": "The edited images"
-          },
-          "prompt": {
-            "title": "Prompt",
-            "type": "string",
-            "description": "The prompt used for generating the image."
-          },
-          "timings": {
-            "title": "Timings",
-            "type": "object",
-            "additionalProperties": {
-              "type": "number"
-            }
-          },
-          "has_nsfw_concepts": {
-            "title": "Has Nsfw Concepts",
-            "items": {
-              "type": "boolean"
-            },
-            "type": "array",
-            "description": "Whether the generated images contain NSFW concepts."
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "images",
+          "timings",
+          "seed",
+          "has_nsfw_concepts",
+          "prompt"
+        ],
+        "title": "Flux2FlashEditImageOutput",
+        "required": [
+          "images",
+          "timings",
+          "seed",
+          "has_nsfw_concepts",
+          "prompt"
+        ],
+        "type": "object"
       },
       "ImageSize": {
         "properties": {
-          "width": {
-            "title": "Width",
-            "default": 512,
-            "type": "integer",
-            "exclusiveMinimum": 0,
-            "maximum": 14142,
-            "description": "The width of the generated image."
-          },
           "height": {
-            "title": "Height",
-            "default": 512,
-            "type": "integer",
-            "exclusiveMinimum": 0,
             "maximum": 14142,
-            "description": "The height of the generated image."
+            "exclusiveMinimum": 0,
+            "title": "Height",
+            "type": "integer",
+            "description": "The height of the generated image.",
+            "default": 512
+          },
+          "width": {
+            "maximum": 14142,
+            "exclusiveMinimum": 0,
+            "title": "Width",
+            "type": "integer",
+            "description": "The width of the generated image.",
+            "default": 512
           }
         },
-        "title": "ImageSize",
         "x-fal-order-properties": [
           "width",
           "height"
         ],
+        "title": "ImageSize",
         "type": "object"
       },
       "ImageFile": {
-        "required": [
-          "url"
-        ],
-        "title": "ImageFile",
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "file_name": {
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "content_type": {
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
+          },
+          "file_size": {
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes."
+          },
+          "height": {
+            "title": "Height",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The height of the image"
+          },
+          "width": {
+            "title": "Width",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The width of the image"
+          }
+        },
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -293,83 +365,11 @@
           "width",
           "height"
         ],
-        "type": "object",
-        "properties": {
-          "width": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Width",
-            "description": "The width of the image"
-          },
-          "file_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size",
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes."
-          },
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file."
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Height",
-            "description": "The height of the image"
-          }
-        }
+        "title": "ImageFile",
+        "required": [
+          "url"
+        ],
+        "type": "object"
       }
     }
   },

@@ -13,7 +13,7 @@
 
 ## Pricing
 
-Requests cost **$0.012** per megapixel of input and output. Input images will be resized to 1MP. For example, a 1024x1024 generation with 512*512 size image input will cost **0.024** (1 MP input + 1 MP output, each costing **0.012**).
+Requests cost **$0.012** per megapixel of input and output. Input images will be resized to 1MP. For example, a 1024x1024 generation with 512*512 size image input will cost **$0.024** (1 MP input + 1 MP output, each costing **$0.012**).
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -48,7 +48,7 @@ The API accepts the following input parameters:
 - **`image_size`** (`ImageSize | Enum`, _optional_):
   The size of the image to generate. The width and height must be between 512 and 2048 pixels.
   - One of: ImageSize | Enum
-  - Examples: {"width":2016,"height":1152}
+  - Examples: {"height":1152,"width":2016}
 
 - **`num_images`** (`integer`, _optional_):
   The number of images to generate. Default value: `1`
@@ -104,8 +104,8 @@ The API accepts the following input parameters:
   "guidance_scale": 2.5,
   "num_inference_steps": 28,
   "image_size": {
-    "width": 2016,
-    "height": 1152
+    "height": 1152,
+    "width": 2016
   },
   "num_images": 1,
   "acceleration": "regular",
@@ -233,6 +233,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -254,4 +258,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

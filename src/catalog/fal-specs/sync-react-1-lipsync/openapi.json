@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/sync-lipsync/react-1",
     "version": "1.0.0",
@@ -71,33 +71,66 @@
         ]
       },
       "SyncLipsyncReact1Input": {
-        "type": "object",
-        "title": "React1Input",
+        "required": [
+          "video_url",
+          "audio_url",
+          "emotion"
+        ],
         "properties": {
-          "model_mode": {
-            "title": "Model Mode",
+          "enable_safety_checker": {
+            "default": true,
+            "title": "Enable Safety Checker",
+            "type": "boolean"
+          },
+          "video_url": {
+            "title": "Video Url",
             "type": "string",
+            "description": "URL to the input video. Must be **15 seconds or shorter**.",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/react_1/input.mp4"
+            ]
+          },
+          "model_mode": {
+            "default": "face",
             "enum": [
               "lips",
               "face",
               "head"
             ],
-            "description": "Controls the edit region and movement scope for the model. Available options:\n- `lips`: Only lipsync using react-1 (minimal facial changes).\n- `face`: Lipsync + facial expressions without head movements.\n- `head`: Lipsync + facial expressions + natural talking head movements.",
-            "default": "face"
-          },
-          "video_url": {
             "type": "string",
+            "description": "Controls the edit region and movement scope for the model. Available options:\n- `lips`: Only lipsync using react-1 (minimal facial changes).\n- `face`: Lipsync + facial expressions without head movements.\n- `head`: Lipsync + facial expressions + natural talking head movements.",
+            "title": "Model Mode"
+          },
+          "audio_url": {
+            "title": "Audio Url",
+            "type": "string",
+            "description": "URL to the input audio. Must be **15 seconds or shorter**.",
             "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/react_1/input.mp4"
+              "https://storage.googleapis.com/falserverless/example_inputs/react_1/input.mp3"
+            ]
+          },
+          "lipsync_mode": {
+            "default": "bounce",
+            "enum": [
+              "cut_off",
+              "loop",
+              "bounce",
+              "silence",
+              "remap"
             ],
-            "description": "URL to the input video. Must be **15 seconds or shorter**.",
-            "title": "Video Url"
+            "type": "string",
+            "description": "Lipsync mode when audio and video durations are out of sync.",
+            "title": "Lipsync Mode"
+          },
+          "temperature": {
+            "default": 0.5,
+            "minimum": 0,
+            "type": "number",
+            "description": "Controls the expresiveness of the lipsync.",
+            "title": "Temperature",
+            "maximum": 1
           },
           "emotion": {
-            "type": "string",
-            "examples": [
-              "neutral"
-            ],
             "enum": [
               "happy",
               "sad",
@@ -106,85 +139,83 @@
               "surprised",
               "neutral"
             ],
+            "type": "string",
             "description": "Emotion prompt for the generation. Currently supports single-word emotions only.",
-            "title": "Emotion"
-          },
-          "temperature": {
-            "maximum": 1,
-            "title": "Temperature",
-            "minimum": 0,
-            "description": "Controls the expresiveness of the lipsync.",
-            "type": "number",
-            "default": 0.5
-          },
-          "lipsync_mode": {
-            "title": "Lipsync Mode",
-            "type": "string",
-            "enum": [
-              "cut_off",
-              "loop",
-              "bounce",
-              "silence",
-              "remap"
-            ],
-            "description": "Lipsync mode when audio and video durations are out of sync.",
-            "default": "bounce"
-          },
-          "audio_url": {
-            "type": "string",
+            "title": "Emotion",
             "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/react_1/input.mp3"
-            ],
-            "description": "URL to the input audio. Must be **15 seconds or shorter**.",
-            "title": "Audio Url"
+              "neutral"
+            ]
           }
         },
+        "title": "React1Input",
+        "type": "object",
         "x-fal-order-properties": [
+          "enable_safety_checker",
           "video_url",
           "audio_url",
           "emotion",
           "model_mode",
           "lipsync_mode",
           "temperature"
-        ],
-        "required": [
-          "video_url",
-          "audio_url",
-          "emotion"
         ]
       },
       "SyncLipsyncReact1Output": {
-        "type": "object",
-        "title": "React1Output",
+        "required": [
+          "video"
+        ],
         "properties": {
           "video": {
-            "$ref": "#/components/schemas/VideoFile",
             "examples": [
               {
+                "fps": 24,
+                "height": 1088,
                 "num_frames": 169,
+                "url": "https://storage.googleapis.com/falserverless/example_outputs/react_1/output.mp4",
                 "content_type": "video/mp4",
                 "width": 1920,
                 "file_name": "output.mp4",
-                "height": 1088,
-                "fps": 24,
-                "duration": 7.041667,
-                "url": "https://storage.googleapis.com/falserverless/example_outputs/react_1/output.mp4"
+                "duration": 7.041667
               }
             ],
+            "$ref": "#/components/schemas/VideoFile",
             "description": "The generated video with synchronized lip and facial movements."
           }
         },
+        "title": "React1Output",
+        "type": "object",
         "x-fal-order-properties": [
-          "video"
-        ],
-        "required": [
           "video"
         ]
       },
       "VideoFile": {
-        "type": "object",
-        "title": "VideoFile",
+        "required": [
+          "url"
+        ],
         "properties": {
+          "fps": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fps",
+            "description": "The FPS of the video"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Height",
+            "description": "The height of the video"
+          },
           "num_frames": {
             "anyOf": [
               {
@@ -196,6 +227,11 @@
             ],
             "title": "Num Frames",
             "description": "The number of frames in the video"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
           },
           "content_type": {
             "anyOf": [
@@ -212,18 +248,6 @@
             ],
             "description": "The mime type of the file."
           },
-          "width": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Width",
-            "description": "The width of the video"
-          },
           "file_size": {
             "anyOf": [
               {
@@ -238,6 +262,18 @@
               4404019
             ],
             "description": "The size of the file in bytes."
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "description": "The width of the video"
           },
           "file_name": {
             "anyOf": [
@@ -254,30 +290,6 @@
             ],
             "description": "The name of the file. It will be auto-generated if not provided."
           },
-          "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Height",
-            "description": "The height of the video"
-          },
-          "fps": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fps",
-            "description": "The FPS of the video"
-          },
           "duration": {
             "anyOf": [
               {
@@ -289,13 +301,10 @@
             ],
             "title": "Duration",
             "description": "The duration of the video"
-          },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
           }
         },
+        "title": "VideoFile",
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -306,9 +315,6 @@
           "fps",
           "duration",
           "num_frames"
-        ],
-        "required": [
-          "url"
         ]
       }
     }

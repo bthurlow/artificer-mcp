@@ -15,8 +15,8 @@
 
 ## Pricing
 
-Your request will cost $0.001 per megapixel of video data (width × height × frames).
-For example, if your upscaled video is 1920×1080 with 121 frames, the total cost will be $0.25.
+Your request will cost **$0.001** per megapixel of video data (width × height × frames).
+ For example, if your upscaled video is 1920×1080 with 121 frames, the total cost will be **$0.25**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -30,6 +30,10 @@ See the input and output schema below, as well as the usage examples.
 
 The API accepts the following input parameters:
 
+
+- **`enable_safety_checker`** (`boolean`, _optional_):
+   Default value: `true`
+  - Default: `true`
 
 - **`video_url`** (`string`, _required_):
   The input video to be processed
@@ -91,6 +95,7 @@ The API accepts the following input parameters:
 
 ```json
 {
+  "enable_safety_checker": true,
   "video_url": "https://storage.googleapis.com/falserverless/example_inputs/seedvr-input.mp4",
   "upscale_mode": "factor",
   "upscale_factor": 2,
@@ -109,7 +114,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   Upscaled video file after processing
-  - Examples: {"content_type":"video/mp4","url":"https://storage.googleapis.com/falserverless/example_outputs/seedvr-output.mp4"}
+  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/seedvr-output.mp4","content_type":"video/mp4"}
 
 - **`seed`** (`integer`, _required_):
   The random seed used for the generation process.
@@ -121,8 +126,8 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "video/mp4",
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/seedvr-output.mp4"
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/seedvr-output.mp4",
+    "content_type": "video/mp4"
   }
 }
 ```
@@ -200,6 +205,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -221,4 +230,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

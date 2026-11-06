@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/seedvr/upscale/image",
     "version": "1.0.0",
@@ -71,10 +71,10 @@
         ]
       },
       "SeedvrUpscaleImageInput": {
-        "required": [
-          "image_url"
-        ],
+        "title": "SeedVRImageInput",
+        "type": "object",
         "x-fal-order-properties": [
+          "enable_safety_checker",
           "image_url",
           "upscale_mode",
           "upscale_factor",
@@ -84,69 +84,13 @@
           "output_format",
           "sync_mode"
         ],
-        "title": "SeedVRImageInput",
+        "required": [
+          "image_url"
+        ],
         "properties": {
-          "image_url": {
-            "description": "The input image to be processed",
-            "title": "Image Url",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/seedvr2/image_in.png"
-            ],
-            "type": "string"
-          },
-          "noise_scale": {
-            "minimum": 0,
-            "description": "The noise scale to use for the generation process.",
-            "title": "Noise Scale",
-            "multipleOf": 0.001,
-            "type": "number",
-            "maximum": 1,
-            "default": 0.1
-          },
-          "target_resolution": {
-            "description": "The target resolution to upscale to when `upscale_mode` is `target`.",
-            "title": "Target Resolution",
-            "enum": [
-              "720p",
-              "1080p",
-              "1440p",
-              "2160p"
-            ],
-            "type": "string",
-            "default": "1080p"
-          },
-          "upscale_factor": {
-            "minimum": 1,
-            "description": "Upscaling factor to be used. Will multiply the dimensions with this factor when `upscale_mode` is `factor`.",
-            "title": "Upscale Factor",
-            "type": "number",
-            "maximum": 10,
-            "default": 2
-          },
-          "output_format": {
-            "description": "The format of the output image.",
-            "title": "Output Format",
-            "enum": [
-              "png",
-              "jpg",
-              "webp"
-            ],
-            "type": "string",
-            "default": "jpg"
-          },
-          "upscale_mode": {
-            "description": "The mode to use for the upscale. If 'target', the upscale factor will be calculated based on the target resolution. If 'factor', the upscale factor will be used directly.",
-            "title": "Upscale Mode",
-            "enum": [
-              "target",
-              "factor"
-            ],
-            "type": "string",
-            "default": "factor"
-          },
           "seed": {
-            "description": "The random seed used for the generation process.",
             "title": "Seed",
+            "description": "The random seed used for the generation process.",
             "anyOf": [
               {
                 "type": "integer"
@@ -156,48 +100,110 @@
               }
             ]
           },
+          "upscale_factor": {
+            "title": "Upscale Factor",
+            "type": "number",
+            "description": "Upscaling factor to be used. Will multiply the dimensions with this factor when `upscale_mode` is `factor`.",
+            "maximum": 10,
+            "default": 2,
+            "minimum": 1
+          },
+          "noise_scale": {
+            "title": "Noise Scale",
+            "type": "number",
+            "minimum": 0,
+            "description": "The noise scale to use for the generation process.",
+            "maximum": 1,
+            "default": 0.1,
+            "multipleOf": 0.001
+          },
+          "target_resolution": {
+            "title": "Target Resolution",
+            "type": "string",
+            "description": "The target resolution to upscale to when `upscale_mode` is `target`.",
+            "default": "1080p",
+            "enum": [
+              "720p",
+              "1080p",
+              "1440p",
+              "2160p"
+            ]
+          },
           "sync_mode": {
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
             "title": "Sync Mode",
             "type": "boolean",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
             "default": false
+          },
+          "upscale_mode": {
+            "title": "Upscale Mode",
+            "type": "string",
+            "description": "The mode to use for the upscale. If 'target', the upscale factor will be calculated based on the target resolution. If 'factor', the upscale factor will be used directly.",
+            "default": "factor",
+            "enum": [
+              "target",
+              "factor"
+            ]
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "type": "boolean",
+            "description": "If set to true, the safety checker will be enabled.",
+            "default": true
+          },
+          "output_format": {
+            "title": "Output Format",
+            "type": "string",
+            "description": "The format of the output image.",
+            "default": "jpg",
+            "enum": [
+              "png",
+              "jpg",
+              "webp"
+            ]
+          },
+          "image_url": {
+            "title": "Image Url",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/seedvr2/image_in.png"
+            ],
+            "description": "The input image to be processed",
+            "type": "string"
           }
-        },
-        "type": "object"
+        }
       },
       "SeedvrUpscaleImageOutput": {
-        "required": [
-          "image",
-          "seed"
-        ],
+        "title": "SeedVRImageOutput",
+        "type": "object",
         "x-fal-order-properties": [
           "image",
           "seed"
         ],
-        "title": "SeedVRImageOutput",
+        "required": [
+          "image",
+          "seed"
+        ],
         "properties": {
           "seed": {
-            "description": "The random seed used for the generation process.",
             "title": "Seed",
-            "type": "integer"
+            "type": "integer",
+            "description": "The random seed used for the generation process."
           },
           "image": {
             "description": "Upscaled image file after processing",
-            "$ref": "#/components/schemas/ImageFile",
             "examples": [
               {
-                "content_type": "image/png",
-                "url": "https://storage.googleapis.com/falserverless/example_outputs/seedvr2/image_out.png"
+                "url": "https://storage.googleapis.com/falserverless/example_outputs/seedvr2/image_out.png",
+                "content_type": "image/png"
               }
-            ]
+            ],
+            "$ref": "#/components/schemas/ImageFile"
           }
-        },
-        "type": "object"
+        }
       },
       "ImageFile": {
-        "required": [
-          "url"
-        ],
+        "title": "ImageFile",
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -206,11 +212,13 @@
           "width",
           "height"
         ],
-        "title": "ImageFile",
+        "required": [
+          "url"
+        ],
         "properties": {
-          "height": {
-            "description": "The height of the image",
-            "title": "Height",
+          "width": {
+            "title": "Width",
+            "description": "The width of the image",
             "anyOf": [
               {
                 "type": "integer"
@@ -220,44 +228,9 @@
               }
             ]
           },
-          "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "width": {
-            "description": "The width of the image",
-            "title": "Width",
+          "height": {
+            "title": "Height",
+            "description": "The height of the image",
             "anyOf": [
               {
                 "type": "integer"
@@ -268,11 +241,11 @@
             ]
           },
           "file_size": {
-            "description": "The size of the file in bytes.",
             "title": "File Size",
             "examples": [
               4404019
             ],
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -281,9 +254,43 @@
                 "type": "null"
               }
             ]
+          },
+          "content_type": {
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "file_name": {
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
-        },
-        "type": "object"
+        }
       }
     }
   },

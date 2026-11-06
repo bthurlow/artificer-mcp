@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/recraft/v4.1/pro/text-to-vector",
     "version": "1.0.0",
@@ -71,12 +71,36 @@
         ]
       },
       "RecraftV41ProTextToVectorInput": {
-        "required": [
-          "prompt"
-        ],
         "title": "RecraftV4VectorProTextToImageInput",
+        "x-fal-order-properties": [
+          "prompt",
+          "image_size",
+          "colors",
+          "background_color",
+          "enable_safety_checker"
+        ],
+        "type": "object",
         "properties": {
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "default": true,
+            "type": "boolean",
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked."
+          },
+          "background_color": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RGBColor"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The preferable background color of the generated images."
+          },
           "image_size": {
+            "title": "Image Size",
+            "default": "square_hd",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
@@ -93,189 +117,140 @@
                 ]
               }
             ],
-            "title": "Image Size",
             "examples": [
               "landscape_16_9"
-            ],
-            "default": "square_hd"
-          },
-          "enable_safety_checker": {
-            "type": "boolean",
-            "title": "Enable Safety Checker",
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "default": true
-          },
-          "colors": {
-            "type": "array",
-            "title": "Colors",
-            "description": "An array of preferable colors",
-            "default": [],
-            "items": {
-              "$ref": "#/components/schemas/RGBColor"
-            }
-          },
-          "background_color": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/RGBColor"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The preferable background color of the generated images."
+            ]
           },
           "prompt": {
-            "minLength": 1,
             "title": "Prompt",
+            "minLength": 1,
             "type": "string",
+            "maxLength": 10000,
             "examples": [
               "a cute character panda with cool clothes, 3d flat color, design"
-            ],
-            "maxLength": 10000
+            ]
+          },
+          "colors": {
+            "title": "Colors",
+            "default": [],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RGBColor"
+            },
+            "description": "An array of preferable colors"
           }
         },
-        "x-fal-order-properties": [
-          "prompt",
-          "image_size",
-          "colors",
-          "background_color",
-          "enable_safety_checker"
-        ],
-        "type": "object"
+        "required": [
+          "prompt"
+        ]
       },
       "RecraftV41ProTextToVectorOutput": {
-        "required": [
+        "title": "RecraftV4VectorProTextToImageOutput",
+        "x-fal-order-properties": [
           "images"
         ],
-        "title": "RecraftV4VectorProTextToImageOutput",
+        "type": "object",
         "properties": {
           "images": {
-            "type": "array",
             "title": "Images",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/File"
+            },
             "examples": [
               [
                 {
-                  "file_name": "image.svg",
                   "url": "https://v3b.fal.media/files/b/0a8ee4de/lmXuapOPV309mE533swE0_image.svg",
+                  "file_size": 1818794,
                   "content_type": "image/svg+xml",
-                  "file_size": 1818794
+                  "file_name": "image.svg"
                 }
               ]
-            ],
-            "items": {
-              "$ref": "#/components/schemas/File"
-            }
+            ]
           }
         },
-        "x-fal-order-properties": [
+        "required": [
           "images"
-        ],
-        "type": "object"
-      },
-      "ImageSize": {
-        "type": "object",
-        "title": "ImageSize",
-        "properties": {
-          "height": {
-            "type": "integer",
-            "title": "Height",
-            "maximum": 14142,
-            "description": "The height of the generated image.",
-            "default": 512,
-            "exclusiveMinimum": 0
-          },
-          "width": {
-            "type": "integer",
-            "title": "Width",
-            "maximum": 14142,
-            "description": "The width of the generated image.",
-            "default": 512,
-            "exclusiveMinimum": 0
-          }
-        },
-        "x-fal-order-properties": [
-          "width",
-          "height"
         ]
       },
       "RGBColor": {
-        "type": "object",
         "title": "RGBColor",
-        "properties": {
-          "r": {
-            "type": "integer",
-            "title": "R",
-            "maximum": 255,
-            "description": "Red color value",
-            "default": 0,
-            "minimum": 0
-          },
-          "b": {
-            "type": "integer",
-            "title": "B",
-            "maximum": 255,
-            "description": "Blue color value",
-            "default": 0,
-            "minimum": 0
-          },
-          "g": {
-            "type": "integer",
-            "title": "G",
-            "maximum": 255,
-            "description": "Green color value",
-            "default": 0,
-            "minimum": 0
-          }
-        },
         "x-fal-order-properties": [
           "r",
           "g",
           "b"
-        ]
+        ],
+        "type": "object",
+        "properties": {
+          "g": {
+            "title": "G",
+            "minimum": 0,
+            "maximum": 255,
+            "default": 0,
+            "type": "integer",
+            "description": "Green color value"
+          },
+          "r": {
+            "title": "R",
+            "minimum": 0,
+            "maximum": 255,
+            "default": 0,
+            "type": "integer",
+            "description": "Red color value"
+          },
+          "b": {
+            "title": "B",
+            "minimum": 0,
+            "maximum": 255,
+            "default": 0,
+            "type": "integer",
+            "description": "Blue color value"
+          }
+        }
+      },
+      "ImageSize": {
+        "title": "ImageSize",
+        "x-fal-order-properties": [
+          "width",
+          "height"
+        ],
+        "type": "object",
+        "properties": {
+          "width": {
+            "title": "Width",
+            "exclusiveMinimum": 0,
+            "maximum": 14142,
+            "default": 512,
+            "type": "integer",
+            "description": "The width of the generated image."
+          },
+          "height": {
+            "title": "Height",
+            "exclusiveMinimum": 0,
+            "maximum": 14142,
+            "default": 512,
+            "type": "integer",
+            "description": "The height of the generated image."
+          }
+        }
       },
       "File": {
-        "required": [
-          "url"
-        ],
         "title": "File",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object",
         "properties": {
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
-          },
           "url": {
-            "type": "string",
             "title": "Url",
+            "type": "string",
             "description": "The URL where the file can be downloaded from."
           },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type",
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ]
-          },
           "file_size": {
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -284,20 +259,45 @@
                 "type": "null"
               }
             ],
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
             "examples": [
               4404019
-            ]
+            ],
+            "description": "The size of the file in bytes."
+          },
+          "content_type": {
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
+          },
+          "file_name": {
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
           }
         },
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
-        "type": "object"
+        "required": [
+          "url"
+        ]
       }
     }
   },

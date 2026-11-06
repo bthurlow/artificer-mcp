@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.0024075** per megapixel of generated video data (width × height × num_frames), rounded up. Only the generated extension segment is billed — num_frames includes the context overlap, but your source video's own frames are **never billed**, even though the returned file contains the full stitched video. For example, if you extend a video at 1280 × 720 with num_frames = 121, the generated segment is ≈112 MP, and your request will cost **$0.270**.
+Billing is calculated at **$0.0024075 per megapixel of the generated extension**, using width × height × requested frames ÷ 1,000,000 and rounding the total up to a whole megapixel. The requested frame count includes the context overlap; the source video itself is not billed. For example, **121 frames at 1280 × 720** are billed as **112 megapixels**, giving a calculated cost of **$0.26964** (approximately **$0.2696**).
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -265,6 +265,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -286,4 +290,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`
