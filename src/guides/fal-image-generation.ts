@@ -36,7 +36,6 @@ Covered elsewhere: Nano Banana, on Google and on fal (\`gemini_nanobanana_prompt
 | \`ideogram-4-tiling-t2i\` | Ideogram V4.0q Tiling generates seamless, edge-matching textures and patterns that repeat infinitely in any direction, ideal for backgrounds, surfaces, and w… | **\`prompt\`**, \`mask_url\`, \`image_url\`, \`output_format\`, \`image_size\`, \`num_images\`, \`sync_mode\` (+7 more) |
 | \`ideogram-3-transparent-t2i\` | Generate images with transparent backgrounds using Ideogram Transparent model | **\`prompt\`**, \`aspect_ratio\`, \`num_images\`, \`sync_mode\` (+4 more) |
 | \`qwen-image-3-t2i\` | Generates images from a text prompt at resolutions up to 2048×2048, with automatic prompt rewriting and prompt-guided resolution selection, building on Qwen'… | **\`prompt\`**, \`image_size\`, \`output_format\`, \`sync_mode\`, \`num_images\` (+4 more) |
-| \`qwen-image-max-t2i\` | Text-to-Image endpoint for Qwen-Image-Max. Qwen Image Max improves upon the Qwen Image Plus series by enhancing the realism and naturalness of images. | **\`prompt\`**, \`image_size\`, \`sync_mode\`, \`output_format\`, \`num_images\` (+4 more) |
 | \`mai-image-2.5-t2i\` | MAI-Image-2.5 is Microsoft's photorealistic image generation and editing model that turns text prompts or uploaded images into high-quality, design-ready vis… | **\`prompt\`**, \`output_format\`, \`sync_mode\`, \`aspect_ratio\`, \`num_images\` |
 | \`mai-image-2.5-pro-t2i\` | Generate high-fidelity, design-ready images with precise typography, strong prompt alignment, and rich visual detail using Microsoft's flagship MAI Image 2.5… | **\`prompt\`**, \`num_images\`, \`aspect_ratio\`, \`output_format\`, \`sync_mode\` |
 | \`grok-imagine-image-2-t2i\` | Generate images from text using xAi's Grok Imagine 2.0 model. | **\`prompt\`**, \`sync_mode\`, \`output_format\`, \`num_images\`, \`aspect_ratio\`, \`resolution\` (+1 more) |
@@ -124,7 +123,6 @@ fal_generate_image({
 | \`ideogram-4-tiling-t2i\` | \`ideogram/v4/tiling\` |
 | \`ideogram-3-transparent-t2i\` | \`fal-ai/ideogram/v3/generate-transparent\` |
 | \`qwen-image-3-t2i\` | \`alibaba/qwen-image-3/text-to-image\` |
-| \`qwen-image-max-t2i\` | \`fal-ai/qwen-image-max/text-to-image\` |
 | \`mai-image-2.5-t2i\` | \`microsoft/mai-image-2.5\` |
 | \`mai-image-2.5-pro-t2i\` | \`microsoft/mai-image-2.5-pro\` |
 | \`grok-imagine-image-2-t2i\` | \`xai/grok-imagine-image/v2.0/text-to-image\` |

@@ -5,14 +5,13 @@ import { z } from 'zod';
 const VEO_GUIDE = `# Veo Video Generation — Prompt Guide
 
 ## What this model is best for
-Google Veo is the cinematic-tier video family with **native audio** (ambient + Foley + lip-synced dialogue) on every 3.x tier. Use Veo when you need talking-head dialogue without a separate TTS leg, when you want the highest fidelity per dollar at 720p/1080p, or when you need 4k output (Pro tier only). Veo 2 stays in the catalog for legacy continuity but Veo 3.x is the default for everything new.
+Google Veo is the cinematic-tier video family with **native audio** (ambient + Foley + lip-synced dialogue) on every 3.x tier. Use Veo when you need talking-head dialogue without a separate TTS leg, when you want the highest fidelity per dollar at 720p/1080p, or when you need 4k output (Pro tier only). Veo 3.x is the only generation on fal now: Veo 2 (\`fal-ai/veo2\`) was retired upstream in 2026-11.
 
 Per family/tier orientation:
 - **Veo 3.1 Pro** — top-tier 720p / 1080p / 4k, native audio, supports text-to-video, image-to-video, reference-to-video (multi-image style consistency), and first-last-frame.
 - **Veo 3.1 Fast** — same modality matrix as Pro, faster wall time, lower cost. No 4k.
 - **Veo 3.1 Lite** — cheapest 3.1 tier (~$0.05/sec at 720p with audio). t2v, i2v, FLF only. No reference-to-video. No 4k.
 - **Veo 3** (Pro / Fast) — prior generation; t2v + i2v only. Use when you specifically want the v3 look or pinning matters.
-- **Veo 2** — legacy text-to-video with extensive camera-control prompt vocabulary. No native audio, no i2v on this slug. Use only if a workflow already targets it.
 
 ## Picking a model
 
@@ -32,7 +31,6 @@ Per family/tier orientation:
 | \`veo-3-fast-t2v\` | t2v | 8s | 1080p | Native | $0.10/s no-audio, $0.15/s audio | Fastest v3 t2v |
 | \`veo-3-i2v\` | i2v | 8s | 1080p | Native | See fal.ai listing | v3 i2v pinning |
 | \`veo-3-fast-i2v\` | i2v | 8s | 1080p | Native | See fal.ai listing | Fast v3 i2v |
-| \`veo-2-t2v\` | t2v (legacy) | 8s | See fal.ai listing | None (silent) | $2.50 for 5s + $0.50/extra-second | Legacy continuity only |
 
 Default picks:
 - Talking-head social clip → **veo-3.1-lite-t2v** (cheapest 3.1 with audio + lip-sync) or **veo-3.1-lite-i2v** if you have a locked character still.
@@ -45,14 +43,13 @@ Default picks:
 - Strong prompt adherence on cinematic camera vocabulary (dolly, pan, tilt, push, parallax, tracking).
 - Excellent identity preservation with image-to-video when source aspect matches output aspect.
 - Reference-to-video (Pro 3.1 only) holds character/style across multiple shots in a series.
-- Veo 2 retains the most expressive camera-control language in the family.
 
 ## Known weaknesses / quirks
 - **Source-image aspect must match output aspect** for image-to-video. A 1:1 source with \`aspect_ratio: "9:16"\` produces a landscape-composed shot awkwardly cropped vertical — the #1 i2v pitfall. Pre-generate the source at the target aspect.
 - **Reference-to-video is Pro-only.** Veo 3.1 Lite and Fast return errors if you try to pass reference images. Use single-image i2v instead.
 - **Veo 3.1 Lite caps resolution at 1080p**, no 4k. The schema enum reflects this.
 - **\`generate_audio\`**: defaults to \`true\` on all 3.x. The Gemini Developer API rejects this field if passed; on fal it works — but most callers should leave it as default.
-- **Duration enum**, not arbitrary integer. Veo 3.x accepts \`"4s" | "6s" | "8s"\`. Veo 2 accepts \`"5s" | "6s" | "7s" | "8s"\`. The artificer transport's \`duration_seconds\` is an integer; pass the integer and the transport stringifies — but if you want \`"6s"\` you pass \`6\`. Other values 4xx.
+- **Duration enum**, not arbitrary integer. Veo 3.x accepts \`"4s" | "6s" | "8s"\`. The artificer transport's \`duration_seconds\` is an integer; pass the integer and the transport stringifies — but if you want \`"6s"\` you pass \`6\`. Other values 4xx.
 - **\`auto_fix\`** rewrites prompts that hit content-policy. Default \`true\` on most 3.x t2v, default \`false\` on i2v / FLF / ref. If you depend on exact prompt wording, pass \`auto_fix: false\` via \`extra_params\`.
 - Complex physics (explosions, dense particle fields, fast crowd action) tends to artifact. Plan multi-shot stories as 4-8s segments and concatenate.
 
@@ -68,12 +65,11 @@ The artificer transport (\`fal_generate_video\`) maps the structural arg \`image
 | Veo 3.1 FLF / Fast-FLF / Lite-FLF | \`prompt\`, \`first_frame_url\`, \`last_frame_url\` | Same as t2v | **Wire keys are \`first_frame_url\` and \`last_frame_url\`** (NOT \`first_image_url\` / \`last_image_url\`). Pass both via \`extra_params\`. **Omit the structural \`image\` arg** so the transport doesn't also set \`image_url\`. |
 | Veo 3 t2v / Fast | \`prompt\` | \`generate_audio\`, \`auto_fix\`, \`safety_tolerance\`, \`seed\` | Resolution caps at 1080p. |
 | Veo 3 i2v / Fast | \`prompt\`, \`image_url\` | same as t2v | Transport \`image\` → \`image_url\`. |
-| Veo 2 t2v | \`prompt\` | \`enhance_prompt\`, \`auto_fix\`, \`seed\` | Aspect ratios include 1:1 in addition to 16:9 / 9:16. No native audio. |
 
 Common knobs:
-- \`aspect_ratio\` — 3.x accepts \`"16:9"\`, \`"9:16"\`, plus \`"auto"\` on i2v / FLF / ref. Veo 2 also accepts \`"1:1"\`.
+- \`aspect_ratio\` — 3.x accepts \`"16:9"\`, \`"9:16"\`, plus \`"auto"\` on i2v / FLF / ref.
 - \`resolution\` — Pro accepts \`"720p"\`, \`"1080p"\`, \`"4k"\`. Fast and Lite cap at \`"1080p"\`.
-- \`duration\` — \`"4s" | "6s" | "8s"\` on 3.x, \`"5s" | "6s" | "7s" | "8s"\` on Veo 2.
+- \`duration\` — \`"4s" | "6s" | "8s"\` on 3.x.
 - \`negative_prompt\` — supported on most slugs; ref-to-video schema does NOT list it.
 
 ## Prompt structure
@@ -137,12 +133,12 @@ For first-last-frame, describe the transition / motion between the two anchored 
 | \`veo-3-fast-t2v\` | \`fal-ai/veo3/fast\` |
 | \`veo-3-i2v\` | \`fal-ai/veo3/image-to-video\` |
 | \`veo-3-fast-i2v\` | \`fal-ai/veo3/fast/image-to-video\` |
-| \`veo-2-t2v\` | \`fal-ai/veo2\` |
 
 All fal slugs route through \`fal_generate_video\` with \`FAL_KEY\`. The Lite t2v slug also has a Google route via \`gemini_generate_video\` (model id \`veo-3.1-lite-generate-preview\`) for callers who already have GOOGLE_API_KEY plumbing.
 
 ## Last verified
-2026-04-28 — initial seed of full fal video catalog. Pricing and input schemas grounded in committed fal-specs (veo-3.1, veo-3.1-t2v, veo-3.1-flf, veo-3.1-ref-to-video, veo-3.1-lite-t2v, veo-3-fast-t2v, veo-2-t2v). Some Fast-tier per-second prices are not currently in synced specs and reference the live fal.ai listing.
+2026-11-06 — \`veo-2-t2v\` retired: \`fal-ai/veo2\` returns 404 on both fal surfaces.
+2026-04-28 — initial seed of full fal video catalog. Pricing and input schemas grounded in committed fal-specs (veo-3.1, veo-3.1-t2v, veo-3.1-flf, veo-3.1-ref-to-video, veo-3.1-lite-t2v, veo-3-fast-t2v). Some Fast-tier per-second prices are not currently in synced specs and reference the live fal.ai listing.
 
 ## Official references
 - Veo 3.1 (i2v): https://fal.ai/models/fal-ai/veo3.1
@@ -151,7 +147,6 @@ All fal slugs route through \`fal_generate_video\` with \`FAL_KEY\`. The Lite t2
 - Veo 3.1 first-last-frame: https://fal.ai/models/fal-ai/veo3.1/first-last-frame-to-video
 - Veo 3.1 Lite: https://fal.ai/models/fal-ai/veo3.1/lite
 - Veo 3 Fast: https://fal.ai/models/fal-ai/veo3/fast
-- Veo 2: https://fal.ai/models/fal-ai/veo2
 - Google upstream: https://ai.google.dev/gemini-api/docs/veo
 - Audio + dialogue: https://ai.google.dev/gemini-api/docs/video#audio-generation
 `;
@@ -160,7 +155,7 @@ export function registerVeoPromptGuide(server: McpServer): void {
   registerTool<Record<string, never>>(
     server,
     'veo_video_prompt_guide',
-    'Reference guide for the Veo video family on fal (Veo 3.1 Pro/Fast/Lite across t2v/i2v/reference-to-video/first-last-frame, Veo 3 Pro/Fast t2v+i2v, Veo 2 legacy t2v). Covers tier selection, native-audio dialogue patterns, the per-modality wire-key quirks (image_urls array for ref, first_frame_url+last_frame_url for FLF), input requirements, and example prompts. No API call — pure reference.',
+    'Reference guide for the Veo video family on fal (Veo 3.1 Pro/Fast/Lite across t2v/i2v/reference-to-video/first-last-frame, Veo 3 Pro/Fast t2v+i2v). Covers tier selection, native-audio dialogue patterns, the per-modality wire-key quirks (image_urls array for ref, first_frame_url+last_frame_url for FLF), input requirements, and example prompts. No API call — pure reference.',
     z.object({}).shape,
     async () => ({
       content: [{ type: 'text', text: VEO_GUIDE }],

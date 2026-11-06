@@ -10,10 +10,10 @@ Physics-aware video generation — MAGI-1 incorporates explicit physics priors s
 ## Picking a model
 | Slug | Modality | Variant | Best for |
 |------|----------|---------|----------|
-| \`magi-t2v\` | t2v | full | Best quality from prompt only |
 | \`magi-distilled-t2v\` | t2v | distilled | Faster t2v at slightly lower quality |
-| \`magi-i2v\` | i2v | full | Animating a known starting frame |
 | \`magi-distilled-i2v\` | i2v | distilled | Faster i2v |
+
+The full (non-distilled) \`magi-t2v\` / \`magi-i2v\` routes were retired upstream in 2026-11 (\`fal-ai/magi\` now 404s), so only the distilled pair remains.
 
 Pricing tiers by inference steps — base = 16 steps; doubling steps roughly doubles cost. Default 4-second clip; additional seconds priced linearly.
 
@@ -42,16 +42,14 @@ Lead with the physical action, then add subject details. Concrete physics descri
 ## Access routes
 | Slug | fal endpoint |
 |------|--------------|
-| \`magi-t2v\` | \`fal-ai/magi\` |
 | \`magi-distilled-t2v\` | \`fal-ai/magi-distilled\` |
-| \`magi-i2v\` | \`fal-ai/magi/image-to-video\` |
 | \`magi-distilled-i2v\` | \`fal-ai/magi-distilled/image-to-video\` |
 
 ## Last verified
 2026-04-28 — initial seed of full fal video catalog.
 
 ## Official references
-- https://fal.ai/models/fal-ai/magi
+- https://fal.ai/models/fal-ai/magi-distilled
 `;
 
 export function registerMagiPromptGuide(server: McpServer): void {

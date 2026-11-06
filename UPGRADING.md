@@ -9,6 +9,30 @@ because they landed under a commit type it hides.
 
 ---
 
+## 0.13.x → 0.14.0
+
+### 16 dead fal routes retired, and `mochi_prompt_guide` removed
+
+**Removed: these 404 upstream.** fal culled a batch of legacy models in late
+October 2026. Each route below has returned 404 on both fal's OpenAPI and
+`llms.txt` surfaces since the 2026-10-26 or 11-02 drift run (re-checked
+2026-11-06).
+
+| Removed slug | Replacement |
+|---|---|
+| `veo-2-t2v` | `veo-3.1-t2v` / `veo-3.1-lite-t2v` (`veo_video_prompt_guide`) |
+| `wan-alpha-t2v` | **None.** It was the last alpha-channel video route; generate on a flat background and key it out (`specialized_video_prompt_guide`) |
+| `ltx-2-pro-t2v`, `ltx-2-fast-t2v`, `ltx-2-pro-i2v`, `ltx-2-fast-i2v` | The LTX-2.3 routes (`ltx_video_prompt_guide`) |
+| `ltx-video-13b-dev-t2v`, `ltx-video-13b-dev-i2v` | LTX-2.3 22B or LTX-2-19b LoRA variants |
+| `hunyuan-custom-i2v` | `bytedance-lynx-i2v` (identity-preserving i2v, `bytedance_lynx_prompt_guide`) |
+| `mochi-v1-t2v` | Any general t2v route. **`mochi_prompt_guide` is removed with it** (unknown-tool error if called). |
+| `magi-t2v`, `magi-i2v` | `magi-distilled-t2v` / `magi-distilled-i2v` |
+| `multishot-master-t2v` | Generate shots separately, then `video_concatenate` |
+| `skyreels-i2v` | A current general i2v route (Kling, Veo 3.1, Seedance) |
+| `qwen-image-max-t2i`, `qwen-image-max-edit` | `qwen-image-3-t2i` / `qwen-image-3-edit` |
+
+---
+
 ## 0.12.x → 0.13.0
 
 ### Sora 2 routes retired, and `sora_video_prompt_guide` removed
