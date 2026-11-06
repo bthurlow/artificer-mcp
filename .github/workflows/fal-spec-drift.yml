@@ -18,7 +18,8 @@ name: Fal Spec Drift
 #      The sync removes them from models.json (and their spec dirs), so
 #      the removal is the diff and the PR is the review. The PR is then
 #      titled as a breaking change so release-please bumps the version.
-#      Capped per run (MAX_AUTO_RETIRE): mass 404s look like a fal outage.
+#      Capped per run at retireCap() (10, or 5% of the catalog if more):
+#      mass 404s look like a fal outage.
 #   3. Other fetch failures (5xx, timeouts, a 404 on one surface, gone
 #      routes over the cap) — write no diff at all, so they would vanish
 #      silently. The sync script exits non-zero and this job fails on it.
@@ -94,12 +95,18 @@ jobs:
         # product of the cron — if it drops a finding, the finding is lost;
         # nobody re-reads a 500-file spec diff to double-check. A script is
         # unit-tested (tests/unit/scripts/), a YAML `run:` block is not.
+        #
+        # Two renders: the job summary gets the full report, and the PR body
+        # is capped under GitHub's 65,536-character limit (a too-long body
+        # fails `gh pr create` outright, as on 2026-10-26 and 11-02). The
+        # capped body says when it was trimmed and points here.
+        env:
+          VERIFY_FLAG: ${{ steps.verify.outputs.exit_code != '0' && '--verify-failed' || '' }}
         run: |
-          node scripts/format-drift-report.mjs \
-            "$RUNNER_TEMP/drift-report.json" \
-            ${{ steps.verify.outputs.exit_code != '0' && '--verify-failed' || '' }} \
-            > "$RUNNER_TEMP/pr-body.md"
-          cat "$RUNNER_TEMP/pr-body.md" >> "$GITHUB_STEP_SUMMARY"
+          node scripts/format-drift-report.mjs "$RUNNER_TEMP/drift-report.json" $VERIFY_FLAG \
+            >> "$GITHUB_STEP_SUMMARY"
+          node scripts/format-drift-report.mjs "$RUNNER_TEMP/drift-report.json" $VERIFY_FLAG \
+            --max-length 60000 > "$RUNNER_TEMP/pr-body.md"
 
       - name: Open or update the drift PR
         env:

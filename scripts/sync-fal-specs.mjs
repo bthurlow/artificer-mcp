@@ -14,7 +14,7 @@
  *
  * A route whose OpenAPI and llms.txt BOTH return 404 is retired: removed
  * from models.json, its spec dir deleted, and listed in the --report output
- * with the guides and docs that still mention it. Up to MAX_AUTO_RETIRE per
+ * with the guides and docs that still mention it. Up to retireCap() per
  * run; more than that at once is treated as a fal-side problem instead.
  *
  * Committed alongside the specs so CI can detect drift by re-running and
@@ -156,13 +156,27 @@ export function classifyFetches(results) {
 }
 
 /**
- * Most routes the cron will auto-retire in one run. A few routes dying in a
- * week is normal. Dozens at once is far more likely to be fal changing its
- * spec URLs or serving 404s during an incident, and auto-removing them would
- * gut the catalog. Above the cap, every gone route is reported as a plain
- * (blocking) failure and nothing is removed.
+ * Floor and share of the catalog the cron will auto-retire in one run. A
+ * handful of routes dying in a week is normal, and fal culls legacy models in
+ * batches (16 at once on 2026-10-26/11-02, about 3% of the catalog). An
+ * incident or a spec-URL change looks different: most of the catalog 404s at
+ * once, and auto-removing that would gut it. Above the cap, every gone route
+ * is reported as a plain (blocking) failure and nothing is removed.
  */
-export const MAX_AUTO_RETIRE = 10;
+export const MIN_AUTO_RETIRE = 10;
+export const MAX_AUTO_RETIRE_SHARE = 0.05;
+
+/**
+ * The retire cap for a catalog of `total` fal routes.
+ *
+ * Exported for unit testing.
+ *
+ * @param {number} total
+ * @returns {number}
+ */
+export function retireCap(total) {
+  return Math.max(MIN_AUTO_RETIRE, Math.ceil(total * MAX_AUTO_RETIRE_SHARE));
+}
 
 /**
  * Split routes whose surfaces both 404 into ones to retire and ones to
@@ -174,7 +188,7 @@ export const MAX_AUTO_RETIRE = 10;
  * @param {number} [cap]
  * @returns {{retire: Array<{slug: string, endpointId: string, error: string}>, failures: Array<{slug: string, endpointId: string, error: string}>}}
  */
-export function planRetirements(gone, cap = MAX_AUTO_RETIRE) {
+export function planRetirements(gone, cap = MIN_AUTO_RETIRE) {
   if (gone.length <= cap) return { retire: gone, failures: [] };
   return {
     retire: [],
@@ -495,7 +509,7 @@ async function main() {
   // Routes that 404 on both surfaces are retired: removed from the catalog
   // with their spec dirs, inside the drift PR. A human still decides, by
   // merging (or not) — the PR is the review. Over the cap, nothing is removed.
-  const plan = planRetirements(gone);
+  const plan = planRetirements(gone, retireCap(routes.length));
   for (const f of plan.failures) entries.push(f);
   for (const g of plan.retire) entries.push({ slug: g.slug, endpointId: g.endpointId });
   const retired = retireRoutes(catalog, plan.retire);
