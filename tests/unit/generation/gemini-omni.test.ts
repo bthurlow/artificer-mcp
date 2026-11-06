@@ -27,7 +27,14 @@ vi.mock('../../../src/generation/utils/download-and-write.js', async () => {
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { registerOmniVideoTools, extractOmniVideo } from '../../../src/generation/gemini-omni.js';
+import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import {
+  registerOmniVideoTools,
+  extractOmniVideo,
+  validateOmniInputs,
+} from '../../../src/generation/gemini-omni.js';
 import { omniGenerateVideoSchema } from '../../../src/generation/types.js';
 
 /** A completed interaction carrying a video uri. */
@@ -167,6 +174,78 @@ describe('gemini_omni_generate_video', () => {
     expect(req.generation_config.video_config.task).toBe('edit');
   });
 
+  it('sends resolution in response_format', async () => {
+    mockCreate.mockResolvedValue(completed());
+    await client.callTool({
+      name: 'gemini_omni_generate_video',
+      arguments: { prompt: 'p', output: '/tmp/clip.mp4', resolution: '1080p' },
+    });
+    expect(mockCreate.mock.calls[0][0].response_format).toMatchObject({ resolution: '1080p' });
+  });
+
+  it('sends first and last frame as two images in order, before the prompt', async () => {
+    // The API has no role field for frames: position is the only signal.
+    mockCreate.mockResolvedValue(completed());
+    const dir = await mkdtemp(join(tmpdir(), 'omni-'));
+    await writeFile(join(dir, 'first.png'), 'FIRST');
+    await writeFile(join(dir, 'last.jpg'), 'LAST');
+
+    await client.callTool({
+      name: 'gemini_omni_generate_video',
+      arguments: {
+        prompt: 'dusk to night',
+        output: '/tmp/clip.mp4',
+        image: join(dir, 'first.png'),
+        last_frame: join(dir, 'last.jpg'),
+      },
+    });
+
+    const input = mockCreate.mock.calls[0][0].input;
+    expect(input).toEqual([
+      { type: 'image', data: Buffer.from('FIRST').toString('base64'), mime_type: 'image/png' },
+      { type: 'image', data: Buffer.from('LAST').toString('base64'), mime_type: 'image/jpeg' },
+      { type: 'text', text: 'dusk to night' },
+    ]);
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it('sends an input video inline with the extend task', async () => {
+    mockCreate.mockResolvedValue(completed());
+    const dir = await mkdtemp(join(tmpdir(), 'omni-'));
+    await writeFile(join(dir, 'clip.mov'), 'VIDEO');
+
+    await client.callTool({
+      name: 'gemini_omni_generate_video',
+      arguments: {
+        prompt: 'the camera keeps rising',
+        output: '/tmp/clip.mp4',
+        video: join(dir, 'clip.mov'),
+        task: 'extend',
+        duration_seconds: 8,
+      },
+    });
+
+    const req = mockCreate.mock.calls[0][0];
+    expect(req.input[0]).toEqual({
+      type: 'video',
+      data: Buffer.from('VIDEO').toString('base64'),
+      mime_type: 'video/quicktime',
+    });
+    expect(req.input.at(-1)).toEqual({ type: 'text', text: 'the camera keeps rising' });
+    expect(req.generation_config).toEqual({ video_config: { task: 'extend' } });
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  it('rejects an invalid combination before calling the API', async () => {
+    const result = await client.callTool({
+      name: 'gemini_omni_generate_video',
+      arguments: { prompt: 'p', output: '/tmp/clip.mp4', task: 'extend' },
+    });
+    expect(result.isError).toBe(true);
+    expect((result.content as Array<{ text: string }>)[0].text).toContain('needs an input');
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
   it('surfaces a failed interaction with its error detail', async () => {
     mockCreate.mockResolvedValue({
       id: 'int_4',
@@ -264,5 +343,52 @@ describe('omniGenerateVideoSchema duration', () => {
     expect(parses(2)).toBe(false);
     expect(parses(16)).toBe(false);
     expect(parses(7.5)).toBe(false);
+  });
+});
+
+describe('validateOmniInputs', () => {
+  it('needs a first frame for a last frame', () => {
+    expect(() => validateOmniInputs({ last_frame: 'b.png' })).toThrow('needs `image`');
+  });
+
+  it('caps first-to-last-frame and extend at 10s', () => {
+    expect(() =>
+      validateOmniInputs({ image: 'a.png', last_frame: 'b.png', duration_seconds: 12 }),
+    ).toThrow('3-10s');
+    expect(() =>
+      validateOmniInputs({ video: 'v.mp4', task: 'extend', duration_seconds: 11 }),
+    ).toThrow('3-10s');
+    expect(() =>
+      validateOmniInputs({ image: 'a.png', last_frame: 'b.png', duration_seconds: 10 }),
+    ).not.toThrow();
+  });
+
+  it('accepts edit or extend from either an input video or a previous interaction', () => {
+    expect(() => validateOmniInputs({ task: 'edit', video: 'v.mp4' })).not.toThrow();
+    expect(() => validateOmniInputs({ task: 'extend', previous_interaction_id: 'int_1' })).not.toThrow();
+    expect(() => validateOmniInputs({ task: 'edit' })).toThrow('needs an input');
+  });
+
+  it('refuses both an input video and a previous interaction', () => {
+    expect(() =>
+      validateOmniInputs({ video: 'v.mp4', previous_interaction_id: 'int_1' }),
+    ).toThrow('not both');
+  });
+});
+
+describe('omniGenerateVideoSchema settings', () => {
+  const base = { prompt: 'p', output: '/tmp/o.mp4' };
+  it('takes the four resolutions and both aspect ratios, and rejects others', () => {
+    for (const resolution of ['360p', '720p', '1080p', '4k']) {
+      expect(omniGenerateVideoSchema.safeParse({ ...base, resolution }).success).toBe(true);
+    }
+    expect(omniGenerateVideoSchema.safeParse({ ...base, resolution: '1440p' }).success).toBe(false);
+    expect(omniGenerateVideoSchema.safeParse({ ...base, aspect_ratio: '1:1' }).success).toBe(false);
+  });
+
+  it('caps reference images at 6', () => {
+    const refs = (n: number) => Array.from({ length: n }, (_, i) => `r${i}.png`);
+    expect(omniGenerateVideoSchema.safeParse({ ...base, reference_images: refs(6) }).success).toBe(true);
+    expect(omniGenerateVideoSchema.safeParse({ ...base, reference_images: refs(7) }).success).toBe(false);
   });
 });

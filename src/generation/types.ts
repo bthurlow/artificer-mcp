@@ -408,9 +408,12 @@ export interface OmniGenerateVideoParams {
   prompt: string;
   output: string;
   image?: string;
+  last_frame?: string;
   reference_images?: string[];
+  video?: string;
   task?: string;
   aspect_ratio?: string;
+  resolution?: string;
   duration_seconds?: number;
   previous_interaction_id?: string;
   seed?: number;
@@ -430,23 +433,42 @@ export const omniGenerateVideoSchema = z.object({
   image: z
     .string()
     .optional()
-    .describe('Optional source image for image-to-video. Local path or URL.'),
-  reference_images: z
-    .array(z.string())
-    .optional()
-    .describe(
-      'Optional reference images for reference-to-video (subject / style consistency). Local paths or URLs.',
-    ),
-  task: z
-    .enum(['text_to_video', 'image_to_video', 'reference_to_video', 'edit'])
-    .optional()
-    .describe(
-      'Explicit task mode. Omit to let the model infer it from the prompt and attached media. Use "edit" together with previous_interaction_id for conversational editing.',
-    ),
-  aspect_ratio: z
+    .describe('Optional source image for image-to-video (the first frame). Local path or URL.'),
+  last_frame: z
     .string()
     .optional()
-    .describe('Aspect ratio — "16:9" or "9:16". Omit for the model default.'),
+    .describe(
+      'Optional end frame for first-to-last-frame interpolation; requires `image` as the first frame. Clips in this mode are 3-10s. Local path or URL.',
+    ),
+  reference_images: z
+    .array(z.string())
+    .max(6)
+    .optional()
+    .describe(
+      'Optional reference images for reference-to-video (subject / style consistency). Up to 6 in total, at most 3 per character for up to 2 characters. Local paths or URLs.',
+    ),
+  video: z
+    .string()
+    .optional()
+    .describe(
+      'Optional input video to edit or extend (15s or shorter), sent inline. Pair with task "edit" (describe the change) or "extend" (describe how it continues). To edit or extend a clip this tool just generated, pass previous_interaction_id instead. Video editing and extending are unavailable in the EEA, Switzerland and the UK. Local path or URL.',
+    ),
+  task: z
+    .enum(['text_to_video', 'image_to_video', 'reference_to_video', 'edit', 'extend'])
+    .optional()
+    .describe(
+      'Explicit task mode. Omit to let the model infer it from the prompt and attached media (Google recommends trying that first). "edit" and "extend" need `video` or previous_interaction_id. "extend" adds a 3-10s continuation, using the last 10s of the input, up to 30s in total.',
+    ),
+  aspect_ratio: z
+    .enum(['16:9', '9:16'])
+    .optional()
+    .describe('Aspect ratio — "16:9" (the API default) or "9:16".'),
+  resolution: z
+    .enum(['360p', '720p', '1080p', '4k'])
+    .optional()
+    .describe(
+      'Output resolution. "720p" is the API default. "1080p" and "4k" are upscaled from the native generation and cost more (~$0.104/s and ~$0.209/s on 1.2, vs ~$0.07/s at 720p); "360p" is the cheapest (~$0.023/s).',
+    ),
   duration_seconds: z
     .number()
     .int()
@@ -454,7 +476,7 @@ export const omniGenerateVideoSchema = z.object({
     .max(15)
     .optional()
     .describe(
-      'Clip length in whole seconds, 3-15 on gemini-omni-1.2-flash (the API default is 10). This tool does not expose the API extend task yet — concatenate clips with video_concatenate for longer pieces.',
+      'Clip length in whole seconds: 3-15 on gemini-omni-1.2-flash (API default 10), but 3-10 for first-to-last-frame (`last_frame`) and for an `extend` continuation.',
     ),
   previous_interaction_id: z
     .string()

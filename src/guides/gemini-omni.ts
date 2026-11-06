@@ -28,8 +28,8 @@ Both are true at once. The technical-specs row settles it by listing *"Maximum v
 ## Capabilities and limits
 | | |
 |---|---|
-| Duration | **3–15 seconds** per call on 1.2, any whole second (API default 10s; first/last-frame interpolation is limited to 3–10s). The API also has an \`extend\` task (3–10s continuations from the last 10s of a clip, up to 30s total on 1.2), but \`gemini_omni_generate_video\` does not expose it yet, so concatenate with \`video_concatenate\` for longer pieces. |
-| Resolution | **720p** (the API default). The API also accepts \`360p\`, \`1080p\` and \`4k\` (both upscaled) via \`response_format.resolution\`, but the tool does not send it yet, so output is 720p. |
+| Duration | **3–15 seconds** per call on 1.2, any whole second (API default 10s; first/last-frame interpolation is limited to 3–10s). For longer pieces use \`task: "extend"\` (3–10s continuations from the last 10s of a clip, up to 30s total), or concatenate clips with \`video_concatenate\`. |
+| Resolution | \`resolution\`: \`360p\`, \`720p\` (default), \`1080p\` or \`4k\`. **1080p and 4k are upscaled** from the native generation, not generated at that size, and cost about 1.5× and 3× the 720p rate. |
 | Frame rate | 24 fps |
 | Aspect ratios | **16:9 and 9:16** (9:16 makes it viable for vertical short-form) |
 | Audio | **Native, always on** — speech, music, and sound effects. No off switch. |
@@ -45,7 +45,12 @@ Set \`task\` explicitly, or omit it and let the model infer from the prompt and 
 - **\`text_to_video\`** — prompt only.
 - **\`image_to_video\`** — pass \`image\`. Animates a still.
 - **\`reference_to_video\`** — pass \`reference_images\`. Holds a subject or style consistent across shots.
-- **\`edit\`** — pair with \`previous_interaction_id\` (see below).
+- **\`edit\`** — change an existing clip: pass \`video\` (an input clip, 15s or shorter) or \`previous_interaction_id\` (a clip this tool generated; see below).
+- **\`extend\`** — continue a clip by 3–10s (the model reads its last 10s), up to 30s in total: pass \`video\` or \`previous_interaction_id\` and describe how it continues.
+
+**First-to-last-frame:** pass \`image\` (start) and \`last_frame\` (end), and describe the transition. The API tells the frames apart only by order, which the tool handles. Clips in this mode are 3–10s.
+
+**Limits the tool checks before calling the API:** \`last_frame\` needs \`image\`; first-to-last-frame and \`extend\` cap at 10s; \`edit\` / \`extend\` need an input; \`video\` and \`previous_interaction_id\` are mutually exclusive; at most 6 reference images. Input videos are sent inline, up to 20 MB. Editing and extending uploaded videos is unavailable in the EEA, Switzerland and the UK. Reference **videos** are not supported by the tool yet: Google's page gives their limits but not the request shape.
 
 ## Conversational editing — the differentiator
 Every call returns an \`interaction_id\`. Pass it back as \`previous_interaction_id\` and describe a change; the model edits that result rather than starting over.
@@ -78,7 +83,7 @@ For **edits**, describe only the change and what to preserve — "same framing a
 |---|---|
 | Synchronized diegetic audio in the clip | **Omni or Veo 3.1** — both generate native audio; Omni lets you then *revise* the shot conversationally |
 | Iterative "tweak this shot" editing | **Omni Flash** — nothing else here is stateful |
-| Above 720p, or 2K/4K | **MiniMax H3** (\`hailuo_prompt_guide\`). Omni's 1080p and 4k are upscales, and this tool sends 720p only. |
+| Above 720p, or 2K/4K | Either: Omni's \`1080p\` / \`4k\` and MiniMax H3's 2K/4K (\`hailuo_prompt_guide\`) are both upscales of a lower native resolution. |
 | Clips longer than 15s in one call | Neither: Omni 1.2 and MiniMax H3 both cap at 15s. Concatenate. |
 | Cheapest per second at vertical short-form | **MiniMax H3** at 480P/768P |
 | **Silent** B-roll under a fixed music master | **MiniMax H3** — returns a bare video file. Omni always bakes in audio you would have to strip. |
@@ -122,7 +127,7 @@ export function registerOmniVideoPromptGuide(server: McpServer): void {
   registerTool<Record<string, never>>(
     server,
     'gemini_omni_video_prompt_guide',
-    'Prompt guidance for Google Gemini Omni Flash video generation. Covers the four task modes (text/image/reference-to-video and edit), stateful conversational editing via previous_interaction_id, the 3-15s / 720p / 24fps / 16:9-9:16 limits, native audio (speech/music/SFX, always on with no off switch — steer via prompt or strip downstream), unsupported features (no system instructions, no structured output, no audio input), ~$0.07/s (720p, 1.2) pricing, and when to pick Omni vs Veo vs MiniMax H3. No API call — pure reference.',
+    'Prompt guidance for Google Gemini Omni Flash video generation. Covers the task modes (text/image/reference-to-video, first-to-last-frame, edit and extend of an input video or a previous result), resolution (360p-4k, upscaled above 720p), stateful conversational editing via previous_interaction_id, the 3-15s / 720p / 24fps / 16:9-9:16 limits, native audio (speech/music/SFX, always on with no off switch — steer via prompt or strip downstream), unsupported features (no system instructions, no structured output, no audio input), ~$0.07/s (720p, 1.2) pricing, and when to pick Omni vs Veo vs MiniMax H3. No API call — pure reference.',
     z.object({}).shape,
     async () => ({ content: [{ type: 'text', text: OMNI_GUIDE }] }),
   );
