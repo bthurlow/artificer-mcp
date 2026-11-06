@@ -8,7 +8,8 @@ import {
   classifyFetches,
   planRetirements,
   retireRoutes,
-  MAX_AUTO_RETIRE,
+  MIN_AUTO_RETIRE,
+  retireCap,
 } from '../../../scripts/sync-fal-specs.mjs';
 
 describe('extractPricing', () => {
@@ -285,17 +286,17 @@ describe('planRetirements', () => {
     }));
 
   it('retires everything up to the cap', () => {
-    const plan = planRetirements(gone(MAX_AUTO_RETIRE));
-    expect(plan.retire).toHaveLength(MAX_AUTO_RETIRE);
+    const plan = planRetirements(gone(MIN_AUTO_RETIRE));
+    expect(plan.retire).toHaveLength(MIN_AUTO_RETIRE);
     expect(plan.failures).toEqual([]);
   });
 
   it('retires nothing over the cap, and reports every route as a failure', () => {
     // Mass 404s look like fal changing its spec URLs, not dozens of models
     // dying the same week. Removing them would gut the catalog.
-    const plan = planRetirements(gone(MAX_AUTO_RETIRE + 1));
+    const plan = planRetirements(gone(MIN_AUTO_RETIRE + 1));
     expect(plan.retire).toEqual([]);
-    expect(plan.failures).toHaveLength(MAX_AUTO_RETIRE + 1);
+    expect(plan.failures).toHaveLength(MIN_AUTO_RETIRE + 1);
     expect(plan.failures[0].error).toContain('auto-retire cap');
   });
 });
@@ -372,5 +373,25 @@ describe('buildReport — retirements', () => {
 
   it('defaults to no retirements', () => {
     expect(buildReport([]).retired).toEqual([]);
+  });
+});
+
+describe('retireCap', () => {
+  const gone = (n: number) =>
+    Array.from({ length: n }, (_, i) => ({ slug: `r${i}`, endpointId: `fal-ai/r${i}`, error: '404' }));
+
+  it('never drops below the floor on a small catalog', () => {
+    expect(retireCap(20)).toBe(MIN_AUTO_RETIRE);
+  });
+
+  it('scales with the catalog, so a batch cull of a few percent goes through', () => {
+    // fal culled 16 of ~465 routes over 2026-10-26/11-02. A fixed cap of 10
+    // blocked it, and every route stayed in the catalog as a red failure.
+    expect(retireCap(465)).toBe(24);
+    expect(planRetirements(gone(16), retireCap(465)).retire).toHaveLength(16);
+  });
+
+  it('still blocks a catalog-wide 404 (an outage or a spec-URL change)', () => {
+    expect(planRetirements(gone(465), retireCap(465)).retire).toEqual([]);
   });
 });

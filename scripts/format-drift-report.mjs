@@ -34,10 +34,37 @@ function cell(value) {
  * Exported for unit testing.
  *
  * @param {{routes: number, retired?: Array<any>, deprecated: Array<any>, failures: Array<any>, costChanges: Array<any>, undeprecated: Array<any>, blocking: boolean}} report
- * @param {{verifyFailed?: boolean}} [opts]
+ * GitHub rejects a PR body over 65,536 characters, and a big sync (a fal
+ * pricing-copy rewrite across hundreds of routes) can exceed that: the
+ * 2026-10-26 and 11-02 runs failed at `gh pr create` for exactly this
+ * reason. With `maxLength`, an oversized body is re-rendered compactly
+ * (price and schema changes reduced to one line per route), and as a last
+ * resort cut at a line boundary. Retirements and fetch failures come first,
+ * so they survive any trimming. The full report still goes to the job
+ * summary, which has no such limit.
+ *
+ * @param {{verifyFailed?: boolean, maxLength?: number}} [opts]
  * @returns {string} markdown
  */
 export function formatDriftReport(report, opts = {}) {
+  const full = render(report, opts, false);
+  const max = opts.maxLength;
+  if (!max || full.length <= max) return full;
+  const compact = render(report, opts, true);
+  if (compact.length <= max) return compact;
+  const tail =
+    "\n\n_…truncated to fit GitHub's PR body limit. The full report is in the workflow run's job summary._\n";
+  const cut = compact.lastIndexOf('\n', max - tail.length);
+  return compact.slice(0, cut > 0 ? cut : max - tail.length) + tail;
+}
+
+/**
+ * @param {any} report
+ * @param {{verifyFailed?: boolean}} opts
+ * @param {boolean} compact one line per price / schema change
+ * @returns {string}
+ */
+function render(report, opts, compact) {
   const {
     retired = [],
     deprecated = [],
@@ -53,6 +80,12 @@ export function formatDriftReport(report, opts = {}) {
     'Most of a fal sync diff is their docs boilerplate churn. **The findings below are the review surface** — if this section is empty, the diff is noise and can be merged on a skim.',
     '',
   );
+  if (compact) {
+    out.push(
+      "> **Trimmed to fit GitHub's PR body limit.** Price and schema changes are listed one line per route. The full report, with before/after prices and every key, is in the workflow run's job summary.",
+      '',
+    );
+  }
 
   if (retired.length > 0) {
     out.push(
@@ -121,7 +154,8 @@ export function formatDriftReport(report, opts = {}) {
       'Watch for a changed *billing unit* (per-video → per-second), not just a changed rate — those are the ones that blow up a budget.',
       '',
     );
-    for (const c of costChanges) {
+    if (compact) out.push(...costChanges.map((c) => `- \`${c.slug}\``), '');
+    for (const c of compact ? [] : costChanges) {
       out.push(
         `<details><summary><code>${c.slug}</code></summary>`,
         '',
@@ -149,6 +183,12 @@ export function formatDriftReport(report, opts = {}) {
     for (const m of schema.modelsAdded) out.push(`- **new model** \`${m}\``);
     for (const m of schema.modelsRemoved) out.push(`- **model gone** \`${m}\``);
     for (const c of schema.changed) {
+      if (compact) {
+        const added = c.addedTop.length + c.addedNested.length;
+        const removed = c.removedTop.length + c.removedNested.length;
+        out.push(`- \`${c.model}\` (+${added} / **−${removed}** keys)`);
+        continue;
+      }
       out.push(`- \`${c.model}\``);
       const line = (label, keys) =>
         keys.length > 0 ? out.push(`  - ${label}: ${keys.map((k) => `\`${k}\``).join(', ')}`) : 0;
@@ -205,15 +245,19 @@ export function formatDriftReport(report, opts = {}) {
 
 async function main() {
   const args = process.argv.slice(2);
-  const path = args.find((a) => !a.startsWith('--'));
-  if (!path) {
-    console.error('Usage: node scripts/format-drift-report.mjs <report.json> [--verify-failed]');
+  const i = args.indexOf('--max-length');
+  const maxLength = i >= 0 ? Number(args[i + 1]) : undefined;
+  const path = args.find((a, j) => !a.startsWith('--') && (i < 0 || j !== i + 1));
+  if (!path || (i >= 0 && !(maxLength > 0))) {
+    console.error(
+      'Usage: node scripts/format-drift-report.mjs <report.json> [--verify-failed] [--max-length N]',
+    );
     process.exitCode = 2;
     return;
   }
   const report = JSON.parse(await readFile(path, 'utf8'));
   process.stdout.write(
-    formatDriftReport(report, { verifyFailed: args.includes('--verify-failed') }),
+    formatDriftReport(report, { verifyFailed: args.includes('--verify-failed'), maxLength }),
   );
 }
 

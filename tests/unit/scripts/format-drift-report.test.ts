@@ -227,3 +227,60 @@ describe('formatDriftReport — retirements', () => {
     expect(md).not.toContain('Delete `g`');
   });
 });
+
+describe('formatDriftReport — PR body size limit', () => {
+  // A sync that rewrote pricing copy on hundreds of routes produced a body
+  // over GitHub's 65,536-character limit, and `gh pr create` failed outright.
+  const long = 'x'.repeat(400);
+  const big = {
+    ...EMPTY,
+    failures: [{ slug: 'dead', endpointId: 'fal-ai/dead', error: '404' }],
+    costChanges: Array.from({ length: 300 }, (_, i) => ({
+      slug: `route-${i}`,
+      endpointId: `fal-ai/route-${i}`,
+      from: long,
+      to: long,
+    })),
+    schemaChanges: {
+      modelsAdded: [],
+      modelsRemoved: [],
+      changed: [
+        {
+          model: 'fal-ai/m',
+          addedTop: ['a', 'b'],
+          removedTop: ['c'],
+          addedNested: [],
+          removedNested: [],
+        },
+      ],
+    },
+  };
+
+  it('renders in full when no limit is given (the job summary)', () => {
+    const md = formatDriftReport(big);
+    expect(md.length).toBeGreaterThan(200_000);
+    expect(md).toContain('**Was:**');
+  });
+
+  it('switches to one line per change when over the limit, keeping every route', () => {
+    const md = formatDriftReport(big, { maxLength: 60_000 });
+    expect(md.length).toBeLessThanOrEqual(60_000);
+    expect(md).toContain('Trimmed to fit');
+    expect(md).not.toContain('**Was:**');
+    expect(md).toContain('- `route-299`');
+    expect(md).toContain('`fal-ai/m` (+2 / **−1** keys)');
+    // Findings with no file diff come first and survive trimming.
+    expect(md).toContain('`dead`');
+  });
+
+  it('cuts at a line boundary as a last resort', () => {
+    const md = formatDriftReport(big, { maxLength: 2_000 });
+    expect(md.length).toBeLessThanOrEqual(2_000);
+    expect(md).toContain('truncated to fit');
+    expect(md).toContain('`dead`');
+  });
+
+  it('leaves a body under the limit untouched', () => {
+    expect(formatDriftReport(EMPTY, { maxLength: 60_000 })).toBe(formatDriftReport(EMPTY));
+  });
+});
