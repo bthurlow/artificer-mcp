@@ -28,6 +28,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { registerOmniVideoTools, extractOmniVideo } from '../../../src/generation/gemini-omni.js';
+import { omniGenerateVideoSchema } from '../../../src/generation/types.js';
 
 /** A completed interaction carrying a video uri. */
 function completed(id = 'int_1', uri = 'https://example.test/v.mp4'): Record<string, unknown> {
@@ -79,7 +80,7 @@ describe('gemini_omni_generate_video', () => {
 
     expect(mockCreate).toHaveBeenCalledOnce();
     const req = mockCreate.mock.calls[0][0];
-    expect(req.model).toBe('gemini-omni-1.1-flash');
+    expect(req.model).toBe('gemini-omni-1.2-flash');
     expect(req.response_format).toMatchObject({ type: 'video', delivery: 'uri', duration: '8s' });
     expect(req.input[0]).toEqual({ type: 'text', text: 'a neon alley' });
 
@@ -246,5 +247,22 @@ describe('gemini_omni_generate_video', () => {
         }),
       ).toThrow(/no video content/);
     });
+  });
+});
+
+describe('omniGenerateVideoSchema duration', () => {
+  const base = { prompt: 'p', output: '/tmp/o.mp4' };
+  const parses = (duration_seconds: number) =>
+    omniGenerateVideoSchema.safeParse({ ...base, duration_seconds }).success;
+
+  it('accepts 3-15s, the range gemini-omni-1.2-flash takes', () => {
+    expect(parses(3)).toBe(true);
+    expect(parses(15)).toBe(true);
+  });
+
+  it('rejects lengths the API returns an invalid-argument error for', () => {
+    expect(parses(2)).toBe(false);
+    expect(parses(16)).toBe(false);
+    expect(parses(7.5)).toBe(false);
   });
 });

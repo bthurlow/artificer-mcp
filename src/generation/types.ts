@@ -421,9 +421,9 @@ export interface OmniGenerateVideoParams {
 export const omniGenerateVideoSchema = z.object({
   model: z
     .string()
-    .default(envDefault('ARTIFICER_OMNI_VIDEO_MODEL', 'gemini-omni-1.1-flash'))
+    .default(envDefault('ARTIFICER_OMNI_VIDEO_MODEL', 'gemini-omni-1.2-flash'))
     .describe(
-      'Gemini Omni video model ID. Default: gemini-omni-1.1-flash (override via ARTIFICER_OMNI_VIDEO_MODEL env var).',
+      'Gemini Omni video model ID. Default: gemini-omni-1.2-flash (override via ARTIFICER_OMNI_VIDEO_MODEL env var).',
     ),
   prompt: z.string().describe('Text prompt describing the video, or the edit to apply.'),
   output: z.string().describe('Output path for the generated video (e.g. "./clip.mp4").'),
@@ -451,10 +451,10 @@ export const omniGenerateVideoSchema = z.object({
     .number()
     .int()
     .min(3)
-    .max(10)
+    .max(15)
     .optional()
     .describe(
-      'Clip length in seconds (3-10). This tool does not expose the API extend task yet — concatenate clips with video_concatenate for longer pieces.',
+      'Clip length in whole seconds, 3-15 on gemini-omni-1.2-flash (the API default is 10). This tool does not expose the API extend task yet — concatenate clips with video_concatenate for longer pieces.',
     ),
   previous_interaction_id: z
     .string()
