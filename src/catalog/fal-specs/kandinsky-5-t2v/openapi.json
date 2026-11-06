@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/kandinsky5/text-to-video",
     "version": "1.0.0",
@@ -71,7 +71,65 @@
         ]
       },
       "Kandinsky5TextToVideoInput": {
-        "type": "object",
+        "properties": {
+          "duration": {
+            "description": "The length of the video to generate (5s or 10s)",
+            "default": "5s",
+            "enum": [
+              "5s",
+              "10s"
+            ],
+            "type": "string",
+            "title": "Duration",
+            "examples": [
+              "5s",
+              "10s"
+            ]
+          },
+          "enable_safety_checker": {
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "default": true,
+            "type": "boolean",
+            "title": "Enable Safety Checker"
+          },
+          "num_inference_steps": {
+            "maximum": 50,
+            "minimum": 1,
+            "description": "The number of inference steps.",
+            "default": 30,
+            "type": "integer",
+            "title": "Num Inference Steps"
+          },
+          "resolution": {
+            "description": "Resolution of the generated video in W:H format. Will be calculated based on the aspect ratio(768x512, 512x512, 512x768).",
+            "default": "768x512",
+            "type": "string",
+            "const": "768x512",
+            "title": "Resolution"
+          },
+          "aspect_ratio": {
+            "default": "3:2",
+            "enum": [
+              "3:2",
+              "1:1",
+              "2:3"
+            ],
+            "type": "string",
+            "title": "Aspect Ratio",
+            "description": "Aspect ratio of the generated video. One of (3:2, 1:1, 2:3)."
+          },
+          "prompt": {
+            "description": "The text prompt to guide video generation.",
+            "type": "string",
+            "title": "Prompt",
+            "examples": [
+              "A dog in red hat"
+            ]
+          }
+        },
+        "required": [
+          "prompt"
+        ],
         "x-fal-order-properties": [
           "prompt",
           "resolution",
@@ -80,83 +138,12 @@
           "num_inference_steps",
           "enable_safety_checker"
         ],
-        "title": "KandinskyT2VRequest",
-        "required": [
-          "prompt"
-        ],
-        "properties": {
-          "aspect_ratio": {
-            "type": "string",
-            "title": "Aspect Ratio",
-            "default": "3:2",
-            "description": "Aspect ratio of the generated video. One of (3:2, 1:1, 2:3).",
-            "enum": [
-              "3:2",
-              "1:1",
-              "2:3"
-            ]
-          },
-          "enable_safety_checker": {
-            "type": "boolean",
-            "title": "Enable Safety Checker",
-            "default": true,
-            "description": "Authorized callers may set false to request relaxed screening."
-          },
-          "resolution": {
-            "type": "string",
-            "title": "Resolution",
-            "default": "768x512",
-            "description": "Resolution of the generated video in W:H format. Will be calculated based on the aspect ratio(768x512, 512x512, 512x768).",
-            "const": "768x512"
-          },
-          "num_inference_steps": {
-            "type": "integer",
-            "title": "Num Inference Steps",
-            "default": 30,
-            "maximum": 50,
-            "minimum": 1,
-            "description": "The number of inference steps."
-          },
-          "duration": {
-            "type": "string",
-            "examples": [
-              "5s",
-              "10s"
-            ],
-            "title": "Duration",
-            "default": "5s",
-            "description": "The length of the video to generate (5s or 10s)",
-            "enum": [
-              "5s",
-              "10s"
-            ]
-          },
-          "prompt": {
-            "type": "string",
-            "examples": [
-              "A dog in red hat"
-            ],
-            "title": "Prompt",
-            "description": "The text prompt to guide video generation."
-          }
-        }
+        "type": "object",
+        "title": "KandinskyT2VRequest"
       },
       "Kandinsky5TextToVideoOutput": {
-        "type": "object",
-        "x-fal-order-properties": [
-          "video"
-        ],
-        "title": "KandinskyT2VResponse",
         "properties": {
           "video": {
-            "examples": [
-              {
-                "file_name": "output.mp4",
-                "content_type": "application/octet-stream",
-                "url": "https://v3b.fal.media/files/b/tiger/5d-CATfsfPrBaXAK38hy6_output.mp4",
-                "file_size": 5797172
-              }
-            ],
             "anyOf": [
               {
                 "$ref": "#/components/schemas/File"
@@ -165,63 +152,46 @@
                 "type": "null"
               }
             ],
-            "description": "The generated video file."
+            "description": "The generated video file.",
+            "examples": [
+              {
+                "url": "https://v3b.fal.media/files/b/tiger/5d-CATfsfPrBaXAK38hy6_output.mp4",
+                "file_name": "output.mp4",
+                "file_size": 5797172,
+                "content_type": "application/octet-stream"
+              }
+            ]
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "type": "object",
+        "title": "KandinskyT2VResponse"
       },
       "File": {
-        "type": "object",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
-        "title": "File",
-        "required": [
-          "url"
-        ],
         "properties": {
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          },
           "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
-            ],
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file."
-          },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
+            ]
           },
           "file_size": {
-            "examples": [
-              4404019
-            ],
-            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -230,9 +200,39 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes."
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "examples": [
+              4404019
+            ]
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ]
           }
-        }
+        },
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object",
+        "title": "File"
       }
     }
   },

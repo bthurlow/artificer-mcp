@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/flux-2-flex/edit",
     "version": "1.0.0",
@@ -71,10 +71,6 @@
         ]
       },
       "Flux2FlexEditInput": {
-        "required": [
-          "prompt",
-          "image_urls"
-        ],
         "x-fal-order-properties": [
           "prompt",
           "image_size",
@@ -87,23 +83,46 @@
           "guidance_scale",
           "num_inference_steps"
         ],
-        "type": "object",
         "title": "Flux2FlexImageEditInput",
         "properties": {
-          "guidance_scale": {
-            "title": "Guidance Scale",
-            "default": 3.5,
-            "type": "number",
-            "minimum": 1.5,
-            "maximum": 10,
-            "description": "The guidance scale to use for the generation."
+          "output_format": {
+            "title": "Output Format",
+            "default": "jpeg",
+            "type": "string",
+            "enum": [
+              "jpeg",
+              "png"
+            ],
+            "description": "The format of the generated image."
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "default": true,
+            "type": "boolean",
+            "description": "Whether to enable the safety checker. Disabling it requires account authorization; unauthorized requests are always checked."
+          },
+          "image_urls": {
+            "title": "Image URLs",
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/example_inputs/flux2_flex_edit_input.png"
+              ]
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of URLs of input images for editing"
           },
           "image_size": {
+            "title": "Image Size",
+            "default": "auto",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
               },
               {
+                "type": "string",
                 "enum": [
                   "auto",
                   "square_hd",
@@ -112,15 +131,31 @@
                   "portrait_16_9",
                   "landscape_4_3",
                   "landscape_16_9"
-                ],
-                "type": "string"
+                ]
               }
             ],
-            "default": "auto",
-            "title": "Image Size",
             "description": "The size of the generated image. If `auto`, the size will be determined by the model."
           },
+          "num_inference_steps": {
+            "title": "Number of Inference Steps",
+            "minimum": 2,
+            "maximum": 50,
+            "default": 28,
+            "type": "integer",
+            "description": "The number of inference steps to perform."
+          },
+          "guidance_scale": {
+            "title": "Guidance Scale",
+            "minimum": 1.5,
+            "maximum": 10,
+            "default": 3.5,
+            "type": "number",
+            "description": "The guidance scale to use for the generation."
+          },
           "safety_tolerance": {
+            "title": "Safety Tolerance",
+            "default": "2",
+            "type": "string",
             "enum": [
               "1",
               "2",
@@ -128,63 +163,24 @@
               "4",
               "5"
             ],
-            "type": "string",
-            "default": "2",
-            "title": "Safety Tolerance",
             "description": "The safety tolerance level for the generated image. 1 being the most strict and 5 being the most permissive."
           },
-          "output_format": {
-            "enum": [
-              "jpeg",
-              "png"
-            ],
-            "type": "string",
-            "default": "jpeg",
-            "title": "Output Format",
-            "description": "The format of the generated image."
-          },
-          "num_inference_steps": {
-            "title": "Number of Inference Steps",
-            "default": 28,
-            "type": "integer",
-            "minimum": 2,
-            "maximum": 50,
-            "description": "The number of inference steps to perform."
-          },
-          "enable_safety_checker": {
-            "default": true,
+          "sync_mode": {
+            "title": "Sync Mode",
+            "default": false,
             "type": "boolean",
-            "title": "Enable Safety Checker",
-            "description": "Whether to enable the safety checker. Disabling it requires account authorization; unauthorized requests are always checked."
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
           },
           "prompt": {
+            "title": "Prompt",
+            "type": "string",
             "examples": [
               "Change colors of the vase. In a cozy living room setting, visualize a gradient vase placed on a table, flowing from rich #6a0dad to soft #ff69b4. Add an artistic carving text with a big font on vase says \"FLEX\" in the middle."
             ],
-            "type": "string",
-            "title": "Prompt",
             "description": "The prompt to generate an image from."
           },
-          "sync_mode": {
-            "default": false,
-            "type": "boolean",
-            "title": "Sync Mode",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
-          },
-          "image_urls": {
-            "examples": [
-              [
-                "https://storage.googleapis.com/falserverless/example_inputs/flux2_flex_edit_input.png"
-              ]
-            ],
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Image URLs",
-            "description": "List of URLs of input images for editing"
-          },
           "seed": {
+            "title": "Seed",
             "anyOf": [
               {
                 "type": "integer"
@@ -193,29 +189,29 @@
                 "type": "null"
               }
             ],
-            "title": "Seed",
             "description": "The seed to use for the generation."
           }
-        }
+        },
+        "type": "object",
+        "required": [
+          "prompt",
+          "image_urls"
+        ]
       },
       "Flux2FlexEditOutput": {
-        "required": [
-          "images",
-          "seed"
-        ],
         "x-fal-order-properties": [
           "images",
           "seed"
         ],
-        "type": "object",
         "title": "Flux2FlexEditOutput",
         "properties": {
           "seed": {
-            "type": "integer",
             "title": "Seed",
+            "type": "integer",
             "description": "The seed used for the generation."
           },
           "images": {
+            "title": "Images",
             "examples": [
               [
                 {
@@ -223,45 +219,46 @@
                 }
               ]
             ],
+            "type": "array",
             "items": {
               "$ref": "#/components/schemas/ImageFile"
             },
-            "type": "array",
-            "title": "Images",
             "description": "The generated images."
           }
-        }
+        },
+        "type": "object",
+        "required": [
+          "images",
+          "seed"
+        ]
       },
       "ImageSize": {
         "x-fal-order-properties": [
           "width",
           "height"
         ],
-        "type": "object",
         "title": "ImageSize",
         "properties": {
-          "height": {
-            "title": "Height",
-            "default": 512,
-            "exclusiveMinimum": 0,
-            "type": "integer",
-            "maximum": 14142,
-            "description": "The height of the generated image."
-          },
           "width": {
             "title": "Width",
-            "default": 512,
-            "exclusiveMinimum": 0,
-            "type": "integer",
+            "description": "The width of the generated image.",
             "maximum": 14142,
-            "description": "The width of the generated image."
+            "default": 512,
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "height": {
+            "title": "Height",
+            "description": "The height of the generated image.",
+            "maximum": 14142,
+            "default": 512,
+            "type": "integer",
+            "exclusiveMinimum": 0
           }
-        }
+        },
+        "type": "object"
       },
       "ImageFile": {
-        "required": [
-          "url"
-        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -270,72 +267,42 @@
           "width",
           "height"
         ],
-        "type": "object",
         "title": "ImageFile",
         "properties": {
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
+          "width": {
+            "title": "Width",
             "anyOf": [
               {
-                "type": "string"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Content Type",
-            "description": "The mime type of the file."
+            "description": "The width of the image"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
           },
           "file_size": {
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "examples": [
               4404019
             ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size",
             "description": "The size of the file in bytes."
           },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Height",
-            "description": "The height of the image"
-          },
-          "width": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Width",
-            "description": "The width of the image"
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
+          "content_type": {
+            "title": "Content Type",
             "anyOf": [
               {
                 "type": "string"
@@ -344,10 +311,43 @@
                 "type": "null"
               }
             ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
+          },
+          "height": {
+            "title": "Height",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The height of the image"
+          },
+          "file_name": {
             "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
             "description": "The name of the file. It will be auto-generated if not provided."
           }
-        }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ]
       }
     }
   },

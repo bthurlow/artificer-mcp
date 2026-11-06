@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for topaz/upscale/image/precision",
     "version": "1.0.0",
@@ -71,6 +71,154 @@
         ]
       },
       "UpscaleImagePrecisionInput": {
+        "title": "ImagePrecisionUpscaleRequest",
+        "required": [
+          "image_url"
+        ],
+        "properties": {
+          "model": {
+            "title": "Model",
+            "type": "string",
+            "enum": [
+              "Standard V2",
+              "High Fidelity V3",
+              "High Fidelity V2",
+              "Low Resolution V2",
+              "CGI",
+              "Text Refine",
+              "Faces"
+            ],
+            "default": "Standard V2",
+            "description": "Precision upscaling model. Standard V2 fits most photos; High Fidelity V3/V2 preserve detail in professional shots; Low Resolution V2 recovers compressed sources; CGI targets art and rendered graphics; Text Refine keeps text and shapes crisp; Faces restores facial detail with Face Recovery 3."
+          },
+          "denoise": {
+            "title": "Denoise",
+            "anyOf": [
+              {
+                "maximum": 1,
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Denoising level (0.0-1.0). Default varies by model."
+          },
+          "sharpen": {
+            "title": "Sharpen",
+            "anyOf": [
+              {
+                "maximum": 1,
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Sharpening level (0.0-1.0). Default varies by model."
+          },
+          "strength": {
+            "title": "Strength",
+            "anyOf": [
+              {
+                "maximum": 1,
+                "type": "number",
+                "minimum": 0.01
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Enhancement strength (0.01-1.0). Applies to Text Refine model only."
+          },
+          "face_enhancement_creativity": {
+            "maximum": 1,
+            "title": "Face Enhancement Creativity",
+            "description": "Creativity level for face enhancement. 0.0 means no creativity, 1.0 means maximum creativity. Ignored if face enhancement is disabled.",
+            "type": "number",
+            "default": 0,
+            "minimum": 0
+          },
+          "upscale_factor": {
+            "maximum": 4,
+            "title": "Upscale Factor",
+            "description": "Factor to upscale the image by (e.g. 2.0 doubles width and height)",
+            "type": "number",
+            "default": 2,
+            "minimum": 1
+          },
+          "face_enhancement_strength": {
+            "maximum": 1,
+            "title": "Face Enhancement Strength",
+            "description": "Strength of the face enhancement. 0.0 means no enhancement, 1.0 means maximum enhancement. Ignored if face enhancement is disabled.",
+            "type": "number",
+            "default": 0.8,
+            "minimum": 0
+          },
+          "fix_compression": {
+            "title": "Fix Compression",
+            "anyOf": [
+              {
+                "maximum": 1,
+                "type": "number",
+                "minimum": 0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Compression artifact removal level (0.0-1.0). Not supported by the CGI model."
+          },
+          "output_format": {
+            "title": "Output Format",
+            "type": "string",
+            "enum": [
+              "jpeg",
+              "png"
+            ],
+            "default": "jpeg",
+            "description": "Output format of the upscaled image."
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "type": "boolean",
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening."
+          },
+          "subject_detection": {
+            "title": "Subject Detection",
+            "type": "string",
+            "enum": [
+              "All",
+              "Foreground",
+              "Background"
+            ],
+            "default": "All",
+            "description": "Subject detection mode for the image enhancement."
+          },
+          "image_url": {
+            "title": "Image Url",
+            "type": "string",
+            "minLength": 1,
+            "examples": [
+              "https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_poor_1.jpeg"
+            ],
+            "description": "Url of the image to be upscaled"
+          },
+          "face_enhancement": {
+            "title": "Face Enhancement",
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to apply face enhancement to the image."
+          },
+          "crop_to_fill": {
+            "title": "Crop To Fill",
+            "type": "boolean",
+            "default": false
+          }
+        },
         "x-fal-order-properties": [
           "image_url",
           "model",
@@ -87,190 +235,37 @@
           "strength",
           "enable_safety_checker"
         ],
-        "required": [
-          "image_url"
-        ],
-        "type": "object",
-        "properties": {
-          "crop_to_fill": {
-            "default": false,
-            "type": "boolean",
-            "title": "Crop To Fill"
-          },
-          "sharpen": {
-            "anyOf": [
-              {
-                "maximum": 1,
-                "type": "number",
-                "minimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Sharpening level (0.0-1.0). Default varies by model.",
-            "title": "Sharpen"
-          },
-          "face_enhancement_strength": {
-            "minimum": 0,
-            "description": "Strength of the face enhancement. 0.0 means no enhancement, 1.0 means maximum enhancement. Ignored if face enhancement is disabled.",
-            "maximum": 1,
-            "default": 0.8,
-            "type": "number",
-            "title": "Face Enhancement Strength"
-          },
-          "fix_compression": {
-            "anyOf": [
-              {
-                "maximum": 1,
-                "type": "number",
-                "minimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Compression artifact removal level (0.0-1.0). Not supported by the CGI model.",
-            "title": "Fix Compression"
-          },
-          "denoise": {
-            "anyOf": [
-              {
-                "maximum": 1,
-                "type": "number",
-                "minimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Denoising level (0.0-1.0). Default varies by model.",
-            "title": "Denoise"
-          },
-          "strength": {
-            "anyOf": [
-              {
-                "maximum": 1,
-                "type": "number",
-                "minimum": 0.01
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Enhancement strength (0.01-1.0). Applies to Text Refine model only.",
-            "title": "Strength"
-          },
-          "face_enhancement_creativity": {
-            "minimum": 0,
-            "description": "Creativity level for face enhancement. 0.0 means no creativity, 1.0 means maximum creativity. Ignored if face enhancement is disabled.",
-            "maximum": 1,
-            "default": 0,
-            "type": "number",
-            "title": "Face Enhancement Creativity"
-          },
-          "face_enhancement": {
-            "description": "Whether to apply face enhancement to the image.",
-            "default": true,
-            "type": "boolean",
-            "title": "Face Enhancement"
-          },
-          "subject_detection": {
-            "description": "Subject detection mode for the image enhancement.",
-            "enum": [
-              "All",
-              "Foreground",
-              "Background"
-            ],
-            "default": "All",
-            "type": "string",
-            "title": "Subject Detection"
-          },
-          "model": {
-            "description": "Precision upscaling model. Standard V2 fits most photos; High Fidelity V3/V2 preserve detail in professional shots; Low Resolution V2 recovers compressed sources; CGI targets art and rendered graphics; Text Refine keeps text and shapes crisp; Faces restores facial detail with Face Recovery 3.",
-            "enum": [
-              "Standard V2",
-              "High Fidelity V3",
-              "High Fidelity V2",
-              "Low Resolution V2",
-              "CGI",
-              "Text Refine",
-              "Faces"
-            ],
-            "default": "Standard V2",
-            "type": "string",
-            "title": "Model"
-          },
-          "image_url": {
-            "description": "Url of the image to be upscaled",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_poor_1.jpeg"
-            ],
-            "type": "string",
-            "minLength": 1,
-            "title": "Image Url"
-          },
-          "enable_safety_checker": {
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "default": true,
-            "type": "boolean",
-            "title": "Enable Safety Checker"
-          },
-          "upscale_factor": {
-            "minimum": 1,
-            "description": "Factor to upscale the image by (e.g. 2.0 doubles width and height)",
-            "maximum": 4,
-            "default": 2,
-            "type": "number",
-            "title": "Upscale Factor"
-          },
-          "output_format": {
-            "description": "Output format of the upscaled image.",
-            "enum": [
-              "jpeg",
-              "png"
-            ],
-            "default": "jpeg",
-            "type": "string",
-            "title": "Output Format"
-          }
-        },
-        "title": "ImagePrecisionUpscaleRequest"
+        "type": "object"
       },
       "UpscaleImagePrecisionOutput": {
-        "x-fal-order-properties": [
-          "image"
-        ],
+        "title": "ImageUpscaleOutput",
         "required": [
           "image"
         ],
-        "type": "object",
         "properties": {
           "image": {
             "$ref": "#/components/schemas/File",
             "description": "The upscaled image."
           }
         },
-        "title": "ImageUpscaleOutput"
+        "x-fal-order-properties": [
+          "image"
+        ],
+        "type": "object"
       },
       "File": {
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
+        "title": "File",
         "required": [
           "url"
         ],
-        "type": "object",
         "properties": {
           "url": {
-            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
             "type": "string",
-            "title": "Url"
+            "description": "The URL where the file can be downloaded from."
           },
           "file_name": {
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -279,28 +274,13 @@
                 "type": "null"
               }
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "title": "File Name"
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type"
+            "description": "The name of the file. It will be auto-generated if not provided."
           },
           "file_size": {
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -309,14 +289,34 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ],
-            "title": "File Size"
+            "description": "The size of the file in bytes."
+          },
+          "content_type": {
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
           }
         },
-        "title": "File"
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object"
       }
     }
   },

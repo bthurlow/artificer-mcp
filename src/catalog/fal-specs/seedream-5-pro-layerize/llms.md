@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.03375 per generated layer** for total pixel area under 1536x1536. For total pixel area over 1536x1536, each request will cost **$0.0675 per generated layer** .  Please note that total pixel area is determined from the size of the generated base layer.
+Your request will cost **$0.03375 per generated layer** for total pixel area under 1536x1536. For total pixel area over 1536x1536, each request will cost **$0.0675 per generated layer** . Please note that total pixel area is determined from the size of the generated base layer.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -44,6 +44,15 @@ The API accepts the following input parameters:
   - Default: `"auto"`
   - Options: `"auto"`, `"auto_1K"`, `"auto_1.5K"`, `"auto_2K"`
   - Examples: "auto"
+
+- **`output_format`** (`OutputFormatEnum`, _optional_):
+  Format of the base image. Separated layers always use PNG. Default value: `"png"`
+  - Default: `"png"`
+  - Options: `"jpeg"`, `"png"`
+
+- **`watermark`** (`boolean`, _optional_):
+  Whether to add the provider's visible watermark.
+  - Default: `false`
 
 - **`sync_mode`** (`boolean`, _optional_):
   If `True`, the media will be returned as a data URI and the output data won't be available in the request history.
@@ -76,6 +85,7 @@ The API accepts the following input parameters:
   "prompt": "Return name and description in english.",
   "image_url": "https://storage.googleapis.com/falserverless/example_inputs/kontext_example_input.webp",
   "image_size": "auto",
+  "output_format": "png",
   "enable_safety_checker": true,
   "enhance_prompt_mode": "standard"
 }
@@ -194,6 +204,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -215,4 +229,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

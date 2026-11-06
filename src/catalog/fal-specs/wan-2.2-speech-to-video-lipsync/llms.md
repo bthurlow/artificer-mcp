@@ -146,7 +146,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video file.
-  - Examples: {"file_size":4685303,"content_type":"application/octet-stream","url":"https://v3.fal.media/files/panda/f7tXRCjvwEcVlmxHuw8kO_2c7ab2540af44eceaf5ffde4e8d094ed.mp4","file_name":"2c7ab2540af44eceaf5ffde4e8d094ed.mp4"}
+  - Examples: {"url":"https://v3.fal.media/files/panda/f7tXRCjvwEcVlmxHuw8kO_2c7ab2540af44eceaf5ffde4e8d094ed.mp4","file_name":"2c7ab2540af44eceaf5ffde4e8d094ed.mp4","content_type":"application/octet-stream","file_size":4685303}
 
 
 
@@ -155,10 +155,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_size": 4685303,
-    "content_type": "application/octet-stream",
     "url": "https://v3.fal.media/files/panda/f7tXRCjvwEcVlmxHuw8kO_2c7ab2540af44eceaf5ffde4e8d094ed.mp4",
-    "file_name": "2c7ab2540af44eceaf5ffde4e8d094ed.mp4"
+    "file_name": "2c7ab2540af44eceaf5ffde4e8d094ed.mp4",
+    "content_type": "application/octet-stream",
+    "file_size": 4685303
   }
 }
 ```
@@ -242,6 +242,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -263,4 +267,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

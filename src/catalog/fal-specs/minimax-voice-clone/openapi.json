@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/minimax/voice-clone",
     "version": "1.0.0",
@@ -71,85 +71,6 @@
         ]
       },
       "MinimaxVoiceCloneInput": {
-        "properties": {
-          "need_volume_normalization": {
-            "title": "Need Volume Normalization",
-            "type": "boolean",
-            "description": "Enable volume normalization for the cloned voice",
-            "default": false
-          },
-          "audio_url": {
-            "title": "Audio Url",
-            "type": "string",
-            "description": "\n            URL of the input audio file for voice cloning. Should be at least 10 seconds\n            long. To retain the voice permanently, use it with a TTS (text-to-speech)\n            endpoint at least once within 7 days. Otherwise, it will be\n            automatically deleted.\n        ",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/model_tests/zonos/demo_voice_zonos.wav"
-            ]
-          },
-          "accuracy": {
-            "title": "Accuracy",
-            "anyOf": [
-              {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Text validation accuracy threshold (0-1)"
-          },
-          "model": {
-            "title": "Model",
-            "type": "string",
-            "enum": [
-              "speech-02-hd",
-              "speech-02-turbo",
-              "speech-01-hd",
-              "speech-01-turbo"
-            ],
-            "description": "TTS model to use for preview. Options: speech-02-hd, speech-02-turbo, speech-01-hd, speech-01-turbo",
-            "examples": [
-              "speech-02-hd",
-              "speech-02-turbo",
-              "speech-01-hd",
-              "speech-01-turbo"
-            ],
-            "default": "speech-02-hd"
-          },
-          "enable_safety_checker": {
-            "title": "Enable Safety Checker",
-            "type": "boolean",
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "default": true
-          },
-          "text": {
-            "title": "Text",
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 1000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Text to generate a TTS preview with the cloned voice (optional)",
-            "examples": [
-              "Hello, this is a preview of your cloned voice! I hope you like it!"
-            ],
-            "default": "Hello, this is a preview of your cloned voice! I hope you like it!"
-          },
-          "noise_reduction": {
-            "title": "Noise Reduction",
-            "type": "boolean",
-            "description": "Enable noise reduction for the cloned voice",
-            "default": false
-          }
-        },
-        "type": "object",
-        "title": "VoiceCloneRequest",
         "x-fal-order-properties": [
           "enable_safety_checker",
           "audio_url",
@@ -161,11 +82,103 @@
         ],
         "required": [
           "audio_url"
-        ]
+        ],
+        "properties": {
+          "noise_reduction": {
+            "title": "Noise Reduction",
+            "description": "Enable noise reduction for the cloned voice",
+            "default": false,
+            "type": "boolean"
+          },
+          "audio_url": {
+            "title": "Audio Url",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/model_tests/zonos/demo_voice_zonos.wav"
+            ],
+            "description": "\n            URL of the input audio file for voice cloning. Should be at least 10 seconds\n            long. To retain the voice permanently, use it with a TTS (text-to-speech)\n            endpoint at least once within 7 days. Otherwise, it will be\n            automatically deleted.\n        ",
+            "type": "string"
+          },
+          "need_volume_normalization": {
+            "title": "Need Volume Normalization",
+            "description": "Enable volume normalization for the cloned voice",
+            "default": false,
+            "type": "boolean"
+          },
+          "accuracy": {
+            "title": "Accuracy",
+            "description": "Text validation accuracy threshold (0-1)",
+            "anyOf": [
+              {
+                "maximum": 1,
+                "minimum": 0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "model": {
+            "enum": [
+              "speech-02-hd",
+              "speech-02-turbo",
+              "speech-01-hd",
+              "speech-01-turbo"
+            ],
+            "title": "Model",
+            "examples": [
+              "speech-02-hd",
+              "speech-02-turbo",
+              "speech-01-hd",
+              "speech-01-turbo"
+            ],
+            "default": "speech-02-hd",
+            "type": "string",
+            "description": "TTS model to use for preview. Options: speech-02-hd, speech-02-turbo, speech-01-hd, speech-01-turbo"
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "default": true,
+            "type": "boolean"
+          },
+          "text": {
+            "title": "Text",
+            "description": "Text to generate a TTS preview with the cloned voice (optional)",
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "Hello, this is a preview of your cloned voice! I hope you like it!",
+            "examples": [
+              "Hello, this is a preview of your cloned voice! I hope you like it!"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "VoiceCloneRequest"
       },
       "MinimaxVoiceCloneOutput": {
+        "x-fal-order-properties": [
+          "custom_voice_id",
+          "audio"
+        ],
+        "required": [
+          "custom_voice_id"
+        ],
         "properties": {
+          "custom_voice_id": {
+            "title": "Custom Voice Id",
+            "description": "The cloned voice ID for use with TTS",
+            "type": "string"
+          },
           "audio": {
+            "description": "Preview audio generated with the cloned voice (if requested)",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/File"
@@ -174,84 +187,17 @@
                 "type": "null"
               }
             ],
-            "description": "Preview audio generated with the cloned voice (if requested)",
             "examples": [
               {
                 "url": "https://fal.media/files/kangaroo/kojPUCNZ9iUGFGMR-xb7h_speech.mp3"
               }
             ]
-          },
-          "custom_voice_id": {
-            "title": "Custom Voice Id",
-            "type": "string",
-            "description": "The cloned voice ID for use with TTS"
           }
         },
         "type": "object",
-        "title": "VoiceCloneOutput",
-        "x-fal-order-properties": [
-          "custom_voice_id",
-          "audio"
-        ],
-        "required": [
-          "custom_voice_id"
-        ]
+        "title": "VoiceCloneOutput"
       },
       "File": {
-        "properties": {
-          "file_name": {
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
-          },
-          "content_type": {
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ]
-          },
-          "file_size": {
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ]
-          },
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
-          }
-        },
-        "type": "object",
-        "title": "File",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -260,7 +206,61 @@
         ],
         "required": [
           "url"
-        ]
+        ],
+        "properties": {
+          "content_type": {
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ]
+          },
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "file_size": {
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ]
+          },
+          "file_name": {
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          }
+        },
+        "type": "object",
+        "title": "File"
       }
     }
   },

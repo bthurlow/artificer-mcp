@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for bytedance/seedream/v5/lite/text-to-image",
     "version": "1.0.0",
@@ -71,28 +71,44 @@
         ]
       },
       "SeedreamV5LiteTextToImageInput": {
+        "required": [
+          "prompt"
+        ],
+        "x-fal-order-properties": [
+          "prompt",
+          "image_size",
+          "num_images",
+          "max_images",
+          "sync_mode",
+          "enable_safety_checker",
+          "output_format",
+          "watermark",
+          "sequential_image_generation",
+          "return_byteplus_urls"
+        ],
+        "title": "SeedDream50LiteT2IInput",
         "properties": {
-          "num_images": {
-            "title": "Num Images",
-            "default": 1,
-            "minimum": 1,
-            "type": "integer",
-            "description": "Number of separate model generations to be run with the prompt.",
-            "maximum": 6
-          },
           "max_images": {
-            "title": "Max Images",
+            "maximum": 15,
             "default": 1,
+            "description": "Maximum images per generation in sequential mode. Ignored when sequential generation is disabled. Combined input references and outputs per generation cannot exceed 15.",
+            "title": "Max Images",
             "minimum": 1,
-            "type": "integer",
-            "description": "If set to a number greater than one, enables multi-image generation. The model will potentially return up to `max_images` images every generation, and in total, `num_images` generations will be carried out. In total, the number of images generated will be between `num_images` and `max_images*num_images`.",
-            "maximum": 6
+            "type": "integer"
+          },
+          "sync_mode": {
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "default": false,
+            "title": "Sync Mode",
+            "type": "boolean"
           },
           "image_size": {
+            "description": "The size of the generated image. Custom dimensions within the provider's pixel and aspect limits are sent unchanged. Other sizes use compatible scaling. The provider's native pixel range is 2560x1440 to 4096x4096, with aspect ratio between 1/16 and 16.",
             "default": "auto_2K",
+            "title": "Image Size",
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ImageSize"
+                "$ref": "#/components/schemas/SeedreamLiteImageSize"
               },
               {
                 "type": "string",
@@ -108,66 +124,90 @@
                   "auto_4K"
                 ]
               }
-            ],
-            "description": "The size of the generated image. Total pixels must be between 2560x1440 and 4096x4096. In case the image size does not fall within these parameters, the image size will be adjusted to by scaling.",
-            "title": "Image Size"
+            ]
           },
-          "sync_mode": {
+          "return_byteplus_urls": {
+            "description": "If set to true returns seedance-2 trusted URLs. Please note these urls expire in 24 hours.",
             "default": false,
-            "type": "boolean",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "title": "Sync Mode"
+            "title": "Return Byteplus Urls",
+            "type": "boolean"
           },
-          "enable_safety_checker": {
-            "examples": [
-              true
-            ],
-            "default": true,
-            "type": "boolean",
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "title": "Enable Safety Checker"
+          "output_format": {
+            "description": "The file format of the generated images.",
+            "default": "jpeg",
+            "title": "Output Format",
+            "type": "string",
+            "enum": [
+              "jpeg",
+              "png"
+            ]
+          },
+          "sequential_image_generation": {
+            "description": "Generate related images with `auto`, or one image per generation with `disabled`. When omitted, values of `max_images` above one enable `auto`.",
+            "title": "Sequential Image Generation",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "auto",
+                  "disabled"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "watermark": {
+            "description": "Whether to add the provider's visible watermark.",
+            "default": false,
+            "title": "Watermark",
+            "type": "boolean"
           },
           "prompt": {
+            "description": "The text prompt used to generate the image",
             "examples": [
               "Realistic DSLR photograph of anthropomorphic Penkingese dog enjoying a bowl of ramen on the Great Wall of China with the words \"Seedream 5.0 Lite available on fal\" visible at the top."
             ],
-            "type": "string",
             "title": "Prompt",
-            "description": "The text prompt used to generate the image"
+            "type": "string"
           },
-          "return_byteplus_urls": {
-            "default": false,
-            "type": "boolean",
-            "description": "If set to true returns seedance-2 trusted URLs. Please note these urls expire in 24 hours.",
-            "title": "Return Byteplus Urls"
+          "num_images": {
+            "maximum": 6,
+            "default": 1,
+            "description": "Number of separate model generations to be run with the prompt.",
+            "title": "Num Images",
+            "minimum": 1,
+            "type": "integer"
+          },
+          "enable_safety_checker": {
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "default": true,
+            "examples": [
+              true
+            ],
+            "title": "Enable Safety Checker",
+            "type": "boolean"
           }
         },
-        "required": [
-          "prompt"
-        ],
-        "type": "object",
-        "title": "SeedDream50LiteT2IInput",
-        "x-fal-order-properties": [
-          "prompt",
-          "image_size",
-          "num_images",
-          "max_images",
-          "sync_mode",
-          "enable_safety_checker",
-          "return_byteplus_urls"
-        ]
+        "type": "object"
       },
       "SeedreamV5LiteTextToImageOutput": {
+        "required": [
+          "images",
+          "seed"
+        ],
+        "x-fal-order-properties": [
+          "images",
+          "seed"
+        ],
+        "title": "SeedDream50LiteT2IOutput",
         "properties": {
-          "seed": {
-            "examples": [
-              42
-            ],
-            "type": "integer",
-            "title": "Seed",
-            "description": "Seed used for generation."
-          },
           "images": {
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            },
+            "description": "Generated images",
             "examples": [
               [
                 {
@@ -175,55 +215,133 @@
                 }
               ]
             ],
-            "items": {
-              "$ref": "#/components/schemas/Image"
-            },
-            "type": "array",
             "title": "Images",
-            "description": "Generated images"
+            "type": "array"
+          },
+          "seed": {
+            "description": "Seed used for generation.",
+            "examples": [
+              42
+            ],
+            "title": "Seed",
+            "type": "integer"
           }
         },
-        "required": [
-          "images",
-          "seed"
-        ],
-        "type": "object",
-        "title": "SeedDream50LiteT2IOutput",
-        "x-fal-order-properties": [
-          "images",
-          "seed"
-        ]
+        "type": "object"
       },
-      "ImageSize": {
-        "type": "object",
+      "SeedreamLiteImageSize": {
         "x-fal-order-properties": [
           "width",
           "height"
         ],
-        "title": "ImageSize",
+        "title": "SeedreamLiteImageSize",
         "properties": {
-          "width": {
-            "type": "integer",
-            "title": "Width",
-            "default": 512,
-            "maximum": 14142,
-            "exclusiveMinimum": 0,
-            "description": "The width of the generated image."
-          },
           "height": {
-            "type": "integer",
-            "title": "Height",
+            "maximum": 16384,
             "default": 512,
-            "maximum": 14142,
             "exclusiveMinimum": 0,
-            "description": "The height of the generated image."
+            "title": "Height",
+            "description": "The height of the generated image.",
+            "type": "integer"
+          },
+          "width": {
+            "maximum": 16384,
+            "default": 512,
+            "exclusiveMinimum": 0,
+            "title": "Width",
+            "description": "The width of the generated image.",
+            "type": "integer"
           }
-        }
+        },
+        "type": "object"
       },
       "Image": {
+        "properties": {
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The height of the image in pixels.",
+            "title": "Height",
+            "examples": [
+              1024
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "examples": [
+              4404019
+            ]
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The width of the image in pixels.",
+            "title": "Width",
+            "examples": [
+              1024
+            ]
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ]
+          }
+        },
         "required": [
           "url"
         ],
+        "description": "Represents an image file.",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -233,90 +351,7 @@
           "height"
         ],
         "title": "Image",
-        "type": "object",
-        "description": "Represents an image file.",
-        "properties": {
-          "width": {
-            "examples": [
-              1024
-            ],
-            "title": "Width",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The width of the image in pixels."
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file."
-          },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The size of the file in bytes."
-          },
-          "height": {
-            "examples": [
-              1024
-            ],
-            "title": "Height",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The height of the image in pixels."
-          }
-        }
+        "type": "object"
       }
     }
   },

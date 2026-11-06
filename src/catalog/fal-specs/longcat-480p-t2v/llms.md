@@ -141,7 +141,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video file.
-  - Examples: {"content_type":"video/mp4","url":"https://v3b.fal.media/files/b/zebra/lXFrGA-egaUXWFGSp8GqT_BxoDEqUZ.mp4"}
+  - Examples: {"url":"https://v3b.fal.media/files/b/zebra/lXFrGA-egaUXWFGSp8GqT_BxoDEqUZ.mp4","content_type":"video/mp4"}
 
 
 
@@ -152,8 +152,8 @@ The API returns the following output format:
   "prompt": "realistic filming style, a person wearing a dark helmet, a deep-colored jacket, blue jeans, and bright yellow shoes rides a skateboard along a winding mountain road. The skateboarder starts in a standing position, then gradually lowers into a crouch, extending one hand to touch the road surface while maintaining a low center of gravity to navigate a sharp curve. After completing the turn, the skateboarder rises back to a standing position and continues gliding forward. The background features lush green hills flanking both sides of the road, with distant snow-capped mountain peaks rising against a clear, bright blue sky. The camera follows closely from behind, smoothly tracking the skateboarder’s movements and capturing the dynamic scenery along the route. The scene is shot in natural daylight, highlighting the vivid outdoor environment and the skateboarder’s fluid actions.",
   "seed": 424911732,
   "video": {
-    "content_type": "video/mp4",
-    "url": "https://v3b.fal.media/files/b/zebra/lXFrGA-egaUXWFGSp8GqT_BxoDEqUZ.mp4"
+    "url": "https://v3b.fal.media/files/b/zebra/lXFrGA-egaUXWFGSp8GqT_BxoDEqUZ.mp4",
+    "content_type": "video/mp4"
   }
 }
 ```
@@ -231,6 +231,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -252,4 +256,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

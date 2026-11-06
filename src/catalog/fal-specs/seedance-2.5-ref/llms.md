@@ -15,7 +15,7 @@
 
 ## Pricing
 
-For 480p, your request will cost roughly **$0.2205** per second of generated video, for 720p, you will be charged roughly **$0.4730** per second of generated video, and for 1080p, roughly **$1.164** per second of generated video. Your request will cost **$0.0214** per 1000 tokens for 480p and 720p video and roughly **$0.0234** per 1000 tokens for 1080p video. The number of tokens is roughly given by (height of output video * width of output video * (input video duration + output video duration) * 24) / 1024. If video inputs are provided the price is multiplied by 0.6. With video inputs and 720p resolution, the price is roughly **$0.2838** per second of generated video. With video references, you will be charged for both input and output videos.
+For 480p, your request will cost roughly **$0.2205** per second of generated video, for 720p, you will be charged roughly **$0.4730** per second of generated video, and for 1080p, roughly **$1.164** per second of generated video. Your request will cost **$0.0214** per 1,000 tokens for 480p and 720p video and roughly **$0.0234** per 1,000 tokens for 1080p video. The number of tokens is roughly given by (height of output video * width of output video * (input video duration + output video duration) * 24) / 1024. If video inputs are provided the price is multiplied by 0.6. With video inputs and 720p resolution, the price is roughly **$0.2838** per second of generated video. With video references, you will be charged for both input and output videos.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -35,9 +35,9 @@ The API accepts the following input parameters:
   - Examples: "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea."
 
 - **`task`** (`TaskEnum`, _optional_):
-  The type of video generation task. Reference uses the supplied media as guidance. Editing modifies a reference video and automatically coerces aspect_ratio and duration to auto. Extension continues a reference video and automatically coerces aspect_ratio to auto. Default value: `"reference"`
+  The type of video generation task. Reference uses the supplied media as guidance. Editing modifies a reference video and automatically coerces aspect_ratio and duration to auto. Extension continues a reference video and automatically coerces aspect_ratio to auto. Auto leaves the task type unset so the model decides it from the prompt and references. Default value: `"reference"`
   - Default: `"reference"`
-  - Options: `"reference"`, `"editing"`, `"extension"`
+  - Options: `"auto"`, `"reference"`, `"editing"`, `"extension"`
 
 - **`image_urls`** (`list<string>`, _optional_):
   Reference images to guide video generation. Refer to them in the prompt as @Image1, @Image2, etc. Supported formats: JPG, PNG, WebP, BMP, TIFF, GIF, HEIC, HEIF. Max 30 MB per image. Up to 30 images. Total files across all modalities must not exceed 50.
@@ -58,7 +58,7 @@ The API accepts the following input parameters:
   - Options: `"480p"`, `"720p"`, `"1080p"`
 
 - **`draft`** (`boolean`, _optional_):
-  Generate a draft preview at 480p, overriding resolution. Returns a draft_id for completing the draft at 1080p within seven days.
+  Generate a draft preview at 480p, overriding resolution. Returns a draft_id for completing the draft at 1080p within 14 days.
   - Default: `false`
 
 - **`duration`** (`DurationEnum`, _optional_):
@@ -133,7 +133,7 @@ The API returns the following output format:
   - Examples: 42
 
 - **`draft_id`** (`string`, _optional_):
-  The draft ID, or null when draft mode is disabled. Complete this draft within seven days using the same account.
+  The draft ID, or null when draft mode is disabled. Complete this draft within 14 days (7 days for US drafts) using the same account.
 
 
 
@@ -215,6 +215,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -236,4 +240,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

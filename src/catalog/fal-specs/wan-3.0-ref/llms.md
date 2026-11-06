@@ -15,7 +15,7 @@
 
 ## Pricing
 
-For every second of video you generate, you will be charged **$0.05** **480p**, **$0.10** **720p**, or **$0.20** **1080p**. For example, a **5s** video at **720p** will cost **$0.50**. **Pricing is subjected to change.**
+For every second of video you generate, you will be charged **$0.05** **480p**, **$0.10** **720p**, or **$0.20** **1080p**. For example, a **5s** video at **720p** will cost **$0.50**. **Pricing is subject to change.**
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -204,6 +204,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -225,4 +229,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

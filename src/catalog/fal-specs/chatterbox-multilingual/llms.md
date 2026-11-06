@@ -34,8 +34,12 @@ The API accepts the following input parameters:
   The text to be converted to speech (maximum 300 characters). Supports 23 languages including English, French, German, Spanish, Italian, Portuguese, Hindi, Arabic, Chinese, Japanese, Korean, and more.
   - Examples: "Last month, we reached a new milestone with two billion views on our YouTube channel.", "Le mois dernier, nous avons atteint un nouveau jalon avec deux milliards de vues sur notre chaîne YouTube."
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Check input content for safety. Disabling requires account authorization. Default value: `true`
+  - Default: `true`
+
 - **`voice`** (`string`, _optional_):
-  Language code for synthesis. In case using custom please provide audio url and select custom_audio_language. Default value: `"english"`
+  Language code for synthesis, or a reference audio URL with custom_audio_language selected. Invalid reference audio is rejected with a non-billable 422 error. Default value: `"english"`
   - Default: `"english"`
   - Examples: "english", "arabic", "danish", "german", "greek", "spanish", "finnish", "french", "hebrew", "hindi", "italian", "japanese", "korean", "malay", "dutch", "norwegian", "polish", "portuguese", "russian", "swedish", "swahili", "turkish", "chinese"
 
@@ -76,6 +80,7 @@ The API accepts the following input parameters:
 ```json
 {
   "text": "Last month, we reached a new milestone with two billion views on our YouTube channel.",
+  "enable_safety_checker": true,
   "voice": "english",
   "exaggeration": 0.5,
   "temperature": 0.8,
@@ -177,6 +182,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -198,4 +207,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

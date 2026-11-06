@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/chatterbox/text-to-speech/multilingual",
     "version": "1.0.0",
@@ -71,58 +71,50 @@
         ]
       },
       "ChatterboxTextToSpeechMultilingualInput": {
-        "required": [
-          "text"
-        ],
-        "x-fal-order-properties": [
-          "text",
-          "voice",
-          "custom_audio_language",
-          "exaggeration",
-          "temperature",
-          "cfg_scale",
-          "seed"
-        ],
-        "title": "ChatterboxMultilingualRequest",
         "properties": {
+          "temperature": {
+            "maximum": 2,
+            "minimum": 0.05,
+            "description": "Controls randomness and variation in generation (0.05-2.0). Higher values create more varied speech patterns.",
+            "default": 0.8,
+            "type": "number",
+            "title": "Temperature"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Random seed for reproducible results. Set to 0 for random generation, or provide a specific number for consistent outputs.",
+            "title": "Seed"
+          },
+          "enable_safety_checker": {
+            "description": "Check input content for safety. Disabling requires account authorization.",
+            "default": true,
+            "type": "boolean",
+            "title": "Enable Safety Checker"
+          },
+          "text": {
+            "description": "The text to be converted to speech (maximum 300 characters). Supports 23 languages including English, French, German, Spanish, Italian, Portuguese, Hindi, Arabic, Chinese, Japanese, Korean, and more.",
+            "maxLength": 300,
+            "type": "string",
+            "title": "Text",
+            "examples": [
+              "Last month, we reached a new milestone with two billion views on our YouTube channel.",
+              "Le mois dernier, nous avons atteint un nouveau jalon avec deux milliards de vues sur notre chaîne YouTube."
+            ]
+          },
           "cfg_scale": {
             "maximum": 1,
-            "title": "CFG Scale",
-            "description": "Configuration/pace weight controlling generation guidance (0.0-1.0). Use 0.0 for language transfer to mitigate accent inheritance.",
             "minimum": 0,
+            "description": "Configuration/pace weight controlling generation guidance (0.0-1.0). Use 0.0 for language transfer to mitigate accent inheritance.",
+            "default": 0.5,
             "type": "number",
-            "default": 0.5
-          },
-          "voice": {
-            "examples": [
-              "english",
-              "arabic",
-              "danish",
-              "german",
-              "greek",
-              "spanish",
-              "finnish",
-              "french",
-              "hebrew",
-              "hindi",
-              "italian",
-              "japanese",
-              "korean",
-              "malay",
-              "dutch",
-              "norwegian",
-              "polish",
-              "portuguese",
-              "russian",
-              "swedish",
-              "swahili",
-              "turkish",
-              "chinese"
-            ],
-            "title": "Voice",
-            "description": "Language code for synthesis. In case using custom please provide audio url and select custom_audio_language. ",
-            "type": "string",
-            "default": "english"
+            "title": "CFG Scale"
           },
           "custom_audio_language": {
             "anyOf": [
@@ -158,62 +150,70 @@
                 "type": "null"
               }
             ],
-            "title": "Custom Audio Language",
-            "description": "If using a custom audio URL, specify the language of the audio here. Ignored if voice is not a custom url."
+            "description": "If using a custom audio URL, specify the language of the audio here. Ignored if voice is not a custom url.",
+            "title": "Custom Audio Language"
           },
-          "text": {
-            "maxLength": 300,
-            "title": "Text",
-            "description": "The text to be converted to speech (maximum 300 characters). Supports 23 languages including English, French, German, Spanish, Italian, Portuguese, Hindi, Arabic, Chinese, Japanese, Korean, and more.",
+          "voice": {
+            "title": "Voice",
+            "description": "Language code for synthesis, or a reference audio URL with custom_audio_language selected. Invalid reference audio is rejected with a non-billable 422 error.",
+            "default": "english",
             "type": "string",
             "examples": [
-              "Last month, we reached a new milestone with two billion views on our YouTube channel.",
-              "Le mois dernier, nous avons atteint un nouveau jalon avec deux milliards de vues sur notre chaîne YouTube."
+              "english",
+              "arabic",
+              "danish",
+              "german",
+              "greek",
+              "spanish",
+              "finnish",
+              "french",
+              "hebrew",
+              "hindi",
+              "italian",
+              "japanese",
+              "korean",
+              "malay",
+              "dutch",
+              "norwegian",
+              "polish",
+              "portuguese",
+              "russian",
+              "swedish",
+              "swahili",
+              "turkish",
+              "chinese"
             ]
-          },
-          "temperature": {
-            "maximum": 2,
-            "title": "Temperature",
-            "description": "Controls randomness and variation in generation (0.05-2.0). Higher values create more varied speech patterns.",
-            "minimum": 0.05,
-            "type": "number",
-            "default": 0.8
-          },
-          "seed": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Seed",
-            "description": "Random seed for reproducible results. Set to 0 for random generation, or provide a specific number for consistent outputs."
           },
           "exaggeration": {
             "maximum": 2,
-            "title": "Exaggeration",
-            "description": "Controls speech expressiveness and emotional intensity (0.25-2.0). 0.5 is neutral, higher values increase expressiveness. Extreme values may be unstable.",
             "minimum": 0.25,
+            "description": "Controls speech expressiveness and emotional intensity (0.25-2.0). 0.5 is neutral, higher values increase expressiveness. Extreme values may be unstable.",
+            "default": 0.5,
             "type": "number",
-            "default": 0.5
+            "title": "Exaggeration"
           }
         },
-        "type": "object"
-      },
-      "ChatterboxTextToSpeechMultilingualOutput": {
         "required": [
-          "audio"
+          "text"
         ],
         "x-fal-order-properties": [
-          "audio"
+          "text",
+          "enable_safety_checker",
+          "voice",
+          "custom_audio_language",
+          "exaggeration",
+          "temperature",
+          "cfg_scale",
+          "seed"
         ],
-        "title": "ChatterboxMultilingualOutput",
+        "type": "object",
+        "title": "ChatterboxMultilingualRequest"
+      },
+      "ChatterboxTextToSpeechMultilingualOutput": {
         "properties": {
           "audio": {
-            "$ref": "#/components/schemas/File",
             "description": "The generated multilingual speech audio file",
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v3.fal.media/files/example/multilingual_speech_output.wav"
@@ -221,39 +221,21 @@
             ]
           }
         },
-        "type": "object"
-      },
-      "File": {
         "required": [
-          "url"
+          "audio"
         ],
         "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
+          "audio"
         ],
-        "title": "File",
+        "type": "object",
+        "title": "ChatterboxMultilingualOutput"
+      },
+      "File": {
         "properties": {
-          "file_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ]
-          },
           "url": {
-            "title": "Url",
             "description": "The URL where the file can be downloaded from.",
-            "type": "string"
+            "type": "string",
+            "title": "Url"
           },
           "file_name": {
             "anyOf": [
@@ -264,10 +246,25 @@
                 "type": "null"
               }
             ],
-            "title": "File Name",
             "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
+            ]
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "examples": [
+              4404019
             ]
           },
           "content_type": {
@@ -279,14 +276,24 @@
                 "type": "null"
               }
             ],
-            "title": "Content Type",
             "description": "The mime type of the file.",
+            "title": "Content Type",
             "examples": [
               "image/png"
             ]
           }
         },
-        "type": "object"
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object",
+        "title": "File"
       }
     }
   },

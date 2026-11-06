@@ -31,13 +31,13 @@ The API accepts the following input parameters:
 
 
 - **`image_url`** (`string`, _required_):
-  Url of the image to be upscaled
+  Url of the image to be upscaled. Wonder 4 supports up to 256 MP input and output. The complete upload request must fit within 500 MB.
   - Examples: "https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_poor_1.jpeg"
 
 - **`model`** (`ModelEnum`, _optional_):
-  Generative upscaling model. Wonder 3.5 is the latest Wonder with finer detail and fewer repetitive patterns; Wonder 3 is Topaz's most advanced generative realism model (Wonder 2/Wonder are earlier generations); Recover 3 rebuilds natural detail; Standard MAX is high-quality precision-leaning upscaling; Redefine adds prompt-guided creative detail; Recovery and Recovery V2 rebuild extreme low-resolution images. Default value: `"Wonder 3"`
+  Generative upscaling model. Wonder 4 automatically enhances and upscales images with no model-specific controls. Wonder 3.5 offers finer detail and fewer repetitive patterns; Wonder 3 is Topaz's most advanced generative realism model (Wonder 2/Wonder are earlier generations); Recover 3 rebuilds natural detail; Standard MAX is high-quality precision-leaning upscaling; Redefine adds prompt-guided creative detail; Recovery and Recovery V2 rebuild extreme low-resolution images. Default value: `"Wonder 3"`
   - Default: `"Wonder 3"`
-  - Options: `"Wonder 3.5"`, `"Wonder 3"`, `"Wonder 2"`, `"Wonder"`, `"Recover 3"`, `"Standard MAX"`, `"Redefine"`, `"Recovery V2"`, `"Recovery"`
+  - Options: `"Wonder 4"`, `"Wonder 3.5"`, `"Wonder 3"`, `"Wonder 2"`, `"Wonder"`, `"Recover 3"`, `"Standard MAX"`, `"Redefine"`, `"Recovery V2"`, `"Recovery"`
 
 - **`upscale_factor`** (`float`, _optional_):
   Factor to upscale the image by (e.g. 2.0 doubles width and height) Default value: `2`
@@ -58,7 +58,7 @@ The API accepts the following input parameters:
   - Options: `"All"`, `"Foreground"`, `"Background"`
 
 - **`face_enhancement`** (`boolean`, _optional_):
-  Whether to apply face enhancement to the image. Default value: `true`
+  Whether to apply face enhancement to the image. Ignored by Wonder 4, which handles face recovery automatically. Default value: `true`
   - Default: `true`
 
 - **`face_enhancement_creativity`** (`float`, _optional_):
@@ -226,6 +226,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -247,4 +251,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

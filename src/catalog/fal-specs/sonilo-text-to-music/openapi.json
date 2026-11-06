@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for sonilo/v1.1/text-to-music",
     "version": "1.0.0",
@@ -71,113 +71,103 @@
         ]
       },
       "V11TextToMusicInput": {
+        "properties": {
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "A blend of R&B warmth, soul depth, neo-soul texture, gospel spirit, pop clarity, and jazz sophistication."
+            ],
+            "description": "Text prompt describing the music to generate.",
+            "type": "string"
+          },
+          "duration": {
+            "default": 90,
+            "title": "Duration",
+            "minimum": 1,
+            "description": "Requested output duration in seconds (max 600). Also used for billing (one billable unit per second per sample, rounded up; each sample under 10s bills as 10s).",
+            "maximum": 600,
+            "type": "integer"
+          },
+          "num_samples": {
+            "default": 1,
+            "title": "Num Samples",
+            "minimum": 1,
+            "description": "How many distinct music tracks to generate.",
+            "maximum": 3,
+            "type": "integer"
+          }
+        },
         "required": [
           "prompt"
         ],
         "title": "TextToMusicInput",
-        "type": "object",
-        "properties": {
-          "duration": {
-            "minimum": 1,
-            "description": "Requested output duration in seconds (max 600). Also used for billing (one billable unit per second per sample, rounded up; each sample under 10s bills as 10s).",
-            "title": "Duration",
-            "type": "integer",
-            "maximum": 600,
-            "default": 90
-          },
-          "prompt": {
-            "description": "Text prompt describing the music to generate.",
-            "title": "Prompt",
-            "type": "string",
-            "examples": [
-              "A blend of R&B warmth, soul depth, neo-soul texture, gospel spirit, pop clarity, and jazz sophistication."
-            ]
-          },
-          "num_samples": {
-            "minimum": 1,
-            "description": "How many distinct music tracks to generate.",
-            "title": "Num Samples",
-            "type": "integer",
-            "maximum": 3,
-            "default": 1
-          }
-        },
         "x-fal-order-properties": [
           "prompt",
           "duration",
           "num_samples"
-        ]
+        ],
+        "type": "object"
       },
       "V11TextToMusicOutput": {
+        "properties": {
+          "audio": {
+            "examples": [
+              {
+                "file_size": 3363482,
+                "file_name": "jazz1.m4a",
+                "content_type": "audio/mp4",
+                "url": "https://fal.media/files/lion/SI-MFSBz0WtUMW4dAhhQs_jazz1.m4a"
+              }
+            ],
+            "description": "The first generated music track, for quick preview/playback.",
+            "$ref": "#/components/schemas/Audio"
+          },
+          "audios": {
+            "title": "Audios",
+            "examples": [
+              [
+                {
+                  "file_size": 3363482,
+                  "file_name": "jazz1.m4a",
+                  "content_type": "audio/mp4",
+                  "url": "https://fal.media/files/lion/SI-MFSBz0WtUMW4dAhhQs_jazz1.m4a"
+                }
+              ]
+            ],
+            "description": "All generated music tracks (AAC/m4a), one per sample.",
+            "items": {
+              "$ref": "#/components/schemas/Audio"
+            },
+            "type": "array"
+          }
+        },
         "required": [
           "audio",
           "audios"
         ],
         "title": "TextToMusicOutput",
-        "type": "object",
-        "properties": {
-          "audio": {
-            "description": "The first generated music track, for quick preview/playback.",
-            "$ref": "#/components/schemas/Audio",
-            "examples": [
-              {
-                "content_type": "audio/mp4",
-                "url": "https://fal.media/files/lion/SI-MFSBz0WtUMW4dAhhQs_jazz1.m4a",
-                "file_name": "jazz1.m4a",
-                "file_size": 3363482
-              }
-            ]
-          },
-          "audios": {
-            "description": "All generated music tracks (AAC/m4a), one per sample.",
-            "title": "Audios",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Audio"
-            },
-            "examples": [
-              [
-                {
-                  "content_type": "audio/mp4",
-                  "url": "https://fal.media/files/lion/SI-MFSBz0WtUMW4dAhhQs_jazz1.m4a",
-                  "file_name": "jazz1.m4a",
-                  "file_size": 3363482
-                }
-              ]
-            ]
-          }
-        },
         "x-fal-order-properties": [
           "audio",
           "audios"
-        ]
+        ],
+        "type": "object"
       },
       "Audio": {
-        "required": [
-          "url"
-        ],
-        "title": "Audio",
-        "type": "object",
         "properties": {
-          "content_type": {
+          "file_size": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "The mime type of the file.",
-            "title": "Content Type",
             "examples": [
-              "image/png"
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size"
           },
           "file_name": {
             "anyOf": [
@@ -188,34 +178,44 @@
                 "type": "null"
               }
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
-            ]
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name"
           },
-          "file_size": {
+          "content_type": {
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
             "examples": [
-              4404019
-            ]
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type"
+          },
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
           }
         },
+        "required": [
+          "url"
+        ],
+        "title": "Audio",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
-        ]
+        ],
+        "type": "object"
       }
     }
   },

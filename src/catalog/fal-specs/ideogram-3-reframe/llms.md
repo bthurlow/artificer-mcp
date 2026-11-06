@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.03** with TURBO, **$0.06** with BALANCED, and **$0.09** with QUALITY.
+Each image costs **$0.03** with TURBO, **$0.06** with BALANCED, and **$0.09** with QUALITY.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -75,6 +75,10 @@ The API accepts the following input parameters:
   - One of: ImageSize | Enum
   - Examples: "square_hd"
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Authorized callers may set false to request relaxed screening. Default value: `true`
+  - Default: `true`
+
 
 
 **Required Parameters Example**:
@@ -93,7 +97,8 @@ The API accepts the following input parameters:
   "rendering_speed": "BALANCED",
   "num_images": 1,
   "image_url": "https://v3.fal.media/files/lion/0qJs_qW8nz0wYsXhFa6Tk.png",
-  "image_size": "square_hd"
+  "image_size": "square_hd",
+  "enable_safety_checker": true
 }
 ```
 
@@ -201,6 +206,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -222,4 +231,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

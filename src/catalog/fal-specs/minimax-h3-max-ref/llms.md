@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Billing uses the requested output duration at **$0.05 per second for 480p**, **$0.08 for 768p**, and **$0.16 for 1080p**. Each request includes **4,096 reference tokens**, shared across all reference images, videos, and audio clips; additional usage costs **$0.02 per 1,000 tokens**, prorated. Square reference images, including **1024 × 1024** and **2048 × 2048** uploads, contribute **1,024 tokens each**. With no video or audio references, the first **four square images** add no reference charge, and each additional square image adds **$0.02048** (about $0.02). For example, a **5-second 768p** output costs **$0.40** with up to four square reference images, or **$0.42048** with five. See the pricing details below for other image shapes, video references, and audio references.
+Billing uses the requested output duration at **$0.05 per second for 480p**, **$0.08 for 768p**, and **$0.16 for 1080p**. Each request includes **4,096 reference tokens**, shared across all reference images, videos, and audio clips; additional usage costs **$0.02 per 1,000 tokens**, prorated. Square reference images, including **1024 × 1024** and **2048 × 2048** uploads, contribute **1,024 tokens each**. With no video or audio references, the first **four square images** add no reference charge, and each additional square image adds **$0.02048** (about **$0.02**). First, middle, and end frame images (image_url, middle_image_url, end_image_url) also count toward reference tokens. Each adds the output canvas’s token count, (output width ÷ 32) × (output height ÷ 32): 576 tokens for a square 768p output, about 1,008 for 16:9 768p. For example, a **5-second 768p** output costs **$0.40** with up to four square reference images, or **$0.42048** with five. See the pricing details below for other image shapes, video references, and audio references.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -143,6 +143,9 @@ The API returns the following output format:
 - **`seed`** (`integer`, _required_):
   Base seed for reproducing the generation.
 
+- **`reference_tokens`** (`integer`, _optional_):
+  Packed reference conditioner rows encoded for this request (images, videos, keyframes, and audio). The first 4096 rows are included in the clip price.
+
 - **`timings`** (`object`, _optional_):
   Timing breakdown in seconds. 'inference' is the DiT denoising time on the GPU backend. Null on routes that do not report backend timings.
 
@@ -237,6 +240,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -258,4 +265,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

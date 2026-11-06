@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/vidu/q3/reference-to-video/mix",
     "version": "1.0.0",
@@ -71,28 +71,7 @@
         ]
       },
       "ViduQ3ReferenceToVideoMixInput": {
-        "x-fal-order-properties": [
-          "prompt",
-          "reference_image_urls",
-          "duration",
-          "seed",
-          "aspect_ratio",
-          "resolution",
-          "audio"
-        ],
         "properties": {
-          "seed": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
-            "title": "Seed"
-          },
           "reference_image_urls": {
             "examples": [
               [
@@ -101,63 +80,99 @@
                 "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference3.png"
               ]
             ],
+            "title": "Reference Image Urls",
+            "description": "URLs of 1 to 4 reference images used to keep subjects or scenes consistent",
             "items": {
               "type": "string"
             },
-            "description": "URLs of 1 to 4 reference images used to keep subjects or scenes consistent",
-            "title": "Reference Image Urls",
             "type": "array"
           },
-          "duration": {
-            "default": 5,
-            "minimum": 1,
-            "description": "Duration of the video in seconds (1-16 for Q3 models)",
-            "title": "Duration",
-            "maximum": 16,
-            "type": "integer"
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": true,
+            "description": "Enable safety checks; disabling requires authorization.",
+            "hidden": true
           },
           "prompt": {
+            "maxLength": 2000,
             "examples": [
               "A character walking through a beach catching an apple."
             ],
-            "description": "Text prompt for video generation, max 2000 characters",
             "title": "Prompt",
-            "type": "string",
-            "maxLength": 2000
+            "description": "Text prompt for video generation, max 2000 characters",
+            "type": "string"
+          },
+          "resolution": {
+            "enum": [
+              "360p",
+              "540p",
+              "720p",
+              "1080p"
+            ],
+            "title": "Resolution",
+            "description": "Output video resolution",
+            "default": "720p",
+            "type": "string"
           },
           "aspect_ratio": {
-            "default": "16:9",
-            "description": "The aspect ratio of the output video",
-            "title": "Aspect Ratio",
-            "type": "string",
             "enum": [
               "16:9",
               "9:16",
               "4:3",
               "3:4",
               "1:1"
-            ]
-          },
-          "resolution": {
-            "default": "720p",
-            "description": "Output video resolution",
-            "title": "Resolution",
-            "type": "string",
-            "enum": [
-              "360p",
-              "540p",
-              "720p",
-              "1080p"
-            ]
+            ],
+            "title": "Aspect Ratio",
+            "description": "The aspect ratio of the output video",
+            "default": "16:9",
+            "type": "string"
           },
           "audio": {
-            "default": true,
-            "description": "Whether to use direct audio-video generation. When true, outputs video with sound.",
             "title": "Audio",
+            "description": "Whether to use direct audio-video generation. When true, outputs video with sound.",
+            "default": true,
             "type": "boolean"
+          },
+          "duration": {
+            "maximum": 16,
+            "title": "Duration",
+            "description": "Duration of the video in seconds (1-16 for Q3 models)",
+            "default": 5,
+            "type": "integer",
+            "minimum": 1
+          },
+          "seed": {
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Random seed for reproducibility. If None, a random seed is chosen."
           }
         },
         "title": "Q3ReferenceToVideoRequest",
+        "x-fal-order-properties": [
+          "enable_safety_checker",
+          "prompt",
+          "reference_image_urls",
+          "duration",
+          "seed",
+          "aspect_ratio",
+          "resolution",
+          "audio"
+        ],
         "required": [
           "prompt",
           "reference_image_urls"
@@ -165,9 +180,6 @@
         "type": "object"
       },
       "ViduQ3ReferenceToVideoMixOutput": {
-        "x-fal-order-properties": [
-          "video"
-        ],
         "properties": {
           "video": {
             "examples": [
@@ -180,23 +192,21 @@
           }
         },
         "title": "Q3ReferenceToVideoOutput",
+        "x-fal-order-properties": [
+          "video"
+        ],
         "required": [
           "video"
         ],
         "type": "object"
       },
       "File": {
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
         "properties": {
           "file_size": {
             "examples": [
               4404019
             ],
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -205,33 +215,18 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
+            "description": "The size of the file in bytes."
           },
           "url": {
-            "description": "The URL where the file can be downloaded from.",
             "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
             "type": "string"
           },
           "file_name": {
             "examples": [
               "z9RV14K95DvU.png"
             ],
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -240,11 +235,31 @@
                 "type": "null"
               }
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file."
           }
         },
         "title": "File",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
         "required": [
           "url"
         ],

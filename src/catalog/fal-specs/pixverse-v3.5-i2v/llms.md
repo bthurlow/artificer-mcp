@@ -13,7 +13,7 @@
 
 ## Pricing
 
-For 5s video your request will cost **$0.15** for 360p and 540p, **$0.2** for 720p and **$0.4** for 1080p. For **$1** you can run this model with approximately 2 times.
+For 5s video your request will cost **$0.15** for 360p and 540p, **$0.20** for 720p and **$0.40** for 1080p. For **$1** you can generate **6** clips at 360p/540p, **5** at 720p or **2** at 1080p.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -94,7 +94,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"url":"https://fal.media/files/tiger/8V9H8RLyFiWjmJDOxGbcG_output.mp4","file_name":"output.mp4","content_type":"video/mp4","file_size":4060052}
+  - Examples: {"url":"https://fal.media/files/tiger/8V9H8RLyFiWjmJDOxGbcG_output.mp4","file_size":4060052,"content_type":"video/mp4","file_name":"output.mp4"}
 
 
 
@@ -104,9 +104,9 @@ The API returns the following output format:
 {
   "video": {
     "url": "https://fal.media/files/tiger/8V9H8RLyFiWjmJDOxGbcG_output.mp4",
-    "file_name": "output.mp4",
+    "file_size": 4060052,
     "content_type": "video/mp4",
-    "file_size": 4060052
+    "file_name": "output.mp4"
   }
 }
 ```
@@ -187,6 +187,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -208,4 +212,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

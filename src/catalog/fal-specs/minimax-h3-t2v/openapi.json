@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for minimax/h3/text-to-video",
     "version": "1.0.0",
@@ -71,41 +71,45 @@
         ]
       },
       "H3TextToVideoInput": {
+        "title": "TextToVideoHailuo03Input",
         "properties": {
-          "duration": {
-            "maximum": 15,
-            "type": "integer",
-            "default": 5,
-            "description": "The duration of the video in seconds.",
-            "title": "Duration",
-            "minimum": 5
-          },
-          "resolution": {
-            "enum": [
-              "480P",
-              "768P",
-              "2K",
-              "4K"
+          "prompt": {
+            "maxLength": 50000,
+            "description": "Text prompt for video generation",
+            "title": "Prompt",
+            "minLength": 1,
+            "examples": [
+              "A white kitten chases a butterfly across a sunlit garden. Gentle camera tracking, natural movement, soft afternoon light filtering through the leaves."
             ],
-            "description": "The resolution of the generated video. 480P and 768P are native generation modes; 2K and 4K upscale a 768P base result.",
-            "type": "string",
-            "default": "2K",
-            "title": "Resolution"
+            "type": "string"
           },
           "sync_mode": {
+            "title": "Sync Mode",
             "description": "Return the generated video as base64 instead of a CDN URL.",
-            "type": "boolean",
             "default": false,
-            "title": "Sync Mode"
+            "type": "boolean"
           },
-          "enable_safety_checker": {
-            "description": "If set to true, the safety checker will be enabled.",
-            "type": "boolean",
-            "default": true,
-            "title": "Enable Safety Checker"
+          "prompt_expansion_mode": {
+            "title": "Prompt Expansion Mode",
+            "description": "How much effort to spend rewriting the prompt before generation. 'disabled' skips prompt expansion. 'fast' returns in about a second. 'balanced' picks per request. 'quality' spends up to ~30s on a richer prompt.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "disabled",
+              "fast",
+              "balanced",
+              "quality"
+            ],
+            "default": "balanced"
           },
           "seed": {
-            "description": "Random seed. A random seed is selected when omitted.",
+            "title": "Seed",
             "anyOf": [
               {
                 "type": "integer"
@@ -114,52 +118,10 @@
                 "type": "null"
               }
             ],
-            "title": "Seed"
-          },
-          "prompt_expansion_mode": {
-            "title": "Prompt Expansion Mode",
-            "description": "How much effort to spend rewriting the prompt before generation. 'disabled' skips prompt expansion. 'fast' returns in about a second. 'balanced' picks per request. 'quality' spends up to ~30s on a richer prompt.",
-            "default": "balanced",
-            "examples": [
-              "disabled",
-              "fast",
-              "balanced",
-              "quality"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "target_audio_url": {
-            "description": "Optional URL of an audio clip at least 2 seconds long (maximum 15 MB) to pin to the generated soundtrack. Longer clips are trimmed to the generated video's length, keeping the beginning. The original audio replaces the output soundtrack, padded with silence if shorter than the video, without changing playback speed. Exceptionally high sample rates may be resampled to 96 kHz. Accepts an HTTP(S) URL or a base64 data URI.",
-            "anyOf": [
-              {
-                "pattern": "\\S",
-                "type": "string",
-                "minLength": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Target Audio Url"
-          },
-          "prompt": {
-            "title": "Prompt",
-            "description": "Text prompt for video generation",
-            "type": "string",
-            "minLength": 1,
-            "examples": [
-              "A white kitten chases a butterfly across a sunlit garden. Gentle camera tracking, natural movement, soft afternoon light filtering through the leaves."
-            ],
-            "maxLength": 50000
+            "description": "Random seed. A random seed is selected when omitted."
           },
           "aspect_ratio": {
+            "title": "Aspect Ratio",
             "enum": [
               "21:9",
               "16:9",
@@ -170,14 +132,52 @@
             ],
             "description": "The aspect ratio of the generated video.",
             "type": "string",
-            "default": "16:9",
-            "title": "Aspect Ratio"
+            "default": "16:9"
+          },
+          "duration": {
+            "title": "Duration",
+            "description": "The duration of the video in seconds.",
+            "maximum": 15,
+            "minimum": 5,
+            "default": 5,
+            "type": "integer"
+          },
+          "target_audio_url": {
+            "title": "Target Audio URL",
+            "anyOf": [
+              {
+                "pattern": "\\S",
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional URL of an audio clip at least 2 seconds long (maximum 15 MB) to pin to the generated soundtrack. Longer clips are trimmed to the generated video's length, keeping the beginning. The original audio replaces the output soundtrack, padded with silence if shorter than the video, without changing playback speed. Exceptionally high sample rates may be resampled to 96 kHz. Accepts an HTTP(S) URL or a base64 data URI."
+          },
+          "resolution": {
+            "title": "Resolution",
+            "enum": [
+              "480P",
+              "768P",
+              "2K",
+              "4K"
+            ],
+            "description": "The resolution of the generated video. 480P and 768P are native generation modes; 2K and 4K upscale a 768P base result.",
+            "type": "string",
+            "default": "2K"
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "description": "If set to true, the safety checker will be enabled.",
+            "default": true,
+            "type": "boolean"
           }
         },
         "required": [
           "prompt"
         ],
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "duration",
@@ -189,12 +189,25 @@
           "target_audio_url",
           "aspect_ratio"
         ],
-        "title": "TextToVideoHailuo03Input"
+        "type": "object"
       },
       "H3TextToVideoOutput": {
+        "title": "TextToVideoHailuo03Output",
         "properties": {
+          "video": {
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video",
+            "examples": [
+              {
+                "content_type": "video/mp4",
+                "url": "https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4",
+                "file_name": "--prs89fkHtWW406fmEs__NRhTqNku.mp4",
+                "file_size": 6463396
+              }
+            ]
+          },
           "expanded_prompt": {
-            "description": "The prompt after expansion, as sent to the model. Null when prompt expansion was disabled, left the prompt unchanged, or was performed internally by MiniMax's hosted API.",
+            "title": "Expanded Prompt",
             "anyOf": [
               {
                 "type": "string"
@@ -203,52 +216,32 @@
                 "type": "null"
               }
             ],
-            "title": "Expanded Prompt"
-          },
-          "video": {
-            "description": "The generated video",
-            "$ref": "#/components/schemas/File",
-            "examples": [
-              {
-                "file_size": 6463396,
-                "content_type": "video/mp4",
-                "url": "https://v3b.fal.media/files/b/0aa46818/--prs89fkHtWW406fmEs__NRhTqNku.mp4",
-                "file_name": "--prs89fkHtWW406fmEs__NRhTqNku.mp4"
-              }
-            ]
+            "description": "The prompt after expansion, as sent to the model. Null when prompt expansion was disabled, left the prompt unchanged, or was performed internally by MiniMax's hosted API."
           }
         },
         "required": [
           "video"
         ],
-        "type": "object",
         "x-fal-order-properties": [
           "video",
           "expanded_prompt"
         ],
-        "title": "TextToVideoHailuo03Output"
+        "type": "object"
       },
       "File": {
-        "title": "File",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
         "type": "object",
+        "title": "File",
+        "required": [
+          "url"
+        ],
         "properties": {
-          "file_name": {
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
-          },
           "content_type": {
-            "title": "Content Type",
             "anyOf": [
               {
                 "type": "string"
@@ -257,18 +250,13 @@
                 "type": "null"
               }
             ],
-            "description": "The mime type of the file.",
+            "title": "Content Type",
             "examples": [
               "image/png"
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
+            ],
+            "description": "The mime type of the file."
           },
           "file_size": {
-            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -277,21 +265,33 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "examples": [
               4404019
-            ]
+            ],
+            "description": "The size of the file in bytes."
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
           }
-        },
-        "required": [
-          "url"
-        ],
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ]
+        }
       }
     }
   },

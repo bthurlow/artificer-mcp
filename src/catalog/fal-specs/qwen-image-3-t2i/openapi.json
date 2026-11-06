@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for alibaba/qwen-image-3/text-to-image",
     "version": "1.0.0",
@@ -71,8 +71,52 @@
         ]
       },
       "QwenImage3TextToImageInput": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "prompt",
+          "negative_prompt",
+          "image_size",
+          "enable_prompt_expansion",
+          "seed",
+          "enable_safety_checker",
+          "sync_mode",
+          "num_images",
+          "output_format"
+        ],
+        "title": "QwenImage3TextToImageInput",
         "properties": {
+          "negative_prompt": {
+            "description": "Content to avoid in the generated image. Max 500 characters.",
+            "examples": [
+              "low resolution, error, worst quality, low quality, deformed"
+            ],
+            "title": "Negative Prompt",
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": ""
+          },
+          "sync_mode": {
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "type": "boolean",
+            "title": "Sync Mode",
+            "default": false
+          },
+          "enable_prompt_expansion": {
+            "description": "Enable automatic LLM prompt rewriting for better results.",
+            "type": "boolean",
+            "title": "Enable Prompt Expansion",
+            "default": true
+          },
           "seed": {
+            "description": "Random seed for reproducibility (0-2147483647).",
+            "title": "Seed",
             "anyOf": [
               {
                 "type": "integer"
@@ -80,30 +124,44 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "Random seed for reproducibility (0-2147483647).",
-            "title": "Seed"
+            ]
           },
-          "sync_mode": {
-            "default": false,
-            "type": "boolean",
-            "title": "Sync Mode",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
+          "output_format": {
+            "description": "The format of the generated image.",
+            "type": "string",
+            "title": "Output Format",
+            "default": "png",
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
+            ]
+          },
+          "prompt": {
+            "description": "Text prompt describing the desired image. Supports Chinese and English. Max 5000 characters.",
+            "maxLength": 5000,
+            "title": "Prompt",
+            "type": "string",
+            "minLength": 1,
+            "examples": [
+              "A cute baby koala holding a card that says \"Qwen Image 3 is now available on fal\" while on a water slide"
+            ]
           },
           "enable_safety_checker": {
-            "default": true,
+            "description": "Enable content moderation for input and output. Disabling it requires account authorization; unauthorized requests are always checked.",
             "type": "boolean",
             "title": "Enable Safety Checker",
-            "description": "Enable content moderation for input and output. Disabling it requires account authorization; unauthorized requests are always checked."
+            "default": true
           },
           "image_size": {
+            "description": "The size of the generated image. Total number of pixels must be between 512x512 and 2048x2048.",
             "examples": [
               {
-                "width": 1024,
-                "height": 1024
+                "height": 1024,
+                "width": 1024
               }
             ],
-            "default": "square_hd",
+            "title": "Image Size",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
@@ -120,82 +178,34 @@
                 ]
               }
             ],
-            "description": "The size of the generated image. Total number of pixels must be between 512x512 and 2048x2048.",
-            "title": "Image Size"
-          },
-          "output_format": {
-            "enum": [
-              "jpeg",
-              "png",
-              "webp"
-            ],
-            "default": "png",
-            "type": "string",
-            "title": "Output Format",
-            "description": "The format of the generated image."
+            "default": "square_hd"
           },
           "num_images": {
             "description": "The number of images to generate.",
-            "default": 1,
-            "minimum": 1,
-            "type": "integer",
+            "maximum": 6,
             "title": "Num Images",
-            "maximum": 6
-          },
-          "enable_prompt_expansion": {
-            "default": true,
-            "type": "boolean",
-            "title": "Enable Prompt Expansion",
-            "description": "Enable automatic LLM prompt rewriting for better results."
-          },
-          "prompt": {
-            "maxLength": 5000,
-            "examples": [
-              "A cute baby koala holding a card that says \"Qwen Image 3 is now available on fal\" while on a water slide"
-            ],
-            "title": "Prompt",
-            "type": "string",
-            "description": "Text prompt describing the desired image. Supports Chinese and English. Max 5000 characters.",
-            "minLength": 1
-          },
-          "negative_prompt": {
-            "examples": [
-              "low resolution, error, worst quality, low quality, deformed"
-            ],
-            "default": "",
-            "anyOf": [
-              {
-                "maxLength": 500,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Content to avoid in the generated image. Max 500 characters.",
-            "title": "Negative Prompt"
+            "type": "integer",
+            "default": 1,
+            "minimum": 1
           }
         },
-        "type": "object",
-        "x-fal-order-properties": [
-          "prompt",
-          "negative_prompt",
-          "image_size",
-          "enable_prompt_expansion",
-          "seed",
-          "enable_safety_checker",
-          "sync_mode",
-          "num_images",
-          "output_format"
-        ],
-        "title": "QwenImage3TextToImageInput",
         "required": [
           "prompt"
         ]
       },
       "QwenImage3TextToImageOutput": {
+        "type": "object",
+        "x-fal-order-properties": [
+          "images",
+          "seed"
+        ],
+        "title": "QwenImage3TextToImageOutput",
         "properties": {
           "images": {
+            "items": {
+              "$ref": "#/components/schemas/File"
+            },
+            "description": "Generated images.",
             "examples": [
               [
                 {
@@ -203,112 +213,50 @@
                 }
               ]
             ],
-            "items": {
-              "$ref": "#/components/schemas/File"
-            },
-            "type": "array",
             "title": "Images",
-            "description": "Generated images."
+            "type": "array"
           },
           "seed": {
+            "description": "The seed used for generation.",
             "examples": [
               42
             ],
-            "type": "integer",
             "title": "Seed",
-            "description": "The seed used for generation."
+            "type": "integer"
           }
         },
-        "type": "object",
-        "x-fal-order-properties": [
-          "images",
-          "seed"
-        ],
-        "title": "QwenImage3TextToImageOutput",
         "required": [
           "images",
           "seed"
         ]
       },
       "ImageSize": {
-        "properties": {
-          "width": {
-            "description": "The width of the generated image.",
-            "exclusiveMinimum": 0,
-            "default": 512,
-            "type": "integer",
-            "title": "Width",
-            "maximum": 14142
-          },
-          "height": {
-            "description": "The height of the generated image.",
-            "exclusiveMinimum": 0,
-            "default": 512,
-            "type": "integer",
-            "title": "Height",
-            "maximum": 14142
-          }
-        },
-        "type": "object",
         "x-fal-order-properties": [
           "width",
           "height"
         ],
-        "title": "ImageSize"
+        "type": "object",
+        "title": "ImageSize",
+        "properties": {
+          "height": {
+            "description": "The height of the generated image.",
+            "maximum": 14142,
+            "title": "Height",
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 512
+          },
+          "width": {
+            "description": "The width of the generated image.",
+            "maximum": 14142,
+            "title": "Width",
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "default": 512
+          }
+        }
       },
       "File": {
-        "properties": {
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
-          },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
-          }
-        },
         "type": "object",
         "x-fal-order-properties": [
           "url",
@@ -317,6 +265,58 @@
           "file_size"
         ],
         "title": "File",
+        "properties": {
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
+          }
+        },
         "required": [
           "url"
         ]

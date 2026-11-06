@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for topaz/upscale/video/generative",
     "version": "1.0.0",
@@ -71,41 +71,14 @@
         ]
       },
       "UpscaleVideoGenerativeInput": {
-        "x-fal-order-properties": [
-          "video_url",
-          "model",
-          "upscale_factor",
-          "target_fps",
-          "softness",
-          "H264_output"
-        ],
+        "title": "VideoGenerativeUpscaleRequest",
         "required": [
           "video_url"
         ],
-        "type": "object",
         "properties": {
-          "softness": {
-            "anyOf": [
-              {
-                "maximum": 5,
-                "type": "number",
-                "minimum": 1
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "How much softening the model applies to the output, from 1 (sharpest) to 5 (softest). Starlight Precise 2.6 only; leave unset for Topaz's default.",
-            "title": "Softness"
-          },
-          "H264_output": {
-            "description": "Whether to use H264 codec for output video. Default is H265.",
-            "default": false,
-            "type": "boolean",
-            "title": "H264 Output"
-          },
           "model": {
-            "description": "Generative diffusion enhancement model. Starlight Precise 2.6 adds realism to AI-generated video; Starlight HQ maximizes quality on high-resolution sources; Starlight Mini restores archival footage; Starlight Sharp is fast restoration with sharper detail; Starlight Fast 2 is the fastest, cheapest diffusion upscaler.",
+            "title": "Model",
+            "type": "string",
             "enum": [
               "Starlight Precise 2.6",
               "Starlight HQ",
@@ -114,18 +87,18 @@
               "Starlight Fast 2"
             ],
             "default": "Starlight Precise 2.6",
-            "type": "string",
-            "title": "Model"
+            "description": "Generative diffusion enhancement model. Starlight Precise 2.6 adds realism to AI-generated video; Starlight HQ maximizes quality on high-resolution sources; Starlight Mini restores archival footage; Starlight Sharp is fast restoration with sharper detail; Starlight Fast 2 is the fastest, cheapest diffusion upscaler."
           },
           "upscale_factor": {
-            "minimum": 1,
-            "description": "Factor to upscale the video by (e.g. 2.0 doubles width and height)",
             "maximum": 4,
-            "default": 2,
+            "title": "Upscale Factor",
+            "description": "Factor to upscale the video by (e.g. 2.0 doubles width and height)",
             "type": "number",
-            "title": "Upscale Factor"
+            "default": 2,
+            "minimum": 1
           },
           "target_fps": {
+            "title": "Target Fps",
             "anyOf": [
               {
                 "maximum": 60,
@@ -136,59 +109,87 @@
                 "type": "null"
               }
             ],
-            "description": "Target FPS for the output. Frame interpolation is enabled only when this differs from the source FPS.",
-            "title": "Target Fps"
+            "description": "Target FPS for the output. Frame interpolation is enabled only when this differs from the source FPS."
+          },
+          "softness": {
+            "title": "Softness",
+            "anyOf": [
+              {
+                "maximum": 5,
+                "type": "number",
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "How much softening the model applies to the output, from 1 (sharpest) to 5 (softest). Starlight Precise 2.6 only; leave unset for Topaz's default."
+          },
+          "H264_output": {
+            "title": "H264 Output",
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to use H264 codec for output video. Default is H265."
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "type": "boolean",
+            "default": true
           },
           "video_url": {
-            "description": "URL of the video to upscale",
+            "title": "Video Url",
+            "type": "string",
             "examples": [
               "https://v3.fal.media/files/kangaroo/y5-1YTGpun17eSeggZMzX_video-1733468228.mp4"
             ],
-            "type": "string",
-            "title": "Video Url"
+            "description": "URL of the video to upscale"
           }
         },
-        "title": "VideoGenerativeUpscaleRequest"
+        "x-fal-order-properties": [
+          "enable_safety_checker",
+          "video_url",
+          "model",
+          "upscale_factor",
+          "target_fps",
+          "softness",
+          "H264_output"
+        ],
+        "type": "object"
       },
       "UpscaleVideoGenerativeOutput": {
-        "x-fal-order-properties": [
-          "video"
-        ],
+        "title": "VideoUpscaleOutput",
         "required": [
           "video"
         ],
-        "type": "object",
         "properties": {
           "video": {
-            "$ref": "#/components/schemas/File",
-            "description": "The upscaled video file",
             "examples": [
               {
                 "url": "https://v3.fal.media/files/penguin/ztj_LB4gQlW6HIfVs8zX4_upscaled.mp4"
               }
-            ]
+            ],
+            "$ref": "#/components/schemas/File",
+            "description": "The upscaled video file"
           }
         },
-        "title": "VideoUpscaleOutput"
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "type": "object"
       },
       "File": {
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
+        "title": "File",
         "required": [
           "url"
         ],
-        "type": "object",
         "properties": {
           "url": {
-            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
             "type": "string",
-            "title": "Url"
+            "description": "The URL where the file can be downloaded from."
           },
           "file_name": {
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -197,28 +198,13 @@
                 "type": "null"
               }
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "title": "File Name"
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type"
+            "description": "The name of the file. It will be auto-generated if not provided."
           },
           "file_size": {
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -227,14 +213,34 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ],
-            "title": "File Size"
+            "description": "The size of the file in bytes."
+          },
+          "content_type": {
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
           }
         },
-        "title": "File"
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object"
       }
     }
   },

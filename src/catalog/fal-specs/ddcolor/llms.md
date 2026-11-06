@@ -54,7 +54,7 @@ The API returns the following output format:
 
 - **`image`** (`Image`, _required_):
   The generated image file info.
-  - Examples: {"url":"https://storage.googleapis.com/falserverless/gallery/5fcaaac6d1344d998ebb9703102c6c63.png","width":512,"file_size":423052,"file_name":"36d3ca4791a647678b2ff01a35c87f5a.png","height":512,"content_type":"image/png"}
+  - Examples: {"file_size":423052,"height":512,"url":"https://storage.googleapis.com/falserverless/gallery/5fcaaac6d1344d998ebb9703102c6c63.png","width":512,"content_type":"image/png","file_name":"36d3ca4791a647678b2ff01a35c87f5a.png"}
 
 
 
@@ -63,12 +63,12 @@ The API returns the following output format:
 ```json
 {
   "image": {
+    "file_size": 423052,
+    "height": 512,
     "url": "https://storage.googleapis.com/falserverless/gallery/5fcaaac6d1344d998ebb9703102c6c63.png",
     "width": 512,
-    "file_size": 423052,
-    "file_name": "36d3ca4791a647678b2ff01a35c87f5a.png",
-    "height": 512,
-    "content_type": "image/png"
+    "content_type": "image/png",
+    "file_name": "36d3ca4791a647678b2ff01a35c87f5a.png"
   }
 }
 ```
@@ -146,6 +146,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -167,4 +171,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

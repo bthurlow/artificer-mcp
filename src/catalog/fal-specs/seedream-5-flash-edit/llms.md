@@ -35,7 +35,7 @@ The API accepts the following input parameters:
   - Examples: "Replace the product in Figure 1 with that in Figure 2. Seamlessly render the logo in Figure 3 into the product design, in a frosted glass texture."
 
 - **`image_size`** (`ImageSize | Enum`, _optional_):
-  The size of the generated image. Total pixels must be between 1024x1024 and 2048x2048, with aspect ratio between 1/16 and 16. Default value: `auto_2K`
+  The size of the generated image. Total pixels must be between 921600 and 4624220, with aspect ratio between 1/16 and 16. Default value: `auto_2K`
   - Default: `"auto_2K"`
   - One of: ImageSize | Enum
   - Examples: "auto_2K"
@@ -51,6 +51,10 @@ The API accepts the following input parameters:
   - Options: `"jpeg"`, `"png"`
   - Examples: "jpeg"
 
+- **`watermark`** (`boolean`, _optional_):
+  Whether to add the provider's visible watermark.
+  - Default: `false`
+
 - **`sync_mode`** (`boolean`, _optional_):
   If `True`, the media will be returned as a data URI and the output data won't be available in the request history.
   - Default: `false`
@@ -59,6 +63,11 @@ The API accepts the following input parameters:
   If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked. Default value: `true`
   - Default: `true`
   - Examples: true
+
+- **`background`** (`BackgroundEnum`, _optional_):
+  Use `transparent` with exactly one alpha-channel reference and PNG output to preserve transparency. Default value: `"opaque"`
+  - Default: `"opaque"`
+  - Options: `"opaque"`, `"transparent"`
 
 - **`image_urls`** (`list<string>`, _required_):
   List of URLs of input reference images. Up to 10 images are supported; if more are sent, only the last 10 are used.
@@ -89,6 +98,7 @@ The API accepts the following input parameters:
   "num_images": 1,
   "output_format": "jpeg",
   "enable_safety_checker": true,
+  "background": "opaque",
   "image_urls": [
     "https://storage.googleapis.com/falserverless/example_inputs/seedreamv45/seedream_v45_edit_input_1.png",
     "https://storage.googleapis.com/falserverless/example_inputs/seedreamv45/seedream_v45_edit_input_2.png",
@@ -201,6 +211,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -222,4 +236,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/wan/v2.2-14b/speech-to-video",
     "version": "1.0.0",
@@ -71,131 +71,87 @@
         ]
       },
       "WanV2214bSpeechToVideoInput": {
-        "required": [
-          "prompt",
-          "image_url",
-          "audio_url"
-        ],
         "properties": {
-          "seed": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Seed",
-            "description": "Random seed for reproducibility. If None, a random seed is chosen."
-          },
-          "resolution": {
-            "default": "480p",
-            "examples": [
-              "480p"
-            ],
-            "title": "Resolution",
-            "description": "Resolution of the generated video (480p, 580p, or 720p).",
-            "type": "string",
-            "enum": [
-              "480p",
-              "580p",
-              "720p"
-            ]
-          },
           "video_write_mode": {
-            "default": "balanced",
             "examples": [
               "balanced"
             ],
-            "title": "Video Write Mode",
-            "description": "The write mode of the output video. Faster write mode means faster results but larger file size, balanced write mode is a good compromise between speed and quality, and small write mode is the slowest but produces the smallest file size.",
-            "type": "string",
             "enum": [
               "fast",
               "balanced",
               "small"
-            ]
-          },
-          "video_quality": {
-            "default": "high",
-            "examples": [
-              "high"
             ],
-            "title": "Video Quality",
-            "description": "The quality of the output video. Higher quality means better visual quality but larger file size.",
             "type": "string",
-            "enum": [
-              "low",
-              "medium",
-              "high",
-              "maximum"
-            ]
-          },
-          "enable_safety_checker": {
-            "default": false,
-            "examples": [
-              true
-            ],
-            "title": "Enable Safety Checker",
-            "description": "If set to true, input data will be checked for safety before processing. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "type": "boolean"
+            "description": "The write mode of the output video. Faster write mode means faster results but larger file size, balanced write mode is a good compromise between speed and quality, and small write mode is the slowest but produces the smallest file size.",
+            "title": "Video Write Mode",
+            "default": "balanced"
           },
           "num_frames": {
-            "default": 80,
-            "minimum": 40,
-            "title": "Number of Frames",
-            "multipleOf": 4,
-            "maximum": 120,
             "examples": [
               80
             ],
+            "minimum": 40,
+            "title": "Number of Frames",
+            "multipleOf": 4,
+            "type": "integer",
             "description": "Number of frames to generate. Must be between 40 to 120, (must be multiple of 4).",
-            "type": "integer"
+            "default": 80,
+            "maximum": 120
           },
-          "guidance_scale": {
-            "default": 3.5,
-            "minimum": 1,
-            "title": "Guidance Scale",
-            "description": "Classifier-free guidance scale. Higher values give better adherence to the prompt but may decrease quality.",
-            "examples": [
-              3.5
-            ],
-            "type": "number",
-            "maximum": 10
+          "negative_prompt": {
+            "type": "string",
+            "description": "Negative prompt for video generation.",
+            "title": "Negative Prompt",
+            "default": ""
           },
-          "prompt": {
+          "audio_url": {
             "examples": [
-              "Summer beach vacation style, a white cat wearing sunglasses sits on a surfboard."
+              "https://storage.googleapis.com/falserverless/example_inputs/wan_s2v_talk.wav"
             ],
-            "title": "Prompt",
-            "description": "The text prompt used for video generation.",
-            "type": "string"
+            "type": "string",
+            "description": "The URL of the audio file.",
+            "title": "Audio URL"
           },
           "enable_output_safety_checker": {
-            "default": false,
             "examples": [
               false
             ],
-            "title": "Enable Output Safety Checker",
+            "type": "boolean",
             "description": "If set to true, output video will be checked for safety after generation.",
-            "type": "boolean"
+            "title": "Enable Output Safety Checker",
+            "default": false
           },
-          "negative_prompt": {
-            "default": "",
-            "title": "Negative Prompt",
-            "description": "Negative prompt for video generation.",
-            "type": "string"
+          "num_inference_steps": {
+            "examples": [
+              27
+            ],
+            "maximum": 40,
+            "minimum": 2,
+            "type": "integer",
+            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
+            "default": 27,
+            "title": "Number of Inference Steps"
           },
           "image_url": {
             "examples": [
               "https://storage.googleapis.com/falserverless/example_inputs/wan_s2v_cat.png"
             ],
-            "title": "Image URL",
+            "type": "string",
             "description": "URL of the input image. If the input image does not match the chosen aspect ratio, it is resized and center cropped.",
-            "type": "string"
+            "title": "Image URL"
+          },
+          "prompt": {
+            "examples": [
+              "Summer beach vacation style, a white cat wearing sunglasses sits on a surfboard."
+            ],
+            "type": "string",
+            "description": "The text prompt used for video generation.",
+            "title": "Prompt"
           },
           "frames_per_second": {
+            "examples": [
+              16
+            ],
             "default": 16,
             "anyOf": [
               {
@@ -208,43 +164,87 @@
               }
             ],
             "title": "Frames per Second",
-            "description": "Frames per second of the generated video. Must be between 4 to 60. When using interpolation and `adjust_fps_for_interpolation` is set to true (default true,) the final FPS will be multiplied by the number of interpolated frames plus one. For example, if the generated frames per second is 16 and the number of interpolated frames is 1, the final frames per second will be 32. If `adjust_fps_for_interpolation` is set to false, this value will be used as-is.",
+            "description": "Frames per second of the generated video. Must be between 4 to 60. When using interpolation and `adjust_fps_for_interpolation` is set to true (default true,) the final FPS will be multiplied by the number of interpolated frames plus one. For example, if the generated frames per second is 16 and the number of interpolated frames is 1, the final frames per second will be 32. If `adjust_fps_for_interpolation` is set to false, this value will be used as-is."
+          },
+          "resolution": {
             "examples": [
-              16
-            ]
+              "480p"
+            ],
+            "enum": [
+              "480p",
+              "580p",
+              "720p"
+            ],
+            "type": "string",
+            "description": "Resolution of the generated video (480p, 580p, or 720p).",
+            "title": "Resolution",
+            "default": "480p"
+          },
+          "enable_safety_checker": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "If set to true, input data will be checked for safety before processing. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "title": "Enable Safety Checker",
+            "default": false
+          },
+          "guidance_scale": {
+            "examples": [
+              3.5
+            ],
+            "maximum": 10,
+            "minimum": 1,
+            "type": "number",
+            "description": "Classifier-free guidance scale. Higher values give better adherence to the prompt but may decrease quality.",
+            "default": 3.5,
+            "title": "Guidance Scale"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "Random seed for reproducibility. If None, a random seed is chosen."
+          },
+          "video_quality": {
+            "examples": [
+              "high"
+            ],
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "maximum"
+            ],
+            "type": "string",
+            "description": "The quality of the output video. Higher quality means better visual quality but larger file size.",
+            "title": "Video Quality",
+            "default": "high"
           },
           "shift": {
-            "default": 5,
-            "minimum": 1,
-            "title": "Shift",
-            "description": "Shift value for the video. Must be between 1.0 and 10.0.",
             "examples": [
               5
             ],
+            "maximum": 10,
+            "minimum": 1,
             "type": "number",
-            "maximum": 10
-          },
-          "audio_url": {
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/wan_s2v_talk.wav"
-            ],
-            "title": "Audio URL",
-            "description": "The URL of the audio file.",
-            "type": "string"
-          },
-          "num_inference_steps": {
-            "default": 27,
-            "minimum": 2,
-            "title": "Number of Inference Steps",
-            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
-            "examples": [
-              27
-            ],
-            "type": "integer",
-            "maximum": 40
+            "description": "Shift value for the video. Must be between 1.0 and 10.0.",
+            "default": 5,
+            "title": "Shift"
           }
         },
-        "title": "WanS2VRequest",
+        "required": [
+          "prompt",
+          "image_url",
+          "audio_url"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "negative_prompt",
@@ -262,51 +262,53 @@
           "image_url",
           "audio_url"
         ],
-        "type": "object"
+        "title": "WanS2VRequest"
       },
       "WanV2214bSpeechToVideoOutput": {
-        "required": [
-          "video"
-        ],
         "properties": {
           "video": {
             "examples": [
               {
-                "file_size": 4685303,
-                "content_type": "application/octet-stream",
                 "url": "https://v3.fal.media/files/panda/f7tXRCjvwEcVlmxHuw8kO_2c7ab2540af44eceaf5ffde4e8d094ed.mp4",
-                "file_name": "2c7ab2540af44eceaf5ffde4e8d094ed.mp4"
+                "file_name": "2c7ab2540af44eceaf5ffde4e8d094ed.mp4",
+                "content_type": "application/octet-stream",
+                "file_size": 4685303
               }
             ],
-            "$ref": "#/components/schemas/File",
-            "description": "The generated video file."
+            "description": "The generated video file.",
+            "$ref": "#/components/schemas/File"
           }
         },
-        "title": "WanS2VResponse",
+        "required": [
+          "video"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "video"
         ],
-        "type": "object"
+        "title": "WanS2VResponse"
       },
       "File": {
-        "required": [
-          "url"
-        ],
         "properties": {
-          "file_size": {
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "file_name": {
             "examples": [
-              4404019
+              "z9RV14K95DvU.png"
             ],
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
           },
           "content_type": {
             "examples": [
@@ -323,35 +325,33 @@
             "title": "Content Type",
             "description": "The mime type of the file."
           },
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
-          },
-          "file_name": {
+          "file_size": {
             "examples": [
-              "z9RV14K95DvU.png"
+              4404019
             ],
             "anyOf": [
               {
-                "type": "string"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
+            "title": "File Size",
+            "description": "The size of the file in bytes."
           }
         },
-        "title": "File",
+        "required": [
+          "url"
+        ],
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "type": "object"
+        "title": "File"
       }
     }
   },

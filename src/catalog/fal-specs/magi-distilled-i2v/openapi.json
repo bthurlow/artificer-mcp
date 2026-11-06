@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/magi-distilled/image-to-video",
     "version": "1.0.0",
@@ -71,12 +71,94 @@
         ]
       },
       "MagiDistilledImageToVideoInput": {
-        "required": [
-          "prompt",
-          "image_url"
-        ],
-        "title": "MagiImageToVideoRequest",
-        "type": "object",
+        "properties": {
+          "prompt": {
+            "description": "The text prompt to guide video generation.",
+            "type": "string",
+            "title": "Prompt",
+            "examples": [
+              "Close-up shot: the old sea captain stares intently, pipe in mouth, wisps of smoke curling around his weathered face. The camera begins to pull back out over the ocean. Finally, the camera sinks below the waves deeply, fading to dark blue and finally to black."
+            ]
+          },
+          "seed": {
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "num_inference_steps": {
+            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
+            "enum": [
+              4,
+              8,
+              16,
+              32
+            ],
+            "default": 16,
+            "type": "integer",
+            "title": "Num Inference Steps"
+          },
+          "image_url": {
+            "description": "URL of the input image to represent the first frame of the video. If the input image does not match the chosen aspect ratio, it is resized and center cropped.",
+            "type": "string",
+            "title": "Image Url",
+            "examples": [
+              "https://raw.githubusercontent.com/painebenjamin/pointy-seeds/refs/heads/main/captain-start.jpg"
+            ]
+          },
+          "resolution": {
+            "description": "Resolution of the generated video (480p or 720p). 480p is 0.5 billing units, and 720p is 1 billing unit.",
+            "enum": [
+              "480p",
+              "720p"
+            ],
+            "default": "720p",
+            "type": "string",
+            "title": "Resolution"
+          },
+          "num_frames": {
+            "description": "Number of frames to generate. Must be between 96 and 192 (inclusive). Each additional 24 frames beyond 96 incurs an additional billing unit.",
+            "default": 96,
+            "title": "Num Frames",
+            "anyOf": [
+              {
+                "maximum": 192,
+                "type": "integer",
+                "minimum": 96
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "enable_safety_checker": {
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "default": true,
+            "type": "boolean",
+            "title": "Enable Safety Checker",
+            "examples": [
+              true
+            ]
+          },
+          "aspect_ratio": {
+            "description": "Aspect ratio of the generated video. If 'auto', the aspect ratio will be determined automatically based on the input image.",
+            "enum": [
+              "auto",
+              "16:9",
+              "9:16",
+              "1:1"
+            ],
+            "default": "auto",
+            "type": "string",
+            "title": "Aspect Ratio"
+          }
+        },
         "x-fal-order-properties": [
           "prompt",
           "image_url",
@@ -87,47 +169,46 @@
           "enable_safety_checker",
           "aspect_ratio"
         ],
+        "type": "object",
+        "required": [
+          "prompt",
+          "image_url"
+        ],
+        "title": "MagiImageToVideoRequest"
+      },
+      "MagiDistilledImageToVideoOutput": {
         "properties": {
-          "num_inference_steps": {
-            "default": 16,
-            "type": "integer",
-            "enum": [
-              4,
-              8,
-              16,
-              32
-            ],
-            "title": "Num Inference Steps",
-            "description": "Number of inference steps for sampling. Higher values give better quality but take longer."
-          },
-          "resolution": {
-            "default": "720p",
-            "type": "string",
-            "enum": [
-              "480p",
-              "720p"
-            ],
-            "title": "Resolution",
-            "description": "Resolution of the generated video (480p or 720p). 480p is 0.5 billing units, and 720p is 1 billing unit."
-          },
-          "prompt": {
-            "examples": [
-              "Close-up shot: the old sea captain stares intently, pipe in mouth, wisps of smoke curling around his weathered face. The camera begins to pull back out over the ocean. Finally, the camera sinks below the waves deeply, fading to dark blue and finally to black."
-            ],
-            "type": "string",
-            "title": "Prompt",
-            "description": "The text prompt to guide video generation."
-          },
-          "enable_safety_checker": {
-            "examples": [
-              true
-            ],
-            "default": true,
-            "type": "boolean",
-            "title": "Enable Safety Checker",
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked."
-          },
           "seed": {
+            "description": "The seed used for generation.",
+            "type": "integer",
+            "title": "Seed"
+          },
+          "video": {
+            "description": "The generated video file.",
+            "$ref": "#/components/schemas/File",
+            "examples": [
+              {
+                "url": "https://v3.fal.media/files/zebra/3XmM6yIGZEWxwbbDyTkhw_391bee80-b756-425d-b74c-f9083c7eec4f.mp4"
+              }
+            ]
+          }
+        },
+        "x-fal-order-properties": [
+          "video",
+          "seed"
+        ],
+        "type": "object",
+        "required": [
+          "video",
+          "seed"
+        ],
+        "title": "MagiImageToVideoResponse"
+      },
+      "File": {
+        "properties": {
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -136,138 +217,57 @@
                 "type": "null"
               }
             ],
-            "title": "Seed",
-            "description": "Random seed for reproducibility. If None, a random seed is chosen."
-          },
-          "image_url": {
             "examples": [
-              "https://raw.githubusercontent.com/painebenjamin/pointy-seeds/refs/heads/main/captain-start.jpg"
-            ],
-            "type": "string",
-            "title": "Image Url",
-            "description": "URL of the input image to represent the first frame of the video. If the input image does not match the chosen aspect ratio, it is resized and center cropped."
+              4404019
+            ]
           },
-          "aspect_ratio": {
-            "default": "auto",
-            "type": "string",
-            "enum": [
-              "auto",
-              "16:9",
-              "9:16",
-              "1:1"
-            ],
-            "title": "Aspect Ratio",
-            "description": "Aspect ratio of the generated video. If 'auto', the aspect ratio will be determined automatically based on the input image."
-          },
-          "num_frames": {
-            "default": 96,
+          "content_type": {
+            "description": "The mime type of the file.",
+            "title": "Content Type",
             "anyOf": [
               {
-                "type": "integer",
-                "minimum": 96,
-                "maximum": 192
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Num Frames",
-            "description": "Number of frames to generate. Must be between 96 and 192 (inclusive). Each additional 24 frames beyond 96 incurs an additional billing unit."
-          }
-        }
-      },
-      "MagiDistilledImageToVideoOutput": {
-        "required": [
-          "video",
-          "seed"
-        ],
-        "title": "MagiImageToVideoResponse",
-        "type": "object",
-        "x-fal-order-properties": [
-          "video",
-          "seed"
-        ],
-        "properties": {
-          "seed": {
-            "type": "integer",
-            "title": "Seed",
-            "description": "The seed used for generation."
-          },
-          "video": {
             "examples": [
+              "image/png"
+            ]
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "anyOf": [
               {
-                "url": "https://v3.fal.media/files/zebra/3XmM6yIGZEWxwbbDyTkhw_391bee80-b756-425d-b74c-f9083c7eec4f.mp4"
+                "type": "string"
+              },
+              {
+                "type": "null"
               }
             ],
-            "$ref": "#/components/schemas/File",
-            "description": "The generated video file."
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string",
+            "title": "Url"
           }
-        }
-      },
-      "File": {
-        "required": [
-          "url"
-        ],
-        "title": "File",
-        "type": "object",
+        },
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "properties": {
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type",
-            "description": "The mime type of the file."
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
-          },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
-          }
-        }
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "title": "File"
       }
     }
   },

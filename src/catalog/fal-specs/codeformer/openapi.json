@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/codeformer",
     "version": "1.0.0",
@@ -71,20 +71,17 @@
         ]
       },
       "CodeformerInput": {
-        "type": "object",
-        "title": "CodeformerInput",
+        "required": [
+          "image_url"
+        ],
         "properties": {
-          "aligned": {
-            "type": "boolean",
-            "default": false,
-            "description": "Should faces etc should be aligned.",
-            "title": "Aligned"
-          },
-          "face_upscale": {
-            "type": "boolean",
-            "default": true,
-            "description": "Should faces be upscaled",
-            "title": "Face Upscale"
+          "image_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_poor_1.jpeg"
+            ],
+            "type": "string",
+            "description": "URL of image to be used for relighting",
+            "title": "Image Url"
           },
           "seed": {
             "anyOf": [
@@ -98,34 +95,40 @@
             "title": "Seed",
             "description": "Random seed for reproducible generation."
           },
-          "fidelity": {
-            "type": "number",
-            "default": 0.5,
-            "description": "Weight of the fidelity factor.",
-            "title": "Fidelity"
-          },
           "upscale_factor": {
             "minimum": 1,
+            "title": "Upscale Factor",
             "type": "number",
-            "default": 2,
             "description": "Upscaling factor",
-            "title": "Upscale Factor"
+            "default": 2
           },
-          "image_url": {
-            "type": "string",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_poor_1.jpeg"
-            ],
-            "description": "URL of image to be used for relighting",
-            "title": "Image Url"
+          "aligned": {
+            "title": "Aligned",
+            "type": "boolean",
+            "description": "Should faces etc should be aligned.",
+            "default": false
           },
           "only_center_face": {
+            "title": "Only Center Face",
             "type": "boolean",
-            "default": false,
             "description": "Should only center face be restored",
-            "title": "Only Center Face"
+            "default": false
+          },
+          "fidelity": {
+            "title": "Fidelity",
+            "type": "number",
+            "description": "Weight of the fidelity factor.",
+            "default": 0.5
+          },
+          "face_upscale": {
+            "title": "Face Upscale",
+            "type": "boolean",
+            "description": "Should faces be upscaled",
+            "default": true
           }
         },
+        "type": "object",
+        "title": "CodeformerInput",
         "x-fal-order-properties": [
           "image_url",
           "fidelity",
@@ -134,48 +137,46 @@
           "only_center_face",
           "face_upscale",
           "seed"
-        ],
-        "required": [
-          "image_url"
         ]
       },
       "CodeformerOutput": {
-        "type": "object",
-        "title": "ConformerOutput",
-        "properties": {
-          "seed": {
-            "type": "integer",
-            "title": "Seed",
-            "description": "\n            Seed of the generated Image. It will be the same value of the one passed in the\n            input or the randomly generated that was used in case none was passed.\n        "
-          },
-          "image": {
-            "$ref": "#/components/schemas/Image",
-            "examples": [
-              {
-                "file_name": "36d3ca4791a647678b2ff01a35c87f5a.png",
-                "height": 512,
-                "content_type": "image/png",
-                "width": 512,
-                "file_size": 423052,
-                "url": "https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_restored_1.jpeg"
-              }
-            ],
-            "description": "The generated image file info."
-          }
-        },
-        "x-fal-order-properties": [
+        "required": [
           "image",
           "seed"
         ],
-        "required": [
+        "properties": {
+          "seed": {
+            "type": "integer",
+            "description": "\n            Seed of the generated Image. It will be the same value of the one passed in the\n            input or the randomly generated that was used in case none was passed.\n        ",
+            "title": "Seed"
+          },
+          "image": {
+            "examples": [
+              {
+                "file_name": "36d3ca4791a647678b2ff01a35c87f5a.png",
+                "content_type": "image/png",
+                "url": "https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_restored_1.jpeg",
+                "height": 512,
+                "width": 512,
+                "file_size": 423052
+              }
+            ],
+            "description": "The generated image file info.",
+            "$ref": "#/components/schemas/Image"
+          }
+        },
+        "type": "object",
+        "title": "ConformerOutput",
+        "x-fal-order-properties": [
           "image",
           "seed"
         ]
       },
       "Image": {
         "title": "Image",
-        "type": "object",
-        "description": "Represents an image file.",
+        "required": [
+          "url"
+        ],
         "properties": {
           "file_name": {
             "anyOf": [
@@ -186,26 +187,11 @@
                 "type": "null"
               }
             ],
-            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
             ],
+            "title": "File Name",
             "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Height",
-            "examples": [
-              1024
-            ],
-            "description": "The height of the image in pixels."
           },
           "content_type": {
             "anyOf": [
@@ -216,11 +202,31 @@
                 "type": "null"
               }
             ],
-            "title": "Content Type",
             "examples": [
               "image/png"
             ],
+            "title": "Content Type",
             "description": "The mime type of the file."
+          },
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              1024
+            ],
+            "title": "Height",
+            "description": "The height of the image in pixels."
           },
           "width": {
             "anyOf": [
@@ -231,10 +237,10 @@
                 "type": "null"
               }
             ],
-            "title": "Width",
             "examples": [
               1024
             ],
+            "title": "Width",
             "description": "The width of the image in pixels."
           },
           "file_size": {
@@ -246,18 +252,15 @@
                 "type": "null"
               }
             ],
-            "title": "File Size",
             "examples": [
               4404019
             ],
+            "title": "File Size",
             "description": "The size of the file in bytes."
-          },
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
           }
         },
+        "type": "object",
+        "description": "Represents an image file.",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -265,9 +268,6 @@
           "file_size",
           "width",
           "height"
-        ],
-        "required": [
-          "url"
         ]
       }
     }

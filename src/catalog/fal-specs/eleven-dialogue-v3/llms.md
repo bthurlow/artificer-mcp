@@ -33,7 +33,7 @@ The API accepts the following input parameters:
 - **`inputs`** (`list<DialogueBlock>`, _required_):
   A list of dialogue inputs, each containing text and a voice ID which will be converted into speech.
   - Array of DialogueBlock
-  - Examples: [{"voice":"Aria","text":"[applause] Thank you all for coming tonight! Today we have a very special guest with us."},{"voice":"Charlotte","text":"[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day."}]
+  - Examples: [{"text":"[applause] Thank you all for coming tonight! Today we have a very special guest with us.","voice":"Aria"},{"text":"[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day.","voice":"Charlotte"}]
 
 - **`stability`** (`float`, _optional_):
   Determines how stable the voice is and the randomness between each generation. Lower values introduce broader emotional range for the voice. Higher values can result in a monotonous voice with limited emotion. Must be one of 0.0, 0.5, 1.0, else it will be rounded to the nearest value.
@@ -61,12 +61,12 @@ The API accepts the following input parameters:
 {
   "inputs": [
     {
-      "voice": "Aria",
-      "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us."
+      "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us.",
+      "voice": "Aria"
     },
     {
-      "voice": "Charlotte",
-      "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day."
+      "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day.",
+      "voice": "Charlotte"
     }
   ]
 }
@@ -78,12 +78,12 @@ The API accepts the following input parameters:
 {
   "inputs": [
     {
-      "voice": "Aria",
-      "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us."
+      "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us.",
+      "voice": "Aria"
     },
     {
-      "voice": "Charlotte",
-      "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day."
+      "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day.",
+      "voice": "Charlotte"
     }
   ],
   "pronunciation_dictionary_locators": []
@@ -127,12 +127,12 @@ curl --request POST \
   --data '{
      "inputs": [
        {
-         "voice": "Aria",
-         "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us."
+         "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us.",
+         "voice": "Aria"
        },
        {
-         "voice": "Charlotte",
-         "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day."
+         "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day.",
+         "voice": "Charlotte"
        }
      ]
    }'
@@ -160,11 +160,11 @@ result = fal_client.subscribe(
     "fal-ai/elevenlabs/text-to-dialogue/eleven-v3",
     arguments={
         "inputs": [{
-            "voice": "Aria",
-            "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us."
+            "text": "[applause] Thank you all for coming tonight! Today we have a very special guest with us.",
+            "voice": "Aria"
         }, {
-            "voice": "Charlotte",
-            "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day."
+            "text": "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day.",
+            "voice": "Charlotte"
         }]
     },
     with_logs=True,
@@ -189,11 +189,11 @@ import { fal } from "@fal-ai/client";
 const result = await fal.subscribe("fal-ai/elevenlabs/text-to-dialogue/eleven-v3", {
   input: {
     inputs: [{
-      voice: "Aria",
-      text: "[applause] Thank you all for coming tonight! Today we have a very special guest with us."
+      text: "[applause] Thank you all for coming tonight! Today we have a very special guest with us.",
+      voice: "Aria"
     }, {
-      voice: "Charlotte",
-      text: "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day."
+      text: "[gulps] ... [strong canadian accent] [excited] Hello everyone! Thank you all for having me tonight on this special day.",
+      voice: "Charlotte"
     }]
   },
   logs: true,
@@ -207,6 +207,10 @@ console.log(result.data);
 console.log(result.requestId);
 ```
 
+
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
 
 ## Additional Resources
 
@@ -229,4 +233,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

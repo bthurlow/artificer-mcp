@@ -13,7 +13,7 @@
 
 ## Pricing
 
-Your request will cost $0.001805 per megapixel of generated video data (width × height × frames), rounded up. For example, if you generate a video that is 121 frames long at 1280 × 720, your total generated video is ≈112 MP, and your request will cost $0.2013
+Your request will cost **$0.001805** per megapixel of generated video data (width × height × frames), rounded up. For example, if you generate a video that is 121 frames long at 1280 × 720, your total generated video is ≈112 MP, and your request will cost **$0.2013**
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -269,7 +269,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video.
-  - Examples: {"content_type":"video/mp4","fps":25,"width":1248,"file_name":"CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4","num_frames":257,"url":"https://v3b.fal.media/files/b/0a88289e/CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4","height":704,"duration":10.28}
+  - Examples: {"fps":25,"width":1248,"num_frames":257,"content_type":"video/mp4","duration":10.28,"height":704,"file_name":"CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4","url":"https://v3b.fal.media/files/b/0a88289e/CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4"}
 
 - **`seed`** (`integer`, _required_):
   The seed used for the random number generator.
@@ -286,14 +286,14 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "video/mp4",
     "fps": 25,
     "width": 1248,
-    "file_name": "CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
     "num_frames": 257,
-    "url": "https://v3b.fal.media/files/b/0a88289e/CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
+    "content_type": "video/mp4",
+    "duration": 10.28,
     "height": 704,
-    "duration": 10.28
+    "file_name": "CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4",
+    "url": "https://v3b.fal.media/files/b/0a88289e/CJcQGDrxOSRg2YFl5GNDt_glXPMoji.mp4"
   },
   "seed": 866232447,
   "prompt": "Continue the scene naturally, maintaining the same style and motion."
@@ -390,6 +390,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -411,4 +415,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

@@ -79,7 +79,7 @@ The API returns the following output format:
 
 - **`images`** (`list<File>`, _required_)
   - Array of File
-  - Examples: [{"file_name":"image.svg","url":"https://v3b.fal.media/files/b/0a8ee4de/lmXuapOPV309mE533swE0_image.svg","content_type":"image/svg+xml","file_size":1818794}]
+  - Examples: [{"url":"https://v3b.fal.media/files/b/0a8ee4de/lmXuapOPV309mE533swE0_image.svg","file_size":1818794,"content_type":"image/svg+xml","file_name":"image.svg"}]
 
 
 
@@ -89,10 +89,10 @@ The API returns the following output format:
 {
   "images": [
     {
-      "file_name": "image.svg",
       "url": "https://v3b.fal.media/files/b/0a8ee4de/lmXuapOPV309mE533swE0_image.svg",
+      "file_size": 1818794,
       "content_type": "image/svg+xml",
-      "file_size": 1818794
+      "file_name": "image.svg"
     }
   ]
 }
@@ -171,6 +171,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -192,4 +196,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

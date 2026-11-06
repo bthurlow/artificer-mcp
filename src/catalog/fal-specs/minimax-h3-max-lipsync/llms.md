@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Billing is calculated per second of generated video. Video costs **$0.05** per second at **480p**, **$0.08** per second at **768p**, **$0.16** per second at **1080p**, and **$0.32** per second at **2K**.  A 1.2x multiplier is added to videos over 15 seconds. A **5-second** video at **768p** costs **$0.40**. A **30-second** video at **768p** costs **$2.88**.
+Billing is calculated per second of generated video. Video costs **$0.05** per second at **480p**, **$0.08** per second at **768p**, **$0.16** per second at **1080p**, and **$0.32** per second at **2K**. A 1.2x multiplier is added to videos over 15 seconds. A **5-second** video at **768p** costs **$0.40**. A **30-second** video at **768p** costs **$2.88**.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -42,8 +42,8 @@ The API accepts the following input parameters:
   - Options: `"480P"`, `"768P"`, `"1080P"`, `"2K"`
 
 - **`enable_transcription`** (`boolean`, _optional_):
-  Transcribe the supplied audio to guide lip synchronization. When disabled, synchronize to the audio without a transcript.
-  - Default: `false`
+  Transcribe the supplied audio to guide lip synchronization. Turn this off if the audio has a lot of non-word sound, such as music, singing, laughter or noise, which the transcript may turn into words that were never spoken. Default value: `true`
+  - Default: `true`
 
 - **`seed`** (`integer`, _optional_):
   Random seed; selected randomly if omitted.
@@ -71,6 +71,7 @@ The API accepts the following input parameters:
   "image_url": "",
   "audio_url": "",
   "resolution": "768P",
+  "enable_transcription": true,
   "enable_safety_checker": true
 }
 ```
@@ -183,6 +184,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -204,4 +209,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

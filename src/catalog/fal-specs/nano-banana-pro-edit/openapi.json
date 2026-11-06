@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/nano-banana-pro/edit",
     "version": "1.0.0",
@@ -71,59 +71,51 @@
         ]
       },
       "NanoBananaProEditInput": {
-        "required": [
-          "prompt",
-          "image_urls"
-        ],
-        "title": "NanoBananaImageToImageInput",
-        "x-fal-order-properties": [
-          "prompt",
-          "num_images",
-          "seed",
-          "aspect_ratio",
-          "output_format",
-          "safety_tolerance",
-          "sync_mode",
-          "image_urls",
-          "system_prompt",
-          "resolution",
-          "limit_generations",
-          "enable_web_search"
-        ],
-        "type": "object",
         "properties": {
-          "system_prompt": {
-            "description": "Optional system instruction that steers the model's persona and output style across the request. Leave blank to omit; when provided, it is sent as the system instruction to Gemini (or as a system message on OpenAI-compatible providers).",
-            "title": "System Prompt",
-            "maxLength": 50000,
-            "type": "string",
-            "default": ""
-          },
-          "image_urls": {
-            "description": "The URLs of the images to use for image-to-image generation or image editing.",
-            "title": "Image URLs",
-            "examples": [
-              [
-                "https://storage.googleapis.com/falserverless/example_inputs/nano-banana-edit-input.png",
-                "https://storage.googleapis.com/falserverless/example_inputs/nano-banana-edit-input-2.png"
-              ]
+          "temperature": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number",
+                "maximum": 2
+              },
+              {
+                "type": "null"
+              }
             ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+            "title": "Temperature",
+            "description": "Sampling temperature. Omit to use the provider default of 1. Explicit values use a direct Google or Vertex API."
           },
-          "num_images": {
-            "default": 1,
-            "description": "The number of images to generate.",
-            "title": "Number of Images",
-            "type": "integer",
-            "maximum": 4,
-            "minimum": 1
+          "max_output_tokens": {
+            "anyOf": [
+              {
+                "minimum": 1,
+                "type": "integer",
+                "maximum": 32768
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Output Tokens",
+            "description": "Maximum output tokens for the generation. Omit to retain the provider default. Explicit values use a direct Google or Vertex API."
+          },
+          "top_p": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "number",
+                "maximum": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top P",
+            "description": "Nucleus sampling probability. Omit to use the provider default of 0.95. Explicit values use a direct Google or Vertex API."
           },
           "safety_tolerance": {
-            "description": "The safety tolerance level for content moderation. 1 is the most strict (blocks most content), 6 is the least strict.",
-            "title": "Safety Tolerance",
+            "type": "string",
             "enum": [
               "1",
               "2",
@@ -132,20 +124,175 @@
               "5",
               "6"
             ],
+            "description": "The safety tolerance level for content moderation. 1 is the most strict (blocks most content), 6 is the least strict.",
+            "default": "4",
+            "title": "Safety Tolerance"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/GeminiMessage"
+            },
+            "type": "array",
+            "description": "Previous native user/model turns. Replay a returned conversation's messages unchanged, including thought signatures; the current prompt is appended as a new user turn.",
+            "title": "History"
+          },
+          "system_prompt": {
+            "maxLength": 50000,
             "type": "string",
-            "default": "4"
+            "description": "Optional system instruction that steers the model's persona and output style across the request. Leave blank to omit; when provided, it is sent as the system instruction to Gemini (or as a system message on OpenAI-compatible providers).",
+            "default": "",
+            "title": "System Prompt"
+          },
+          "sync_mode": {
+            "type": "boolean",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "default": false,
+            "title": "Sync Mode"
           },
           "limit_generations": {
-            "description": "Experimental parameter to limit the number of generations from each round of prompting to 1. Set to `True` to to disregard any instructions in the prompt regarding the number of images to generate.",
-            "title": "Limit Generations",
             "type": "boolean",
-            "default": true
+            "description": "Experimental parameter to limit the number of generations from each round of prompting to 1. Set to `True` to to disregard any instructions in the prompt regarding the number of images to generate.",
+            "default": true,
+            "title": "Limit Generations"
+          },
+          "include_thoughts": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Include Thoughts",
+            "description": "Whether to include thought summaries. Omit to preserve the existing behavior: an explicit thinking_level requests summaries. Set limit_generations=false to return summary text in description. This does not disable thinking or return intermediate thought images."
+          },
+          "enable_web_search": {
+            "type": "boolean",
+            "description": "Enable web search for the image generation task. This will allow the model to use the latest information from the web to generate the image.",
+            "default": false,
+            "title": "Enable Web Search"
+          },
+          "prompt": {
+            "maxLength": 50000,
+            "examples": [
+              "make a photo of the man driving the car down the california coastline"
+            ],
+            "type": "string",
+            "minLength": 3,
+            "description": "The prompt for image editing.",
+            "title": "Prompt"
+          },
+          "resolution": {
+            "type": "string",
+            "enum": [
+              "1K",
+              "2K",
+              "4K"
+            ],
+            "description": "The resolution of the image to generate.",
+            "default": "1K",
+            "title": "Resolution"
+          },
+          "num_images": {
+            "title": "Number of Images",
+            "minimum": 1,
+            "type": "integer",
+            "description": "The number of images to generate.",
+            "default": 1,
+            "maximum": 4
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
+            ],
+            "description": "The format of the generated image.",
+            "default": "png",
+            "title": "Output Format"
+          },
+          "thinking_level": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "high"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thinking Level",
+            "description": "Thinking effort. Pro Image supports only high; omit to retain its provider default. An explicit level requests summaries unless include_thoughts overrides it. Thinking cannot be disabled."
+          },
+          "image_urls": {
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/example_inputs/nano-banana-edit-input.png",
+                "https://storage.googleapis.com/falserverless/example_inputs/nano-banana-edit-input-2.png"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "The URLs of the images to use for image-to-image generation or image editing.",
+            "title": "Image URLs"
+          },
+          "return_history": {
+            "type": "boolean",
+            "description": "Return reusable native conversations with original image parts and provider thought signatures. Uses a native provider. Each generated conversation is independent; send its messages as history for the next turn.",
+            "default": false,
+            "title": "Return History"
+          },
+          "context": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/GeminiTextPart"
+                },
+                {
+                  "$ref": "#/components/schemas/GeminiImagePart"
+                },
+                {
+                  "$ref": "#/components/schemas/GeminiDocumentPart"
+                },
+                {
+                  "$ref": "#/components/schemas/GeminiSignaturePart"
+                }
+              ],
+              "discriminator": {
+                "mapping": {
+                  "signature": "#/components/schemas/GeminiSignaturePart",
+                  "document": "#/components/schemas/GeminiDocumentPart",
+                  "text": "#/components/schemas/GeminiTextPart",
+                  "image": "#/components/schemas/GeminiImagePart"
+                },
+                "propertyName": "type"
+              }
+            },
+            "type": "array",
+            "description": "Ordered text, original images, PDF or UTF-8 text documents appended to the current prompt. Uses a native provider. Images count toward the total 14-reference limit.",
+            "title": "Context"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "The seed for the random number generator."
           },
           "aspect_ratio": {
-            "description": "The aspect ratio of the generated image.",
             "title": "Aspect Ratio",
             "anyOf": [
               {
+                "type": "string",
                 "enum": [
                   "auto",
                   "21:9",
@@ -157,163 +304,371 @@
                   "4:5",
                   "3:4",
                   "2:3",
-                  "9:16"
-                ],
-                "type": "string"
+                  "9:16",
+                  "4:1",
+                  "1:4",
+                  "8:1",
+                  "1:8"
+                ]
               },
               {
                 "type": "null"
               }
             ],
-            "default": "auto"
-          },
-          "prompt": {
-            "description": "The prompt for image editing.",
-            "title": "Prompt",
-            "maxLength": 50000,
-            "examples": [
-              "make a photo of the man driving the car down the california coastline"
-            ],
-            "type": "string",
-            "minLength": 3
-          },
-          "resolution": {
-            "description": "The resolution of the image to generate.",
-            "title": "Resolution",
-            "enum": [
-              "1K",
-              "2K",
-              "4K"
-            ],
-            "type": "string",
-            "default": "1K"
-          },
-          "seed": {
-            "description": "The seed for the random number generator.",
-            "title": "Seed",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "output_format": {
-            "description": "The format of the generated image.",
-            "title": "Output Format",
-            "enum": [
-              "jpeg",
-              "png",
-              "webp"
-            ],
-            "type": "string",
-            "default": "png"
-          },
-          "enable_web_search": {
-            "description": "Enable web search for the image generation task. This will allow the model to use the latest information from the web to generate the image.",
-            "title": "Enable Web Search",
-            "type": "boolean",
-            "default": false
-          },
-          "sync_mode": {
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "title": "Sync Mode",
-            "type": "boolean",
-            "default": false
+            "default": "auto",
+            "description": "The aspect ratio of the generated image, including 1:4, 4:1, 1:8 and 8:1."
           }
-        }
+        },
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "x-fal-order-properties": [
+          "prompt",
+          "image_urls",
+          "history",
+          "context",
+          "return_history",
+          "thinking_level",
+          "include_thoughts",
+          "temperature",
+          "top_p",
+          "max_output_tokens",
+          "num_images",
+          "seed",
+          "aspect_ratio",
+          "output_format",
+          "safety_tolerance",
+          "sync_mode",
+          "system_prompt",
+          "resolution",
+          "limit_generations",
+          "enable_web_search"
+        ],
+        "title": "NanoBananaImageToImageInput"
       },
       "NanoBananaProEditOutput": {
-        "required": [
-          "images",
-          "description"
-        ],
-        "title": "NanoBananaImageToImageOutput",
-        "x-fal-order-properties": [
-          "images",
-          "description"
-        ],
-        "type": "object",
         "properties": {
-          "description": {
-            "description": "The description of the generated images.",
-            "title": "Description",
-            "type": "string"
-          },
           "images": {
-            "description": "The edited images.",
-            "title": "Images",
             "examples": [
               [
                 {
-                  "content_type": "image/png",
+                  "file_name": "nano-banana-pro-edit-output.png",
                   "url": "https://storage.googleapis.com/falserverless/example_outputs/nano-banana-pro-edit-output.png",
-                  "file_name": "nano-banana-pro-edit-output.png"
+                  "content_type": "image/png"
                 }
               ]
             ],
-            "type": "array",
             "items": {
               "$ref": "#/components/schemas/ImageFile"
-            }
+            },
+            "type": "array",
+            "description": "The edited images.",
+            "title": "Images"
+          },
+          "description": {
+            "type": "string",
+            "description": "The description of the generated images.",
+            "title": "Description"
+          },
+          "conversations": {
+            "items": {
+              "$ref": "#/components/schemas/GeminiConversation"
+            },
+            "type": "array",
+            "description": "Reusable per-generation conversations, populated only when return_history is true. Retain every part and thought signature when continuing a conversation.",
+            "title": "Conversations"
+          },
+          "grounding_metadata": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array",
+            "description": "Provider grounding metadata for the generated images, including search queries, source pages and image-source attribution when available.",
+            "title": "Grounding Metadata"
           }
-        }
+        },
+        "type": "object",
+        "required": [
+          "images",
+          "description"
+        ],
+        "x-fal-order-properties": [
+          "images",
+          "description",
+          "conversations",
+          "grounding_metadata"
+        ],
+        "title": "NanoBananaImageToImageOutput"
+      },
+      "GeminiMessage": {
+        "additionalProperties": false,
+        "properties": {
+          "parts": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/GeminiTextPart"
+                },
+                {
+                  "$ref": "#/components/schemas/GeminiImagePart"
+                },
+                {
+                  "$ref": "#/components/schemas/GeminiDocumentPart"
+                },
+                {
+                  "$ref": "#/components/schemas/GeminiSignaturePart"
+                }
+              ],
+              "discriminator": {
+                "mapping": {
+                  "signature": "#/components/schemas/GeminiSignaturePart",
+                  "document": "#/components/schemas/GeminiDocumentPart",
+                  "text": "#/components/schemas/GeminiTextPart",
+                  "image": "#/components/schemas/GeminiImagePart"
+                },
+                "propertyName": "type"
+              }
+            },
+            "type": "array",
+            "minItems": 1,
+            "description": "Ordered text, image, document, and signature parts.",
+            "title": "Parts"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "model"
+            ],
+            "description": "Native Gemini conversation role.",
+            "title": "Role"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "parts"
+        ],
+        "x-fal-order-properties": [
+          "role",
+          "parts"
+        ],
+        "title": "GeminiMessage"
+      },
+      "GeminiTextPart": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "text",
+            "title": "Type",
+            "description": "The text part discriminator."
+          },
+          "thought": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thought",
+            "description": "Provider thought marker, preserved when replaying a returned conversation."
+          },
+          "text": {
+            "type": "string",
+            "description": "Text at this position in the conversation.",
+            "title": "Text"
+          },
+          "thought_signature": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thought Signature",
+            "description": "Opaque provider-issued thought signature. Replay it unchanged on its original part."
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "text"
+        ],
+        "x-fal-order-properties": [
+          "thought",
+          "thought_signature",
+          "type",
+          "text"
+        ],
+        "title": "GeminiTextPart"
+      },
+      "GeminiImagePart": {
+        "additionalProperties": false,
+        "properties": {
+          "image_url": {
+            "type": "string",
+            "description": "Original image URL or data URI. Replayed without resizing or re-encoding.",
+            "title": "Image Url"
+          },
+          "type": {
+            "type": "string",
+            "const": "image",
+            "title": "Type",
+            "description": "The image part discriminator."
+          },
+          "thought": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thought",
+            "description": "Provider thought marker, preserved when replaying a returned conversation."
+          },
+          "thought_signature": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thought Signature",
+            "description": "Opaque provider-issued thought signature. Replay it unchanged on its original part."
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "image_url"
+        ],
+        "x-fal-order-properties": [
+          "thought",
+          "thought_signature",
+          "type",
+          "image_url"
+        ],
+        "title": "GeminiImagePart"
+      },
+      "GeminiDocumentPart": {
+        "additionalProperties": false,
+        "properties": {
+          "mime_type": {
+            "type": "string",
+            "enum": [
+              "application/pdf",
+              "text/plain"
+            ],
+            "description": "The document's media type.",
+            "title": "Mime Type"
+          },
+          "type": {
+            "type": "string",
+            "const": "document",
+            "title": "Type",
+            "description": "The document part discriminator."
+          },
+          "thought": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thought",
+            "description": "Provider thought marker, preserved when replaying a returned conversation."
+          },
+          "file_url": {
+            "type": "string",
+            "description": "PDF or UTF-8 plain-text document URL or data URI (up to 15 MB).",
+            "title": "File Url"
+          },
+          "thought_signature": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thought Signature",
+            "description": "Opaque provider-issued thought signature. Replay it unchanged on its original part."
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "file_url",
+          "mime_type"
+        ],
+        "x-fal-order-properties": [
+          "thought",
+          "thought_signature",
+          "type",
+          "file_url",
+          "mime_type"
+        ],
+        "title": "GeminiDocumentPart"
+      },
+      "GeminiSignaturePart": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "signature",
+            "title": "Type",
+            "description": "The signature part discriminator."
+          },
+          "thought": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thought",
+            "description": "Provider thought marker, preserved when replaying a returned conversation."
+          },
+          "thought_signature": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Provider-issued signature-only part, replayed unchanged.",
+            "title": "Thought Signature"
+          }
+        },
+        "type": "object",
+        "required": [
+          "thought_signature",
+          "type"
+        ],
+        "x-fal-order-properties": [
+          "thought",
+          "thought_signature",
+          "type"
+        ],
+        "title": "GeminiSignaturePart"
       },
       "ImageFile": {
-        "required": [
-          "url"
-        ],
-        "title": "ImageFile",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size",
-          "width",
-          "height"
-        ],
-        "type": "object",
         "properties": {
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
           "height": {
-            "description": "The height of the image",
-            "title": "Height",
             "anyOf": [
               {
                 "type": "integer"
@@ -321,11 +676,11 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Height",
+            "description": "The height of the image"
           },
           "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
             ],
@@ -336,11 +691,34 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
           },
-          "width": {
-            "description": "The width of the image",
-            "title": "Width",
+          "url": {
+            "type": "string",
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url"
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file."
+          },
+          "file_size": {
+            "examples": [
+              4404019
+            ],
             "anyOf": [
               {
                 "type": "integer"
@@ -348,9 +726,225 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "File Size",
+            "description": "The size of the file in bytes."
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "description": "The width of the image"
           }
-        }
+        },
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "title": "ImageFile"
+      },
+      "GeminiConversation": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/GeminiVideoMessage"
+            },
+            "type": "array",
+            "description": "One complete provider conversation. Pass messages as history in the next request, retaining every signature and part.",
+            "title": "Messages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "messages"
+        ],
+        "x-fal-order-properties": [
+          "messages"
+        ],
+        "title": "GeminiConversation"
+      },
+      "GeminiVideoMessage": {
+        "additionalProperties": false,
+        "properties": {
+          "parts": {
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/GeminiTextPart"
+                },
+                {
+                  "$ref": "#/components/schemas/GeminiImagePart"
+                },
+                {
+                  "$ref": "#/components/schemas/GeminiDocumentPart"
+                },
+                {
+                  "$ref": "#/components/schemas/GeminiVideoPart"
+                },
+                {
+                  "$ref": "#/components/schemas/GeminiSignaturePart"
+                },
+                {
+                  "$ref": "#/components/schemas/GeminiAudioPart"
+                }
+              ],
+              "discriminator": {
+                "mapping": {
+                  "signature": "#/components/schemas/GeminiSignaturePart",
+                  "audio": "#/components/schemas/GeminiAudioPart",
+                  "document": "#/components/schemas/GeminiDocumentPart",
+                  "text": "#/components/schemas/GeminiTextPart",
+                  "video": "#/components/schemas/GeminiVideoPart",
+                  "image": "#/components/schemas/GeminiImagePart"
+                },
+                "propertyName": "type"
+              }
+            },
+            "type": "array",
+            "minItems": 1,
+            "description": "Ordered text, image, document, video, audio, and signature parts.",
+            "title": "Parts"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "model"
+            ],
+            "description": "Native Gemini conversation role.",
+            "title": "Role"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "parts"
+        ],
+        "x-fal-order-properties": [
+          "role",
+          "parts"
+        ],
+        "title": "GeminiVideoMessage"
+      },
+      "GeminiVideoPart": {
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "video",
+            "title": "Type",
+            "description": "The video part discriminator."
+          },
+          "video_url": {
+            "type": "string",
+            "description": "Video URL or data URI (up to 15 MB and 120 seconds), or a YouTube URL. Supported by Flash Image only.",
+            "title": "Video Url"
+          },
+          "thought": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thought",
+            "description": "Provider thought marker, preserved when replaying a returned conversation."
+          },
+          "thought_signature": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thought Signature",
+            "description": "Opaque provider-issued thought signature. Replay it unchanged on its original part."
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "video_url"
+        ],
+        "x-fal-order-properties": [
+          "thought",
+          "thought_signature",
+          "type",
+          "video_url"
+        ],
+        "title": "GeminiVideoPart"
+      },
+      "GeminiAudioPart": {
+        "additionalProperties": false,
+        "properties": {
+          "thought_signature": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thought Signature",
+            "description": "Opaque provider-issued thought signature. Replay it unchanged on its original part."
+          },
+          "type": {
+            "type": "string",
+            "const": "audio",
+            "title": "Type",
+            "description": "The audio part discriminator."
+          },
+          "thought": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thought",
+            "description": "Provider thought marker, preserved when replaying a returned conversation."
+          },
+          "audio_url": {
+            "type": "string",
+            "description": "Original audio URL or data URI from a previous Flash Image request (up to 15 MB).",
+            "title": "Audio Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "audio_url"
+        ],
+        "x-fal-order-properties": [
+          "thought",
+          "thought_signature",
+          "type",
+          "audio_url"
+        ],
+        "title": "GeminiAudioPart"
       }
     }
   },

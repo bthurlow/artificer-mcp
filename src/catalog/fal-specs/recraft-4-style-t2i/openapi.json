@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for recraft/v4/style/text-to-image",
     "version": "1.0.0",
@@ -71,12 +71,57 @@
         ]
       },
       "V4StyleTextToImageInput": {
-        "required": [
-          "prompt"
-        ],
         "title": "RecraftV4StyleTextToImageInput",
+        "x-fal-order-properties": [
+          "prompt",
+          "image_size",
+          "colors",
+          "background_color",
+          "enable_safety_checker",
+          "style_id",
+          "image_urls",
+          "style_match"
+        ],
+        "type": "object",
         "properties": {
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "default": true,
+            "type": "boolean",
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked."
+          },
+          "style_id": {
+            "title": "Style ID",
+            "anyOf": [
+              {
+                "format": "uuid4",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The ID of an existing V4 custom style."
+          },
+          "style_match": {
+            "title": "Style Match",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "precise",
+                  "flexible"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Override how closely the generation follows the custom style."
+          },
           "image_size": {
+            "title": "Image Size",
+            "default": "square_hd",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
@@ -93,42 +138,44 @@
                 ]
               }
             ],
-            "title": "Image Size",
             "examples": [
               "landscape_16_9"
-            ],
-            "default": "square_hd"
+            ]
           },
           "colors": {
-            "type": "array",
             "title": "Colors",
-            "description": "An array of preferable colors",
             "default": [],
+            "type": "array",
             "items": {
               "$ref": "#/components/schemas/RGBColor"
-            }
+            },
+            "description": "An array of preferable colors"
           },
-          "prompt": {
-            "minLength": 1,
-            "title": "Prompt",
-            "type": "string",
-            "examples": [
-              "Tilt-shift miniature effect on a real Portuguese fishing village at golden hour, colorful boats in the harbor appearing toy-like, selective focus band across the middle, saturated primary colors of blue red and yellow boats against white buildings, 90mm tilt-shift lens, the familiar made fantastical, Wes Anderson color sensibility"
-            ],
-            "maxLength": 10000
-          },
-          "style_id": {
+          "image_urls": {
+            "title": "Image URLs",
             "anyOf": [
               {
-                "type": "string",
-                "format": "uuid4"
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 10
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Style ID",
-            "description": "The ID of an existing V4 custom style."
+            "description": "The URLs of the style reference images. Supports PNG, JPG, and WEBP; provide between 1 and 10 images."
+          },
+          "prompt": {
+            "title": "Prompt",
+            "minLength": 1,
+            "type": "string",
+            "maxLength": 10000,
+            "examples": [
+              "Tilt-shift miniature effect on a real Portuguese fishing village at golden hour, colorful boats in the harbor appearing toy-like, selective focus band across the middle, saturated primary colors of blue red and yellow boats against white buildings, 90mm tilt-shift lens, the familiar made fantastical, Wes Anderson color sensibility"
+            ]
           },
           "background_color": {
             "anyOf": [
@@ -140,205 +187,133 @@
               }
             ],
             "description": "The preferable background color of the generated images."
-          },
-          "image_urls": {
-            "anyOf": [
-              {
-                "type": "array",
-                "maxItems": 10,
-                "minItems": 1,
-                "items": {
-                  "type": "string"
-                }
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Image URLs",
-            "description": "The URLs of the style reference images. Supports PNG, JPG, and WEBP; provide between 1 and 10 images."
-          },
-          "style_match": {
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "precise",
-                  "flexible"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Style Match",
-            "description": "Override how closely the generation follows the custom style."
-          },
-          "enable_safety_checker": {
-            "type": "boolean",
-            "title": "Enable Safety Checker",
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "default": true
           }
         },
-        "x-fal-order-properties": [
-          "prompt",
-          "image_size",
-          "colors",
-          "background_color",
-          "enable_safety_checker",
-          "style_id",
-          "image_urls",
-          "style_match"
-        ],
-        "type": "object"
+        "required": [
+          "prompt"
+        ]
       },
       "V4StyleTextToImageOutput": {
-        "required": [
-          "images"
-        ],
         "title": "RecraftV4StyleTextToImageOutput",
-        "properties": {
-          "style_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "uuid4"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Style Id",
-            "description": "The custom style used or created for this generation."
-          },
-          "images": {
-            "type": "array",
-            "title": "Images",
-            "examples": [
-              [
-                {
-                  "file_name": "image.webp",
-                  "url": "https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/standard-output.webp",
-                  "content_type": "image/webp",
-                  "file_size": 272628
-                }
-              ]
-            ],
-            "items": {
-              "$ref": "#/components/schemas/File"
-            }
-          }
-        },
         "x-fal-order-properties": [
           "images",
           "style_id"
         ],
-        "type": "object"
-      },
-      "ImageSize": {
         "type": "object",
-        "title": "ImageSize",
         "properties": {
-          "height": {
-            "type": "integer",
-            "title": "Height",
-            "maximum": 14142,
-            "description": "The height of the generated image.",
-            "default": 512,
-            "exclusiveMinimum": 0
+          "style_id": {
+            "title": "Style Id",
+            "anyOf": [
+              {
+                "format": "uuid4",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The custom style used or created for this generation."
           },
-          "width": {
-            "type": "integer",
-            "title": "Width",
-            "maximum": 14142,
-            "description": "The width of the generated image.",
-            "default": 512,
-            "exclusiveMinimum": 0
+          "images": {
+            "title": "Images",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/File"
+            },
+            "examples": [
+              [
+                {
+                  "url": "https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/standard-output.webp",
+                  "file_size": 272628,
+                  "content_type": "image/webp",
+                  "file_name": "image.webp"
+                }
+              ]
+            ]
           }
         },
+        "required": [
+          "images"
+        ]
+      },
+      "ImageSize": {
+        "title": "ImageSize",
         "x-fal-order-properties": [
           "width",
           "height"
-        ]
+        ],
+        "type": "object",
+        "properties": {
+          "width": {
+            "title": "Width",
+            "exclusiveMinimum": 0,
+            "maximum": 14142,
+            "default": 512,
+            "type": "integer",
+            "description": "The width of the generated image."
+          },
+          "height": {
+            "title": "Height",
+            "exclusiveMinimum": 0,
+            "maximum": 14142,
+            "default": 512,
+            "type": "integer",
+            "description": "The height of the generated image."
+          }
+        }
       },
       "RGBColor": {
-        "type": "object",
         "title": "RGBColor",
-        "properties": {
-          "r": {
-            "type": "integer",
-            "title": "R",
-            "maximum": 255,
-            "description": "Red color value",
-            "default": 0,
-            "minimum": 0
-          },
-          "b": {
-            "type": "integer",
-            "title": "B",
-            "maximum": 255,
-            "description": "Blue color value",
-            "default": 0,
-            "minimum": 0
-          },
-          "g": {
-            "type": "integer",
-            "title": "G",
-            "maximum": 255,
-            "description": "Green color value",
-            "default": 0,
-            "minimum": 0
-          }
-        },
         "x-fal-order-properties": [
           "r",
           "g",
           "b"
-        ]
+        ],
+        "type": "object",
+        "properties": {
+          "g": {
+            "title": "G",
+            "minimum": 0,
+            "maximum": 255,
+            "default": 0,
+            "type": "integer",
+            "description": "Green color value"
+          },
+          "r": {
+            "title": "R",
+            "minimum": 0,
+            "maximum": 255,
+            "default": 0,
+            "type": "integer",
+            "description": "Red color value"
+          },
+          "b": {
+            "title": "B",
+            "minimum": 0,
+            "maximum": 255,
+            "default": 0,
+            "type": "integer",
+            "description": "Blue color value"
+          }
+        }
       },
       "File": {
-        "required": [
-          "url"
-        ],
         "title": "File",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "type": "object",
         "properties": {
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
-          },
           "url": {
-            "type": "string",
             "title": "Url",
+            "type": "string",
             "description": "The URL where the file can be downloaded from."
           },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type",
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ]
-          },
           "file_size": {
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -347,20 +322,45 @@
                 "type": "null"
               }
             ],
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
             "examples": [
               4404019
-            ]
+            ],
+            "description": "The size of the file in bytes."
+          },
+          "content_type": {
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
+          },
+          "file_name": {
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
           }
         },
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
-        "type": "object"
+        "required": [
+          "url"
+        ]
       }
     }
   },

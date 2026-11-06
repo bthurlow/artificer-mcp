@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for pixelcut/video-background-removal",
     "version": "1.0.0",
@@ -71,34 +71,20 @@
         ]
       },
       "VideoBackgroundRemovalInput": {
+        "required": [
+          "video_url"
+        ],
         "title": "VideoBgrmInput",
-        "description": "Input model for video background removal.",
         "x-fal-order-properties": [
           "video_url",
           "background",
           "background_color",
           "output_format"
         ],
-        "type": "object",
-        "required": [
-          "video_url"
-        ],
         "properties": {
-          "background_color": {
-            "description": "Custom solid background color (only used when background='custom').",
-            "$ref": "#/components/schemas/RGBColor"
-          },
-          "video_url": {
-            "title": "Video Url",
-            "description": "URL of the input video",
-            "examples": [
-              "https://cdn3.pixelcut.app/fal/video-background-removal/sample.mp4"
-            ],
-            "type": "string"
-          },
           "output_format": {
             "title": "Output Format",
-            "description": "Output video format. Auto-detected if not set (defaults to webm_vp9 for transparent).",
+            "description": "Output video format. Auto-detected if not set (defaults to webm_vp9 for transparent). Transparent backgrounds need webm_vp9, mov_h265, mov_proresks, mkv_vp9 or gif. Transparent MOV is meant for Apple players and editing tools; browser previews, especially Chrome, may show edge halos or no transparency. Use webm_vp9 for transparent web playback.",
             "anyOf": [
               {
                 "enum": [
@@ -120,6 +106,10 @@
             ]
           },
           "background": {
+            "default": "transparent",
+            "title": "Background",
+            "description": "Output background: transparent, a named preset color, or 'custom' to use the background_color color picker.",
+            "type": "string",
             "enum": [
               "transparent",
               "black",
@@ -128,73 +118,86 @@
               "blue",
               "magenta",
               "custom"
-            ],
-            "description": "Output background: transparent, a named preset color, or 'custom' to use the background_color color picker.",
-            "title": "Background",
+            ]
+          },
+          "video_url": {
+            "title": "Video Url",
+            "description": "URL of the input video",
             "type": "string",
-            "default": "transparent"
+            "examples": [
+              "https://cdn3.pixelcut.app/fal/video-background-removal/sample.mp4"
+            ]
+          },
+          "background_color": {
+            "description": "Custom solid background color (only used when background='custom').",
+            "$ref": "#/components/schemas/RGBColor"
           }
-        }
+        },
+        "type": "object",
+        "description": "Input model for video background removal."
       },
       "VideoBackgroundRemovalOutput": {
-        "title": "VideoBgrmOutput",
-        "description": "Output model for video background removal.",
-        "x-fal-order-properties": [
+        "required": [
           "video"
         ],
-        "type": "object",
-        "required": [
+        "title": "VideoBgrmOutput",
+        "x-fal-order-properties": [
           "video"
         ],
         "properties": {
           "video": {
             "description": "Output video file",
+            "$ref": "#/components/schemas/Video",
             "examples": [
               {
-                "content_type": "video/webm",
-                "file_name": "sample_result.webm",
                 "url": "https://cdn3.pixelcut.app/fal/video-background-removal/sample_result.webm",
-                "file_size": 5489205
+                "file_name": "sample_result.webm",
+                "file_size": 5489205,
+                "content_type": "video/webm"
               }
-            ],
-            "$ref": "#/components/schemas/Video"
+            ]
           }
-        }
+        },
+        "type": "object",
+        "description": "Output model for video background removal."
       },
       "RGBColor": {
         "title": "RGBColor",
-        "description": "RGB color. Model name is a FAL convention — renders as a color picker.",
         "x-fal-order-properties": [
           "r",
           "g",
           "b"
         ],
-        "type": "object",
         "properties": {
-          "g": {
-            "title": "G",
-            "maximum": 255,
-            "type": "integer",
-            "minimum": 0,
-            "default": 0
-          },
           "b": {
+            "default": 0,
             "title": "B",
-            "maximum": 255,
-            "type": "integer",
             "minimum": 0,
-            "default": 0
+            "type": "integer",
+            "maximum": 255
           },
           "r": {
+            "default": 0,
             "title": "R",
-            "maximum": 255,
-            "type": "integer",
             "minimum": 0,
-            "default": 0
+            "type": "integer",
+            "maximum": 255
+          },
+          "g": {
+            "default": 0,
+            "title": "G",
+            "minimum": 0,
+            "type": "integer",
+            "maximum": 255
           }
-        }
+        },
+        "type": "object",
+        "description": "RGB color. Model name is a FAL convention — renders as a color picker."
       },
       "Video": {
+        "required": [
+          "url"
+        ],
         "title": "Video",
         "x-fal-order-properties": [
           "url",
@@ -202,52 +205,30 @@
           "file_name",
           "file_size"
         ],
-        "type": "object",
-        "required": [
-          "url"
-        ],
         "properties": {
-          "content_type": {
-            "title": "Content Type",
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "file_name": {
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "url": {
             "title": "Url",
             "description": "The URL where the file can be downloaded from.",
             "type": "string"
           },
+          "file_name": {
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
           "file_size": {
             "title": "File Size",
             "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
             "anyOf": [
               {
                 "type": "integer"
@@ -255,9 +236,28 @@
               {
                 "type": "null"
               }
+            ],
+            "examples": [
+              4404019
+            ]
+          },
+          "content_type": {
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
             ]
           }
-        }
+        },
+        "type": "object"
       }
     }
   },

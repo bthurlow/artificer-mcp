@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "Queue OpenAPI for fal-ai/kling-video/v3/pro/text-to-video",
     "version": "1.0.0",
@@ -71,11 +71,89 @@
         ]
       },
       "KlingVideoV3ProTextToVideoInput": {
-        "type": "object",
-        "title": "TextToVideoV3ProRequest",
         "properties": {
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "description": "Disabling safety checks requires account authorization; unauthorized requests are always checked.",
+            "default": true,
+            "type": "boolean"
+          },
+          "negative_prompt": {
+            "maxLength": 2500,
+            "title": "Negative Prompt",
+            "default": "blur, distort, and low quality",
+            "type": "string"
+          },
+          "prompt": {
+            "examples": [
+              "Close-up of glowing fireflies dancing in a dark forest at twilight. Soft bioluminescent particles float through the air. Shallow depth of field, bokeh lights in background. Magical atmosphere, gentle movement."
+            ],
+            "title": "Prompt",
+            "anyOf": [
+              {
+                "maxLength": 2500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Text prompt for video generation. Either prompt or multi_prompt must be provided, but not both."
+          },
+          "generate_audio": {
+            "title": "Generate Audio",
+            "description": "Whether to generate native audio for the video. Supports Chinese and English voice output. Other languages are automatically translated to English. For English speech, use lowercase letters; for acronyms or proper nouns, use uppercase.",
+            "default": true,
+            "type": "boolean"
+          },
+          "aspect_ratio": {
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1"
+            ],
+            "title": "Aspect Ratio",
+            "description": "The aspect ratio of the generated video frame",
+            "default": "16:9",
+            "type": "string"
+          },
+          "multi_prompt": {
+            "examples": [
+              null
+            ],
+            "title": "Multi Prompt",
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/KlingV3MultiPromptElement"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "List of prompts for multi-shot video generation. If provided, overrides the single prompt and divides the video into multiple shots with specified prompts and durations."
+          },
+          "shot_type": {
+            "enum": [
+              "customize",
+              "intelligent"
+            ],
+            "title": "Shot Type",
+            "description": "The type of multi-shot video generation. 'intelligent' lets the model automatically determine shot structure.",
+            "default": "customize",
+            "type": "string"
+          },
+          "cfg_scale": {
+            "maximum": 1,
+            "title": "Cfg Scale",
+            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
+            "default": 0.5,
+            "type": "number",
+            "minimum": 0
+          },
           "duration": {
-            "type": "string",
             "enum": [
               "3",
               "4",
@@ -91,92 +169,13 @@
               "14",
               "15"
             ],
+            "title": "Duration",
             "description": "The duration of the generated video in seconds",
             "default": "5",
-            "title": "Duration"
-          },
-          "cfg_scale": {
-            "type": "number",
-            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
-            "maximum": 1,
-            "title": "Cfg Scale",
-            "default": 0.5,
-            "minimum": 0
-          },
-          "shot_type": {
-            "type": "string",
-            "enum": [
-              "customize",
-              "intelligent"
-            ],
-            "description": "The type of multi-shot video generation. 'intelligent' lets the model automatically determine shot structure.",
-            "default": "customize",
-            "title": "Shot Type"
-          },
-          "multi_prompt": {
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/KlingV3MultiPromptElement"
-                }
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Multi Prompt",
-            "description": "List of prompts for multi-shot video generation. If provided, overrides the single prompt and divides the video into multiple shots with specified prompts and durations.",
-            "examples": [
-              null
-            ]
-          },
-          "prompt": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 2500
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Prompt",
-            "description": "Text prompt for video generation. Either prompt or multi_prompt must be provided, but not both.",
-            "examples": [
-              "Close-up of glowing fireflies dancing in a dark forest at twilight. Soft bioluminescent particles float through the air. Shallow depth of field, bokeh lights in background. Magical atmosphere, gentle movement."
-            ]
-          },
-          "generate_audio": {
-            "type": "boolean",
-            "title": "Generate Audio",
-            "description": "Whether to generate native audio for the video. Supports Chinese and English voice output. Other languages are automatically translated to English. For English speech, use lowercase letters; for acronyms or proper nouns, use uppercase.",
-            "default": true
-          },
-          "aspect_ratio": {
-            "type": "string",
-            "enum": [
-              "16:9",
-              "9:16",
-              "1:1"
-            ],
-            "description": "The aspect ratio of the generated video frame",
-            "title": "Aspect Ratio",
-            "default": "16:9"
-          },
-          "enable_safety_checker": {
-            "type": "boolean",
-            "title": "Enable Safety Checker",
-            "description": "Disabling safety checks requires account authorization; unauthorized requests are always checked.",
-            "default": true
-          },
-          "negative_prompt": {
-            "type": "string",
-            "title": "Negative Prompt",
-            "default": "blur, distort, and low quality",
-            "maxLength": 2500
+            "type": "string"
           }
         },
+        "title": "TextToVideoV3ProRequest",
         "x-fal-order-properties": [
           "enable_safety_checker",
           "prompt",
@@ -187,38 +186,41 @@
           "aspect_ratio",
           "negative_prompt",
           "cfg_scale"
-        ]
+        ],
+        "type": "object"
       },
       "KlingVideoV3ProTextToVideoOutput": {
-        "type": "object",
-        "title": "TextToVideoV3ProOutput",
         "properties": {
           "video": {
-            "$ref": "#/components/schemas/File",
-            "description": "The generated video",
             "examples": [
               {
+                "file_size": 8062911,
                 "url": "https://storage.googleapis.com/falserverless/example_outputs/kling-v3/pro-t2v/out.mp4",
                 "file_name": "output.mp4",
-                "content_type": "video/mp4",
-                "file_size": 8062911
+                "content_type": "video/mp4"
               }
-            ]
+            ],
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video"
           }
         },
+        "title": "TextToVideoV3ProOutput",
         "x-fal-order-properties": [
           "video"
         ],
         "required": [
           "video"
-        ]
+        ],
+        "type": "object"
       },
       "KlingV3MultiPromptElement": {
-        "type": "object",
-        "title": "KlingV3MultiPromptElement",
         "properties": {
+          "prompt": {
+            "title": "Prompt",
+            "description": "The prompt for this shot.",
+            "type": "string"
+          },
           "duration": {
-            "type": "string",
             "enum": [
               "1",
               "2",
@@ -236,64 +238,29 @@
               "14",
               "15"
             ],
-            "description": "The duration of this shot in seconds",
             "title": "Duration",
-            "default": "5"
-          },
-          "prompt": {
-            "type": "string",
-            "title": "Prompt",
-            "description": "The prompt for this shot."
+            "description": "The duration of this shot in seconds",
+            "default": "5",
+            "type": "string"
           }
         },
+        "title": "KlingV3MultiPromptElement",
         "x-fal-order-properties": [
           "prompt",
           "duration"
         ],
         "required": [
           "prompt"
-        ]
+        ],
+        "type": "object"
       },
       "File": {
-        "type": "object",
-        "title": "File",
         "properties": {
-          "url": {
-            "type": "string",
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type",
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ]
-          },
           "file_size": {
+            "examples": [
+              4404019
+            ],
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -302,13 +269,45 @@
                 "type": "null"
               }
             ],
-            "title": "File Size",
-            "description": "The size of the file in bytes.",
+            "description": "The size of the file in bytes."
+          },
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "file_name": {
             "examples": [
-              4404019
-            ]
+              "z9RV14K95DvU.png"
+            ],
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file."
           }
         },
+        "title": "File",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -317,7 +316,8 @@
         ],
         "required": [
           "url"
-        ]
+        ],
+        "type": "object"
       }
     }
   },

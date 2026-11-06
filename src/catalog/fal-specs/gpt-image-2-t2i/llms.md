@@ -54,13 +54,17 @@ The API accepts the following input parameters:
 - **`num_images`** (`integer`, _optional_):
   Number of images to generate Default value: `1`
   - Default: `1`
-  - Range: `1` to `4`
+  - Range: `1` to `10`
   - Examples: 1
 
 - **`output_format`** (`OutputFormatEnum`, _optional_):
   Output format for the images Default value: `"png"`
   - Default: `"png"`
   - Options: `"jpeg"`, `"png"`, `"webp"`
+
+- **`output_compression`** (`integer`, _optional_):
+  Compression level from 0 to 100. Only supported when output_format is 'jpeg' or 'webp'.
+  - Range: `0` to `100`
 
 - **`sync_mode`** (`boolean`, _optional_):
   If `True`, the media will be returned as a data URI and the output data won't be available in the request history.
@@ -102,7 +106,7 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated images.
   - Array of ImageFile
-  - Examples: [{"content_type":"image/png","width":1024,"file_name":"EnWrO3XWjPE0nxBDpaQrj.png","height":1024,"url":"https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png"}]
+  - Examples: [{"file_name":"EnWrO3XWjPE0nxBDpaQrj.png","content_type":"image/png","url":"https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png","height":1024,"width":1024}]
 
 
 
@@ -112,11 +116,11 @@ The API returns the following output format:
 {
   "images": [
     {
-      "content_type": "image/png",
-      "width": 1024,
       "file_name": "EnWrO3XWjPE0nxBDpaQrj.png",
+      "content_type": "image/png",
+      "url": "https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png",
       "height": 1024,
-      "url": "https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png"
+      "width": 1024
     }
   ]
 }
@@ -195,6 +199,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -216,4 +224,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

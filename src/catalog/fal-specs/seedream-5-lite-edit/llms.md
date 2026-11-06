@@ -34,10 +34,10 @@ The API accepts the following input parameters:
   The text prompt used to edit the image
   - Examples: "Replace the product in Figure 1 with that in Figure 2. Seamlessly render logo in Figure 3 into the product design, in frosted glass texture. Remove any extra text in Figure 1, and design a catchy tagline for the perfume."
 
-- **`image_size`** (`ImageSize | Enum`, _optional_):
-  The size of the generated image. Total pixels must be between 2560x1440 and 4096x4096. In case the image size does not fall within these parameters, the image size will be adjusted to by scaling. Default value: `auto_2K`
+- **`image_size`** (`SeedreamLiteImageSize | Enum`, _optional_):
+  The size of the generated image. Custom dimensions within the provider's pixel and aspect limits are sent unchanged. Other sizes use compatible scaling. The provider's native pixel range is 2560x1440 to 4096x4096, with aspect ratio between 1/16 and 16. Default value: `auto_2K`
   - Default: `"auto_2K"`
-  - One of: ImageSize | Enum
+  - One of: SeedreamLiteImageSize | Enum
 
 - **`num_images`** (`integer`, _optional_):
   Number of separate model generations to be run with the prompt. Default value: `1`
@@ -45,9 +45,9 @@ The API accepts the following input parameters:
   - Range: `1` to `6`
 
 - **`max_images`** (`integer`, _optional_):
-  If set to a number greater than one, enables multi-image generation. The model will potentially return up to `max_images` images every generation, and in total, `num_images` generations will be carried out. In total, the number of images generated will be between `num_images` and `max_images*num_images`. Default value: `1`
+  Maximum images per generation in sequential mode. Ignored when sequential generation is disabled. Combined input references and outputs per generation cannot exceed 15. Default value: `1`
   - Default: `1`
-  - Range: `1` to `6`
+  - Range: `1` to `15`
 
 - **`sync_mode`** (`boolean`, _optional_):
   If `True`, the media will be returned as a data URI and the output data won't be available in the request history.
@@ -58,8 +58,21 @@ The API accepts the following input parameters:
   - Default: `true`
   - Examples: true
 
+- **`output_format`** (`OutputFormatEnum`, _optional_):
+  The file format of the generated images. Default value: `"jpeg"`
+  - Default: `"jpeg"`
+  - Options: `"jpeg"`, `"png"`
+
+- **`watermark`** (`boolean`, _optional_):
+  Whether to add the provider's visible watermark.
+  - Default: `false`
+
+- **`sequential_image_generation`** (`Enum`, _optional_):
+  Generate related images with `auto`, or one image per generation with `disabled`. When omitted, values of `max_images` above one enable `auto`.
+  - Options: `"auto"`, `"disabled"`
+
 - **`image_urls`** (`list<string>`, _required_):
-  List of URLs of input images for editing. Presently, up to 10 image inputs are allowed. If over 10 images are sent, only the last 10 will be used.
+  List of URLs of input images for editing. When more than 10 references are provided, only the last 10 are used.
   - Array of string
   - Examples: ["https://v3b.fal.media/files/b/0a8f9936/KOsb_qPB_W0ZJ0Ee2OsnU_586e2892841d46f09049ee7199b303d3.png","https://v3b.fal.media/files/b/0a8f994e/JroWTogO6jOTFk9b6B3XM_591ca38cef2f44bbba2843cbf80fb1b2.png","https://v3b.fal.media/files/b/0a8f9960/Q6pzwXAiFaFPOpSScoE-D_0eca5db19e5242739f127efe49b38922.png"]
 
@@ -87,6 +100,7 @@ The API accepts the following input parameters:
   "num_images": 1,
   "max_images": 1,
   "enable_safety_checker": true,
+  "output_format": "jpeg",
   "image_urls": [
     "https://v3b.fal.media/files/b/0a8f9936/KOsb_qPB_W0ZJ0Ee2OsnU_586e2892841d46f09049ee7199b303d3.png",
     "https://v3b.fal.media/files/b/0a8f994e/JroWTogO6jOTFk9b6B3XM_591ca38cef2f44bbba2843cbf80fb1b2.png",
@@ -204,6 +218,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -225,4 +243,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

@@ -16,8 +16,7 @@
 
 ## Pricing
 
-Priced per second of output video, by resolution: 480p at $0.08/sec, 720p at $0.14/sec, 1080p at $0.25/sec. A 5-second clip costs $0.40 at 480p, $0.70 at 720p, and $1.25 at 1080p. Cost scales linearly with duration. Each reference image adds $0.01 (1–7 supported). A reference audio clip, if provided, is included at no extra cost.
-
+Priced per second of output video, by resolution: 480p at **$0.08**/sec, 720p at **$0.14**/sec, 1080p at **$0.25**/sec. A 5-second clip costs **$0.40** at 480p, **$0.70** at 720p, and **$1.25** at 1080p. Cost scales linearly with duration. Each reference image adds **$0.01** (1–7 supported). A reference audio clip, if provided, is included at no extra cost.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -84,7 +83,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video.
-  - Examples: {"duration":6.041667,"content_type":"video/mp4","url":"https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","width":1280,"fps":24,"file_name":"0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","num_frames":145,"height":720}
+  - Examples: {"height":720,"url":"https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","duration":6.041667,"fps":24,"content_type":"video/mp4","num_frames":145,"file_name":"0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","width":1280}
 
 
 
@@ -93,14 +92,14 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "duration": 6.041667,
-    "content_type": "video/mp4",
+    "height": 720,
     "url": "https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4",
-    "width": 1280,
+    "duration": 6.041667,
     "fps": 24,
-    "file_name": "0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4",
+    "content_type": "video/mp4",
     "num_frames": 145,
-    "height": 720
+    "file_name": "0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4",
+    "width": 1280
   }
 }
 ```
@@ -181,6 +180,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -202,4 +205,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

@@ -34,20 +34,25 @@ The API accepts the following input parameters:
   Text description of the desired image.
   - Examples: "Make this scene more realistic but still keep the game vibes"
 
+- **`image_urls`** (`list<string>`, _optional_):
+  List of URLs of the images to edit. A maximum of 5 images are supported.
+  - Array of string
+  - Examples: ["https://v3b.fal.media/files/b/0a8b911d/Abk8vStrvmSPlzUqI_NN3_image_043.png"]
+
 - **`num_images`** (`integer`, _optional_):
   Number of images to generate. Default value: `1`
   - Default: `1`
-  - Range: `1` to `4`
+  - Range: `1` to `10`
 
 - **`aspect_ratio`** (`AspectRatioEnum`, _optional_):
-  Aspect ratio of the edited image. When set to `auto` (the default), the output preserves the aspect ratio of the first input image. Default value: `"auto"`
+  Aspect ratio of the edited image. Standard auto uses the nearest supported ratio of the first reference. Default value: `"auto"`
   - Default: `"auto"`
-  - Options: `"auto"`, `"2:1"`, `"20:9"`, `"19.5:9"`, `"16:9"`, `"4:3"`, `"3:2"`, `"1:1"`, `"2:3"`, `"3:4"`, `"9:16"`, `"9:19.5"`, `"9:20"`, `"1:2"`
+  - Options: `"2:1"`, `"20:9"`, `"19.5:9"`, `"16:9"`, `"4:3"`, `"3:2"`, `"1:1"`, `"2:3"`, `"3:4"`, `"9:16"`, `"9:19.5"`, `"9:20"`, `"1:2"`, `"auto"`, `"21:9"`, `"5:2"`
 
 - **`resolution`** (`ResolutionEnum`, _optional_):
-  Resolution of the generated image. `1k` for standard resolution, `2k` for high resolution. Default value: `"1k"`
+  Resolution of the generated image: 1k, 1.5k, or 2k. Default value: `"1k"`
   - Default: `"1k"`
-  - Options: `"1k"`, `"2k"`
+  - Options: `"1k"`, `"1.5k"`, `"2k"`
 
 - **`output_format`** (`OutputFormatEnum`, _optional_):
   The format of the generated image. Default value: `"jpeg"`
@@ -62,15 +67,10 @@ The API accepts the following input parameters:
   Authorized callers may set false to request relaxed screening. Default value: `true`
   - Default: `true`
 
-- **`image_urls`** (`list<string>`, _optional_):
-  List of URLs of the images to edit. A maximum of 5 images are supported.
-  - Array of string
-  - Examples: ["https://v3b.fal.media/files/b/0a8b911d/Abk8vStrvmSPlzUqI_NN3_image_043.png"]
-
 - **`quality`** (`QualityEnum`, _optional_):
-  Quality level of the edited image. Default value: `"medium"`
+  Quality level of the edited image. `auto` lets xAI choose; it currently uses `medium` for editing. Default value: `"medium"`
   - Default: `"medium"`
-  - Options: `"low"`, `"medium"`
+  - Options: `"low"`, `"medium"`, `"auto"`
 
 
 
@@ -87,14 +87,14 @@ The API accepts the following input parameters:
 ```json
 {
   "prompt": "Make this scene more realistic but still keep the game vibes",
+  "image_urls": [
+    "https://v3b.fal.media/files/b/0a8b911d/Abk8vStrvmSPlzUqI_NN3_image_043.png"
+  ],
   "num_images": 1,
   "aspect_ratio": "auto",
   "resolution": "1k",
   "output_format": "jpeg",
   "enable_safety_checker": true,
-  "image_urls": [
-    "https://v3b.fal.media/files/b/0a8b911d/Abk8vStrvmSPlzUqI_NN3_image_043.png"
-  ],
   "quality": "medium"
 }
 ```
@@ -199,6 +199,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -220,4 +224,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

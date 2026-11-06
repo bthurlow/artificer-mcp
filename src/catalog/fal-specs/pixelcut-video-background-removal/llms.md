@@ -43,7 +43,7 @@ The API accepts the following input parameters:
   Custom solid background color (only used when background='custom').
 
 - **`output_format`** (`Enum`, _optional_):
-  Output video format. Auto-detected if not set (defaults to webm_vp9 for transparent).
+  Output video format. Auto-detected if not set (defaults to webm_vp9 for transparent). Transparent backgrounds need webm_vp9, mov_h265, mov_proresks, mkv_vp9 or gif. Transparent MOV is meant for Apple players and editing tools; browser previews, especially Chrome, may show edge halos or no transparency. Use webm_vp9 for transparent web playback.
   - Options: `"webm_vp9"`, `"mp4_h264"`, `"mp4_h265"`, `"mov_proresks"`, `"mov_h265"`, `"mkv_h264"`, `"mkv_h265"`, `"mkv_vp9"`, `"gif"`
 
 
@@ -72,7 +72,7 @@ The API returns the following output format:
 
 - **`video`** (`Video`, _required_):
   Output video file
-  - Examples: {"content_type":"video/webm","file_name":"sample_result.webm","url":"https://cdn3.pixelcut.app/fal/video-background-removal/sample_result.webm","file_size":5489205}
+  - Examples: {"url":"https://cdn3.pixelcut.app/fal/video-background-removal/sample_result.webm","file_name":"sample_result.webm","file_size":5489205,"content_type":"video/webm"}
 
 
 
@@ -81,10 +81,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "video/webm",
-    "file_name": "sample_result.webm",
     "url": "https://cdn3.pixelcut.app/fal/video-background-removal/sample_result.webm",
-    "file_size": 5489205
+    "file_name": "sample_result.webm",
+    "file_size": 5489205,
+    "content_type": "video/webm"
   }
 }
 ```
@@ -162,6 +162,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -183,4 +187,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

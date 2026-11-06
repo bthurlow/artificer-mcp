@@ -13,7 +13,7 @@
 
 ## Pricing
 
-Your request will cost **$0.08** per image. For **$1.00**, you can run this model **12** times. 2K and 4K outputs will be charged at **1.5** times and **2** times the standard rate, respectively. 0.5K (512px) resolution outputs will be charged at **0.75** times the standard rate. If web search is used, an additional $0.015 will be charged. If high thinking is used, an additional $0.002 will be charged. **Note: Pricing is subject to change.**
+Your request will cost **$0.08** per image. For **$1.00**, you can run this model **12** times. 2K and 4K outputs will be charged at **1.5** times and **2** times the standard rate, respectively. 0.5K (512px) resolution outputs will be charged at **0.75** times the standard rate. If web search is used, an additional **$0.015** will be charged. If high thinking is used, an additional **$0.002** will be charged. **Note: Pricing is subject to change.**
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -31,6 +31,37 @@ The API accepts the following input parameters:
 - **`prompt`** (`string`, _required_):
   The text prompt to generate an image from.
   - Examples: "An action shot of a black lab swimming in an inground suburban swimming pool. The camera is placed meticulously on the water line, dividing the image in half, revealing both the dogs head above water holding a tennis ball in it's mouth, and it's paws paddling underwater."
+
+- **`history`** (`list<GeminiVideoMessage>`, _optional_):
+  Previous native Gemini turns, including original parts and thought signatures from conversations. The current prompt starts a new user turn.
+  - Array of GeminiVideoMessage
+
+- **`context`** (`list<GeminiTextPart | GeminiImagePart | GeminiDocumentPart | GeminiVideoPart | GeminiSignaturePart>`, _optional_):
+  Ordered text, image, PDF, UTF-8 text-file or video parts appended to the current prompt. Original media bytes are preserved; images count toward the total 14-reference limit.
+  - Array of GeminiTextPart | GeminiImagePart | GeminiDocumentPart | GeminiVideoPart | GeminiSignaturePart
+
+- **`return_history`** (`boolean`, _optional_):
+  Return reusable native conversations with original image parts and provider thought signatures. Uses a native provider. Each generated conversation is independent; send its messages as history for the next turn.
+  - Default: `false`
+
+- **`thinking_level`** (`Enum`, _optional_):
+  Controls thinking effort ('minimal' or 'high') and requests thought summaries. Omit to use the provider default ('minimal'); thinking cannot be disabled.
+  - Options: `"minimal"`, `"high"`
+
+- **`include_thoughts`** (`boolean`, _optional_):
+  Whether to include thought summaries. Omit to preserve the existing behavior: an explicit thinking_level requests summaries. Set limit_generations=false to return summary text in description. This does not disable thinking or return intermediate thought images.
+
+- **`temperature`** (`float`, _optional_):
+  Sampling temperature. Omit to use the provider default of 1. Explicit values use a direct Google or Vertex API.
+  - Range: `0` to `2`
+
+- **`top_p`** (`float`, _optional_):
+  Nucleus sampling probability. Omit to use the provider default of 0.95. Explicit values use a direct Google or Vertex API.
+  - Range: `0` to `1`
+
+- **`max_output_tokens`** (`integer`, _optional_):
+  Maximum output tokens for the generation. Omit to retain the provider default. Explicit values use a direct Google or Vertex API.
+  - Range: `1` to `32768`
 
 - **`num_images`** (`integer`, _optional_):
   The number of images to generate. Default value: `1`
@@ -76,9 +107,9 @@ The API accepts the following input parameters:
   Enable web search for the image generation task. This will allow the model to use the latest information from the web to generate the image.
   - Default: `false`
 
-- **`thinking_level`** (`Enum`, _optional_):
-  When set, enables model thinking with the given level ('minimal' or 'high') and includes thoughts in the generation. Omit to disable.
-  - Options: `"minimal"`, `"high"`
+- **`enable_image_search`** (`boolean`, _optional_):
+  Ground image generation with Google Image Search. Can be combined with enable_web_search; source attribution is returned in grounding_metadata. Uses direct Google or Vertex APIs.
+  - Default: `false`
 
 
 
@@ -95,6 +126,23 @@ The API accepts the following input parameters:
 ```json
 {
   "prompt": "An action shot of a black lab swimming in an inground suburban swimming pool. The camera is placed meticulously on the water line, dividing the image in half, revealing both the dogs head above water holding a tennis ball in it's mouth, and it's paws paddling underwater.",
+  "history": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "type": "",
+          "text": ""
+        }
+      ]
+    }
+  ],
+  "context": [
+    {
+      "type": "",
+      "text": ""
+    }
+  ],
   "num_images": 1,
   "aspect_ratio": "auto",
   "output_format": "png",
@@ -112,10 +160,18 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated images.
   - Array of ImageFile
-  - Examples: [{"file_name":"nano-banana-2-t2i-output.png","url":"https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png","content_type":"image/png"}]
+  - Examples: [{"content_type":"image/png","file_name":"nano-banana-2-t2i-output.png","url":"https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png"}]
 
 - **`description`** (`string`, _required_):
   The description of the generated images.
+
+- **`conversations`** (`list<GeminiConversation>`, _optional_):
+  Reusable per-generation conversations, populated only when return_history is true. Retain every part and thought signature when continuing a conversation.
+  - Array of GeminiConversation
+
+- **`grounding_metadata`** (`list<object>`, _optional_):
+  Provider grounding metadata for the generated images, including search queries, source pages and image-source attribution when available.
+  - Array of object
 
 
 
@@ -125,12 +181,27 @@ The API returns the following output format:
 {
   "images": [
     {
+      "content_type": "image/png",
       "file_name": "nano-banana-2-t2i-output.png",
-      "url": "https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png",
-      "content_type": "image/png"
+      "url": "https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png"
     }
   ],
-  "description": ""
+  "description": "",
+  "conversations": [
+    {
+      "messages": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "type": "",
+              "text": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
 ```
 
@@ -207,6 +278,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -228,4 +303,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Upscaling to 1080p costs $0.0072/s, 2K costs $0.0144/s, and 4K costs $0.0288/s, at a 30fps rate. Processing at 60fps doubles the cost for any resolution. Processing in `pro` mode makes the price 10 times of the normal price ($0.072/s, $0.144/s, $0.288/s for 1080p,2K, 4K at 30fps respectively, at 60fps these prices are further doubled.)
+Upscaling to 1080p costs **$0.0072**/s, 2K costs **$0.0144**/s, 4K costs **$0.0288**/s,  6K costs **$0.0574**/s, and 8K costs **$0.1148**/s at a 30fps rate. Processing at 30-60fps (excluding 30fps, including 60fps) doubles the cost for any resolution. Processing over 60fps further doubles it (i.e 4x of 30fps rate). Processing in `pro` mode makes the price 10 times of the normal price (**$0.072**/s, **$0.144**/s, **$0.288**/s for 1080p,2K, 4K at 30fps respectively).
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -189,6 +189,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -210,4 +214,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

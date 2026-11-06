@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **0.035** when a **style_id** is provided. If no **style_id** is provided, a new one will be generated from the provided images and you will be charged **0.005** extra. You will be given a style_id for such a generation.
+Each image costs **$0.035** when a **style_id** is provided. If no **style_id** is provided, a new one will be generated from the provided images and you will be charged **$0.005** extra. You will be given a style_id for such a generation.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -90,7 +90,7 @@ The API returns the following output format:
 
 - **`images`** (`list<File>`, _required_)
   - Array of File
-  - Examples: [{"file_name":"image.webp","url":"https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/standard-output.webp","content_type":"image/webp","file_size":272628}]
+  - Examples: [{"url":"https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/standard-output.webp","file_size":272628,"content_type":"image/webp","file_name":"image.webp"}]
 
 - **`style_id`** (`string`, _optional_):
   The custom style used or created for this generation.
@@ -103,10 +103,10 @@ The API returns the following output format:
 {
   "images": [
     {
-      "file_name": "image.webp",
       "url": "https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/standard-output.webp",
+      "file_size": 272628,
       "content_type": "image/webp",
-      "file_size": 272628
+      "file_name": "image.webp"
     }
   ]
 }
@@ -185,6 +185,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -206,4 +210,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`

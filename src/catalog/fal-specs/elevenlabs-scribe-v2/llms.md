@@ -15,7 +15,7 @@
 
 ## Pricing
 
-Your request will cost **$0.008 per input audio minutes**. If keyterm is used, you request will cost %30 more.
+Your request will cost **$0.008** per minute of input audio. If keyterm is used, your request will cost 30% more.
 
 For more details, see [fal.ai pricing](https://fal.ai/pricing).
 
@@ -93,7 +93,7 @@ The API returns the following output format:
 - **`words`** (`list<TranscriptionWord>`, _required_):
   Word-level transcription details
   - Array of TranscriptionWord
-  - Examples: {"text":"Hey,","type":"word","end":0.539,"speaker_id":"speaker_0","start":0.079}, {"text":" ","type":"spacing","end":0.599,"speaker_id":"speaker_0","start":0.539}, {"text":"this","type":"word","end":0.679,"speaker_id":"speaker_0","start":0.599}, {"text":" ","type":"spacing","end":0.739,"speaker_id":"speaker_0","start":0.679}, {"text":"is","type":"word","end":0.799,"speaker_id":"speaker_0","start":0.739}, {"text":" ","type":"spacing","end":0.939,"speaker_id":"speaker_0","start":0.799}, {"text":"a","type":"word","end":0.939,"speaker_id":"speaker_0","start":0.939}, {"text":" ","type":"spacing","end":0.959,"speaker_id":"speaker_0","start":0.939}, {"text":"test","type":"word","end":1.179,"speaker_id":"speaker_0","start":0.959}, {"text":" ","type":"spacing","end":1.219,"speaker_id":"speaker_0","start":1.179}, {"text":"recording","type":"word","end":1.719,"speaker_id":"speaker_0","start":1.22}, {"text":" ","type":"spacing","end":1.719,"speaker_id":"speaker_0","start":1.719}, {"text":"for","type":"word","end":1.86,"speaker_id":"speaker_0","start":1.719}, {"text":" ","type":"spacing","end":1.879,"speaker_id":"speaker_0","start":1.86}, {"text":"Scribe","type":"word","end":2.24,"speaker_id":"speaker_0","start":1.879}, {"text":" ","type":"spacing","end":2.319,"speaker_id":"speaker_0","start":2.24}, {"text":"version","type":"word","end":2.759,"speaker_id":"speaker_0","start":2.319}, {"text":" ","type":"spacing","end":2.779,"speaker_id":"speaker_0","start":2.759}, {"text":"two,","type":"word","end":3.379,"speaker_id":"speaker_0","start":2.779}, {"text":" ","type":"spacing","end":3.399,"speaker_id":"speaker_0","start":3.379}, {"text":"which","type":"word","end":3.519,"speaker_id":"speaker_0","start":3.399}, {"text":" ","type":"spacing","end":3.539,"speaker_id":"speaker_0","start":3.519}, {"text":"is","type":"word","end":3.659,"speaker_id":"speaker_0","start":3.539}, {"text":" ","type":"spacing","end":3.699,"speaker_id":"speaker_0","start":3.659}, {"text":"now","type":"word","end":3.839,"speaker_id":"speaker_0","start":3.699}, {"text":" ","type":"spacing","end":3.839,"speaker_id":"speaker_0","start":3.839}, {"text":"available","type":"word","end":4.319,"speaker_id":"speaker_0","start":3.839}, {"text":" ","type":"spacing","end":4.339,"speaker_id":"speaker_0","start":4.319}, {"text":"on","type":"word","end":4.579,"speaker_id":"speaker_0","start":4.339}, {"text":" ","type":"spacing","end":4.599,"speaker_id":"speaker_0","start":4.579}, {"text":"fal.ai.","type":"word","end":5.699,"speaker_id":"speaker_0","start":4.599}
+  - Examples: {"type":"word","end":0.539,"start":0.079,"text":"Hey,","speaker_id":"speaker_0"}, {"type":"spacing","end":0.599,"start":0.539,"text":" ","speaker_id":"speaker_0"}, {"type":"word","end":0.679,"start":0.599,"text":"this","speaker_id":"speaker_0"}, {"type":"spacing","end":0.739,"start":0.679,"text":" ","speaker_id":"speaker_0"}, {"type":"word","end":0.799,"start":0.739,"text":"is","speaker_id":"speaker_0"}, {"type":"spacing","end":0.939,"start":0.799,"text":" ","speaker_id":"speaker_0"}, {"type":"word","end":0.939,"start":0.939,"text":"a","speaker_id":"speaker_0"}, {"type":"spacing","end":0.959,"start":0.939,"text":" ","speaker_id":"speaker_0"}, {"type":"word","end":1.179,"start":0.959,"text":"test","speaker_id":"speaker_0"}, {"type":"spacing","end":1.219,"start":1.179,"text":" ","speaker_id":"speaker_0"}, {"type":"word","end":1.719,"start":1.22,"text":"recording","speaker_id":"speaker_0"}, {"type":"spacing","end":1.719,"start":1.719,"text":" ","speaker_id":"speaker_0"}, {"type":"word","end":1.86,"start":1.719,"text":"for","speaker_id":"speaker_0"}, {"type":"spacing","end":1.879,"start":1.86,"text":" ","speaker_id":"speaker_0"}, {"type":"word","end":2.24,"start":1.879,"text":"Scribe","speaker_id":"speaker_0"}, {"type":"spacing","end":2.319,"start":2.24,"text":" ","speaker_id":"speaker_0"}, {"type":"word","end":2.759,"start":2.319,"text":"version","speaker_id":"speaker_0"}, {"type":"spacing","end":2.779,"start":2.759,"text":" ","speaker_id":"speaker_0"}, {"type":"word","end":3.379,"start":2.779,"text":"two,","speaker_id":"speaker_0"}, {"type":"spacing","end":3.399,"start":3.379,"text":" ","speaker_id":"speaker_0"}, {"type":"word","end":3.519,"start":3.399,"text":"which","speaker_id":"speaker_0"}, {"type":"spacing","end":3.539,"start":3.519,"text":" ","speaker_id":"speaker_0"}, {"type":"word","end":3.659,"start":3.539,"text":"is","speaker_id":"speaker_0"}, {"type":"spacing","end":3.699,"start":3.659,"text":" ","speaker_id":"speaker_0"}, {"type":"word","end":3.839,"start":3.699,"text":"now","speaker_id":"speaker_0"}, {"type":"spacing","end":3.839,"start":3.839,"text":" ","speaker_id":"speaker_0"}, {"type":"word","end":4.319,"start":3.839,"text":"available","speaker_id":"speaker_0"}, {"type":"spacing","end":4.339,"start":4.319,"text":" ","speaker_id":"speaker_0"}, {"type":"word","end":4.579,"start":4.339,"text":"on","speaker_id":"speaker_0"}, {"type":"spacing","end":4.599,"start":4.579,"text":" ","speaker_id":"speaker_0"}, {"type":"word","end":5.699,"start":4.599,"text":"fal.ai.","speaker_id":"speaker_0"}
 
 
 
@@ -105,11 +105,11 @@ The API returns the following output format:
   "language_code": "eng",
   "language_probability": 1,
   "words": {
-    "text": "Hey,",
     "type": "word",
     "end": 0.539,
-    "speaker_id": "speaker_0",
-    "start": 0.079
+    "start": 0.079,
+    "text": "Hey,",
+    "speaker_id": "speaker_0"
   }
 }
 ```
@@ -187,6 +187,10 @@ console.log(result.requestId);
 ```
 
 
+## Deploy your own model
+
+To run your own weights, a fine-tune or a custom pipeline on the GPUs that serve this API, deploy it on fal Serverless. GPUs from H100 (80GB) to B300 (288GB), billed per second; an H100 is $4.50/h list, as low as $2.49/h. Prices, GPU specs and deploy steps: [fal Serverless](https://fal.ai/serverless.md).
+
 ## Additional Resources
 
 ### Documentation
@@ -208,4 +212,6 @@ This file covers one model. To find anything else:
 - [Platform overview](https://fal.ai/llms.txt): Entry points and representative endpoint IDs
 - [Documentation index](https://fal.ai/docs/llms.txt): Every documentation page
 - [Full documentation text](https://fal.ai/docs/llms-full.txt): The whole documentation inlined
+- [Pricing](https://fal.ai/pricing.md): Model API and Serverless GPU prices
+- [fal Serverless](https://fal.ai/serverless.md): Deploy your own models: GPU prices, specs and steps
 - Any other model: `https://fal.ai/models/<endpoint-id>/llms.txt`
