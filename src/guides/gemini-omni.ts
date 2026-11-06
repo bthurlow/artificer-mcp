@@ -5,7 +5,7 @@ import { z } from 'zod';
 const OMNI_GUIDE = `# Gemini Omni Flash (video) — Prompt Guide
 
 ## What this model is best for
-Google's conversational video model. Generates 3–10 second clips and — uniquely — lets you **edit a result by asking**, in a follow-up call that keeps the rest of the clip intact. Google positions it as the default video model going forward.
+Google's conversational video model. Generates 3–15 second clips and — uniquely — lets you **edit a result by asking**, in a follow-up call that keeps the rest of the clip intact. Google positions it as the default video model going forward.
 
 Reach for it when you want fast iteration on a shot ("same scene, relight it for dusk") rather than one-shot generation.
 
@@ -28,15 +28,15 @@ Both are true at once. The technical-specs row settles it by listing *"Maximum v
 ## Capabilities and limits
 | | |
 |---|---|
-| Duration | **3–10 seconds** per call. The 1.1 API adds an \`extend\` task (3–10s continuations, up to 40s total), but \`gemini_omni_generate_video\` does not expose it yet, so concatenate with \`video_concatenate\` for longer pieces. |
-| Resolution | **720p** (the API default). The 1.1 API also accepts \`360p\`, \`1080p\` and \`4k\` (upscaled) via \`response_format.resolution\`, but the tool does not send it yet. Google publishes a price for 720p only. |
+| Duration | **3–15 seconds** per call on 1.2, any whole second (API default 10s; first/last-frame interpolation is limited to 3–10s). For longer pieces use \`task: "extend"\` (3–10s continuations from the last 10s of a clip, up to 30s total), or concatenate clips with \`video_concatenate\`. |
+| Resolution | \`resolution\`: \`360p\`, \`720p\` (default), \`1080p\` or \`4k\`. **1080p and 4k are upscaled** from the native generation, not generated at that size, and cost about 1.5× and 3× the 720p rate. |
 | Frame rate | 24 fps |
 | Aspect ratios | **16:9 and 9:16** (9:16 makes it viable for vertical short-form) |
 | Audio | **Native, always on** — speech, music, and sound effects. No off switch. |
 | Audio input | **Not supported** — no audio reference conditioning |
-| Images per prompt | Up to **10** (720p, 16:9 or 9:16) |
+| Reference inputs | Up to **6 images** (at most 3 per character, 2 characters). Reference **videos**: up to 3 clips of ≤3s for a 3–10s output, or 1 for 11–15s; new generations only, not edits or extends. |
 | Provenance | SynthID watermark + Content Credentials (C2PA) |
-| Cost | **~$0.10 per second** of output — same tier as Veo 3.1 Fast |
+| Cost | **~$0.07 per second** at 720p on 1.2 (360p $0.023/s; upscaled 1080p $0.104/s, 4k $0.209/s). 1.1 was ~$0.10/s. |
 
 **Not supported on this model:** system instructions, structured output, context caching, function calling, grounding, code execution, tuning, or batch inference. Thinking and token counting are supported. Worth knowing before designing a prompt pipeline around it — a system-instruction-based house style will not apply here, so fold that guidance into the prompt itself.
 
@@ -45,7 +45,12 @@ Set \`task\` explicitly, or omit it and let the model infer from the prompt and 
 - **\`text_to_video\`** — prompt only.
 - **\`image_to_video\`** — pass \`image\`. Animates a still.
 - **\`reference_to_video\`** — pass \`reference_images\`. Holds a subject or style consistent across shots.
-- **\`edit\`** — pair with \`previous_interaction_id\` (see below).
+- **\`edit\`** — change an existing clip: pass \`video\` (an input clip, 15s or shorter) or \`previous_interaction_id\` (a clip this tool generated; see below).
+- **\`extend\`** — continue a clip by 3–10s (the model reads its last 10s), up to 30s in total: pass \`video\` or \`previous_interaction_id\` and describe how it continues.
+
+**First-to-last-frame:** pass \`image\` (start) and \`last_frame\` (end), and describe the transition. The API tells the frames apart only by order, which the tool handles. Clips in this mode are 3–10s.
+
+**Limits the tool checks before calling the API:** \`last_frame\` needs \`image\`; first-to-last-frame and \`extend\` cap at 10s; \`edit\` / \`extend\` need an input; \`video\` and \`previous_interaction_id\` are mutually exclusive; at most 6 reference images. Input videos are sent inline, up to 20 MB. Editing and extending uploaded videos is unavailable in the EEA, Switzerland and the UK. Reference **videos** are not supported by the tool yet: Google's page gives their limits but not the request shape.
 
 ## Conversational editing — the differentiator
 Every call returns an \`interaction_id\`. Pass it back as \`previous_interaction_id\` and describe a change; the model edits that result rather than starting over.
@@ -78,8 +83,8 @@ For **edits**, describe only the change and what to preserve — "same framing a
 |---|---|
 | Synchronized diegetic audio in the clip | **Omni or Veo 3.1** — both generate native audio; Omni lets you then *revise* the shot conversationally |
 | Iterative "tweak this shot" editing | **Omni Flash** — nothing else here is stateful |
-| Above 720p, or 2K/4K | **MiniMax H3** (\`hailuo_prompt_guide\`) — Omni caps at 720p |
-| Clips longer than 10s in one call | **MiniMax H3** (up to 15s) |
+| Above 720p, or 2K/4K | Either: Omni's \`1080p\` / \`4k\` and MiniMax H3's 2K/4K (\`hailuo_prompt_guide\`) are both upscales of a lower native resolution. |
+| Clips longer than 15s in one call | Neither: Omni 1.2 and MiniMax H3 both cap at 15s. Concatenate. |
 | Cheapest per second at vertical short-form | **MiniMax H3** at 480P/768P |
 | **Silent** B-roll under a fixed music master | **MiniMax H3** — returns a bare video file. Omni always bakes in audio you would have to strip. |
 | Conditioning on a supplied audio clip | **MiniMax H3 r2v** — Omni accepts no audio input |
@@ -87,9 +92,9 @@ For **edits**, describe only the change and what to preserve — "same framing a
 ## Access routes
 | Provider | Tool | Model ID | Cost | Notes |
 |----------|------|----------|------|-------|
-| google | \`gemini_omni_generate_video\` | \`gemini-omni-1.1-flash\` | ~$0.10/second (720p) | Interactions API. Native audio, always on. Override the model via \`ARTIFICER_OMNI_VIDEO_MODEL\`. |
+| google | \`gemini_omni_generate_video\` | \`gemini-omni-1.2-flash\` | ~$0.07/second (720p) | Interactions API. Native audio, always on. Override the model via \`ARTIFICER_OMNI_VIDEO_MODEL\`. |
 
-**\`gemini-omni-flash-preview\` is deprecated as of 2026-10-22.** Google's migration target is \`gemini-omni-1.1-flash\`, which is now the default. If \`ARTIFICER_OMNI_VIDEO_MODEL\` or a per-call \`model\` still names the preview ID, change it.
+**\`gemini-omni-1.2-flash\` is the default.** From **2026-12-03**, Google routes every \`gemini-omni-1.1-flash\` request to 1.2 automatically, billed at 1.2 rates, so a pinned 1.1 keeps working. \`gemini-omni-flash-preview\` was deprecated on 2026-10-22. If \`ARTIFICER_OMNI_VIDEO_MODEL\` or a per-call \`model\` names either older ID, change it.
 
 Omni uses Google's **Interactions API**, not the \`generateVideos\` call Veo uses — which is why it is a separate tool rather than another model id on \`gemini_generate_video\`. Both work off \`GOOGLE_API_KEY\`; neither requires Vertex.
 
@@ -105,14 +110,15 @@ Added in the 2026-09-24 fal catalog refresh. Model descriptions are fal's own; i
 | \`gemini-omni-flash-1.1-ref\` | Gemini Omni Flash 1.1 is Google's multimodal video model. This endpoint generates video from combined multimodal references, images, videos and text together… | **\`prompt\`**, \`duration\`, \`aspect_ratio\`, \`resolution\`, \`image_urls\` (+1 more) |
 
 ## Last verified
+2026-11-06: default moved to \`gemini-omni-1.2-flash\`. Model ID, the 3–15s duration range, reference limits, the 1.1 auto-routing date and the per-resolution prices were checked against aistudio.google.com's Omni and pricing pages (ai.google.dev/gemini-api/docs now redirects there). 1.2 has not been called live yet; the task modes, editing and audio behavior below were verified on earlier versions.
 2026-10-08: default moved from \`gemini-omni-flash-preview\` (deprecated 2026-10-22) to \`gemini-omni-1.1-flash\`. Model ID, the \`resolution\` values, the \`extend\` task and the ~$0.10/s 720p price were checked against ai.google.dev's Omni and pricing pages. The rest of this guide (task modes, editing, audio behavior, unsupported features) was verified on the preview model, and 1.1 has not been called live yet.
 2026-08-15 — **corrected**: an earlier revision of this guide claimed Omni output was silent. That was wrong. It came from reading \`ai.google.dev/gemini-api/docs/video\`, which is the **Veo** page, instead of \`/docs/omni\`. Native audio is confirmed against the Omni page and the Vertex model card. Capabilities, the unsupported-features list, Interactions-API usage, and the ~$0.10/s rate re-verified in the same pass. Duration/resolution ceilings are preview-era limits Google has said will lift; re-check before assuming 720p and 10s still bind.
 
 ## Official references
-- **Omni video generation (the authoritative page for this model): https://ai.google.dev/gemini-api/docs/omni**
+- **Omni video generation (the authoritative page for this model): https://aistudio.google.com/docs/omni**
 - Vertex model card: https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/omni-flash-preview
 - Models: https://ai.google.dev/gemini-api/docs/models
-- Pricing: https://ai.google.dev/gemini-api/docs/pricing
+- Pricing: https://aistudio.google.com/docs/pricing
 
 Note \`ai.google.dev/gemini-api/docs/video\` covers **Veo**, not Omni. Reading it for Omni behavior is what produced the silent-output error above.
 `;
@@ -121,7 +127,7 @@ export function registerOmniVideoPromptGuide(server: McpServer): void {
   registerTool<Record<string, never>>(
     server,
     'gemini_omni_video_prompt_guide',
-    'Prompt guidance for Google Gemini Omni Flash video generation. Covers the four task modes (text/image/reference-to-video and edit), stateful conversational editing via previous_interaction_id, the 3-10s / 720p / 24fps / 16:9-9:16 limits, native audio (speech/music/SFX, always on with no off switch — steer via prompt or strip downstream), unsupported features (no system instructions, no structured output, no audio input), ~$0.10/s pricing, and when to pick Omni vs Veo vs MiniMax H3. No API call — pure reference.',
+    'Prompt guidance for Google Gemini Omni Flash video generation. Covers the task modes (text/image/reference-to-video, first-to-last-frame, edit and extend of an input video or a previous result), resolution (360p-4k, upscaled above 720p), stateful conversational editing via previous_interaction_id, the 3-15s / 720p / 24fps / 16:9-9:16 limits, native audio (speech/music/SFX, always on with no off switch — steer via prompt or strip downstream), unsupported features (no system instructions, no structured output, no audio input), ~$0.07/s (720p, 1.2) pricing, and when to pick Omni vs Veo vs MiniMax H3. No API call — pure reference.',
     z.object({}).shape,
     async () => ({ content: [{ type: 'text', text: OMNI_GUIDE }] }),
   );

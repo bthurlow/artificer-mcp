@@ -68,6 +68,60 @@ export function extractOmniVideo(interaction: InteractionLike): {
 }
 
 /**
+ * Largest input video sent inline as base64. Google recommends the Files API
+ * for big videos but gives no hard inline limit; Gemini requests cap out
+ * around 20 MB, and a 15s input (the API maximum) is normally well under it.
+ */
+const MAX_INLINE_VIDEO_BYTES = 20_000_000;
+
+function imageMime(path: string): string {
+  const ext = (extname(path).slice(1) || 'png').toLowerCase();
+  return `image/${ext === 'jpg' ? 'jpeg' : ext}`;
+}
+
+function videoMime(path: string): string {
+  const ext = (extname(path).slice(1) || 'mp4').toLowerCase();
+  if (ext === 'mov') return 'video/quicktime';
+  return `video/${ext}`;
+}
+
+/**
+ * Reject combinations the API would refuse, with a message that names the
+ * fix, before uploading anything or spending a generation.
+ *
+ * Exported for unit testing.
+ */
+export function validateOmniInputs(p: {
+  image?: string;
+  last_frame?: string;
+  video?: string;
+  task?: string;
+  duration_seconds?: number;
+  previous_interaction_id?: string;
+}): void {
+  const fail = (msg: string): never => {
+    throw new Error(`gemini_omni_generate_video: ${msg}`);
+  };
+  if (p.last_frame && !p.image) {
+    fail('last_frame needs `image` as the first frame (first-to-last-frame mode).');
+  }
+  if (p.last_frame && p.duration_seconds !== undefined && p.duration_seconds > 10) {
+    fail(`first-to-last-frame clips are 3-10s; got duration_seconds ${p.duration_seconds}.`);
+  }
+  if ((p.task === 'edit' || p.task === 'extend') && !p.video && !p.previous_interaction_id) {
+    fail(
+      `task "${p.task}" needs an input: pass \`video\`, or previous_interaction_id for a clip this tool generated.`,
+    );
+  }
+  if (p.task === 'extend' && p.duration_seconds !== undefined && p.duration_seconds > 10) {
+    fail(`an extend continuation is 3-10s; got duration_seconds ${p.duration_seconds}.`);
+  }
+  if (p.video && p.previous_interaction_id) {
+    fail('pass either `video` or previous_interaction_id, not both.');
+  }
+}
+
+/**
  * Register the Gemini Omni Flash video tool.
  *
  * Deliberately a SEPARATE tool from `gemini_generate_video` (Veo) rather than
@@ -79,43 +133,67 @@ export function registerOmniVideoTools(server: McpServer): void {
   registerTool<OmniGenerateVideoParams>(
     server,
     'gemini_omni_generate_video',
-    'Generate video via Google Gemini Omni Flash (Interactions API). Text-to-video, image-to-video, or reference-to-video, plus stateful conversational editing of a previous result via previous_interaction_id. Output carries NATIVE AUDIO (speech/music/SFX) generated in the same pass, with no flag to disable it — describe the audio you want in the prompt, or strip the track downstream if you are laying your own music under the clip. Long-running; polls until complete or timeout. Uses GOOGLE_API_KEY env var.',
+    'Generate video via Google Gemini Omni Flash (Interactions API). Text-to-video, image-to-video, first-to-last-frame (image + last_frame), or reference-to-video, at 360p-4k (1080p/4k upscaled); edit or extend an input `video`; plus stateful conversational editing or extending of a previous result via previous_interaction_id. Output carries NATIVE AUDIO (speech/music/SFX) generated in the same pass, with no flag to disable it — describe the audio you want in the prompt, or strip the track downstream if you are laying your own music under the clip. Long-running; polls until complete or timeout. Uses GOOGLE_API_KEY env var.',
     omniGenerateVideoSchema.shape,
     async ({
       model,
       prompt,
       output,
       image,
+      last_frame,
       reference_images,
+      video,
       task,
       aspect_ratio,
+      resolution,
       duration_seconds,
       previous_interaction_id,
       seed,
       poll_timeout_seconds,
       poll_interval_seconds,
     }) => {
+      validateOmniInputs({
+        image,
+        last_frame,
+        video,
+        task,
+        duration_seconds,
+        previous_interaction_id,
+      });
+
       const client = getGenAIClient();
 
-      // Build the multimodal input: prompt text first, then any imagery.
-      const content: Array<Record<string, unknown>> = [{ type: 'text', text: prompt }];
+      // Build the multimodal input: media first, then the prompt text, as in
+      // Google's examples. Order carries meaning: for first-to-last-frame the
+      // API has no role field, so the first image is the start frame and the
+      // second the end frame.
+      const content: Array<Record<string, unknown>> = [];
 
       const cleanups: Array<() => Promise<void>> = [];
-      const attachImage = async (path: string): Promise<void> => {
+      const attach = async (path: string, kind: 'image' | 'video'): Promise<void> => {
         const resolved = await resolveInput(path);
         if (resolved.cleanup) cleanups.push(async () => void (await resolved.cleanup?.()));
         const bytes = await readFile(resolved.localPath);
-        const ext = (extname(path).slice(1) || 'png').toLowerCase();
+        if (kind === 'video' && bytes.byteLength > MAX_INLINE_VIDEO_BYTES) {
+          throw new Error(
+            `gemini_omni_generate_video: input video is ${(bytes.byteLength / 1e6).toFixed(1)} MB, ` +
+              `over the ${MAX_INLINE_VIDEO_BYTES / 1e6} MB this tool sends inline. Trim it (inputs ` +
+              'must be 15s or shorter anyway) or re-encode at a lower bitrate.',
+          );
+        }
         content.push({
-          type: 'image',
+          type: kind,
           data: bytes.toString('base64'),
-          mime_type: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
+          mime_type: kind === 'image' ? imageMime(path) : videoMime(path),
         });
       };
 
       try {
-        if (image) await attachImage(image);
-        for (const ref of reference_images ?? []) await attachImage(ref);
+        if (video) await attach(video, 'video');
+        if (image) await attach(image, 'image');
+        if (last_frame) await attach(last_frame, 'image');
+        for (const ref of reference_images ?? []) await attach(ref, 'image');
+        content.push({ type: 'text', text: prompt });
 
         const generationConfig: Record<string, unknown> = {};
         if (task) generationConfig['video_config'] = { task };
@@ -123,6 +201,7 @@ export function registerOmniVideoTools(server: McpServer): void {
 
         const responseFormat: Record<string, unknown> = { type: 'video', delivery: 'uri' };
         if (aspect_ratio) responseFormat['aspect_ratio'] = aspect_ratio;
+        if (resolution) responseFormat['resolution'] = resolution;
         if (duration_seconds !== undefined) {
           // The API takes a duration string, not a bare number.
           responseFormat['duration'] = `${duration_seconds}s`;
@@ -177,26 +256,26 @@ export function registerOmniVideoTools(server: McpServer): void {
           );
         }
 
-        const video = extractOmniVideo(interaction);
+        const generated = extractOmniVideo(interaction);
 
         let bytes: number;
         let mime: string;
-        if (video.uri) {
+        if (generated.uri) {
           // Omni returns `delivery: "uri"` results on the Gemini Files API,
           // which serves them behind the API key — without this header the
           // download 403s.
-          const written = await downloadAndWrite(video.uri, output, {
-            headers: geminiDownloadHeaders(video.uri),
-            defaultMime: video.mimeType,
+          const written = await downloadAndWrite(generated.uri, output, {
+            headers: geminiDownloadHeaders(generated.uri),
+            defaultMime: generated.mimeType,
           });
           bytes = written.bytes;
           mime = written.mime;
         } else {
-          const buf = Buffer.from(video.data ?? '', 'base64');
+          const buf = Buffer.from(generated.data ?? '', 'base64');
           const { getProvider } = await import('../storage/providers/registry.js');
-          await getProvider(output).write(output, buf, video.mimeType);
+          await getProvider(output).write(output, buf, generated.mimeType);
           bytes = buf.byteLength;
-          mime = video.mimeType;
+          mime = generated.mimeType;
         }
 
         return {
