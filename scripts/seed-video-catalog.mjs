@@ -118,9 +118,6 @@ const cinematic = [
   falEntry('veo-3-i2v', 'fal-ai/veo3/image-to-video', 'veo_video_prompt_guide'),
   falEntry('veo-3-fast-i2v', 'fal-ai/veo3/fast/image-to-video', 'veo_video_prompt_guide'),
 
-  // Veo 2 (legacy)
-  falEntry('veo-2-t2v', 'fal-ai/veo2', 'veo_video_prompt_guide'),
-
   // Luma Ray 2 family
   falEntry('luma-ray-2-t2v', 'fal-ai/luma-dream-machine/ray-2', 'luma_ray_prompt_guide'),
   falEntry(
@@ -343,8 +340,6 @@ const general = [
   falEntry('wan-2.1-t2v-lora', 'fal-ai/wan-t2v-lora', 'wan_video_prompt_guide'),
   falEntry('wan-2.1-i2v-lora', 'fal-ai/wan-i2v-lora', 'wan_video_prompt_guide'),
 
-  // Wan Alpha (transparent backgrounds — niche but unique, lives in general)
-  falEntry('wan-alpha-t2v', 'fal-ai/wan-alpha', 'wan_video_prompt_guide'),
 
   // Krea-tuned Wan
   falEntry('krea-wan-14b-t2v', 'fal-ai/krea-wan-14b/text-to-video', 'wan_video_prompt_guide'),
@@ -631,12 +626,6 @@ const general = [
   falEntry('ltx-2.3-pro-i2v', 'fal-ai/ltx-2.3/image-to-video', 'ltx_video_prompt_guide'),
   falEntry('ltx-2.3-fast-i2v', 'fal-ai/ltx-2.3/image-to-video/fast', 'ltx_video_prompt_guide'),
 
-  // LTX-2 (prior gen)
-  falEntry('ltx-2-pro-t2v', 'fal-ai/ltx-2/text-to-video', 'ltx_video_prompt_guide'),
-  falEntry('ltx-2-fast-t2v', 'fal-ai/ltx-2/text-to-video/fast', 'ltx_video_prompt_guide'),
-  falEntry('ltx-2-pro-i2v', 'fal-ai/ltx-2/image-to-video', 'ltx_video_prompt_guide'),
-  falEntry('ltx-2-fast-i2v', 'fal-ai/ltx-2/image-to-video/fast', 'ltx_video_prompt_guide'),
-
   // LTX-2-19b (open weights)
   falEntry('ltx-2-19b-t2v', 'fal-ai/ltx-2-19b/text-to-video', 'ltx_video_prompt_guide'),
   falEntry(
@@ -670,15 +659,9 @@ const general = [
     'fal-ai/ltx-video-13b-distilled',
     'ltx_video_prompt_guide',
   ),
-  falEntry('ltx-video-13b-dev-t2v', 'fal-ai/ltx-video-13b-dev', 'ltx_video_prompt_guide'),
   falEntry(
     'ltx-video-13b-distilled-i2v',
     'fal-ai/ltx-video-13b-distilled/image-to-video',
-    'ltx_video_prompt_guide',
-  ),
-  falEntry(
-    'ltx-video-13b-dev-i2v',
-    'fal-ai/ltx-video-13b-dev/image-to-video',
     'ltx_video_prompt_guide',
   ),
   falEntry(
@@ -717,7 +700,6 @@ const general = [
     'fal-ai/hunyuan-video-img2vid-lora',
     'hunyuan_video_prompt_guide',
   ),
-  falEntry('hunyuan-custom-i2v', 'fal-ai/hunyuan-custom', 'hunyuan_video_prompt_guide'),
 
   // Vidu Q3
   falEntry('vidu-q3-t2v', 'fal-ai/vidu/q3/text-to-video', 'vidu_prompt_guide'),
@@ -783,8 +765,6 @@ const general = [
   falEntry('cogvideox-5b-t2v', 'fal-ai/cogvideox-5b', 'cogvideox_prompt_guide'),
   falEntry('cogvideox-5b-i2v', 'fal-ai/cogvideox-5b/image-to-video', 'cogvideox_prompt_guide'),
 
-  // Mochi (open weights)
-  falEntry('mochi-v1-t2v', 'fal-ai/mochi-v1', 'mochi_prompt_guide'),
 
   // NVIDIA Cosmos (world-model lineage)
   falEntry(
@@ -848,15 +828,11 @@ const general = [
   // Sana Video (lightweight/fast)
 
   // MAGI (physics-aware)
-  falEntry('magi-t2v', 'fal-ai/magi', 'magi_prompt_guide'),
   falEntry('magi-distilled-t2v', 'fal-ai/magi-distilled', 'magi_prompt_guide'),
-  falEntry('magi-i2v', 'fal-ai/magi/image-to-video', 'magi_prompt_guide'),
   falEntry('magi-distilled-i2v', 'fal-ai/magi-distilled/image-to-video', 'magi_prompt_guide'),
 
   // Specialty research models
-  falEntry('multishot-master-t2v', 'fal-ai/multishot-master', 'specialized_video_prompt_guide'),
   falEntry('transpixar-t2v', 'fal-ai/transpixar', 'specialized_video_prompt_guide'),
-  falEntry('skyreels-i2v', 'fal-ai/skyreels-i2v', 'specialized_video_prompt_guide'),
   falEntry('ovi-t2v', 'fal-ai/ovi', 'specialized_video_prompt_guide'),
   falEntry('ovi-i2v', 'fal-ai/ovi/image-to-video', 'specialized_video_prompt_guide'),
   falEntry(

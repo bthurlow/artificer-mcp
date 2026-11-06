@@ -31,7 +31,6 @@ Covered elsewhere: Nano Banana edits (\`gemini_nanobanana_prompt_guide\`), upsca
 | \`ideogram-3-reframe\` | Extend existing images with Ideogram V3's reframe feature. Create expanded versions and adaptations while preserving main image and adding new creative direc… | **\`image_size\`**, **\`image_url\`**, \`image_urls\`, \`num_images\`, \`sync_mode\` (+6 more) |
 | \`ideogram-object-removal\` | Prompt-free object removal from an image and mask, erasing objects with their shadows and reflections and reconstructing the scene cleanly. | **\`image_url\`**, **\`mask_url\`**, \`sync_mode\` |
 | \`qwen-image-3-edit\` | Edits images from one to three reference images and a natural-language instruction, preserving key details such as facial features and identity while applyin… | **\`prompt\`**, **\`image_urls\`**, \`image_size\`, \`output_format\`, \`sync_mode\`, \`num_images\` (+4 more) |
-| \`qwen-image-max-edit\` | Image editing endpoint for Qwen-Image-Max. Qwen Image Max improves upon the Qwen Image Plus series by enhancing the realism and naturalness of images. | **\`image_urls\`**, **\`prompt\`**, \`image_size\`, \`sync_mode\`, \`output_format\`, \`num_images\` (+4 more) |
 | \`qwen-image-edit-multiple-angles\` | Generates same scene from different angles (azimuth/elevation) with Qwen image Edit 2511 and the Lora Multiple Angles | **\`image_urls\`**, \`num_images\`, \`image_size\`, \`output_format\`, \`sync_mode\` (+11 more) |
 | \`mai-image-2.5-edit\` | MAI-Image-2.5 is Microsoft's photorealistic image generation and editing model that turns text prompts or uploaded images into high-quality, design-ready vis… | **\`image_urls\`**, **\`prompt\`**, \`output_format\`, \`sync_mode\`, \`aspect_ratio\`, \`num_images\` |
 | \`mai-image-2.5-pro-edit\` | Apply precise, controllable edits to a reference image while preserving composition, typography, identity, and fine visual detail. | **\`prompt\`**, \`num_images\`, \`aspect_ratio\`, \`output_format\`, \`image_url\`, \`sync_mode\` |
@@ -134,7 +133,6 @@ fal_generate_image({
 | \`ideogram-3-reframe\` | \`fal-ai/ideogram/v3/reframe\` |
 | \`ideogram-object-removal\` | \`fal-ai/ideogram/object-removal\` |
 | \`qwen-image-3-edit\` | \`alibaba/qwen-image-3/edit\` |
-| \`qwen-image-max-edit\` | \`fal-ai/qwen-image-max/edit\` |
 | \`qwen-image-edit-multiple-angles\` | \`fal-ai/qwen-image-edit-2511-multiple-angles\` |
 | \`mai-image-2.5-edit\` | \`microsoft/mai-image-2.5/edit\` |
 | \`mai-image-2.5-pro-edit\` | \`microsoft/mai-image-2.5-pro/edit\` |

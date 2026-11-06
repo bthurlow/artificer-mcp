@@ -59,10 +59,9 @@ Wan 2.6 is **image-to-video only** as of 2026-08-15 — fal removed the \`wan/v2
 | \`wan-2.1-t2v-lora\` | t2v + LoRA | Custom-style 2.1 t2v |
 | \`wan-2.1-i2v-lora\` | i2v + LoRA | Custom-style 2.1 i2v |
 
-### Wan Alpha + Krea Wan
+### Krea Wan
 | Slug | Modality | Best for |
 |------|----------|----------|
-| \`wan-alpha-t2v\` | t2v | **Transparent backgrounds** (alpha channel) |
 | \`krea-wan-14b-t2v\` | t2v | Krea-tuned Wan 14B fast endpoint |
 
 ## Wan 2.7 talking-head — KNOWN LANDMINES
@@ -81,7 +80,7 @@ Validated 2026-04-24 against artificer-mcp v0.9.0 in the Q2 talking-head bake-of
 - **Wan 2.7** is the default talking-head pick (fastest, cheapest with rubric-parity to Kling Avatar v2 Pro).
 - Wan 2.1 and 2.2 5b lineages give the cheapest video options on fal — Wan 2.2 5B FastVideo at $0.0125/video.
 - LoRA endpoints (a14b, 2.1) accept caller-supplied custom-style fine-tunes.
-- Wan Alpha is the only fal model producing alpha-channel video besides TransPixar.
+- **No alpha channel any more.** Wan Alpha (\`fal-ai/wan-alpha\`) was retired upstream in 2026-11, and TransPixar before it, so no catalog route outputs transparent video. See \`specialized_video_prompt_guide\` for the key-it-out fallback.
 - Krea Wan 14B brings a Krea-tuned style without leaving the Wan family.
 
 ## Known weaknesses
@@ -103,13 +102,11 @@ Validated 2026-04-24 against artificer-mcp v0.9.0 in the Q2 talking-head bake-of
 - **Talking-head (Wan 2.7)**: image anchors identity, audio drives mouth, prompt describes setting + shot. Don't describe dialogue or mouth movement — that competes with audio.
 - **General t2v**: standard subject + action + camera framing. Wan handles cinematic vocabulary well.
 - **LoRA variants**: keep prompt about the scene; let the LoRA carry style.
-- **Wan Alpha**: describe the foreground subject; the model produces transparent background output for compositing.
 
 ## Example prompts
 - Talking-head: \`prompt: "A woman speaking directly to camera, natural lighting, head and shoulders, steady frame", audio: voice.wav, image: portrait.jpg, extra_params: { resolution: "720p", duration: 7 }\`
 - t2v cinematic: \`prompt: "Wide shot of a sailboat at sunset, gentle wave motion"\` (Wan 2.7-t2v)
 - LoRA: \`prompt: "city skyline at night", extra_params: { loras: [{ path: "https://...lora.safetensors", scale: 1.0 }] }\` (wan-2.2-a14b-lora-t2v)
-- Alpha: \`prompt: "Animated logo reveal, golden particles, transparent background"\` (wan-alpha-t2v)
 - Cheapest fallback: \`prompt: "A panda eating bamboo"\` (wan-2.2-5b-fastvideo-t2v at $0.0125)
 
 ## Access routes (full table)
@@ -137,7 +134,6 @@ Validated 2026-04-24 against artificer-mcp v0.9.0 in the Q2 talking-head bake-of
 | \`wan-2.1-pro-i2v\` | \`fal-ai/wan-pro/image-to-video\` |
 | \`wan-2.1-t2v-lora\` | \`fal-ai/wan-t2v-lora\` |
 | \`wan-2.1-i2v-lora\` | \`fal-ai/wan-i2v-lora\` |
-| \`wan-alpha-t2v\` | \`fal-ai/wan-alpha\` |
 | \`krea-wan-14b-t2v\` | \`fal-ai/krea-wan-14b/text-to-video\` |
 
 ## Newer routes (added 2026-09-24)
@@ -166,7 +162,7 @@ export function registerWanPromptGuide(server: McpServer): void {
   registerTool<Record<string, never>>(
     server,
     'wan_video_prompt_guide',
-    'Reference guide for Alibaba Wan Video — full lineage from Wan 2.1 (compact pricing) through Wan 2.7 (default talking-head). 25 routes covering t2v / i2v / reference / talking-head / LoRA / alpha-channel modes across Wan 2.1, 2.2 a14b, 2.2 5b, 2.5, 2.6, 2.7, Wan Alpha, and Krea Wan. Includes the 3 mandatory talking-head landmines for the Wan 2.7 i2v audio-driven path. No API call — pure reference.',
+    'Reference guide for Alibaba Wan Video — full lineage from Wan 2.1 (compact pricing) through Wan 2.7 (default talking-head). Covers t2v / i2v / reference / talking-head / LoRA modes across Wan 2.1, 2.2 a14b, 2.2 5b, 2.5, 2.6, 2.7, and Krea Wan. Includes the 3 mandatory talking-head landmines for the Wan 2.7 i2v audio-driven path. No API call — pure reference.',
     z.object({}).shape,
     async () => ({ content: [{ type: 'text', text: WAN_GUIDE }] }),
   );

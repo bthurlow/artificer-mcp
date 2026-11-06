@@ -36,7 +36,6 @@ import { registerKandinskyVideoPromptGuide } from './kandinsky-video.js';
 import { registerGrokImaginePromptGuide } from './grok-imagine.js';
 import { registerDecartLucyPromptGuide } from './decart-lucy.js';
 import { registerCogVideoxPromptGuide } from './cogvideox.js';
-import { registerMochiPromptGuide } from './mochi.js';
 import { registerNvidiaCosmosPromptGuide } from './nvidia-cosmos.js';
 import { registerLongcatPromptGuide } from './longcat-video.js';
 import { registerMagiPromptGuide } from './magi.js';
@@ -123,7 +122,6 @@ export function registerGuideTools(server: McpServer): void {
   registerGrokImaginePromptGuide(server);
   registerDecartLucyPromptGuide(server);
   registerCogVideoxPromptGuide(server);
-  registerMochiPromptGuide(server);
   registerNvidiaCosmosPromptGuide(server);
   registerLongcatPromptGuide(server);
   registerMagiPromptGuide(server);

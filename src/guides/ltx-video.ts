@@ -29,13 +29,8 @@ LTX is the cheapest path to 1080p / 2160p video on fal with native audio support
 | \`ltx-2.3-22b-distilled-lora-t2v\` | distilled | t2v | yes |
 | \`ltx-2.3-22b-distilled-lora-i2v\` | distilled | i2v | yes |
 
-### LTX-2 lineage (closed-tier prior gen)
-| Slug | Variant | Modality |
-|------|---------|----------|
-| \`ltx-2-pro-t2v\` | Pro | t2v |
-| \`ltx-2-fast-t2v\` | Fast | t2v |
-| \`ltx-2-pro-i2v\` | Pro | i2v |
-| \`ltx-2-fast-i2v\` | Fast | i2v |
+### LTX-2 lineage (closed-tier prior gen) — RETIRED 2026-11
+The four \`ltx-2-pro-*\` / \`ltx-2-fast-*\` routes (\`fal-ai/ltx-2/*\`) and the two \`ltx-video-13b-dev-*\` routes now 404 on fal and were removed. Use LTX-2.3 (closed tier) instead; for LoRA work, the LTX-2.3 22B or LTX-2-19b LoRA variants above and below.
 
 ### LTX-2-19b lineage (open weights, 19B)
 | Slug | Variant | Modality | LoRA |
@@ -55,8 +50,6 @@ LTX is the cheapest path to 1080p / 2160p video on fal with native audio support
 | \`ltx-video-preview-t2v\` | preview | Original LTX preview |
 | \`ltx-video-13b-distilled-t2v\` | 13B distilled | Older 13B distilled t2v |
 | \`ltx-video-13b-distilled-i2v\` | 13B distilled | Older 13B distilled i2v |
-| \`ltx-video-13b-dev-t2v\` | 13B dev | LoRA-supporting dev variant |
-| \`ltx-video-13b-dev-i2v\` | 13B dev | LoRA-supporting i2v |
 | \`ltx-video-v095-t2v\` | v0.9.5 | Earlier checkpoint |
 | \`ltx-video-preview-i2v\` | preview | Original i2v |
 | \`ltxv-13b-098-distilled-t2v\` | v0.9.8 13B distilled | Long-form variant |
@@ -95,7 +88,7 @@ LTX is the cheapest path to 1080p / 2160p video on fal with native audio support
 LTX accepts standard scene + camera + style prompts. Open-weights variants respond to verbose prompts; closed-tier (LTX-2.3) is more efficient with concise prompts. LoRA-driven generation: keep the prompt about the scene, let the LoRA carry style.
 
 ## Example prompts
-- LTX-2 Fast: \`prompt: "A drone shot rising over a forest at dawn, mist between trees", extra_params: { generate_audio: true, resolution: "1080p" }\`
+- LTX-2.3 Fast: \`prompt: "A drone shot rising over a forest at dawn, mist between trees", extra_params: { generate_audio: true, resolution: "1080p" }\`
 - LoRA: \`prompt: "A cyberpunk city at night, neon reflections", extra_params: { loras: [{ path: "https://...lora.safetensors", scale: 1.0 }] }\`
 - LTX-2.3 Pro 4K: \`prompt: "Slow-motion close-up of water droplets on a leaf", extra_params: { resolution: "2160p" }\`
 
@@ -119,7 +112,6 @@ Added in the 2026-09-24 fal catalog refresh. Model descriptions are fal's own; i
 2026-08-15 — pricing re-synced from fal for the LTX-2.3 closed tier and the legacy 13B distilled routes; \`ltx-video-lora-i2v\` retired. Lineage tables and prompt guidance are unchanged since the 2026-04-28 initial seed and were not re-verified in this pass.
 
 ## Official references
-- https://fal.ai/models/fal-ai/ltx-2/text-to-video
 - https://fal.ai/models/fal-ai/ltx-2.3/text-to-video
 - Lightricks LTX-Video: https://github.com/Lightricks/LTX-Video
 `;
