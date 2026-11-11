@@ -377,3 +377,39 @@ export const audioBeatGridSchema = z.object({
       'Expected tempo. Narrows the tempo search around it; use it when the grid comes back at double or half the tempo you hear.',
     ),
 });
+
+/** Parameters for the audio_gate tool */
+export interface AudioGateParams {
+  input: string;
+  output: string;
+  windows: Array<[number, number]>;
+  fade_ms: number;
+  codec?: string;
+}
+
+export const audioGateSchema = z.object({
+  input: z.string().describe("Path or URI of the audio to gate, e.g. one singer's stem."),
+  output: z
+    .string()
+    .describe(
+      'Path or URI for the gated audio. Format from the extension; use .wav to keep it lossless.',
+    ),
+  windows: z
+    .array(z.tuple([z.number(), z.number()]))
+    .min(1)
+    .describe(
+      "Time ranges to keep, [start, end] in seconds of the input, e.g. one singer's lines. Everything outside them is silenced. Any order; overlapping windows merge.",
+    ),
+  fade_ms: z
+    .number()
+    .min(0)
+    .max(1000)
+    .default(10)
+    .describe(
+      'Ramp length in milliseconds, placed outside each window (before its start, after its end) so the kept audio is untouched and the edges do not click. 0 = hard edges.',
+    ),
+  codec: z
+    .string()
+    .optional()
+    .describe('Codec override. If omitted, picks a default for the output extension.'),
+});

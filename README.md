@@ -18,7 +18,7 @@
 - **Speech generation** via Gemini TTS (prebuilt voices, natural-language style/accent control)
 - **Music generation** via Lyria 3 (batch) + Lyria RealTime (streaming)
 - **Image processing** via ImageMagick (57 tools — resize, composite, text, social cards, ad creatives, app icons, and more)
-- **Video + audio post-processing** via FFmpeg (18 video + 12 audio tools — concatenate, trim, aspect, transitions, beat-synced music-video assembly, beat grids, overlays, subtitles, b-roll, encoding controls, image-to-video, seamless loops, audio mixing with sidechain ducking, loudness normalization, and more)
+- **Video + audio post-processing** via FFmpeg (18 video + 13 audio tools — concatenate, trim, aspect, transitions, beat-synced music-video assembly, beat grids, overlays, subtitles, b-roll, encoding controls, image-to-video, seamless loops, audio mixing with sidechain ducking, loudness normalization, gating stems to time windows, and more)
 - **Pluggable storage** — local filesystem + Google Cloud Storage out of the box; S3 / OneDrive stubbed for contribution; 7 storage tools (upload, download, list, delete, exists, public URL, signed URL)
 - **Opinionated workflows** — one-call chains for common patterns (brand asset pack, social carousel, multi-element carousel compose, talking-head video, ad creative set, 9:16 short-form video for IG/TikTok/YT/FB, narrated explainer)
 - **Brand spec** — one JSON env var (`ARTIFICER_BRAND_SPEC`) defines colors, fonts, TTS voice, music prompt, and logo variants so every tool can soft-default to project-consistent choices
@@ -89,6 +89,8 @@ Add to your MCP config:
 | `GOOGLE_CLOUD_PROJECT` | Switches Gemini calls to Vertex AI. Required for `gemini_upscale_image` and for `negative_prompt` on Imagen tools. |
 | `GOOGLE_CLOUD_LOCATION` | Vertex AI region (default: `us-central1`). |
 | `FAL_KEY` | Required for all `fal_*` tools. |
+| `MVSEP_API_TOKEN` | Required for `mvsep_separate_audio` (MVSep: one stem per singer of a duet). Get it at mvsep.com/user-api; keys from before 6 October 2026 were reset after MVSep's security incident. |
+| `MVSEP_API_URL` | Optional MVSep API base (default `https://mvsep.com/api`, geo-routed). Pin a region, e.g. `https://de.mvsep.com/api`; a job can only be collected from the region that created it. |
 | `ARTIFICER_IMAGEN_MODEL` | Sets a default model for `gemini_generate_image`. There is **no built-in default** since 0.10.0 (Imagen is deprecated), so without this, pass `model` on every call. See [UPGRADING.md](UPGRADING.md). |
 | `ARTIFICER_IMAGEN_EDIT_MODEL` | Sets a default model for `gemini_edit_image`. There is **no built-in default** since 0.10.0. |
 | `ARTIFICER_IMAGEN_UPSCALE_MODEL` | Override default model for `gemini_upscale_image` (fallback: `imagen-4.0-upscale-preview`). |
