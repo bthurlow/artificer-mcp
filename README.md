@@ -13,7 +13,7 @@
 
 **artificer-mcp** is a public MCP server for AI-powered creative media generation and processing. One server covering the full creative pipeline:
 
-- **Image generation** via Gemini (Imagen family) + Nano Banana
+- **Image generation** via Gemini Nano Banana and fal-hosted models
 - **Video generation** via Veo
 - **Speech generation** via Gemini TTS (prebuilt voices, natural-language style/accent control)
 - **Music generation** via Lyria 3 (batch) + Lyria RealTime (streaming)
@@ -22,7 +22,7 @@
 - **Pluggable storage** — local filesystem + Google Cloud Storage out of the box; S3 / OneDrive stubbed for contribution; 7 storage tools (upload, download, list, delete, exists, public URL, signed URL)
 - **Opinionated workflows** — one-call chains for common patterns (brand asset pack, social carousel, multi-element carousel compose, talking-head video, ad creative set, 9:16 short-form video for IG/TikTok/YT/FB, narrated explainer)
 - **Brand spec** — one JSON env var (`ARTIFICER_BRAND_SPEC`) defines colors, fonts, TTS voice, music prompt, and logo variants so every tool can soft-default to project-consistent choices
-- **Prompt guides** — structured prompt guidance per AI provider (Imagen, Nano Banana, Veo, Gemini TTS, Lyria) with official-doc references + field-tested good/bad examples
+- **Prompt guides** — structured prompt guidance per AI provider (Nano Banana, Veo, Gemini TTS, Lyria, fal model families) with official-doc references + field-tested good/bad examples
 
 Built for the [Model Context Protocol](https://modelcontextprotocol.io/). Works with Claude Code, Claude Desktop, Cursor, and any MCP-compatible client.
 
@@ -84,16 +84,13 @@ Add to your MCP config:
 
 | Variable | Purpose |
 |---|---|
-| `GOOGLE_API_KEY` | Required for all Gemini/Imagen/Veo tools. |
+| `GOOGLE_API_KEY` | Required for all Gemini tools. |
 | `GOOGLE_APPLICATION_CREDENTIALS` | Required for `gs://` storage URIs. Path to a GCP service-account JSON. |
-| `GOOGLE_CLOUD_PROJECT` | Switches Gemini calls to Vertex AI. Required for `gemini_upscale_image` and for `negative_prompt` on Imagen tools. |
+| `GOOGLE_CLOUD_PROJECT` | Vertex AI project, for Google methods that are Vertex-only. |
 | `GOOGLE_CLOUD_LOCATION` | Vertex AI region (default: `us-central1`). |
 | `FAL_KEY` | Required for all `fal_*` tools. |
 | `MVSEP_API_TOKEN` | Required for `mvsep_separate_audio` (MVSep: one stem per singer of a duet). Get it at mvsep.com/user-api; keys from before 6 October 2026 were reset after MVSep's security incident. |
 | `MVSEP_API_URL` | Optional MVSep API base (default `https://mvsep.com/api`, geo-routed). Pin a region, e.g. `https://de.mvsep.com/api`; a job can only be collected from the region that created it. |
-| `ARTIFICER_IMAGEN_MODEL` | Sets a default model for `gemini_generate_image`. There is **no built-in default** since 0.10.0 (Imagen is deprecated), so without this, pass `model` on every call. See [UPGRADING.md](UPGRADING.md). |
-| `ARTIFICER_IMAGEN_EDIT_MODEL` | Sets a default model for `gemini_edit_image`. There is **no built-in default** since 0.10.0. |
-| `ARTIFICER_IMAGEN_UPSCALE_MODEL` | Override default model for `gemini_upscale_image` (fallback: `imagen-4.0-upscale-preview`). |
 | `ARTIFICER_VEO_MODEL` | Override default model for `gemini_generate_video` (fallback: `veo-2.0-generate-001`). |
 | `ARTIFICER_OMNI_VIDEO_MODEL` | Override default model for `gemini_omni_generate_video` (fallback: `gemini-omni-1.2-flash`). |
 | `ARTIFICER_NANOBANANA_MODEL` | Override default model for `gemini_nanobanana_generate_image` (fallback: `gemini-3.1-flash-image`). |
@@ -127,7 +124,7 @@ See [docs/](docs/) for detailed documentation per area.
 |-----|--------|
 | [UPGRADING.md](UPGRADING.md) | **Breaking changes and migrations between versions — read this first when a call that used to work starts failing** |
 | [docs/storage.md](docs/storage.md) | Storage providers, URI routing, extending with new providers |
-| [docs/image-gen.md](docs/image-gen.md) | Gemini image generation tools (Imagen + Nano Banana), prompt patterns |
+| [docs/image-gen.md](docs/image-gen.md) | Image generation tools (Nano Banana, fal models), prompt patterns |
 | [docs/video-gen.md](docs/video-gen.md) | Veo video generation tools, model selection, prompt patterns |
 | [docs/audio-gen.md](docs/audio-gen.md) | Gemini TTS speech generation + Lyria music generation (batch + realtime) |
 | [docs/video-audio-post.md](docs/video-audio-post.md) | FFmpeg-backed video/audio post-processing tools |

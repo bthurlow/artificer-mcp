@@ -30,6 +30,28 @@ Google shuts down `gemini-2.5-flash-preview-tts`, the old default for
 - The `speech.general` catalog slug `gemini-tts-2.5-flash` is now
   `gemini-tts-3.8-flash`.
 
+### Imagen tools removed
+
+Google has shut down every Imagen model on the Gemini API (the last,
+`imagen-4.0-*-generate-001`, on 2026-08-17; Google names
+`gemini-nano-banana-2.1` as the replacement). The catalog dropped Imagen in
+0.10.0; its tools now go too. **Removed (unknown-tool error if called):**
+
+| Removed | Use instead |
+|---|---|
+| `gemini_generate_image` | `gemini_nanobanana_generate_image` (no `reference_images`), or a fal `image.general` route via `fal_generate_image` |
+| `gemini_edit_image` | `gemini_nanobanana_generate_image` with `reference_images`, or a fal `image.edit` route |
+| `gemini_upscale_image` | A fal `image.upscale` route via `fal_generate_image` (e.g. Topaz, SeedVR2, Crystal); see `fal_image_upscale_prompt_guide` |
+| `gemini_image_prompt_guide` | `gemini_nanobanana_prompt_guide` |
+
+- **Env vars no longer read:** `ARTIFICER_IMAGEN_MODEL`,
+  `ARTIFICER_IMAGEN_EDIT_MODEL`, `ARTIFICER_IMAGEN_UPSCALE_MODEL`. Remove them
+  from your MCP config.
+- **No equivalents** for Imagen's `negative_prompt`, `seed`,
+  `number_of_images` or safety knobs on nano-banana: write exclusions into the
+  prompt, and loop calls for variations. Several fal image models take
+  `negative_prompt` and `num_images`.
+
 ## 0.13.x → 0.14.0
 
 ### 16 dead fal routes retired, and `mochi_prompt_guide` removed

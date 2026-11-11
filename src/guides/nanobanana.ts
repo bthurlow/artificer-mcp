@@ -7,7 +7,7 @@ const NANOBANANA_GUIDE = `# Gemini Nano-Banana (gemini-3.1-flash-image) — Prom
 ## Overview
 Nano-banana is a multimodal image model accessed via \`generateContent\` with IMAGE response modality. It accepts **text + reference images** as multimodal parts — enabling generation, edits, composites, style transfer, and reference-guided work from a single tool.
 
-**This is artificer's only Google image route.** Imagen is deprecated by Google and retired from the catalog (see \`gemini_image_prompt_guide\` for the migration mapping), so nano-banana now covers both the from-scratch and the work-with-existing-imagery lanes.
+**This is artificer's only Google image route.** Google shut Imagen down (the last models on 2026-08-17) and artificer removed its tools, so nano-banana covers both the from-scratch and the work-with-existing-imagery lanes: text-to-image without \`reference_images\`; edits, inpainting, composites and style transfer with them; N variations by looping calls. For upscaling, use an \`image.upscale\` route from \`model_catalog\` (e.g. Topaz or SeedVR2 via \`fal_generate_image\`).
 
 **Strengths:**
 - Photoreal generation from text alone

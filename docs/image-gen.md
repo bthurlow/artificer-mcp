@@ -1,17 +1,14 @@
 # Image Generation
 
-artificer-mcp ships AI-powered image generation via Google's Gemini stack.
+artificer-mcp ships AI-powered image generation via Google's Gemini stack (nano-banana) and fal-hosted models. Imagen is gone: Google shut it down (the last models on 2026-08-17) and its tools were removed in 0.15.0; see [UPGRADING](../UPGRADING.md).
 
 ## Tools
 
 | Tool | Backed by | Purpose |
 |------|-----------|---------|
-| `gemini_generate_image` | Imagen 4 (`imagen-4.0-generate-001`) | Text-to-image generation |
-| `gemini_edit_image` | Imagen 3 capability (`imagen-3.0-capability-001`) | Edit an existing image from a text instruction |
-| `gemini_upscale_image` | Imagen upscale (`imagen-4.0-upscale-preview`) | Upscale an existing image 2× or 4× |
 | `gemini_nanobanana_generate_image` | Nano Banana 2 (`gemini-3.1-flash-image`) by default | Generation, edits and composites from reference images. `image_size` picks 1K/2K/4K, and the file format follows the output extension |
 
-All four accept per-call `model` overrides. Env fallbacks (see [README](../README.md#environment-variables)): `ARTIFICER_IMAGEN_MODEL`, `ARTIFICER_IMAGEN_EDIT_MODEL`, `ARTIFICER_IMAGEN_UPSCALE_MODEL`, `ARTIFICER_NANOBANANA_MODEL`.
+Per-call `model` overrides the default; `ARTIFICER_NANOBANANA_MODEL` sets it (see [README](../README.md#environment-variables)). For upscaling, use an `image.upscale` route below.
 
 ### fal image models (`fal_generate_image`)
 
@@ -32,8 +29,8 @@ Nano Banana itself is also on fal (Nano Banana 2, Pro, Lite), with native `outpu
 
 Pair any image tool with its prompt guide:
 
-- `gemini_image_prompt_guide` — Imagen 3/4 best practices (style keywords, aspect ratios, negative prompts, safety-filter avoidance)
-- `gemini_nanobanana_prompt_guide` — Nano Banana quirks (what it does well vs. Imagen)
+- `gemini_nanobanana_prompt_guide` — nano-banana templates, reference-image tips, aspect ratios
+- The fal guides in the table above, one per group
 
 Guides return structured markdown with official-doc links, field-tested good/bad examples, and model-specific notes. No API call.
 

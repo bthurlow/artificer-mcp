@@ -1,5 +1,4 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { registerImagenPromptGuide } from './imagen.js';
 import { registerNanobananaPromptGuide } from './nanobanana.js';
 import { registerVeoPromptGuide } from './veo.js';
 import { registerOmniVideoPromptGuide } from './gemini-omni.js';
@@ -77,7 +76,6 @@ import { registerBrandSpecTool } from './brand-spec.js';
  */
 export function registerGuideTools(server: McpServer): void {
   // Image
-  registerImagenPromptGuide(server);
   registerNanobananaPromptGuide(server);
 
   // Existing video (Veo, Wan, Kling Avatar, VEED Fabric)

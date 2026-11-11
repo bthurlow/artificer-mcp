@@ -119,7 +119,6 @@ model has a canonical reference page.
 Each guide lives in its own file under `src/guides/`:
 
 - `src/guides/veo.ts` → registers `veo_video_prompt_guide`
-- `src/guides/imagen.ts` → registers `gemini_image_prompt_guide`
 - `src/guides/nanobanana.ts` → registers `gemini_nanobanana_prompt_guide`
 - `src/guides/gemini-tts.ts` → registers `gemini_tts_prompt_guide`
 - `src/guides/lyria.ts` → registers `gemini_lyria_prompt_guide`
