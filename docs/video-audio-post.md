@@ -1,6 +1,6 @@
 # Video & Audio Post-Processing
 
-26 FFmpeg-backed tools for video and audio post-processing. Requires FFmpeg 6+ with `ffmpeg` and `ffprobe` in PATH (hard floor is 4.3 for `xfade`; 6+ is the tested baseline). A libass-enabled build is needed for `video_add_subtitles` burn-in.
+31 FFmpeg-backed tools for video and audio post-processing. Requires FFmpeg 6+ with `ffmpeg` and `ffprobe` in PATH (hard floor is 4.3 for `xfade`; 6+ is the tested baseline). A libass-enabled build is needed for `video_add_subtitles` burn-in.
 
 ## Video tools (18)
 
@@ -37,7 +37,7 @@
 | `video_set_codec`      | Change codec + quality     | `video_codec`, `audio_codec`, `crf`, `preset`                          |
 | `video_set_frame_rate` | Change fps                 | `frame_rate`, `drop_duplicate_frames` (true=fps filter, false=-r flag) |
 
-## Audio tools (10)
+## Audio tools (13)
 
 | Tool                       | Description                                                                                                                                                                                                       | Key params                                                                                    |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
@@ -51,6 +51,9 @@
 | `audio_set_sample_rate`    | Resample audio                                                                                                                                                                                                    | `sample_rate` (22050/44100/48000/96000)                                                       |
 | `audio_remove_silence`     | Trim silence                                                                                                                                                                                                      | `threshold_db`, `min_silence_duration`, `remove` (start/end/both/all)                         |
 | `audio_beat_grid`          | Beat grid for cutting to music: tempo, beats, the bar position carrying the kick (`downbeats`, `half_bar`), the grid-to-attack `offset_s`, and the kick phase per section. Local analysis, a few seconds per song | `start`, `end` (song time), `output` (JSON), `beats_per_bar`, `bpm_hint`                      |
+| `audio_info`               | Codec, sample rate, channels, duration, bitrate                                                                                                                                                                   | `input`                                                                                       |
+| `audio_pad`                | Add silence before and/or after                                                                                                                                                                                   | `pad_start_seconds`, `pad_end_seconds`                                                        |
+| `audio_gate`               | Keep only given time windows, silence the rest; same length and sample rate, ramps outside each window. For gating a duet's per-singer stems to each singer's lines                                               | `windows` ([start, end] s), `fade_ms`                                                         |
 
 ## Common patterns
 

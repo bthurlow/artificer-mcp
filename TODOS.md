@@ -200,33 +200,6 @@ From btmusic's 2026-11-06 video-model cost review. Checked against fal's own pag
 
 ---
 
-## 35. Singer separation (duets): MVSep male/female route (NEW, filed 2026-11-11)
-
-- **Gap:** the only separator is `fal-ai/demucs`, which puts both singers of a duet in one vocal stem (the guide's
-  own gotcha). Lip-sync (OmniHuman etc.) mouths whatever vocal it is fed, so a duet music video needs one stem per
-  singer. Timestamp splitting fails wherever the two voices overlap.
-- **Proven 2026-11-11 (btmusic Album 4 "Thought and Memory", t06):** MVSep "Male/Female separation" via the web UI,
-  model MelRoformer 2025.01, "Extract vocals first with BS Roformer", full master in. 0 ms offset vs the master;
-  wrong-singer leakage −29 to −61 dB in solo sections; overlaps (sustained F note under an M line, and the reverse)
-  split to one voice per stem by ear. One weak spot: a last F line routed into the M stem at full level, so callers
-  still gate each stem to its singer's timestamps. Feeding a Demucs stem in instead (job B) was cleaner in F solo
-  sections, worse in M ones; not better overall.
-- **API (mvsep.com/en/full_api, read 2026-11-11):** `POST https://mvsep.com/api/separation/create` multipart
-  (`api_token`, `audiofile`, `sep_type=57`, `add_opt1` model: 0 BSRoformer Sucial / 3 BSRoformer aufr33 / 1 SCNet
-  XL / **2 MelRoformer (default, best SDR 13.03)**, `add_opt2` 0 = direct / **1 = vocals first with BS Roformer**,
-  `output_format` 1 = wav16 / 4 = wav32, **`is_demo` must stay 0**: 1 publishes the job on a public demo page).
-  Poll `GET /api/separation/get?hash=` (`waiting` / `processing` / `done` / `failed` ...); outputs in `data.files`
-  (key structure not documented: read a live response). Token from `POST /api/app/login` (`email`, `password`).
-  Regions: mvsep.com (geo), de / de2 / sg pinned; jobs live in the region that created them.
-- **Plans:** free registered = 50 jobs/day, 10 min, 100 MB, 1 concurrent, API "Limited"; unregistered = MP3 output
-  only (WAV needs an account). Premium = credits (~1 credit / audio minute for standard models; check
-  `price_coefficient` in `GET /api/app/algorithms`).
-- **Ask:** a separator route (or `fal_separate_audio`-style tool) for MVSep with `sep_type` / model / extract options,
-  WAV output, `is_demo` forced to 0, token from config; optionally a helper that gates each returned stem to given
-  time windows. Update the stem-separation guide to point duets here.
-- **Check first:** mvsep.com links a "Security incident (October 2026)" page (not read yet). Read it before storing
-  a token; never use the third-party PyPI `mvsep-cli` (the API page warns it asks for your token).
-
 ---
 
 ## Loose ends from completed items
@@ -238,3 +211,4 @@ These are small follow-ups left by items in [the history](docs/history/completed
 - **#15:** the MiniMax paren-singing divergence was never reported upstream.
 - **#18b:** the `safety` capability is empty. Re-seed `safety.text` if a fal-hosted classifier reappears. Until then, `fal_classify_text` needs an explicit model.
 - **#19:** on `@google/genai` 2.17, only the Interactions path (Omni) and nano-banana (#25, 2026-09-24) have run live. Veo `generateVideos`, TTS and Lyria have not.
+- **#35:** `mvsep_separate_audio` has not run against the live API (no token here; validated in btmusic). The first run should confirm the shape of `data.files` (taken from MVSep's own Python examples: `url` and `download`) and the `<input>_male_female_mt_2_{male,female}` file names the stem names come from (seen in web-UI downloads).

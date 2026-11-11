@@ -113,6 +113,7 @@ const EXPECTED_TOOLS = {
     'audio_remove_silence',
     'audio_mix',
     'audio_pad',
+    'audio_gate',
     'audio_beat_grid',
   ],
   generation: [
@@ -136,6 +137,7 @@ const EXPECTED_TOOLS = {
     'fal_upload',
     'fal_fetch_result',
     'fal_cancel',
+    'mvsep_separate_audio',
   ],
   guides: [
     'gemini_image_prompt_guide',
@@ -246,15 +248,15 @@ describe('MCP Protocol — artificer-mcp Server', () => {
   // ── 2. Tool discovery ─────────────────────────────────────────────────────
 
   describe('tool discovery', () => {
-    it('should return exactly 185 tools', () => {
-      expect(tools).toHaveLength(185);
+    it('should return exactly 187 tools', () => {
+      expect(tools).toHaveLength(187);
     });
   });
 
   // ── 3. Tool names ─────────────────────────────────────────────────────────
 
   describe('tool names', () => {
-    it('should contain all 185 expected tool names', () => {
+    it('should contain all 187 expected tool names', () => {
       const registeredNames = tools.map((t) => t.name).sort();
       const expectedNames = [...ALL_TOOL_NAMES].sort();
 

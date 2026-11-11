@@ -59,7 +59,7 @@ Prefer `gemini_generate_music` for one-shot music beds (simpler, deterministic).
 
 `ARTIFICER_BRAND_SPEC.music.default_prompt` is used by higher-level workflows (e.g., `workflow_narrated_explainer`) when the caller doesn't pass their own prompt. The raw `gemini_generate_music` tools always require an explicit prompt.
 
-## Stem separation (fal)
+## Stem separation
 
 ### fal_separate_audio
 
@@ -69,7 +69,21 @@ Splits a mixed track into stems (vocals, drums, bass, other, and with Demucs's 6
 fal_separate_audio({ model: "fal-ai/demucs", audio: "./song.wav", output_dir: "./stems", stems: ["vocals"] })
 ```
 
-Typical uses: an isolated vocal for lip-sync (see `fal_lipsync_prompt_guide`) or for cleaner karaoke timing, and instrumental versions. Demucs puts every singer in one `vocals` stem; it can't split a duet. See `fal_stem_separation_prompt_guide`.
+Typical uses: an isolated vocal for lip-sync (see `fal_lipsync_prompt_guide`) or for cleaner karaoke timing, and instrumental versions. Demucs puts every singer in one `vocals` stem; it can't split a duet (use `mvsep_separate_audio` below). See `fal_stem_separation_prompt_guide`.
+
+### mvsep_separate_audio (duets)
+
+Splits a duet into one stem per singer with MVSep's Male/Female separation (sep_type 57; MelRoformer 2025.01 with "extract vocals first", the settings proven on a duet). Writes `<basename>-male` and `<basename>-female` into `output_dir`. Requires `MVSEP_API_TOKEN` (mvsep.com/user-api). Other MVSep algorithms run through `sep_type` and `add_opt1..3`.
+
+```
+mvsep_separate_audio({ audio: "./master.wav", output_dir: "./stems" })
+audio_gate({ input: "./stems/master-male.wav", output: "./stems/male-gated.wav", windows: [[52.1, 66.4], [173.6, 186.6]] })
+```
+
+- Send the full master. Then gate each stem to its singer's lines with `audio_gate`: the separator can route a whole line to the wrong stem, and lip-sync models mouth whatever they hear.
+- Jobs are never published to MVSep's public demo page (`is_demo` is always 0).
+- The job hash goes out as a progress message. A job that times out is cancelled (refunded if it hadn't started); pass `hash` instead of `audio` to collect one that finished.
+- A free account allows 50 jobs a day, with 10 minutes and 100 MB per file, one job at a time. WAV output needs an account.
 
 ## Forced alignment (fal)
 

@@ -5,6 +5,7 @@ import { registerTool } from '../utils/register.js';
 import { ffmpegBatch, ffprobe } from '../utils/exec-ffmpeg.js';
 import { resolveInput, resolveOutput } from '../utils/resource.js';
 import { registerBeatGridTool } from './beat-grid-tool.js';
+import { checkWindows, gateFilter, mergeWindows } from './gate.js';
 import {
   type AudioInfoParams,
   type AudioExtractFromVideoParams,
@@ -17,6 +18,7 @@ import {
   type AudioRemoveSilenceParams,
   type AudioMixParams,
   type AudioPadParams,
+  type AudioGateParams,
   audioExtractFromVideoSchema,
   audioNormalizeSchema,
   audioConvertFormatSchema,
@@ -27,6 +29,7 @@ import {
   audioRemoveSilenceSchema,
   audioMixSchema,
   audioPadSchema,
+  audioGateSchema,
   audioInfoSchema,
 } from './types.js';
 
@@ -120,7 +123,7 @@ function probeNumber(value: string | undefined): number | undefined {
  * Covers: audio_info, audio_extract_from_video, audio_normalize,
  * audio_convert_format, audio_convert_properties, audio_set_bitrate,
  * audio_set_channels, audio_set_sample_rate, audio_remove_silence,
- * audio_mix, audio_pad, audio_beat_grid.
+ * audio_mix, audio_pad, audio_gate, audio_beat_grid.
  */
 export function registerAudioTools(server: McpServer): void {
   registerBeatGridTool(server);
@@ -732,6 +735,85 @@ export function registerAudioTools(server: McpServer): void {
             {
               type: 'text',
               text: `Padded audio (${parts.join(', ')}, codec=${chosenCodec}) → ${output}`,
+            },
+          ],
+        };
+      } finally {
+        await inR.cleanup?.();
+        await outR.cleanup?.();
+      }
+    },
+  );
+
+  // ── audio_gate ─────────────────────────────────────────────────────────
+  registerTool<AudioGateParams>(
+    server,
+    'audio_gate',
+    "Keep only the given time windows of an audio file and silence everything else, without moving, trimming or resampling anything (same length, same sample rate). Short ramps sit outside each window, so the kept audio is untouched. Use it to gate each singer's stem of a duet to that singer's own lines: a male/female separator can route an odd line into the wrong stem, and lip-sync models mouth whatever is in their audio.",
+    audioGateSchema.shape,
+    async ({ input, output, windows, fade_ms, codec }) => {
+      const problems = checkWindows(windows);
+      if (problems.length > 0) {
+        throw new Error(`audio_gate: ${problems.join(' ')}`);
+      }
+      const fade = fade_ms / 1000;
+      const kept = mergeWindows(windows, fade);
+
+      const inR = await resolveInput(input);
+      const outR = await resolveOutput(output);
+      try {
+        await mkdir(dirname(outR.localPath), { recursive: true });
+        let chosenCodec = codec;
+        if (!chosenCodec) {
+          const ext = extOf(output);
+          chosenCodec = defaultCodecForExt(ext);
+          if (ext.toLowerCase() === 'wav') {
+            // Keep a 24/32-bit or float stem at its own depth.
+            const probe = JSON.parse(
+              await ffprobe([
+                '-v',
+                'error',
+                '-select_streams',
+                'a:0',
+                '-show_entries',
+                'stream=codec_name',
+                '-of',
+                'json',
+                inR.localPath,
+              ]),
+            ) as ProbeResult;
+            const inCodec = probe.streams?.[0]?.codec_name;
+            if (inCodec?.startsWith('pcm_')) chosenCodec = inCodec;
+          }
+        }
+        await ffmpegBatch([
+          '-y',
+          '-i',
+          inR.localPath,
+          '-vn',
+          '-af',
+          gateFilter(kept, fade),
+          '-c:a',
+          chosenCodec,
+          outR.localPath,
+        ]);
+        await outR.commit();
+        const keptSeconds = kept.reduce((sum, [a, b]) => sum + (b - a), 0);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(
+                {
+                  output,
+                  windows: kept,
+                  kept_seconds: Number(keptSeconds.toFixed(3)),
+                  fade_ms,
+                  codec: chosenCodec,
+                },
+                null,
+                2,
+              ),
             },
           ],
         };

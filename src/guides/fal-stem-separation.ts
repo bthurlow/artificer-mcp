@@ -106,28 +106,47 @@ const result = await fal_separate_audio({
 
 ## Gotchas
 
-- **Duet/overlapping vocals limitation**: Demucs does not handle duets or two singers performing simultaneously. It will blend overlapping vocals into a single stem rather than separating them. For multi-vocalist material, expect lower vocal separation quality.
+- **Duets: use MVSep, not Demucs.** Demucs puts every singer in one \`vocals\` stem, overlapping lines included. For one stem per singer (lip-sync each singer separately), see "Duets" below.
 - **Audio quality**: Input audio quality affects separation quality. Low-bitrate or heavily processed audio produces lower-fidelity stems.
 - **Duration and cost**: Pricing is $0.0007 per second of input. A 5-minute song costs ~$0.21. Very long recordings (e.g., 1-hour podcast) cost proportionally more.
 - **Stem assignment**: with the 4-stem networks, anything that isn't vocals, drums or bass lands in \`other\`. Listen to the stems before relying on them.
 - **Model variants**: The \`htdemucs_6s\` variant supports 6 stems including guitar/piano. Other variants output 4 stems (vocals, drums, bass, other).
 
+## Duets: one stem per singer (MVSep)
+
+\`mvsep_separate_audio\` runs MVSep's Male/Female separation (sep_type 57) and writes \`<basename>-male\` and \`<basename>-female\` stems. Needs \`MVSEP_API_TOKEN\` (mvsep.com/user-api; keys from before 6 October 2026 were reset after MVSep's security incident).
+
+\`\`\`
+mvsep_separate_audio({ audio: "./master.wav", output_dir: "./stems" })
+// → { hash, stems: { male: "./stems/master-male.wav", female: "./stems/master-female.wav" } }
+
+audio_gate({ input: "./stems/master-male.wav", output: "./stems/male-gated.wav",
+             windows: [[52.1, 66.4], [112.0, 124.8], [173.6, 186.6]] })
+\`\`\`
+
+- **Send the full master**, with the defaults: MelRoformer 2025.01 (\`add_opt1\` 2) and "extract vocals first with BS Roformer" (\`add_opt2\` 1). On a male/female duet (btmusic, 2026-11-11) that gave 0 ms offset against the master, wrong-singer leakage of −29 to −61 dB in solo sections, and overlapping lines split one voice per stem. Feeding a Demucs vocal stem in instead was not better overall.
+- **Gate every stem** to its singer's lines with \`audio_gate\` before lip-sync. The separator can still route a whole line to the wrong stem at full level (there, the female singer's last verse line landed in the male stem), and lip-sync models mouth whatever is in their audio. Gating also leaves true silence between lines.
+- **Same-gender duets** are not what this model separates; it splits by voice type.
+- **Free account limits:** 50 jobs a day, 10 minutes and 100 MB per file, one job at a time; WAV output needs an account. Jobs are never published to MVSep's demo page (\`is_demo\` is always 0).
+- **Timeouts:** the job's hash goes out as a progress message. A timed-out job is cancelled (refunded if it had not started); pass \`hash\` to collect a job that finished.
+
 ## Access routes
 
-| Slug | fal endpoint |
-|------|-------------|
-| demucs-stem-separation | fal-ai/demucs |
+| Slug | Route |
+|------|-------|
+| demucs-stem-separation | fal: fal-ai/demucs (\`fal_separate_audio\`) |
+| mvsep-male-female | MVSep: sep_type 57 (\`mvsep_separate_audio\`) |
 
 ## Last verified
 
-2026-09-24 against fal's live OpenAPI + vendor docs. Demucs duet limitation documented in TODO #21. Stem output structure confirmed from OpenAPI schema.
+2026-09-24 against fal's live OpenAPI + vendor docs. Demucs duet limitation documented in TODO #21. Stem output structure confirmed from OpenAPI schema. MVSep section 2026-11-11 from mvsep.com/en/full_api and the btmusic duet test (TODO #35).
 `;
 
 export function registerFalStemSeparationPromptGuide(server: McpServer): void {
   registerTool<Record<string, never>>(
     server,
     'fal_stem_separation_prompt_guide',
-    'Grouped guide for audio stem separation covering output stem types, quality vs speed tradeoffs, and known limitations (e.g. Demucs duet handling from TODO #21). No API call — pure reference.',
+    'Grouped guide for audio stem separation covering output stem types, quality vs speed tradeoffs, and known limitations, and duets: one stem per singer via MVSep (mvsep_separate_audio) gated with audio_gate. No API call — pure reference.',
     z.object({}).shape,
     async () => ({ content: [{ type: 'text', text: FAL_STEM_SEPARATION_GUIDE }] }),
   );
