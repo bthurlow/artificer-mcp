@@ -12,30 +12,32 @@ Open leftovers from these items (unverified live paths, write-ups not done) are 
 
 **The design problem was signal-to-noise, not scheduling.** "The diff is non-empty" is useless as an alert when fal rewrites docs boilerplate across all 263 routes on a whim. The job keys off the two findings that actually change what a caller gets back:
 
-| Finding | Produces a diff? | How it surfaces |
-|---------|------------------|-----------------|
+| Finding                                                | Produces a diff?         | How it surfaces                                 |
+| ------------------------------------------------------ | ------------------------ | ----------------------------------------------- |
 | Deprecated route (still 200, serves a different model) | yes — `deprecated` field | rides the PR, called out at the top of the body |
-| Fetch failure / 404 | **no** | script exits non-zero → **job goes red** |
-| Price change | yes — `cost` field | PR body, with both sides shown |
-| Recovery (flag cleared) | yes | PR body |
+| Fetch failure / 404                                    | **no**                   | script exits non-zero → **job goes red**        |
+| Price change                                           | yes — `cost` field       | PR body, with both sides shown                  |
+| Recovery (flag cleared)                                | yes                      | PR body                                         |
 
-The 404 case is why the job can fail rather than just PR: a dead route writes *nothing*, so without a red job it would leave no trace at all and the cron would close green with a broken route still in the catalog.
+The 404 case is why the job can fail rather than just PR: a dead route writes _nothing_, so without a red job it would leave no trace at all and the cron would close green with a broken route still in the catalog.
 
 **Supporting changes:**
+
 - `sync-fal-specs.mjs` — `syncOne` now returns a structured outcome instead of a boolean; new pure `buildReport()` (unit-tested) summarizes into `{deprecated, failures, costChanges, undeprecated, blocking}`; new `--report <file>` writes it as JSON.
-- **New `scripts/format-drift-report.mjs`** renders the PR body. Deliberately a script, not inline `jq`: the body *is* the product of this cron — if it drops a finding, the finding is lost, because nobody re-reads a 500-file spec diff to double-check. A script gets unit tests; a YAML `run:` block does not.
+- **New `scripts/format-drift-report.mjs`** renders the PR body. Deliberately a script, not inline `jq`: the body _is_ the product of this cron — if it drops a finding, the finding is lost, because nobody re-reads a 500-file spec diff to double-check. A script gets unit tests; a YAML `run:` block does not.
 - **`process.exit()` → `process.exitCode`.** Calling `exit()` while undici's sockets are closing raced and aborted the process with a libuv assertion (`!(handle->flags & UV_HANDLE_CLOSING)`, exit 127) instead of a clean 1. Non-deterministic — it exited cleanly earlier the same day. Since the whole cron keys off this exit code, a crash-vs-clean coin flip was not acceptable.
 
 **Answers to the original Cons:**
-- ~~"Requires the sync script to be stable first"~~ — it is, and #18b proved the diffs will *never* be non-noisy, so waiting was the wrong plan.
+
+- ~~"Requires the sync script to be stable first"~~ — it is, and #18b proved the diffs will _never_ be non-noisy, so waiting was the wrong plan.
 - ~~"Auto-PRs can be ignored; drift accumulates"~~ — one rolling branch (`chore/fal-spec-drift`), force-pushed weekly, so it is always a single current PR rather than twelve stale ones.
 - ~~"Adds a CI credential requirement (FAL_KEY)"~~ — **not needed.** The script reads `fal.ai/api/openapi` and `llms.txt`, both public. Verified unauthenticated.
 
-**Known limitation — description corrected 2026-08-15.** CI on a bot-opened PR *does* trigger, contrary to what this note first said. The run lands at **`action_required`**, GitHub's approval gate for bot-initiated workflow runs, and runs in that state publish **no check contexts** — which is why `gh pr checks` reports "no checks reported" and the PR sits `BLOCKED`. Proven on the release PR: every run triggered by `github-actions[bot]` sat at `action_required`, while the one triggered by `bthurlow` completed successfully on the same workflow.
+**Known limitation — description corrected 2026-08-15.** CI on a bot-opened PR _does_ trigger, contrary to what this note first said. The run lands at **`action_required`**, GitHub's approval gate for bot-initiated workflow runs, and runs in that state publish **no check contexts** — which is why `gh pr checks` reports "no checks reported" and the PR sits `BLOCKED`. Proven on the release PR: every run triggered by `github-actions[bot]` sat at `action_required`, while the one triggered by `bthurlow` completed successfully on the same workflow.
 
 **Decision (Brian, 2026-08-15): manual approval stays.** Bot-initiated runs will keep requiring a human to click **Approve and run** in the Actions tab (or `POST /actions/runs/{id}/approve`). Do **not** "fix" this by relaxing the repo setting or giving a bot a PAT — a human looking at what a bot is about to run on `main` is the point.
 
-That makes the in-job checks **load-bearing rather than a nicety**: nobody watches a weekly cron the way they watch a release, so the drift PR's gated run may sit unapproved indefinitely. Running `yarn typecheck && yarn test:unit` *inside* the drift job, and stamping a loud "❌ Catalog guards failed" section into the PR body when they fail, is what guarantees the result is visible at all.
+That makes the in-job checks **load-bearing rather than a nicety**: nobody watches a weekly cron the way they watch a release, so the drift PR's gated run may sit unapproved indefinitely. Running `yarn typecheck && yarn test:unit` _inside_ the drift job, and stamping a loud "❌ Catalog guards failed" section into the PR body when they fail, is what guarantees the result is visible at all.
 
 ~~**Not verified:** the workflow has never run on GitHub.~~ It has now, and the first real runs exposed a bug the local verification could not see:
 
@@ -45,7 +47,7 @@ That makes the in-job checks **load-bearing rather than a nicety**: nobody watch
 
 **Changed 2026-11-06: cap scales, and the PR body fits.** The 2026-10-26 and 11-02 runs both failed. fal culled 16 legacy routes, which was over the fixed cap of 10, so none were retired. Separately, a 900-file sync rendered a PR body over GitHub's 65,536-character limit, so `gh pr create` failed and no PR opened at all. The cap is now `retireCap()`: 10, or 5% of the catalog if that is more (24 at 465 routes). The PR body is capped at 60,000 characters, falling back to one line per price or schema change, while the job summary keeps the full report.
 
-**Also hardened (same PR):** both `wget` calls in `ci.yml` now retry (`--tries=3 --timeout=30 --retry-connrefused`). That fetch failed twice on 2026-08-15 — once a genuine URL rot, once a transient blip — and the integration job is the *only* place ffmpeg- and ImageMagick-backed code is ever actually exercised, so a flaky red there trains everyone to ignore a signal that matters.
+**Also hardened (same PR):** both `wget` calls in `ci.yml` now retry (`--tries=3 --timeout=30 --retry-connrefused`). That fetch failed twice on 2026-08-15 — once a genuine URL rot, once a transient blip — and the integration job is the _only_ place ffmpeg- and ImageMagick-backed code is ever actually exercised, so a flaky red there trains everyone to ignore a signal that matters.
 
 ### Original filing (kept for history)
 
@@ -54,16 +56,19 @@ That makes the in-job checks **load-bearing rather than a nicety**: nobody watch
 **Why:** The hybrid spec integration (OpenAPI + llms.txt fetched and committed at build time) means spec drift is visible in PR diff — but only when a contributor re-runs the sync script. If fal silently updates a model's schema (adds a param, changes a default, adjusts pricing), we won't notice until someone happens to run sync. A periodic auto-sync + auto-PR catches it without manual action.
 
 **Pros:**
+
 - Schema drift surfaces automatically, not when a user hits a bug.
 - Pricing changes appear in PR review (important for cost budgeting).
 - Zero ongoing cost — runs once a week in CI.
 
 **Cons:**
+
 - Requires the sync script to be stable first (can't auto-PR noise while we're still tuning the ingest).
 - Auto-PRs can be ignored; drift accumulates until someone reviews.
 - Adds a CI credential requirement (FAL_KEY available to the cron job) if the script needs auth.
 
 **Context:**
+
 - Depends on the `scripts/sync-fal-specs.mjs` script landing as part of Phase 1 (see `docs/plans/fal-multi-provider-design-2026-04-23.md` → Phase 1 updated scope).
 - Suggested implementation: GitHub Actions workflow on cron, runs sync, commits changes to a branch, opens PR with changed spec files + diff summary.
 - Naming convention: PRs titled `chore: sync fal-ai specs ({date})`.
@@ -85,6 +90,7 @@ That makes the in-job checks **load-bearing rather than a nicety**: nobody watch
 **What:** New top-level `transcription` capability with sub-class `transcription.asr`. One transport tool: `fal_transcribe`. Covers 7 fal ASR models. Forced alignment is NOT in scope on fal (no FA models hosted) — see TODO #7 for the deferred wrapper-FA approach.
 
 **Why:** Concrete pipeline use case — drive ASS subtitle generation in FFmpeg for karaoke-style per-syllable highlighting. The flow:
+
 1. **ASR** transcribes generated TTS or live audio → text + word-level timing.
 2. A downstream renderer (separate TODO — likely a `video_add_karaoke` tool or extension to `video_add_subtitles`) consumes those word timings to emit ASS with `\k` karaoke tags.
 3. v1 ships ASR-only; word-level timing from scribe-v2 is good enough for karaoke at word granularity. If ASR errors on known TTS prove unacceptable, escalate to TODO #7.
@@ -92,6 +98,7 @@ That makes the in-job checks **load-bearing rather than a nicety**: nobody watch
 Also unlocks the simpler cases — generic transcription for content moderation, transcript-based highlight extraction, and a "what did the model actually say?" QA loop on TTS output.
 
 **Decisions locked (2026-04-25):**
+
 - **Capability:** new top-level `transcription` (existing `speech.*` is all audio-out; transcription is audio-in / text-out).
 - **Sub-classes:** only `transcription.asr` seeded. Don't seed `transcription.alignment` until a real FA provider lands.
 - **Transports:** one tool — `fal_transcribe`. No `fal_align` (fal hosts no FA models — see TODO #7).
@@ -101,6 +108,7 @@ Also unlocks the simpler cases — generic transcription for content moderation,
 - **Response shape:** standardized as `{text, language, words: [{text, type: "word"|"spacing"|"audio_event", start, end, speaker_id?}], raw}`. Lossy normalization for non-scribe models (default `type: "word"`, synthesize `"spacing"` from gaps). `raw` carries model-specific extras.
 
 **Models in scope (7):**
+
 - `fal-ai/elevenlabs/speech-to-text/scribe-v2` — default per bake-off, $0.008/min (+30% with `keyterms`)
 - `fal-ai/elevenlabs/speech-to-text` (Scribe v1) — same price tier
 - `fal-ai/whisper` — generic Whisper
@@ -112,6 +120,7 @@ Also unlocks the simpler cases — generic transcription for content moderation,
 **Excluded:** `fal-ai/smart-turn` (turn detection, not transcription), `*/stream` endpoints x2 (MCP doesn't stream).
 
 **Implementation notes:**
+
 - Output format: JSON, not a file. Skip `downloadAndWrite`.
 - Audio input: route through `resolveForFal` (HTTPS passthrough vs upload) like the other fal transports.
 - Same playbook as Phase 5 — scaffolding → transport → prompt guides → wiring → smokes. Existing fal client factory, error taxonomy, sync-specs script, tool-registry, and `model_catalog` env-filter all already work.
@@ -133,16 +142,19 @@ Also unlocks the simpler cases — generic transcription for content moderation,
 **Why:** Phase 4 was originally scoped as the text-to-image side (Imagen, Nanobanana already shipped via Google). The fal image surface is much wider and includes capabilities Google's models don't expose well — FLUX-Pro img2img, Recraft v3 style transfer, Topaz upscaling, controllable inpainting via FLUX Fill. Skipping these means the pipeline can't reach for the right tool when nano-banana isn't a fit.
 
 **Pros:**
+
 - Unblocks "polish this thumbnail" / "remove this object" / "upres for print" pipeline steps that have no current home.
 - Same thin-transport pattern as the other fal transports — model-specific knobs flow through `extra_params`, so a wide model surface lands at low maintenance cost.
 - ControlNet-flavored models in particular are hard to reach without going direct to fal — exposing them via artificer means workflows compose naturally.
 
 **Cons:**
+
 - Image-input shape varies more than audio-input. Some models take 1 image, some take a reference + a mask, some take 3 conditioning images. The `extra_params` escape hatch covers it but the prompt guide quality has to be high or callers will stumble.
 - Upscaling is arguably a separate transport — it has no prompt, no negative prompt, and the structural args differ enough that one schema covering both edits and upscales gets ugly. Possible split into `fal_edit_image` + `fal_upscale_image`.
 - Mask handling. Inpainting/outpainting masks are PNGs that need `resolveForFal` exactly like reference audio. Not hard, just needs the prompt guide to be concrete about what makes a valid mask.
 
 **Context:**
+
 - Fal model search: `https://fal.ai/explore/search?categories=image-to-image`.
 - Existing reference: `gemini_edit_image` in `src/generation/gemini-image.ts` — output shape and ergonomics live there.
 - This may merge with the parked Phase 4 work. Phase 4 today is "fal image-model list pending"; that list almost certainly contains both t2i (FLUX, Recraft, Imagen-via-fal) AND i2i (FLUX-Fill, ControlNet). When the list arrives, scope Phase 4 as both transports together rather than splitting.
@@ -165,16 +177,19 @@ Also unlocks the simpler cases — generic transcription for content moderation,
 **Why:** Today's video transports are all generative (text→video, image→video). The "improve a video we already have" lane is empty. Real cases: upres a 720p Wan output to 1080p before publish, frame-interpolate a 12fps Kling output to 24fps for smoother motion, style-shift a stock clip to match a brand look. Without v2v in the toolset, the pipeline either ships the lower-quality original or punts to a separate service.
 
 **Pros:**
+
 - Closes the post-production loop. Generate via `fal_generate_video`, polish via `fal_edit_video`, all under one MCP roof.
 - Topaz Video AI hosting on fal is genuinely useful — that model is otherwise behind a desktop app license.
 - Lots of these tools are "set and forget" — single video in, single video out, minimal prompt — which means the schema can stay thin.
 
 **Cons:**
+
 - These models are slow. A 30s video upscale can take 5+ minutes — the existing fal subscribe pattern handles long polls fine, but timeouts and progress UX need a closer look.
 - Fal's queue cost for video editing is higher per minute of output than for generation. Worth surfacing in the prompt guide so callers don't accidentally upscale a 10-min clip.
 - Same input-shape variance issue as i2i — some models take video + mask, some take video + style image, some take video + audio (video-sync, which was explicitly out of scope in P5 — confirm whether v2v scope re-includes it).
 
 **Context:**
+
 - Fal model search: `https://fal.ai/explore/search?categories=video-to-video`.
 - Video-sync (lip-sync to existing video) was explicitly excluded from Phase 5 by user direction. Whether it re-enters under v2v scope is a user decision — flag during scoping.
 - Capability placement: `video.edit` is the natural home. Sub-classes `video.upscale` / `video.interpolate` / `video.style` only if the model list shows enough entries per bucket to make discovery useful. Otherwise one flat sub-class is fine.
@@ -189,6 +204,7 @@ Also unlocks the simpler cases — generic transcription for content moderation,
 **Real caller:** btmusic motion-art / Canvas exports. Apple Music album motion art requires a **3840×3840** square (plus 2048×2732 tall); no generation model we use outputs that natively. (Apple motion is deferred on the btmusic side because DistroKid can't deliver it, but the need recurs for any 4K / print-adjacent video surface.)
 
 **fal upscalers verified live 2026-09-24** (fal model search, "video upscale"):
+
 - `fal-ai/topaz/upscale/video`: **$0.01/s** (≤720p out), **$0.02/s** (720p-1080p), **$0.08/s** (>1080p); 2x at 60fps; half price on the Gaia 2 model. Also `topaz/upscale/video/{precision,creative,generative}` variants (no `fal-ai/` prefix).
 - `fal-ai/seedvr/upscale/video`: **$0.001 per megapixel of video data** (w×h×frames; 1080p × 121 frames ≈ $0.25). `target` vs `factor` mode.
 - Others listed: `fal-ai/flashvsr/upscale/video`, `fal-ai/bytedance-upscaler/upscale/video`, `clarityai/crystal-video-upscaler`, `blackforestlabs/flux-video-upscale`, `fal-ai/video-upscaler`.
@@ -201,6 +217,7 @@ Also unlocks the simpler cases — generic transcription for content moderation,
 ## 7. Forced alignment (`align_text_to_audio`) — DONE 2026-09-24
 
 **Shipped:** `align_text_to_audio({ audio, text, model?, output?, format? })`, seeding `transcription.alignment` (slug `elevenlabs-forced-alignment`). It defaults to fal's ElevenLabs forced aligner, the only one fal hosts, so unlike the fal transports it has a default model; the default is overridable for a future aligner with the same `words[]` shape. On top of the aligner it adds:
+
 - **line timings** from the script's own line breaks, via an in-order exact match with a small lookahead. It drops punctuation tokens and rejoins split contractions ("don" + "t"), but never prefix-matches, so "a" can't claim "and". Lines with no timed word are interpolated and marked.
 - **low-confidence words**, flagged when their `loss` sits above the clip's mean + 2σ. The loss has no documented absolute scale, so the flag is relative, like `video_make_loop`'s seam check.
 - **LRC / SRT / JSON output**, chosen by `format` or the extension.
@@ -222,18 +239,21 @@ New plan: `align_text_to_audio` wraps that model and adds what the karaoke/lyric
 **Why:** TODO #4 (scoped 2026-04-25) ships ASR-only because fal hosts no forced-alignment models. For karaoke v1, scribe-v2's word timing is good enough — but fails when ASR mishears proper nouns, technical terms, or music lyrics where the transcript is known to be exactly right. A wrapper-FA tool gives true FA semantics (input includes the canonical text) without waiting for fal to add a real FA endpoint.
 
 **Pros:**
+
 - Closes the gap where ASR-error-rate matters more than transcript discovery.
 - Reuses `fal_transcribe` — no new provider integration.
 - Keeps `transcription.alignment` sub-class meaningful (would be the home for this and any future real FA model).
 - Cheap to implement — string alignment (Needleman-Wunsch or simpler tokenizer + greedy match) is a well-trodden algorithm.
 
 **Cons:**
+
 - Word boundary timing is only as good as the underlying ASR. If scribe-v2 misses or duplicates a word, the alignment slot for that word is fabricated by interpolation. Not the same as proper acoustic FA (MFA, WhisperX).
 - Punctuation, capitalization, and number formatting (e.g., "30%" vs "thirty percent") force a normalizer in the matcher. Edge cases around contractions, hyphenation, hesitation markers.
 - Adds a tool that callers could mistake for "real" FA — naming and prompt guide need to be honest about the wrapper limits.
 - Syllable-level timing is still out of reach. v1 stays word-level. Phoneme/syllable-level FA needs a real acoustic aligner.
 
 **Context:**
+
 - Triggered when ASR-only timing causes karaoke caption errors on known TTS scripts. Today's plan (TODO #4) ships ASR-only and validates against the karaoke pipeline first.
 - Implementation sketch:
   1. Tokenize known transcript (whitespace + Unicode word-boundary).
@@ -262,16 +282,19 @@ New plan: `align_text_to_audio` wraps that model and adds what the karaoke/lyric
 **Why:** Phase 1 shipped `fal_generate_video` as a generic transport, but the catalog only seeded image-driven and audio-driven models (Wan 2.7, Kling Avatar, VEED Fabric — all need an image or audio input). Pure t2v on fal — "make a 5-second establishing shot of X" — has zero catalog coverage today. The transport itself is t2v-capable (the schema makes `image` optional, `prompt` is structural), but a caller asking `model_catalog` for video options sees only i2v and talking-head. The capability is half-shipped.
 
 **Pros:**
+
 - **No new transport code.** `fal_generate_video` already handles t2v — pass any t2v model id with just a prompt, no `image`. Closing the gap is purely catalog + guides + bake-off.
 - Unblocks "establishing shot" / "B-roll" / "stock-style cinematic" pipeline use cases that today have no fal home (Google Veo via `gemini_generate_video` is the only path).
 - Same playbook every other phase has used — sync specs, seed routes, write guides, bake-off, flip recommended-default in the matching guide.
 
 **Cons:**
+
 - T2V model surface is wide and quality varies enormously. A meaningful bake-off needs a fixed prompt set + scoring rubric (cinematic coherence, motion realism, prompt adherence, cost-per-second). The talking-head bake-off rubric doesn't transfer — TODO #1 (eval harness generalization) becomes load-bearing here.
 - Sub-class taxonomy is unobvious. `video.cinematic` already exists for Veo; do we add `video.t2v_general` and `video.t2v_motion_graphic`, or push everything under `video.cinematic`? Probably needs the model list before deciding.
 - T2V is expensive per second (Runway / Veo / Luma all in the $0.20-$0.60/sec range). A bake-off of 5 models × 5 prompts × 5s clips = ~$30-$50 in fal credits, more if 1080p.
 
 **Context:**
+
 - Transport schema reference: `src/generation/fal/types.ts` — `image` and `audio` are both optional, `prompt` is the structural arg.
 - Existing fal-Veo route in `video.cinematic` is already wired (currently `stub: true` — flipping is one line). That covers fal's Veo3.1 i2v path. The t2v sibling (`fal-ai/veo3.1`, no `/image-to-video` suffix) is a separate route.
 - Candidate model IDs to enumerate (verify availability via fal explore): `fal-ai/luma-dream-machine`, `fal-ai/runway-gen3`, `fal-ai/runway-gen4`, `fal-ai/minimax-hailuo-02/standard/text-to-video`, `fal-ai/kling-video/v2.5/master/text-to-video`, `fal-ai/wan/v2.7/text-to-video`, `fal-ai/veo3.1`, `fal-ai/veo3.1/fast`, `fal-ai/pika/v2.2/text-to-video`.
@@ -292,7 +315,7 @@ New plan: `align_text_to_audio` wraps that model and adds what the karaoke/lyric
 
 **Tightened.** Every nested object — `colors`, `fonts`, `tts`, `music`, `logo` — is now `.strict()`. Unknown keys throw instead of vanishing.
 
-**`extras` is what makes strict safe.** Sealing the nested objects without an escape hatch would just move the problem: a brand with a fifth color would have nowhere legitimate to put it and no option but to give up on the spec. `extras` means strict rejects *typos* rather than rejecting *needs*.
+**`extras` is what makes strict safe.** Sealing the nested objects without an escape hatch would just move the problem: a brand with a fifth color would have nowhere legitimate to put it and no option but to give up on the spec. `extras` means strict rejects _typos_ rather than rejecting _needs_.
 
 **The error message is the actual deliverable.** The old failure wasted the caller's time twice: once writing fields that disappeared, then again round-tripping `brand_spec_get` to reverse-engineer what the schema really took. So an unknown key now reports the accepted slots and points at `extras`:
 
@@ -308,13 +331,14 @@ That map is **derived from the schema at module load**, not hand-listed, so addi
 
 **Left undone deliberately:** the filing's third Con — "does `gemini_generate_image` know to inject `colors.background` into prompts?" — is still open. The resolvers now expose the slots, so a consuming tool can opt in, but actually injecting new fields into generation prompts would change output for existing callers and is its own decision, not a schema fix. Filed below as **#9b**.
 
-Also note the live caller doc `D:\projects\btmusic\instructions\artificer-prompts.md` records the *old* accepted shape in its 2026-06-07 learnings entry; it is in another repo and was not updated here.
+Also note the live caller doc `D:\projects\btmusic\instructions\artificer-prompts.md` records the _old_ accepted shape in its 2026-06-07 learnings entry; it is in another repo and was not updated here.
 
 ---
 
 ## 9c. Original #9 filing (kept for history)
 
 **What:** `brandSpecSchema` in `src/brand.ts` is `.strict()` at the root but unsealed at every nested level (`colors`, `fonts`, `tts`, `music`, `logo`). Unknown keys inside those nested objects are silently dropped by Zod's default behavior with no warning. Two acceptable fixes:
+
 - **(a) Broaden the schema** — add optional slots for the fields callers naturally reach for: `colors.background`, `colors.background_name`, `colors.highlight`, `colors.highlight_name`, `fonts.mono`, `fonts.sans`, and probably leave room for an arbitrary `colors.extras: Record<string, string>` and `fonts.extras: Record<string, string>` so future projects with multi-family or multi-mode palettes don't keep hitting this.
 - **(b) Tighten the nested `.strict()`** — every nested object becomes `.strict()` too, so any unknown key throws with the same loud-misconfiguration message style as the existing root-level validation. Caller learns immediately that `colors.background` isn't a slot, can decide whether to refile (a) or restructure their spec.
 
@@ -323,21 +347,25 @@ Both are real fixes. (a) makes the schema match how multi-mode brand systems act
 **Why:** The current behavior is the worst of both worlds. The Zod schema looks rich because users can write whatever they want, but only documented fields survive — and there's no error or warning that the rest disappeared. Caller wastes effort crafting spec fields that get silently dropped, then re-derives the actual accepted shape via `brand_spec_get` round-trip. Confirmed 2026-06-07 against `btmusic`'s Cathode Saint brand spec: wrote 4 color slots (primary / secondary / background / highlight) and 6 font slots (regular + medium + semibold + bold + mono + sans), got back 2 color slots and 4 font slots with no error.
 
 The Cathode Saint case is representative of a real class of brand system, not a one-off:
+
 - **Multi-mode palettes.** Cathode Saint has two co-equal visual modes — "vivid CRT" (phosphor green dominant) and "warm sacred" (gold dominant), plus a brand-mandated background (`#0A0A0A` deep black) and highlight (`#F4ECD8` bone white). The current 2-slot palette only captures the dominant color of one mode.
 - **Multi-family typography.** Cathode Saint uses three families on the same surface set — Cinzel (display / wordmark), IBM Plex Mono (technical / credits / lyric sheets), IBM Plex Sans (body / press). The current 1-family × 4-weight shape only fits one of them. (Brand systems with display + body + mono are routine — DoughMetrics is the rare project where one family covers everything.)
 
 **Pros:**
+
 - Either fix makes the schema match real-world brand systems OR fail loudly. No more silent-drop confusion.
 - (a) variant: zero migration for existing callers — additive optional fields are backward-compatible.
 - (b) variant: zero new schema surface — just changes nested `.strict()` posture, error message is self-explanatory.
 - Pairs naturally with new `resolveColor` / `resolveFont` overloads: `resolveColor(explicit, 'background')`, `resolveFont(explicit, 'mono')` — same pattern as the existing `'primary'`/`'secondary'` and `'regular'`/`'medium'`/`'semibold'`/`'bold'` lookups.
 
 **Cons:**
+
 - (a) bloats the schema surface; harder to discover the canonical "primary brand color" if everything is a slot. Mitigate with field ordering + JSDoc that explicitly calls out which slots are the canonical brand color vs. accent vs. surface.
 - (b) breaks anyone who currently has unused/typo'd nested keys lurking in their `ARTIFICER_BRAND_SPEC` env var. Loud failure is the point, but it's still a breaking change.
 - Either expansion needs a downstream propagation: does `gemini_generate_image` know to inject `colors.background` into prompts? Probably not today. The schema fix is half the work; tools that consume the new slots are the other half.
 
 **Context:**
+
 - Schema definition: `src/brand.ts` lines 21-115. Note `.strict()` at line 115 is on the outer `z.object(...)`, not on the nested objects.
 - Round-trip discovery path: `mcp__artificer__brand_spec_get` returns the **parsed** spec (with stripped fields), not the **raw** env var. That's how the silent drop surfaces.
 - Live caller doc for btmusic: `D:\projects\btmusic\instructions\artificer-prompts.md` — learnings log entry 2026-06-07 records the live accepted shape so the project doesn't keep relearning it.
@@ -354,8 +382,9 @@ The Cathode Saint case is representative of a real class of brand system, not a 
 ## 10. Image-model wiring refresh — Imagen retirement + nano-banana default + negative_prompt — DONE 2026-08-15
 
 **Shipped, all three parts:**
+
 - (a) **Imagen fully retired** (Brian's call, 2026-08-15 — no replacement, nano-banana takes over). Deprecation independently confirmed against ai.google.dev: `imagen-4.0-generate` sits under "Previous models" with a "will be shut down soon" notice. The `imagen-4` route is deleted from `models.json`; `gemini_image_prompt_guide` is now a retirement notice + capability-migration table; `gemini_generate_image` / `gemini_edit_image` stay registered as thin transports but **lost their baked defaults** — `model` is required unless an operator pins `ARTIFICER_IMAGEN_MODEL` / `ARTIFICER_IMAGEN_EDIT_MODEL` (new `retiredDefault` helper in `src/generation/types.ts`).
-- (b) Nano-banana promoted to **`gemini-3.1-flash-image`** — note this is the *stable GA* ID, not the `-preview` variant btmusic's `.mcp.json` pins; ai.google.dev lists no `gemini-3.1-flash-image-preview`. **btmusic should drop its `ARTIFICER_NANOBANANA_MODEL` override or repoint it.** Real per-resolution pricing seeded ($0.045 / $0.067 / $0.101 / $0.151 for 0.5K / 1K / 2K / 4K). Guide documents the siblings (`gemini-3.1-flash-lite-image`, `gemini-3-pro-image`).
+- (b) Nano-banana promoted to **`gemini-3.1-flash-image`** — note this is the _stable GA_ ID, not the `-preview` variant btmusic's `.mcp.json` pins; ai.google.dev lists no `gemini-3.1-flash-image-preview`. **btmusic should drop its `ARTIFICER_NANOBANANA_MODEL` override or repoint it.** Real per-resolution pricing seeded ($0.045 / $0.067 / $0.101 / $0.151 for 0.5K / 1K / 2K / 4K). Guide documents the siblings (`gemini-3.1-flash-lite-image`, `gemini-3-pro-image`).
 - (c) `negative_prompt` now **fails fast** on `gemini_generate_image` and `gemini_edit_image` with a message that names the fix (fold exclusions into the positive prompt), instead of surfacing an opaque SDK 400. The guard is skipped when `GOOGLE_CLOUD_PROJECT` is set, since Vertex does accept the parameter.
 
 **Not done here — possible follow-up:** `gemini-3.1-flash-lite-image` and `gemini-3-pro-image` are documented in the guide but not seeded as their own catalog routes.
@@ -378,9 +407,9 @@ Source: btmusic upscale bake-off blocked 2026-05-26 (`instructions/artificer-pro
 
 ## 12. Image composite/canvas fixes — DONE 2026-08-15
 
-**(a) Composite desaturation — root-caused and fixed.** ImageMagick adopts the **first** image's colorspace for a composite. A solid dark background is routinely stored as a *grayscale* PNG — ImageMagick writes one that way itself whenever an image carries no color — so the colored overlay was converted to gray on the way in. That is why the source and the resize both checked out gold: the color died at the composite, in the base image nobody inspected. Reproduced exactly as reported: `srgb(212,175,55)` → `gray(212)`, identical on `Over` and `Lighten`.
+**(a) Composite desaturation — root-caused and fixed.** ImageMagick adopts the **first** image's colorspace for a composite. A solid dark background is routinely stored as a _grayscale_ PNG — ImageMagick writes one that way itself whenever an image carries no color — so the colored overlay was converted to gray on the way in. That is why the source and the resize both checked out gold: the color died at the composite, in the base image nobody inspected. Reproduced exactly as reported: `srgb(212,175,55)` → `gray(212)`, identical on `Over` and `Lighten`.
 
-**Scope was wider than filed.** The same defect hit every tool landing a colored layer on a caller-supplied base: `composite`, `watermark`, AND `gradient-overlay` (gold→darkred gradient collapsed to `gray(211)`→`gray(140)`). So every branded banner, watermark, and gradient built on a dark background has been silently desaturating. Fixed via a shared `FORCE_SRGB` promotion of the base. `rounded_corners` / `mask_apply` composite a grayscale *mask* onto a color base, so the base colorspace already wins — verified unaffected, left alone.
+**Scope was wider than filed.** The same defect hit every tool landing a colored layer on a caller-supplied base: `composite`, `watermark`, AND `gradient-overlay` (gold→darkred gradient collapsed to `gray(211)`→`gray(140)`). So every branded banner, watermark, and gradient built on a dark background has been silently desaturating. Fixed via a shared `FORCE_SRGB` promotion of the base. `rounded_corners` / `mask_apply` composite a grayscale _mask_ onto a color base, so the base colorspace already wins — verified unaffected, left alone.
 
 Two risks checked before adopting the approach: Gray→sRGB is **value-preserving** across the tonal range (0/10/64/128/192/255 all round-trip exactly, so no brightness shift), and ImageMagick still writes a genuinely colorless result back as grayscale (so no file bloat).
 
@@ -392,7 +421,7 @@ Commits `1a1a4f1`, `e122be7`. 9 integration tests assert real pixel color and ge
 
 ## 13. background-remove — flood-fill toggle + ML-segmentation mode — (a) DONE 2026-08-15, (b) OPEN
 
-**(a) Flood-fill shipped.** `mode: "color-key" | "flood-fill"`, default `color-key` so existing callers are unaffected. The description had advertised flood fill since day one while only keying was implemented. Keying removes every matching pixel, so a white background punches holes through white *inside* the subject — the swiss-cheese failure. Flood-fill seeds from **all four corners** (one seed is not enough: a subject touching an edge, or a background split by the subject, leaves unreachable regions) and honors `replace_color`. `target_color` is ignored in this mode — each seed samples the color already at that corner.
+**(a) Flood-fill shipped.** `mode: "color-key" | "flood-fill"`, default `color-key` so existing callers are unaffected. The description had advertised flood fill since day one while only keying was implemented. Keying removes every matching pixel, so a white background punches holes through white _inside_ the subject — the swiss-cheese failure. Flood-fill seeds from **all four corners** (one seed is not enough: a subject touching an edge, or a background split by the subject, leaves unreachable regions) and honors `replace_color`. `target_color` is ignored in this mode — each seed samples the color already at that corner.
 
 **(b) ML-segmentation mode — still open.** Wrapping rembg / U²-Net for soft-glow and photographic backgrounds remains the real fix for cutouts that color-keying and flood-fill both can't handle; flood-fill only helps when the background is flat and edge-connected. This still carries a new binary/model dependency, which is the reason it was deferred and remains so. Brand glow-on-dark assets continue to need the luminance-as-alpha ffmpeg workaround. Source: btmusic `instructions/bg-removal-recipes.md`.
 
@@ -446,7 +475,7 @@ The input schema is located via the POST operation's `requestBody.$ref`, not by 
 
 **Staleness guard:** `yarn catalog:keys:check` fails if the map no longer matches the specs, wired into the Typecheck CI job and the `ci` script. Without it the warning could start describing a schema that no longer exists — the same class of lie it was built to prevent.
 
-**Verified:** +17 tests (895 passing). The end-to-end path is tested against the *real committed map* in `music-warning.test.ts`, deliberately a separate file from `music.test.ts` because that one mocks `node:fs/promises` wholesale and would mask the load. Wiring proven to bite by deleting it (1 test fails). Guide updated with the warning text.
+**Verified:** +17 tests (895 passing). The end-to-end path is tested against the _real committed map_ in `music-warning.test.ts`, deliberately a separate file from `music.test.ts` because that one mocks `node:fs/promises` wholesale and would mask the load. Wiring proven to bite by deleting it (1 test fails). Guide updated with the warning text.
 
 **Scope note:** wired to `fal_generate_music` only, which is what this item filed. `fal_generate_video` / `_speech` / `_transcribe` have the identical silent-drop exposure and the checker is model-agnostic — adopting it there is a one-line change per transport, deliberately not taken here to keep the blast radius to the filed scope. Filed as **#16b**.
 
@@ -481,7 +510,8 @@ Source: btmusic `instructions/artificer-prompts.md` 2026-06-05.
 ## 17. Music-model guide + catalog accuracy (ElevenLabs / Lyria 3) — DONE 2026-08-15
 
 **Shipped, all three parts:**
-- (a) ElevenLabs Music guide corrected. It **does** support vocals and authored lyrics — via `composition_plan` sections carrying a `lines` array (max 30 lines/section, 200 chars/line), verified against the ElevenLabs Music API reference. The old "no native lyrics support / primarily instrumental" reasoning is replaced with the accurate constraint: no lyrics field in *prompt mode*, and no vocalist-level control (per-section multi-vocalist is partial/unreliable). Routing conclusion unchanged.
+
+- (a) ElevenLabs Music guide corrected. It **does** support vocals and authored lyrics — via `composition_plan` sections carrying a `lines` array (max 30 lines/section, 200 chars/line), verified against the ElevenLabs Music API reference. The old "no native lyrics support / primarily instrumental" reasoning is replaced with the accurate constraint: no lyrics field in _prompt mode_, and no vocalist-level control (per-section multi-vocalist is partial/unreliable). Routing conclusion unchanged.
 - (b) **Lyria 3 vocal capability confirmed — Brian was right.** Google's music-generation docs state it delivers "structural coherence, including vocals, timed lyrics, and full instrumental arrangements." The guide's "Lyria 3 is mostly instrumental; avoid vocal requests" line was wrong — it had carried Lyria 2's instrumental-only constraint across. Replaced with a "Lyria 3 sings" section that contrasts it against fal-hosted Lyria 2.
 - (c) New optional `vocals` field on catalog entries (`"vocal_capable"` | `"instrumental_only"`), typed in `src/catalog/catalog.ts` and passed through `filterCatalog` — note the filter reconstructs entries field-by-field, so any future entry-level field must be added there too or it is silently dropped. Applied to lyria-3, eleven-music, minimax-music-2.6 (vocal_capable) and lyria-2, stable-audio-2.5 (instrumental_only). Lyria 3's cost normalized to real figures from Google's pricing page ($0.04/song clip, $0.08/song Pro); Lyria RealTime has no published per-unit price and now says so explicitly instead of implying one exists.
 
@@ -494,6 +524,7 @@ Source: btmusic memory `artificer_mcp.md`, `instructions/artificer-prompts.md` c
 **Shipped as catalog + guide only — no new transport.** fal began hosting H3 on 2026-08-01, so `fal_generate_video` already reaches it. The direct MiniMax v2 API (task-create + poll against `platform.minimax.io`) was **not** needed and was not built.
 
 **Three routes seeded** in `video.general`, specs synced to `src/catalog/fal-specs/minimax-h3-*`:
+
 - `minimax-h3-t2v` → `minimax/h3/text-to-video`
 - `minimax-h3-i2v` → `minimax/h3/image-to-video` — **supports first-to-last keyframe** via `end_image_url` (Brian, 2026-08-15)
 - `minimax-h3-r2v` → `minimax/h3/reference-to-video` — up to 12 reference files across image/video/audio lists
@@ -501,6 +532,7 @@ Source: btmusic memory `artificer_mcp.md`, `instructions/artificer-prompts.md` c
 **Endpoint ids carry no `fal-ai/` prefix** — they are `minimax/h3/...`. A `fal-ai/minimax/hailuo-03/...` alias also resolves but exposes a reduced schema (no `seed`, no `enable_prompt_expansion`); the catalog uses the `minimax/h3/` form.
 
 **Corrections to the original filing**, all verified against the synced specs:
+
 - Duration is **5–15s**, not 4–15s.
 - Resolutions are **480P / 768P / 2K / 4K**, not just 768P/2K. Only 480P and 768P are native — **2K and 4K upscale a 768P base**, so they cost more without adding real detail.
 - Pricing is **$0.05 / $0.08 / $0.13 / $0.16 per second** by tier — not the $0.26/s at 2K that secondary sources reported.
@@ -516,9 +548,10 @@ Source: btmusic memory `artificer_mcp.md`, `instructions/artificer-prompts.md` c
 
 ### The mechanism change: `deprecated` is now a first-class field
 
-The original filing called the deprecations a data problem. They were a **schema** problem. fal does not publish retirements in a section of their own — they replace the body of `## Pricing` with a one-line notice, so `extractPricing` returned it and the script wrote *"This model has been deprecated…"* straight into `cost`. That destroyed the last known price and left prose that isn't a price in the field callers read as one.
+The original filing called the deprecations a data problem. They were a **schema** problem. fal does not publish retirements in a section of their own — they replace the body of `## Pricing` with a one-line notice, so `extractPricing` returned it and the script wrote _"This model has been deprecated…"_ straight into `cost`. That destroyed the last known price and left prose that isn't a price in the field callers read as one.
 
 Fixed at three levels:
+
 - **`scripts/sync-fal-specs.mjs`** — new `extractDeprecation()` routes the notice to `route.deprecated` and leaves `cost` alone. It also clears a stale flag if a route recovers, and prints a dedicated "N DEPRECATED route(s)" block so retirements aren't buried under several hundred lines of "wrote" chatter.
 - **`src/catalog/catalog.ts`** — `deprecated?: string` on `AccessRoute`. A deprecated route is **not `available`** and is hidden from `model_catalog` by default; `include_unavailable: true` shows it with the notice attached.
 - **`tests/unit/catalog/integrity.test.ts`** — a guard that fails the build if a deprecation notice ever appears in a `cost` field again. Verified to bite by re-poisoning the catalog.
@@ -526,27 +559,31 @@ Fixed at three levels:
 **Why hide rather than merely label:** a deprecated fal route still returns **200**. It just serves a different model than the slug named. That is precisely the hidden routing this server exists to avoid, so the catalog must not offer it as a normal choice. `cost` on a deprecated route is retained as the last observed price and is explicitly **not authoritative** — billing follows whatever model fal redirects to.
 
 ### Deprecated (still answer, serve something else)
-| Slug | Actually serves |
-|------|-----------------|
-| `seedance-1-lite-t2v` | Seedance 1.0 Pro Fast |
-| `seedance-1-lite-i2v` | Seedance 1.0 Pro Fast |
+
+| Slug                  | Actually serves                                      |
+| --------------------- | ---------------------------------------------------- |
+| `seedance-1-lite-t2v` | Seedance 1.0 Pro Fast                                |
+| `seedance-1-lite-i2v` | Seedance 1.0 Pro Fast                                |
 | `seedance-1-lite-ref` | **Grok Imagine Video** — a different vendor entirely |
 
 The `-ref` redirect is the nasty one: it leaves the Seedance family, so multi-reference and audio behavior are Grok's, not what `seedance_prompt_guide` documented. Guide now carries a migration table pointing at `seedance-1-pro-fast-*` and `seedance-2-*-ref`.
 
 ### Retired (404 on both openapi and llms.txt — verified, no renamed successor)
+
 `wan-2.6-t2v` · `ltx-video-lora-i2v` · `hunyuan-video-img2vid-lora-i2v` · `transpixar-t2v` · `animatediff-sparsectrl-lcm-t2v` · `qwen-3-guard`
 
 Entries and their spec dirs deleted; every referencing guide updated. **Two of these cost real capability, not just a route:**
-- **TransPixar was the catalog's only alpha-channel video model.** There is now *no* route producing video with a real alpha channel. The fallback (generate on flat color → `background_remove` color-key → `composite`) is materially worse on soft edges, motion blur, and particles/smoke — which is exactly what the model was for. Recorded in `specialized_video_prompt_guide`.
-- **`qwen-3-guard` was the only `safety` entry, so the whole capability is now empty.** fal's model index returns nothing for guard/moderation/safety, so there is no replacement to point at. `fal_classify_text` still works but now *requires* an explicit `model` — the existing "exactly one non-stub entry" auto-default rule already handles zero by throwing an actionable error, so no code change was needed, only honest tool descriptions.
+
+- **TransPixar was the catalog's only alpha-channel video model.** There is now _no_ route producing video with a real alpha channel. The fallback (generate on flat color → `background_remove` color-key → `composite`) is materially worse on soft edges, motion blur, and particles/smoke — which is exactly what the model was for. Recorded in `specialized_video_prompt_guide`.
+- **`qwen-3-guard` was the only `safety` entry, so the whole capability is now empty.** fal's model index returns nothing for guard/moderation/safety, so there is no replacement to point at. `fal_classify_text` still works but now _requires_ an explicit `model` — the existing "exactly one non-stub entry" auto-default rule already handles zero by throwing an actionable error, so no code change was needed, only honest tool descriptions.
 
 Also lost: SparseCtrl conditioning (only AnimateDiff variant offering it) and LoRA-capable Hunyuan **i2v** (t2v LoRA survives).
 
 **Second round, 2026-09-24 (#46):** `hunyuan-video-lora-t2v` · `sana-video-t2v` · `lyra-2-zoom-i2v` also 404 on both surfaces with no successor in fal's index, and were retired the same way. Hunyuan now has **no** LoRA route at all (the guide points LoRA work at the LTX LoRA variants), `sana_prompt_guide` was removed with its only model, and Lyra-2 was the only pseudo-3D zoom route. This was the first `!` commit, and it shipped as 0.11.0; UPGRADING.md has the migration. Note that fal's model index still listed the already-dead `hunyuan-video-img2vid-lora`, so the index lags behind reality: a 404 on both surfaces is the signal to trust.
 
 ### Price changes worth knowing
-- **`ltx-video-13b-distilled-i2v` switched from per-video to per-second billing** — $0.04/video → $0.04/s, or $0.08/s with the detail pass. A 10s clip went from a flat $0.04 to $0.40–$0.80, a **10–20× jump** for anyone budgeting against the old flat rate. Its sibling `-t2v` did *not* change, so the pair no longer behaves alike. Flagged loudly in `ltx_video_prompt_guide`.
+
+- **`ltx-video-13b-distilled-i2v` switched from per-video to per-second billing** — $0.04/video → $0.04/s, or $0.08/s with the detail pass. A 10s clip went from a flat $0.04 to $0.40–$0.80, a **10–20× jump** for anyone budgeting against the old flat rate. Its sibling `-t2v` did _not_ change, so the pair no longer behaves alike. Flagged loudly in `ltx_video_prompt_guide`.
 - LTX-2.3 closed tier rose: Fast $0.04→$0.06/s, Pro i2v $0.06→$0.08/s at 1080p. Pro and Fast have each converged to one rate across t2v and i2v.
 - Seedance 2.x pricing now documents 1080p at $0.682/s and a cheaper $0.008/1k-token 4k rate; the 720p rate ticked $0.3024→$0.3034.
 
@@ -577,14 +614,15 @@ Also lost: SparseCtrl conditioning (only AnimateDiff variant offering it) and Lo
 The original research said native audio, based on two Google blogs. A later pass in this same session "corrected" that to silent — **and the correction was itself wrong.** It came from reading `ai.google.dev/gemini-api/docs/video`, which is the **Veo** page, rather than `/docs/omni`, which is the page for this model. Brian caught it against the Vertex model card.
 
 Authoritative now:
-- `ai.google.dev/gemini-api/docs/omni`: *"The model generates a video with audio based on your text description"* and *"By default the model will try to generate an appropriate audio track for a video."*
-- Vertex model card: *Capabilities → Sound generation: Speech, music, sound effects — **Supported***.
 
-**The model card looks self-contradictory and is not.** Its *Modalities* row says *Audio: Not supported* — that governs the **message interface** (no audio input, no audio-only response). *Sound generation* governs the track **inside the generated video**. The technical-specs row confirms it by listing *"Maximum video length (with audio)"* separately from *"(without audio)"*. The one real consequence of the Modalities row: **no audio reference conditioning** — you cannot condition a generation on a supplied audio clip.
+- `ai.google.dev/gemini-api/docs/omni`: _"The model generates a video with audio based on your text description"_ and _"By default the model will try to generate an appropriate audio track for a video."_
+- Vertex model card: _Capabilities → Sound generation: Speech, music, sound effects — **Supported**_.
+
+**The model card looks self-contradictory and is not.** Its _Modalities_ row says _Audio: Not supported_ — that governs the **message interface** (no audio input, no audio-only response). _Sound generation_ governs the track **inside the generated video**. The technical-specs row confirms it by listing _"Maximum video length (with audio)"_ separately from _"(without audio)"_. The one real consequence of the Modalities row: **no audio reference conditioning** — you cannot condition a generation on a supplied audio clip.
 
 **There is no way to disable the audio.** No `generate_audio` flag, no silent mode. Levers are prompt-steering (describe the audio; `"No dialogue"` suppresses speech) or stripping downstream.
 
-**Consequence for the music-video pilot — reverses the earlier note.** Every Omni clip arrives with a synthetic soundtrack that **must be stripped** before the Cathode Saint master goes under it, so the "strip/replace the baked audio" step the *original* plan called for is back. That makes **MiniMax H3 the lower-friction pick** for fixed-master B-roll: fal returns a bare video file with no audio track and no strip step. Omni's advantages remain conversational editing and native audio where you actually want diegetic sound.
+**Consequence for the music-video pilot — reverses the earlier note.** Every Omni clip arrives with a synthetic soundtrack that **must be stripped** before the Cathode Saint master goes under it, so the "strip/replace the baked audio" step the _original_ plan called for is back. That makes **MiniMax H3 the lower-friction pick** for fixed-master B-roll: fal returns a bare video file with no audio track and no strip step. Omni's advantages remain conversational editing and native audio where you actually want diegetic sound.
 
 **Process note worth keeping:** the failure was overriding a correct finding with a worse source and stating it confidently across the guide, tool description, catalog, and PR text. When a doc page contradicts prior research, check that it is the page for the model in question before treating it as authoritative.
 
@@ -595,6 +633,7 @@ Authoritative now:
 **VERIFIED LIVE 2026-08-17 (Brian).** A real generation completed and downloaded on 0.10.1. The request shape built from SDK types plus docs was correct; the Interactions API create/poll contract works as implemented.
 
 **It took two bugs to get there, and the test suite caught neither:**
+
 1. The audio claim was wrong — documentation error, corrected in #37 after Brian checked the Vertex model card. No test can verify a prose claim.
 2. The download 403'd on the very first real call — Omni serves results from `generativelanguage.googleapis.com` behind the API key and the transport sent no `x-goog-api-key`. Invisible because the tests mocked `downloadAndWrite` wholesale and never inspected its arguments. Fixed in #39 / 0.10.1, with the rule extracted to a shared `geminiDownloadHeaders()` so Veo and Omni cannot diverge again.
 
@@ -610,7 +649,8 @@ Authoritative now:
 
 **Why:** Veo is Artificer's current premium video route; the btmusic cinematic-music-video pilot (#18 + btmusic task #177) was set to A/B Veo vs MiniMax-H3. If omni-flash supersedes Veo, wire it in so the pipeline rides the successor rather than a deprecating model. Source: Brian 2026-08-15.
 
-**Findings (researched 2026-08-15; official Google sources):** CONFIRMED real — public preview **2026-06-30**. A Gemini-family conversational **video model with native audio** (omni-*input*: text/image/video references -> video+audio OUT; image generation is a SEPARATE model, "Nano Banana 2 Lite" — check whether Artificer's `gemini_nanobanana_generate_image` should target v2 Lite).
+**Findings (researched 2026-08-15; official Google sources):** CONFIRMED real — public preview **2026-06-30**. A Gemini-family conversational **video model with native audio** (omni-_input_: text/image/video references -> video+audio OUT; image generation is a SEPARATE model, "Nano Banana 2 Lite" — check whether Artificer's `gemini_nanobanana_generate_image` should target v2 Lite).
+
 - **Capabilities:** text/image/reference-to-video + conversational video editing; **720p** today ("higher soon"); **3-10s clips, NO extend/interpolation yet** (concatenate downstream); 24 fps; aspect ratios **9:16 + 16:9** both confirmed.
 - **Access + API:** works on **both** the Gemini Dev API (`GOOGLE_API_KEY`) and Vertex — no Vertex-only lock. **NEW surface: the Interactions API** (`POST https://generativelanguage.googleapis.com/v1beta/interactions`), NOT the Veo `google-genai` `generate_videos` call. Async: poll `GET /v1beta/files/{id}` until `state == ACTIVE`. Key params: `generation_config.video_config.task` in {`text_to_video`,`image_to_video`,`reference_to_video`,`edit`}, `response_format.type:"video"` (+`delivery:"uri"`), `previous_interaction_id` for stateful multi-turn edits, aspect ratio in config. (Audio-reference input + scene-extension = "coming soon.")
 - **Cost:** **$0.10/sec** of output = same as Veo 3.1 Fast (~$1.00 per 10s clip, audio included).
@@ -631,27 +671,28 @@ Authoritative now:
 
 ### Original filing (kept for history)
 
-**What:** Seed catalog routes + a prompt guide for fal's audio-driven performance models, so a music video can put a character on camera *singing the real vocal*. Two families:
+**What:** Seed catalog routes + a prompt guide for fal's audio-driven performance models, so a music video can put a character on camera _singing the real vocal_. Two families:
 
-| Family | Slug candidates (all verified 200 on fal openapi 2026-09-24) | Live fal price | Notes |
-|---|---|---|---|
-| **image + audio → video** (generate a singing shot from a still keyframe) | `fal-ai/bytedance/omnihuman/v1.5` | $0.16/s | 30s/call at 1080p (60s at 720p); prompt + mask inputs; strongest singing claims (breath, high-note expression, body motion) |
-| | `minimax/h3-max/lip-sync/image-to-video` | $0.05 (480p) / $0.08 (768p) / $0.16 (1080p) / $0.32 (2K) per s | 5-15s/call (longer audio trimmed); set `enable_transcription:false` for singing |
-| | `fal-ai/ai-avatar/multi` (MultiTalk) | $0.20/s (2x at 720p) | **only live fal option for two people in one shot** (one image + one audio per person); 720p max; turn-taking, may not hold simultaneous singing |
-| | `fal-ai/infinitalk`, `fal-ai/wan/v2.2-14b/speech-to-video` | ~$0.10-0.20/s | 720p max; lower priority |
-| **video + audio → video** (re-lip-sync an existing Kling/Veo clip) | `fal-ai/sync-lipsync/v3` (sync-3) | $8/min (~$0.133/s) | Handles tight close-ups, profiles, occluders (mics, hands); `sync_mode` for duration mismatch (default `cut_off`); one face per pass |
-| | `fal-ai/sync-lipsync/react-1` | $10/min | Also re-drives expression/head motion (`emotion` enum); for when the source clip's acting is flat |
-| | `fal-ai/kling-video/lipsync/audio-to-video` | $0.014 per input-video second, **rounded up to 5s increments** | Very cheap first-pass tool; 2-10s input clips (fits Kling/Veo clip lengths) |
+| Family                                                                    | Slug candidates (all verified 200 on fal openapi 2026-09-24) | Live fal price                                                 | Notes                                                                                                                                            |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **image + audio → video** (generate a singing shot from a still keyframe) | `fal-ai/bytedance/omnihuman/v1.5`                            | $0.16/s                                                        | 30s/call at 1080p (60s at 720p); prompt + mask inputs; strongest singing claims (breath, high-note expression, body motion)                      |
+|                                                                           | `minimax/h3-max/lip-sync/image-to-video`                     | $0.05 (480p) / $0.08 (768p) / $0.16 (1080p) / $0.32 (2K) per s | 5-15s/call (longer audio trimmed); set `enable_transcription:false` for singing                                                                  |
+|                                                                           | `fal-ai/ai-avatar/multi` (MultiTalk)                         | $0.20/s (2x at 720p)                                           | **only live fal option for two people in one shot** (one image + one audio per person); 720p max; turn-taking, may not hold simultaneous singing |
+|                                                                           | `fal-ai/infinitalk`, `fal-ai/wan/v2.2-14b/speech-to-video`   | ~$0.10-0.20/s                                                  | 720p max; lower priority                                                                                                                         |
+| **video + audio → video** (re-lip-sync an existing Kling/Veo clip)        | `fal-ai/sync-lipsync/v3` (sync-3)                            | $8/min (~$0.133/s)                                             | Handles tight close-ups, profiles, occluders (mics, hands); `sync_mode` for duration mismatch (default `cut_off`); one face per pass             |
+|                                                                           | `fal-ai/sync-lipsync/react-1`                                | $10/min                                                        | Also re-drives expression/head motion (`emotion` enum); for when the source clip's acting is flat                                                |
+|                                                                           | `fal-ai/kling-video/lipsync/audio-to-video`                  | $0.014 per input-video second, **rounded up to 5s increments** | Very cheap first-pass tool; 2-10s input clips (fits Kling/Veo clip lengths)                                                                      |
 
 Skip: `fal-ai/bytedance/omnihuman` (1.0, $0.14/s, superseded by 1.5), `fal-ai/sync-lipsync/v2/pro` (superseded by sync-3), `fal-ai/hunyuan-avatar` (~$0.28/s, poor value), LongCat Multi-Avatar (deprecated on fal).
 
-**Why:** btmusic (Cathode Saint) cinematic-music-video pilot. The current catalog has only `kling-ai-avatar-v2-pro` ($0.115/s, 60s audio cap on fal) and `veed-fabric-1.0` (720p ceiling, talking-head tuned). Neither is the right pick for photoreal 1080p *singing*, and there is no video+audio re-lip-sync route at all. The third-party music-video platforms evaluated 2026-09-24 (Flova, ACE Studio, MusVideo, SunoMV, Neural Frames, Freebeat, etc.) were mostly resellers of the same fal models; **on-camera lip-sync was the one capability they had that Artificer lacked.**
+**Why:** btmusic (Cathode Saint) cinematic-music-video pilot. The current catalog has only `kling-ai-avatar-v2-pro` ($0.115/s, 60s audio cap on fal) and `veed-fabric-1.0` (720p ceiling, talking-head tuned). Neither is the right pick for photoreal 1080p _singing_, and there is no video+audio re-lip-sync route at all. The third-party music-video platforms evaluated 2026-09-24 (Flova, ACE Studio, MusVideo, SunoMV, Neural Frames, Freebeat, etc.) were mostly resellers of the same fal models; **on-camera lip-sync was the one capability they had that Artificer lacked.**
 
 **Likely no new transport needed.** `fal_generate_video` already maps `image_url` + `audio_url`, and `video_url` can ride `extra_params` + `extra_files` (upload via `resolveForFal`). **Confirm at build:** each output schema returns a single `video` File that the existing downloader handles; per #19's lesson, make one live call per route before calling it done (mocks can't see output-shape surprises).
 
-**Scope decision to re-open:** #6 records that video-sync (lip-sync to existing video) was *explicitly excluded from Phase 5 by user direction*. This filing asks to reverse that for the vid+audio family. It does not require building #6's general `fal_edit_video` transport.
+**Scope decision to re-open:** #6 records that video-sync (lip-sync to existing video) was _explicitly excluded from Phase 5 by user direction_. This filing asks to reverse that for the vid+audio family. It does not require building #6's general `fal_edit_video` transport.
 
 **Guide content (singing-specific, the part the vendor docs don't cover):**
+
 - Feed the **isolated vocal stem**, not the full mix (drums/guitars read as mouth motion; reverb tails smear word endings). Lay the full master back over the finished edit. Relates to #21.
 - Chunk long passages at **phrase boundaries** to fit per-call caps (OmniHuman 30s at 1080p, H3 Max 15s); start each chunk slightly before the vocal entrance so the first consonant has room.
 - **Duets:** no fal model reliably renders two faces singing at once. Default to single-singer shots; for a two-shot, run sync-3 twice (one face + that singer's audio per pass). Demucs does not split two vocalists, so duet vocals must be split by timestamp (mute the other voice's lines) before per-singer passes.
@@ -690,6 +731,7 @@ Skip: `fal-ai/bytedance/omnihuman` (1.0, $0.14/s, superseded by 1.5), `fal-ai/sy
 ### Original filing (kept for history)
 
 **What:** Seed `luma/agent/ray/v3.2/*` (note: **no `fal-ai/` prefix**, like H3), verified live 2026-09-24:
+
 - `.../image-to-video`: first/last frame (`image_url` + `end_image_url`) **or** `keyframes` (1-64 image URLs) + `keyframe_indexes` (output-frame positions at 24fps: 5s → 0-120, 10s → 0-240). The two modes are mutually exclusive. **10s and HDR only unlock with multi-keyframe input.** Price per 5s: $0.15 (540p) / $0.30 (720p) / **$1.20 (1080p) ≈ $0.24/s**; HDR 1080p $2.40/5s.
 - `.../video-to-video` (modify an existing clip): 1080p $2.16/5s ≈ **$0.43/s**.
 - `.../reframe` and `.../text-to-video`.
@@ -722,7 +764,7 @@ Closed without separate work: the weekly drift job (#2) catches both failure mod
 
 **Shipped** as `video_make_loop` with `mode: rebound | crossfade | check`. What changed from the filing below, and why:
 
-- **`target_duration` became `max_duration` + `min_duration`.** Clamping a *finished* loop to a target cuts it mid-cycle and puts the seam back. So `max_duration` trims the **source** before the loop is built, and `min_duration` repeats **whole cycles**. If both can't hold, the seamless length wins and the result carries a warning.
+- **`target_duration` became `max_duration` + `min_duration`.** Clamping a _finished_ loop to a target cuts it mid-cycle and puts the seam back. So `max_duration` trims the **source** before the loop is built, and `min_duration` repeats **whole cycles**. If both can't hold, the seamless length wins and the result carries a warning.
 - **Everything is frame-exact.** Rebound is `2n − 2` frames: the turn-around frame and the wrap frame are each dropped from the reversed half, since otherwise each shows twice and stalls. Crossfade output is `n − k` frames.
 - **The crossfade uses `blend` with a timestamp ramp, not `xfade`.** Measured: both `xfade` and a frame-counter (`N`) ramp leave a faint ghost of the tail on the last frame, so the seam scored below the clip's own frame steps. With a `T` ramp the last frame is the clean head frame, and the seam scores the same as the source's natural step (0.909 vs 0.910).
 - **The `check` verdict is relative, not a fixed threshold.** It compares the last→first SSIM against the clip's own frame-to-frame SSIMs (below the 10th percentile counts as a seam). Fast footage has low adjacent SSIM everywhere, so an absolute cutoff would fail good action loops and pass bad static ones. Every built loop is also checked, and the result reports it.
@@ -732,10 +774,11 @@ Closed without separate work: the weekly drift job (#2) catches both failure mod
 ### Original filing (kept for history)
 
 **What:** A local (non-fal) video tool in the existing `video_*` family that turns a clip into a seamless loop for platform loop surfaces. Modes:
+
 - `rebound`: play forward then reversed (`reverse` + concat), dropping the duplicated turn-around frames so there is no stutter at either end. Matches Spotify Canvas's own "rebound" loop style.
 - `crossfade`: blend the tail into the head (`xfade` of the last N ms over the first N ms, output shortened by N) so a clip whose first and last frames differ still loops without a visible jump.
 - `check`: report the seam delta (e.g. SSIM/PSNR of last frame vs first frame) so a caller can tell whether a first=last-frame generation actually closed the loop before shipping it.
-Plus: `target_duration` (clamp or pad to a platform window, e.g. Canvas 3-8s), and always output **silent** (loop surfaces play over the track).
+  Plus: `target_duration` (clamp or pad to a platform window, e.g. Canvas 3-8s), and always output **silent** (loop surfaces play over the track).
 
 **Why:** btmusic Spotify Canvas pipeline (per-track 9:16 loops, 3-8s). Canvas is harvested from music-video "loop shots" or generated standalone; generated clips rarely close the loop exactly, even with first=last-frame anchoring. Today this is hand-rolled ffmpeg every time. Also applies to Apple motion art (seamless loop is a hard rejection criterion, if that path ever opens) and to TikTok/IG ambient loops.
 
@@ -748,6 +791,7 @@ Plus: `target_duration` (clamp or pad to a platform window, e.g. Canvas 3-8s), a
 ## 25. nano-banana: output format mismatch + no resolution knob — DONE 2026-09-24
 
 **Shipped**, with all three fix options:
+
 - **Format follows the extension.** The returned bytes are sniffed (magic bytes, not the API's MIME type), and when they disagree with a `.png` / `.jpg` / `.webp` / `.gif` output they are converted with ImageMagick. Matching bytes are written untouched. An extension the tool cannot convert to (e.g. `.tiff`) is written as-is, and the result says what the bytes actually are, instead of mislabeling silently. The result line now reports pixel size and any conversion: `saved to bust.png (896×1200, converted from JPEG to PNG)`. Requesting PNG from the API is not possible: `outputMimeType` / `imageOutputOptions` are Vertex-only per the SDK types.
 - **`image_size`: `1K | 2K | 4K`**, sent only when set, so existing calls keep the 1K default. Values come from the pinned SDK's `ImageConfig` type. **Not yet confirmed live** (no `GOOGLE_API_KEY` in the dev shell). The first real 2K call should confirm that the result reports the larger dimensions.
 - **Reference images** are sent with the MIME type of their bytes, falling back to the extension.
@@ -760,6 +804,7 @@ Plus: `target_duration` (clamp or pad to a platform window, e.g. Canvas 3-8s), a
 **Observed (btmusic vocalist busts, 2026-09-24):** every `gemini_nanobanana_generate_image` call with `output: "*.png"` (models `gemini-3-pro-image` and `gemini-3.1-flash-image`) wrote **JPEG bytes into a `.png` file** (`magick identify` → `JPEG 896x1200`). All outputs were **896×1200** at 3:4 (≈1K), although the catalog prices 2K and 4K tiers for this model.
 
 **Cause (read in `src/generation/nanobanana.ts`):**
+
 1. Line ~98-108: `ext = extname(output) || '.png'`, then the returned `inlineData` bytes are written verbatim with `inline.mimeType ?? 'image/png'`. The model returns `image/jpeg`; nothing converts or renames, so the extension lies.
 2. No image-size parameter is sent (Gemini image config `imageSize` e.g. `"1K" | "2K" | "4K"` on the models that support it), so every call gets the default ~1K. There is no way to buy the 2K/4K tier the catalog advertises.
 3. Latent: `mimeFromPath(reference_images[i])` trusts the extension, so these same mislabeled files get sent back as `image/png` when reused as references. It worked in practice, but it is the wrong MIME type on the wire.
@@ -767,6 +812,7 @@ Plus: `target_duration` (clamp or pad to a platform window, e.g. Canvas 3-8s), a
 **Why it matters:** downstream tools that key off the extension break silently. btmusic's brand-metadata pipeline writes **PNG tEXt** chunks, which do not exist in a JPEG, so assets would ship untagged. Canonical brand masters also need ≥2K. (btmusic worked around it by re-encoding with `magick ... PNG:out.png`.)
 
 **Fix options:**
+
 - Honor the requested extension: if `output` ends in `.png` and the model returned JPEG, transcode (sharp/ImageMagick is already a dependency of the image tools), or write the true extension and return the real path. At minimum return the actual MIME type/extension in the tool result and warn.
 - Add `image_size` (`1K`/`2K`/`4K`) to the tool schema, pass it through to the Gemini image config, and document the per-tier price from `model_catalog` in `gemini_nanobanana_prompt_guide`.
 - Sniff reference-image MIME from magic bytes, not the extension.
@@ -777,9 +823,10 @@ Plus: `target_duration` (clamp or pad to a platform window, e.g. Canvas 3-8s), a
 
 ## 32. fal transports: no request_id on a long queue wait, no way to resume — DONE 2026-11-11
 
-**Cause:** every fal tool called `client.subscribe(model, { startTimeout: poll_timeout_seconds })`. In `@fal-ai/client` 1.9.6, `startTimeout` is a server-side limit on time spent *waiting in the queue* only, and the client-side `timeout` is documented as not enforced. A job that left the queue and then sat IN_PROGRESS was waited on forever, and `subscribe` exposes the request_id only when it throws.
+**Cause:** every fal tool called `client.subscribe(model, { startTimeout: poll_timeout_seconds })`. In `@fal-ai/client` 1.9.6, `startTimeout` is a server-side limit on time spent _waiting in the queue_ only, and the client-side `timeout` is documented as not enforced. A job that left the queue and then sat IN_PROGRESS was waited on forever, and `subscribe` exposes the request_id only when it throws.
 
 **Shipped:**
+
 - `runFalJob` (`src/generation/fal/queue.ts`) replaces `subscribe` in all eight fal tools: `queue.submit`, then `queue.status` every 2 s against a deadline the tool enforces, then `queue.result`. Three status errors in a row end the wait; one or two are ridden out.
 - **The request_id is visible from submit:** logged to stderr, sent as an MCP progress message when the client passes a progressToken (status changes and queue position follow), and appended to a local job log (`<tmpdir>/artificer/fal-jobs.jsonl`, override with `ARTIFICER_FAL_JOBS_FILE`). The log survives a stopped call, whose reply never arrives.
 - **On timeout the job is cancelled on fal** (Brian's call: a job nobody collects should not keep billing), and the error names the request_id, the last status and queue position, the wait, and the `fal_fetch_result` call to check whether it finished anyway. A client cancellation of the tool call (`extra.signal`) cancels the fal job the same way. `registerTool` now passes the SDK's request `extra` to handlers.
@@ -809,9 +856,43 @@ Plus: `target_duration` (clamp or pad to a platform window, e.g. Canvas 3-8s), a
 
 ---
 
+## 33. Edit-list assembly: per-cut transitions, beat snapping, element overlays — DONE 2026-11-11
+
+**Shipped** as `video_assemble_edl({edl | edl_path, output})` in three PRs (#75, #76 and the sweep PR), replacing btmusic's `scripts/assemble-edl.py`. Code in `src/video/edl/` (`schema.ts`, `plan.ts`, `index.ts`); user docs in `docs/video-audio-post.md`.
+
+- **PR A (#75):** segments and shots in song time, `clip_song_start` sync, punch-in, `cut` / `flash`, snap `true` / `kick` / `half` from an `audio_beat_grid` file (or `beats` + `kick_ref` + `beat_offset`), every problem reported before rendering, batched rendering past 24 shots. Plus `transitions[]` (one per cut) on `video_add_transitions`. reel-v6 with its effects swapped for cuts came out bit-identical to the prototype, except one Kling shot the prototype colour-converted (the tool tags every shot BT.709 and leaves pixels alone).
+- **PR B (#76):** element overlays: an `fx` table (`screen`, `matte_light`, `matte_dark` and blend modes; `peak`, `max_lead`, `zoom`/`cx`/`cy`, `lo`/`hi`, `grade`, `post_speed`, `tail`). reel-v6's burn and smoke matched the prototype at 37.8-43 dB on every frame (one RGB round trip for the whole chain instead of one per element).
+- **PR C:** the `sweep` wipe: a still (dark on white) crossing the frame with smoothstep motion, the incoming shot revealed behind its centre line, both shots in song sync through a `dur` window centred on the cut (`scale`, `margin_px`, `hflip`, `blur`, `lo`/`hi`, `grade`). Refused across a segment boundary, outside the segment, or past either clip. reel-v6's wing wipe matched a prototype patched to the same progress timing at 43-44 dB through the window.
+
+**Found and fixed while matching the prototype:**
+
+- `trim=start_frame` after a seek put shots a frame off (the fps filter can start at slot 1): trim by pts.
+- Mixed colour tags made a batched render colour-convert a whole batch: every shot is tagged BT.709.
+- Batch files' millisecond timestamps moved a flash edge by a frame (flash timed from the frame number) and made an element blend emit an extra frame (`fps=` after the join).
+- In the prototype too: elements trimmed in seconds came out a frame short, and `shortest=1` then dropped the video's last frame. Elements are now padded and cut in frames.
+- In the sweep's two-input filters (`blend`, `overlay`), the frame counter read 1 on the first frame, putting the still a frame ahead: the edge is computed from the window's timestamps instead.
+- The prototype timed the still by `dur` and the reveal by whole frames, so they drifted up to ~20 px apart. Both now share one progress, frame/(frames-1): the window's first frame is the outgoing shot exactly and its last the incoming one.
+
+### Original filing (kept for history)
+
+- **Gap:** `video_add_transitions` / `video_concatenate` apply ONE xfade type to every cut, with no beat grid
+  and no overlay elements. A fast hip-hop music video (btmusic Album 4) needs a different transition per cut, cuts
+  snapped to beats, and generated elements (fire, smoke, raven wing) composited over the cut.
+- **Prototype that works:** `btmusic/scripts/assemble-edl.py` (JSON EDL in SONG time; lip-synced clips stay in
+  sync via `clip_song_start`; static punch-in zoom per shot; flash via `eq` brightness; elements placed so their
+  peak lands on the cut, `max_lead` cap; modes `screen` (light elements on black), `matte_dark` (dark elements on
+  white → opaque overlay, alpha from inverted luma with levels), per-element `grade`).
+- **Gotchas found building it:** (1) `blend` in YUV tints everything green: blend in RGB (`gbrp`); (2) a studio-lit
+  element (raven on white) reads far too bright over a night plate: needs a grade; (3) `multiply` on a dark element
+  is see-through (ghost wings): use a luma matte + overlay instead.
+- **Ask:** a `video_assemble_edl` tool with this model (or absorb the script). Beat grid: `audio_beat_grid` (#34, done) writes the JSON this should read.
+
+---
+
 ## 34. `audio_beat_grid`: beat grid + downbeat/kick phase detection — DONE 2026-11-11
 
 **Shipped** as `audio_beat_grid({input, start?, end?, output?, beats_per_bar = 4, bpm_hint?})`, in TypeScript with ffmpeg decoding (no Python): `src/audio/dsp.ts` (FFT, mel spectrogram, onset strength, band envelopes) and `src/audio/beat-grid.ts`.
+
 - **Grid:** librosa `beat_track`'s method and defaults: 22.05 kHz, hop 512, mel spectral flux with the median across bands, windowed-autocorrelation tempo with a log-normal prior, the Ellis DP tracker with tightness 100, weak-end trimming. `tempo_bpm` is the slope of the tracked beats.
 - **Accents:** kick (40-120 Hz) and snare/clap (1.5-5 kHz) peak energy within ±80 ms of each beat, from 2 ms envelopes. `phase_strength` tables (relative energy per bar position plus contrast), `kick_phase`, `downbeats`, `half_bar` (in 2/4 every beat; in odd meters the downbeats), `kick_ref` (first downbeat with a clear kick), `sections` (8-bar windows stepped by 4 bars, merged; `kick_phase: null` where contrast < 1.5).
 - **`offset_s`:** median of (kick attack − grid) over downbeats with a kick. The attack is where the kick's low-band energy first reaches 10% of its peak. Cuts belong on the attack.

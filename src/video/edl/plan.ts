@@ -79,6 +79,22 @@ export interface PlannedEffect {
   delay: number;
   /** Seconds from the element's first shown frame to its peak. */
   toPeak: number;
+  /** For a sweep: the wipe window, with both shots re-timed to cover it. */
+  sweep?: PlannedSweep;
+}
+
+/**
+ * A sweep's window: `frames` output frames from `startFrame`, centred on
+ * the cut. `from` and `to` are the outgoing and incoming shots re-timed to
+ * the window, so both keep playing in song sync through it. Their source
+ * frames count on from the shots' own, so the window's first frame is the
+ * outgoing shot's frame exactly and its last is the incoming shot's.
+ */
+export interface PlannedSweep {
+  startFrame: number;
+  frames: number;
+  from: PlannedShot;
+  to: PlannedShot;
 }
 
 export interface EdlPlan {
@@ -103,7 +119,52 @@ const BUILT_IN_TRANSITIONS = new Set(['cut', 'flash']);
 
 /** A grade is spliced into the graph, so it must stay one filter chain. */
 const GRADE_FORBIDDEN = /[;[\]]/;
+/** A sweep's element is a still, looped by the image demuxer. */
+const STILL_IMAGE = /\.(png|jpe?g|webp|bmp|tiff?)$/i;
 const fmt = (t: number): string => t.toFixed(3);
+
+/**
+ * The window of a sweep into `to`, or the problem with it. The window is
+ * `dur` centred on the cut (rounded as the prototype did) and must stay
+ * inside the segment; the outgoing clip must run to its end and the
+ * incoming clip must already have started at its beginning.
+ */
+function planSweep(
+  fx: EdlFx,
+  from: PlannedShot,
+  to: PlannedShot,
+  where: {
+    segFirstFrame: number;
+    segEndFrame: number;
+    fps: number;
+    ctx: PlanContext;
+    label: string;
+  },
+): PlannedSweep | string {
+  const { fps, ctx, label } = where;
+  const frames = Math.round(fx.dur * fps);
+  const startFrame = Math.round(to.outFrame - (fx.dur * fps) / 2);
+  if (startFrame < where.segFirstFrame || startFrame + frames > where.segEndFrame) {
+    return `${label}: the ${fx.dur}s sweep window (output ${fmt(startFrame / fps)} to ${fmt((startFrame + frames) / fps)}s) runs outside its segment; shorten dur.`;
+  }
+  const retime = (shot: PlannedShot): PlannedShot => ({
+    ...shot,
+    outFrame: startFrame,
+    frames,
+    srcFrame: shot.srcFrame + (startFrame - shot.outFrame),
+  });
+  const a = retime(from);
+  const b = retime(to);
+  if (b.srcFrame < 0) {
+    return `${label}: the sweep starts ${fmt(-b.srcFrame / fps)}s before ${to.clip} begins; shorten dur or start the clip earlier.`;
+  }
+  const fromLen = ctx.clipDuration(from.clip);
+  const needed = (a.srcFrame + frames) / fps;
+  if (fromLen !== undefined && needed > fromLen + 0.5 / fps) {
+    return `${label}: the sweep plays ${from.clip} up to ${fmt(needed)}s, but it is ${fmt(fromLen)}s long; shorten dur.`;
+  }
+  return { startFrame, frames, from: a, to: b };
+}
 
 /**
  * Lay the EDL out on the output frame grid. Shot boundaries are rounded to
@@ -121,16 +182,25 @@ export function planEdl(edl: Edl, ctx: PlanContext): { plan: EdlPlan; errors: st
   const fxNames = Object.keys(edl.fx);
   for (const [name, fx] of Object.entries(edl.fx)) {
     if (fx.type === 'sweep') {
+      if (!STILL_IMAGE.test(fx.src)) {
+        errors.push(
+          `fx "${name}": a sweep's src must be a still image (png, jpg, webp, bmp or tif), not ${fx.src}.`,
+        );
+      }
+      if (Math.round(fx.dur * fps) < 2) {
+        errors.push(`fx "${name}": dur ${fx.dur}s is under two frames at ${fps} fps.`);
+      }
+    } else if (fx.peak === undefined) {
       errors.push(
-        `fx "${name}": the sweep type is not available yet; use an overlay mode for now.`,
+        `fx "${name}": an overlay needs a peak (the element second that lands on the cut).`,
       );
     }
     if (fx.grade && GRADE_FORBIDDEN.test(fx.grade)) {
       errors.push(`fx "${name}": grade must be a plain filter chain (no ";", "[" or "]").`);
     }
     if (fx.hi <= fx.lo) errors.push(`fx "${name}": hi (${fx.hi}) must be above lo (${fx.lo}).`);
-    const len = ctx.clipDuration(fx.src);
-    if (len !== undefined && fx.peak > len) {
+    const len = fx.type === 'sweep' ? undefined : ctx.clipDuration(fx.src);
+    if (len !== undefined && fx.peak !== undefined && fx.peak > len) {
       errors.push(`fx "${name}": peak ${fx.peak}s is past the end of ${fx.src} (${fmt(len)}s).`);
     }
   }
@@ -148,6 +218,9 @@ export function planEdl(edl: Edl, ctx: PlanContext): { plan: EdlPlan; errors: st
       );
     }
 
+    // The segment's output frames, which a sweep's window must stay inside.
+    const segFirstFrame = Math.round(outT * fps);
+    const segEndFrame = Math.round((outT + b - a) * fps);
     const starts: number[] = [];
     seg.shots.forEach((sh, k) => {
       if (k === 0) {
@@ -212,7 +285,7 @@ export function planEdl(edl: Edl, ctx: PlanContext): { plan: EdlPlan; errors: st
           `${label}: needs the clip up to ${fmt(needed)}s, but it is ${fmt(clipLen)}s long.`,
         );
       }
-      shots.push({
+      const shot: PlannedShot = {
         segment: si,
         index: k,
         clip: sh.clip,
@@ -225,9 +298,21 @@ export function planEdl(edl: Edl, ctx: PlanContext): { plan: EdlPlan; errors: st
         fx: sh.fx,
         fy: sh.fy,
         transition: sh.in,
-      });
+      };
+      shots.push(shot);
       const fx = edl.fx[sh.in];
-      if (isFx && fx) {
+      if (isFx && fx?.type === 'sweep') {
+        const prev = shots.at(-2);
+        if (k === 0 || prev?.segment !== si || prev.index !== k - 1) {
+          errors.push(
+            `${label}: a sweep wipes from the previous shot in the same segment (across a segment boundary the audio jumps).`,
+          );
+        } else {
+          const sweep = planSweep(fx, prev, shot, { segFirstFrame, segEndFrame, fps, ctx, label });
+          if (typeof sweep === 'string') errors.push(sweep);
+          else effects.push({ name: sh.in, outFrame: f0, fx, elIn: 0, delay: 0, toPeak: 0, sweep });
+        }
+      } else if (isFx && fx?.peak !== undefined) {
         const t = f0 / fps;
         const elIn = Math.max(0, fx.peak - t, fx.peak - (fx.max_lead ?? Infinity));
         effects.push({
@@ -348,32 +433,45 @@ function shotChains(
   firstInput: number,
   out: string,
 ): { inputs: GraphInput[]; filters: string[] } {
-  const { width: W, height: H, fps } = plan;
   const inputs: GraphInput[] = [];
   const filters: string[] = [];
   shots.forEach((shot, n) => {
-    const seekFrames = Math.max(0, shot.srcFrame - Math.round(fps * SEEK_MARGIN_SECONDS));
-    // Two decoder threads per input keeps many open inputs affordable.
-    const options = ['-threads', '2'];
-    // Seeking to a whole output frame keeps the fps filter's grid on the
-    // unseeked one: output slot k after the seek is slot seekFrames + k.
-    if (seekFrames > 0) options.push('-ss', (seekFrames / fps).toFixed(6));
-    inputs.push({ options, path: clipPath(shot.clip) });
-    // Trim by PTS, not start_frame. The fps filter's output timebase is
-    // 1/fps, so output slot k has pts k exactly. After a seek it can start
-    // emitting at slot 1 instead of 0 (a 25 fps source whose frame just
-    // before the seek point was dropped), and start_frame counts emitted
-    // frames: that put every seeked shot a frame off in the parity test
-    // against the prototype. Seconds-based start/end round at half a frame.
-    const sf = shot.srcFrame - seekFrames;
-    filters.push(
-      `[${firstInput + n}:v]fps=${fps},trim=start_pts=${sf}:end_pts=${sf + shot.frames},setpts=PTS-STARTPTS,` +
-        `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},` +
-        `${punchCrop(plan, shot)}setsar=1,format=yuv420p,${COLOR_TAGS}[v${n}]`,
-    );
+    const chain = shotChain(plan, shot, clipPath, firstInput + n);
+    inputs.push(chain.input);
+    filters.push(`${chain.filter}[v${n}]`);
   });
   filters.push(`${shots.map((_, n) => `[v${n}]`).join('')}concat=n=${shots.length}:v=1:a=0${out}`);
   return { inputs, filters };
+}
+
+/** One shot's input and its filter chain (unlabelled output, yuv420p). */
+function shotChain(
+  plan: EdlPlan,
+  shot: PlannedShot,
+  clipPath: (clip: string) => string,
+  inputIndex: number,
+): { input: GraphInput; filter: string } {
+  const { width: W, height: H, fps } = plan;
+  const seekFrames = Math.max(0, shot.srcFrame - Math.round(fps * SEEK_MARGIN_SECONDS));
+  // Two decoder threads per input keeps many open inputs affordable.
+  const options = ['-threads', '2'];
+  // Seeking to a whole output frame keeps the fps filter's grid on the
+  // unseeked one: output slot k after the seek is slot seekFrames + k.
+  if (seekFrames > 0) options.push('-ss', (seekFrames / fps).toFixed(6));
+  // Trim by PTS, not start_frame. The fps filter's output timebase is
+  // 1/fps, so output slot k has pts k exactly. After a seek it can start
+  // emitting at slot 1 instead of 0 (a 25 fps source whose frame just
+  // before the seek point was dropped), and start_frame counts emitted
+  // frames: that put every seeked shot a frame off in the parity test
+  // against the prototype. Seconds-based start/end round at half a frame.
+  const sf = shot.srcFrame - seekFrames;
+  return {
+    input: { options, path: clipPath(shot.clip) },
+    filter:
+      `[${inputIndex}:v]fps=${fps},trim=start_pts=${sf}:end_pts=${sf + shot.frames},setpts=PTS-STARTPTS,` +
+      `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},` +
+      `${punchCrop(plan, shot)}setsar=1,format=yuv420p,${COLOR_TAGS}`,
+  };
 }
 
 /** The "flash" transitions over the joined picture, from [base] to `out`. */
@@ -424,6 +522,60 @@ function elementChain(plan: EdlPlan, e: PlannedEffect, input: number, out: strin
 }
 
 /**
+ * A sweep's window, as [sw<n>] in gbrp, padded so its frames sit at their
+ * output frame numbers: the two shots, in song sync, split at the edge
+ * (incoming on the left), with the still matted over the edge. The still
+ * is dark on white, so its alpha is inverted luma through the lo..hi ramp.
+ *
+ * The edge and the still share one smoothstep progress, q = frame/(frames-1),
+ * so the first frame is all outgoing shot and the last all incoming. The
+ * prototype timed the still by `dur` and the reveal by whole frames, so the
+ * still drifted up to ~20 px off the edge it covers at 1080p.
+ */
+function sweepChain(
+  plan: EdlPlan,
+  sweep: PlannedSweep,
+  fx: EdlFx,
+  n: number,
+  clipPath: (clip: string) => string,
+  firstInput: number,
+): { inputs: GraphInput[]; filters: string[] } {
+  const { width: W, height: H, fps } = plan;
+  const from = shotChain(plan, sweep.from, clipPath, firstInput);
+  const to = shotChain(plan, sweep.to, clipPath, firstInput + 1);
+  // Read twice, like a matte element: a split shared buffers with the colour copy.
+  const still = {
+    options: ['-loop', '1', '-t', (sweep.frames / fps + 0.5).toFixed(3)],
+    path: clipPath(fx.src),
+  };
+  const [ic, ia] = [firstInput + 2, firstInput + 3];
+  const flip = fx.hflip ? 'hflip,' : '';
+  const size = `scale=-2:${Math.round(H * fx.scale)},fps=${fps}`;
+  const blur = fx.blur ? `,avgblur=sizeX=${fx.blur}:sizeY=1` : '';
+  const grade = fx.grade ? `,${fx.grade}` : '';
+  // The window's own frame number, from its timestamps (they start at 0 on
+  // the 1/fps grid). Not N/n: in these two-input filters the count read 1
+  // on the first frame, which put the still a frame ahead.
+  const edge = (time: string): string => {
+    const q = `min(1\\,max(0\\,round(${time}*${fps})/${sweep.frames - 1}))`;
+    return `(-${fx.margin_px}+${W + 2 * fx.margin_px}*${q}*${q}*(3-2*${q}))`;
+  };
+  return {
+    inputs: [from.input, to.input, still, still],
+    filters: [
+      `${from.filter},format=gbrp[sa${n}]`,
+      `${to.filter},format=gbrp[sb${n}]`,
+      `[sa${n}][sb${n}]blend=all_expr=if(lt(X\\,${edge('T')})\\,B\\,A)[sx${n}]`,
+      `[${ic}:v]${flip}${size},format=rgba${grade}${blur}[wc${n}]`,
+      `[${ia}:v]${flip}${size},format=gray,negate,lut=y=clip((val-${fx.lo})*255/(${fx.hi}-${fx.lo})\\,0\\,255)${blur}[wa${n}]`,
+      `[wc${n}][wa${n}]alphamerge[wo${n}]`,
+      `[sx${n}][wo${n}]overlay=x=${edge('t')}-overlay_w/2:y=(main_h-overlay_h)/2:format=gbrp:shortest=1,` +
+        `tpad=start=${sweep.startFrame}:start_mode=add[sw${n}]`,
+    ],
+  };
+}
+
+/**
  * Everything after the shots are joined, from [base] to [vout]: flashes,
  * then each element in cut order. Elements composite in planar RGB (blending
  * in YUV tinted everything green in the prototype), converted once for the
@@ -446,6 +598,20 @@ function finishChain(
   plan.effects.forEach((e, n) => {
     const { fx } = e;
     const grade = fx.grade ? `,${fx.grade}` : '';
+    if (e.sweep) {
+      const win = sweepChain(plan, e.sweep, fx, n, clipPath, firstInput + inputs.length);
+      inputs.push(...win.inputs);
+      filters.push(
+        ...win.filters,
+        // Only the window's frames are composited; outside it the picture
+        // passes through untouched. Gated by time with half a frame either
+        // side: the joined picture's timestamps are microseconds, and the
+        // frame count is off by one here too (see sweepChain).
+        `[c${n}][sw${n}]overlay=format=gbrp:eof_action=pass:` +
+          `enable=between(t\\,${((e.sweep.startFrame - 0.5) / plan.fps).toFixed(6)}\\,${((e.sweep.startFrame + e.sweep.frames - 0.5) / plan.fps).toFixed(6)})[c${n + 1}]`,
+      );
+      return;
+    }
     filters.push(elementChain(plan, e, addInput(clipPath(fx.src)), `[e${n}]`));
     if (fx.mode === 'matte_dark' || fx.mode === 'matte_light') {
       filters.push(elementChain(plan, e, addInput(clipPath(fx.src)), `[em${n}]`));
