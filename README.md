@@ -5,7 +5,7 @@
 [![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fbthurlow.github.io%2Fartificer-mcp%2Fbadges%2Fcoverage.json&cacheSeconds=300)](https://github.com/bthurlow/artificer-mcp/actions/workflows/ci.yml)
 [![GitHub release](https://img.shields.io/github/v/release/bthurlow/artificer-mcp)](https://github.com/bthurlow/artificer-mcp/releases/latest)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Node](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
+[![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org/)
 [![MCP](https://img.shields.io/badge/MCP-compatible-purple)](https://modelcontextprotocol.io/)
 
@@ -36,7 +36,7 @@ Looking for just ImageMagick without AI generation dependencies? Use the focused
 
 ## Prerequisites
 
-- **Node.js** 22+
+- **Node.js** 24+ (tested on 24 and 26)
 - **ImageMagick 7+** with `magick` in PATH — [install](https://imagemagick.org/script/download.php)
 - **FFmpeg 6+** with `ffmpeg` and `ffprobe` in PATH — [install](https://ffmpeg.org/download.html). Use a full build: the video tools need `libx264`, `libvpx-vp9`, `libopus`, `libmp3lame` and the `drawtext` / `subtitles` filters, which minimal builds leave out.
 - **Ghostscript** (if using `pdf-to-image`) — ImageMagick calls it to read PDFs (`gswin64c` on Windows, `gs` elsewhere). Without it, PDF input fails with `PDFDelegateFailed`. [install](https://ghostscript.com/releases/gsdnld.html)

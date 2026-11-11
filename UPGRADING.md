@@ -30,6 +30,14 @@ Google shuts down `gemini-2.5-flash-preview-tts`, the old default for
 - The `speech.general` catalog slug `gemini-tts-2.5-flash` is now
   `gemini-tts-3.8-flash`.
 
+### Node.js 24 or newer
+
+`engines` is now `>=24` (was `>=22`). Node 26 is the Active LTS and CI runs
+on it; unit tests also run on 24, the oldest supported line. Node 22 is in
+maintenance until 2027-04-30, and `@google/genai` 3 already requires 22+.
+On Node 22, upgrade before installing 0.15.0 (`npx` and package managers
+that enforce `engines` will refuse it).
+
 ### `gemini_generate_video` (Veo) needs Vertex AI; `@google/genai` 3
 
 Google shut Veo down on the Gemini API (the last models,

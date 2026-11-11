@@ -670,7 +670,7 @@ export function registerAssetTools(server: McpServer): void {
         .filter(
           (e) => e.isFile() && imageExtensions.has(e.name.split('.').pop()?.toLowerCase() ?? ''),
         )
-        .map((e) => join(e.parentPath ?? e.path ?? input_dir, e.name));
+        .map((e) => join(e.parentPath, e.name));
 
       const results: string[] = [];
       let totalOriginal = 0;

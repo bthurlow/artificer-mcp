@@ -4,7 +4,7 @@ import { copyFile } from 'node:fs/promises';
 export default defineConfig({
   entry: ['src/index.ts'],
   format: ['esm'],
-  target: 'node18',
+  target: 'node24',
   outDir: 'dist',
   clean: true,
   splitting: false,
