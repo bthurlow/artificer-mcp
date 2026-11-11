@@ -215,6 +215,7 @@ export interface VideoAddTransitionsParams {
   inputs: string[];
   output: string;
   transition: string;
+  transitions?: string[];
   duration: number;
 }
 
@@ -231,6 +232,12 @@ export const videoAddTransitionsSchema = z.object({
     .default('fade')
     .describe(
       `FFmpeg xfade transition name — e.g., "fade", "wipeleft", "slideup", "circleopen", "dissolve". See https://ffmpeg.org/ffmpeg-filters.html#xfade for the full list.`,
+    ),
+  transitions: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'One xfade transition per cut, in order (length = inputs - 1), e.g. ["fade", "wipeleft", "circleopen"]. Overrides `transition`. For cuts on a beat grid, flashes and overlay elements, use video_assemble_edl.',
     ),
   duration: z
     .number()

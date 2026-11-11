@@ -202,6 +202,9 @@ From btmusic's 2026-11-06 video-model cost review. Checked against fal's own pag
   element (raven on white) reads far too bright over a night plate: needs a grade; (3) `multiply` on a dark element
   is see-through (ghost wings): use a luma matte + overlay instead.
 - **Ask:** a `video_assemble_edl` tool with this model (or absorb the script). Beat grid: `audio_beat_grid` (#34, done) writes the JSON this should read.
+- **Progress 2026-11-11, PR A shipped:** `video_assemble_edl` with segments and shots in song time, `clip_song_start` sync, punch-in, `cut` / `flash`, snap `true` / `kick` / `half` from a `beat_grid` file (or `beats` + `kick_ref` + `beat_offset`), all problems reported before rendering, batched rendering past 24 shots. Plus `transitions[]` (one per cut) on `video_add_transitions`. Rendering the btmusic reel-v6 EDL (effects swapped for cuts) gave frames and audio bit-identical to `assemble-edl.py`, except the one Kling shot: the prototype colour-converted it (tagged BT.709 among untagged clips); the tool tags every shot BT.709 and leaves pixels alone.
+  - **Found and fixed while matching the prototype:** `trim=start_frame` after a seek put shots a frame off (the fps filter can start at slot 1; trim by pts instead); mixed colour tags made a batched render colour-convert a whole batch; batch files' millisecond timestamps moved a flash edge by a frame (flash now timed from the frame number).
+- **Still to do:** PR B, element overlays (`screen`, `matte_dark`, `matte_light`, `multiply`; `peak`, `max_lead`, `zoom`/`cx`/`cy`, `post_speed`, `tail`, `grade`, `lo`/`hi`), and PR C, the `sweep` wipe. Until then `in` accepts only `cut` and `flash`, and btmusic keeps `assemble-edl.py` for the effects.
 
 ---
 

@@ -21,6 +21,7 @@ import {
   planLoop,
   type SeamReport,
 } from './loop.js';
+import { registerAssembleEdlTool } from './edl/index.js';
 import {
   type VideoConcatenateParams,
   type VideoTrimParams,
@@ -155,9 +156,12 @@ function parseAspectRatio(input: string): { w: number; h: number } {
  * Register video post-processing tools with the MCP server.
  *
  * Covers: video_concatenate, video_trim, video_change_aspect_ratio,
- * video_convert_format, video_change_speed, video_set_resolution.
+ * video_convert_format, video_change_speed, video_set_resolution, and the
+ * others below, plus video_assemble_edl (./edl).
  */
 export function registerVideoTools(server: McpServer): void {
+  registerAssembleEdlTool(server);
+
   // ── video_concatenate ───────────────────────────────────────────────────
   registerTool<VideoConcatenateParams>(
     server,
@@ -546,9 +550,15 @@ export function registerVideoTools(server: McpServer): void {
   registerTool<VideoAddTransitionsParams>(
     server,
     'video_add_transitions',
-    'Join videos with xfade transitions between each pair. Inputs must share resolution/frame rate; use video_set_resolution first if not. See FFmpeg xfade docs for transition names.',
+    'Join videos with xfade transitions between each pair: one `transition` for every cut, or a different one per cut via `transitions`. Inputs must share resolution/frame rate; use video_set_resolution first if not. See FFmpeg xfade docs for transition names.',
     videoAddTransitionsSchema.shape,
-    async ({ inputs, output, transition, duration }) => {
+    async ({ inputs, output, transition, transitions, duration }) => {
+      if (transitions && transitions.length !== inputs.length - 1) {
+        throw new Error(
+          `video_add_transitions: transitions has ${transitions.length} entries; ${inputs.length} inputs need ${inputs.length - 1} (one per cut).`,
+        );
+      }
+      const transitionAt = (i: number): string => transitions?.[i] ?? transition;
       const resolvedInputs = await Promise.all(inputs.map((p) => resolveInput(p)));
       const localInputs = resolvedInputs.map((r) => r.localPath);
       const outR = await resolveOutput(output);
@@ -572,7 +582,7 @@ export function registerVideoTools(server: McpServer): void {
           const vLabel = i === infos.length - 1 ? '[vout]' : `[v${i + 1}]`;
           const aLabel = i === infos.length - 1 ? '[aout]' : `[a${i + 1}]`;
           videoChain.push(
-            `${vPrev}[${i + 1}:v]xfade=transition=${transition}:duration=${duration}:offset=${runningOffset.toFixed(3)}${vLabel}`,
+            `${vPrev}[${i + 1}:v]xfade=transition=${transitionAt(i)}:duration=${duration}:offset=${runningOffset.toFixed(3)}${vLabel}`,
           );
           audioChain.push(`${aPrev}[${i + 1}:a]acrossfade=d=${duration}${aLabel}`);
           vPrev = vLabel;
@@ -606,7 +616,9 @@ export function registerVideoTools(server: McpServer): void {
           content: [
             {
               type: 'text',
-              text: `Joined ${inputs.length} videos with ${transition} transitions → ${output}`,
+              text: transitions
+                ? `Joined ${inputs.length} videos with transitions ${transitions.join(', ')} → ${output}`
+                : `Joined ${inputs.length} videos with ${transition} transitions → ${output}`,
             },
           ],
         };

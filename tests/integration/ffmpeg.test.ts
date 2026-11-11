@@ -434,6 +434,38 @@ describe('Integration: video_add_transitions', () => {
     expect(probe.duration).toBeGreaterThan(3.0);
     expect(probe.duration).toBeLessThan(4.0);
   }, 60_000);
+
+  it.skipIf(!hasFfmpeg)('takes a different transition per cut', async () => {
+    const output = join(testDir, 'transitions-per-cut.mp4');
+    const res = (await client.callTool({
+      name: 'video_add_transitions',
+      arguments: {
+        inputs: [fixtureVideo, fixtureVideo2, fixtureVideo],
+        output,
+        transitions: ['wipeleft', 'circleopen'],
+        duration: 0.5,
+      },
+    })) as { isError?: boolean; content: Array<{ text: string }> };
+    expect(res.isError).toBeFalsy();
+    expect(res.content[0].text).toContain('wipeleft, circleopen');
+    const probe = await probeVideo(output);
+    // Three 2s clips, two 0.5s transitions ≈ 5s.
+    expect(probe.duration).toBeGreaterThan(4.5);
+    expect(probe.duration).toBeLessThan(5.5);
+  }, 60_000);
+
+  it.skipIf(!hasFfmpeg)('rejects a transitions list of the wrong length', async () => {
+    const res = (await client.callTool({
+      name: 'video_add_transitions',
+      arguments: {
+        inputs: [fixtureVideo, fixtureVideo2],
+        output: join(testDir, 'never.mp4'),
+        transitions: ['fade', 'fade'],
+      },
+    })) as { isError?: boolean; content: Array<{ text: string }> };
+    expect(res.isError).toBe(true);
+    expect(res.content[0].text).toMatch(/2 inputs need 1/);
+  });
 });
 
 describe('Integration: video_add_image_overlay', () => {
