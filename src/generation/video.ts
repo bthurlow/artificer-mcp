@@ -2,7 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { readFile } from 'node:fs/promises';
 import { extname } from 'node:path';
 import { registerTool } from '../utils/register.js';
-import { getGenAIClient } from './client.js';
+import { getGenAIClientForVertex } from './client.js';
 import { getProvider } from '../storage/providers/registry.js';
 import { resolveInput } from '../utils/resource.js';
 import { downloadAndWrite, geminiDownloadHeaders } from './utils/download-and-write.js';
@@ -23,7 +23,7 @@ export function registerVideoGenTools(server: McpServer): void {
   registerTool<GenerateVideoParams>(
     server,
     'gemini_generate_video',
-    'Generate a video from a text prompt (text-to-video) or from a text prompt + input image (image-to-video) via Google Veo. Long-running — polls until complete or timeout. Uses GOOGLE_API_KEY env var.',
+    'Generate a video from a text prompt (text-to-video) or from a text prompt + input image (image-to-video) via Google Veo on Vertex AI. Long-running — polls until complete or timeout. Veo is Vertex-only: Google shut it down on the Gemini API (2026-10-22), so this needs GOOGLE_CLOUD_PROJECT and Application Default Credentials, not GOOGLE_API_KEY. With only an API key, use gemini_omni_generate_video (the replacement Google names) or a fal Veo route.',
     generateVideoSchema.shape,
     async ({
       model,
@@ -42,7 +42,7 @@ export function registerVideoGenTools(server: McpServer): void {
       poll_interval_seconds,
       poll_timeout_seconds,
     }) => {
-      const client = getGenAIClient();
+      const client = getGenAIClientForVertex('gemini_generate_video');
 
       // Build the image input for image-to-video, if provided.
       // Resolve through the storage abstraction so gs://, s3://, https:// URIs work.
@@ -124,10 +124,27 @@ export function registerVideoGenTools(server: McpServer): void {
           return {
             content: [{ type: 'text', text: `Video generated and saved to ${output}` }],
           };
+        } else if (video?.uri?.startsWith('gs://')) {
+          // Vertex writes to Cloud Storage when an output bucket is set;
+          // read it through the storage layer (fetch cannot).
+          const src = await resolveInput(video.uri);
+          try {
+            await getProvider(output).write(output, await readFile(src.localPath), mime);
+          } finally {
+            await src.cleanup?.();
+          }
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Video generated and saved to ${output} (copied from ${video.uri})`,
+              },
+            ],
+          };
         } else if (video?.uri) {
-          // Video returned as a URI (GCS or HTTP) — download it. Gemini
-          // Files API URIs need the API key; `geminiDownloadHeaders`
-          // decides, so this rule lives in exactly one place.
+          // Video returned as an HTTP URI — download it. Gemini Files API
+          // URIs need the API key; `geminiDownloadHeaders` decides, so this
+          // rule lives in exactly one place.
           await downloadAndWrite(video.uri, output, {
             headers: geminiDownloadHeaders(video.uri),
             defaultMime: mime,

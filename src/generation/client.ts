@@ -22,10 +22,16 @@ function requireApiKey(): string {
  * GOOGLE_API_KEY is not set (non-generation tools still work).
  * Throws a clear error if the key is missing when a generation tool
  * is actually invoked.
+ *
+ * Pinned to `v1beta`. @google/genai 3 moved the Gemini Developer API
+ * default to `v1`, where preview models and aliases (nano-banana previews,
+ * Lyria, the TTS previews, `*-latest`) are not served; the Interactions
+ * API (Omni, 3.8 TTS) is documented on `v1beta` too. Set in code, so the
+ * SDK's GOOGLE_GENAI_API_VERSION variable does not change it.
  */
 export function getGenAIClient(): GoogleGenAI {
   if (cachedClient) return cachedClient;
-  cachedClient = new GoogleGenAI({ apiKey: requireApiKey() });
+  cachedClient = new GoogleGenAI({ apiKey: requireApiKey(), apiVersion: 'v1beta' });
   return cachedClient;
 }
 

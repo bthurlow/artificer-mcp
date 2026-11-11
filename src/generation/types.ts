@@ -209,9 +209,9 @@ export interface GenerateVideoParams {
 export const generateVideoSchema = z.object({
   model: z
     .string()
-    .default(envDefault('ARTIFICER_VEO_MODEL', 'veo-2.0-generate-001'))
+    .default(envDefault('ARTIFICER_VEO_MODEL', 'veo-3.1-generate-001'))
     .describe(
-      'Veo model ID. Pass any valid model string. Default: veo-2.0-generate-001 (override via ARTIFICER_VEO_MODEL env var).',
+      'Vertex AI Veo model ID. Default: veo-3.1-generate-001 (override via ARTIFICER_VEO_MODEL env var). Also: veo-3.1-fast-generate-001, veo-3.1-lite-generate-001 (preview). The Gemini API ids (veo-2.0-generate-001, *-generate-preview) are shut down.',
     ),
   prompt: z.string().describe('Text description of the video to generate.'),
   output: z.string().describe('Output path for the generated video (e.g., "./output.mp4").'),
@@ -225,7 +225,7 @@ export const generateVideoSchema = z.object({
     .number()
     .positive()
     .optional()
-    .describe('Video duration in seconds. Model-dependent; Veo 2.0 supports 5-8s.'),
+    .describe('Video duration in seconds. Model-dependent; Veo 3.1 takes 4, 6 or 8.'),
   aspect_ratio: z
     .string()
     .default('16:9')
