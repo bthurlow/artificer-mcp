@@ -772,3 +772,37 @@ Plus: `target_duration` (clamp or pad to a platform window, e.g. Canvas 3-8s), a
 - Sniff reference-image MIME from magic bytes, not the extension.
 
 **Trigger:** now. It affects every brand asset produced through this route.
+
+---
+
+## 32. fal transports: no request_id on a long queue wait, no way to resume — DONE 2026-11-11
+
+**Cause:** every fal tool called `client.subscribe(model, { startTimeout: poll_timeout_seconds })`. In `@fal-ai/client` 1.9.6, `startTimeout` is a server-side limit on time spent *waiting in the queue* only, and the client-side `timeout` is documented as not enforced. A job that left the queue and then sat IN_PROGRESS was waited on forever, and `subscribe` exposes the request_id only when it throws.
+
+**Shipped:**
+- `runFalJob` (`src/generation/fal/queue.ts`) replaces `subscribe` in all eight fal tools: `queue.submit`, then `queue.status` every 2 s against a deadline the tool enforces, then `queue.result`. Three status errors in a row end the wait; one or two are ridden out.
+- **The request_id is visible from submit:** logged to stderr, sent as an MCP progress message when the client passes a progressToken (status changes and queue position follow), and appended to a local job log (`<tmpdir>/artificer/fal-jobs.jsonl`, override with `ARTIFICER_FAL_JOBS_FILE`). The log survives a stopped call, whose reply never arrives.
+- **On timeout the job is cancelled on fal** (Brian's call: a job nobody collects should not keep billing), and the error names the request_id, the last status and queue position, the wait, and the `fal_fetch_result` call to check whether it finished anyway. A client cancellation of the tool call (`extra.signal`) cancels the fal job the same way. `registerTool` now passes the SDK's request `extra` to handlers.
+- **New tools:** `fal_fetch_result({request_id?, model?, output?})` returns status, queue position and recent logs while a job runs; once it completes it returns the raw result and, with `output`, downloads every media file in it (any `{url}` object, so it works for every fal tool's output). With no request_id it lists recent jobs from the log; `model` is looked up there when omitted. `fal_cancel({request_id, model?})`.
+- `fal_classify_text` had no timeout at all; it now has a fixed 120 s.
+
+**Not confirmed live yet** (live checks run in btmusic): the progress messages showing in Claude Code, and fal's response to a cancel of an IN_PROGRESS job.
+
+### Original filing (kept for history)
+
+- **Symptom:** `fal_generate_video` (OmniHuman 1.5, 720p, ~10.5 s) sat in fal's QUEUE for 16+ min
+  (request `01a1c765-4eed-7700-a465-68b27bb38b44`). `poll_timeout_seconds: 900` did not fire, and the tool
+  never surfaced the request_id, so the caller saw a "hung" call. Stopping the MCP task loses the result even
+  though fal still runs and bills the job. Brian found the id in the fal dashboard.
+- **Asks:** (1) return/log the request_id the moment the job is submitted (also in the "moved to background"
+  notice); (2) a `fal_fetch_result({model, request_id, output})` tool (status + download) so a stopped or
+  timed-out call can be recovered without paying twice; (3) report queue position/status on timeout, and make
+  sure `poll_timeout_seconds` actually ends the wait (returning the request_id).
+- **btmusic workaround:** none in-tool. Claude can curl the queue API with the key read from
+  `btmusic/.mcp.json` (never printed): `GET queue.fal.run/fal-ai/bytedance/requests/<id>/status`,
+  `PUT .../cancel` (the app path is the first two segments of the model id). Brian reported the request showed
+  no input params in the dashboard; status was IN_PROGRESS with empty logs/metrics when cancelled
+  (`CANCELLATION_REQUESTED`). Also add (4): a `fal_cancel({model, request_id})` tool.
+- **Update 2026-11-10:** a second identical submit (`01a1c77c-b6c5-7cd2-a565-bd7a673345bd`) did the same: IN_PROGRESS,
+  empty logs, no params shown, no charge. Two earlier OmniHuman calls the same afternoon ran fine. Looks like a fal-side
+  OmniHuman outage, not Artificer, but (1)-(4) still stand: the caller had no visibility either time.

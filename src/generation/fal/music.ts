@@ -2,7 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerTool } from '../../utils/register.js';
 import { downloadAndWrite } from '../utils/download-and-write.js';
 import { getFalClient } from './client.js';
-import { parseFalError } from './errors.js';
+import { runFalJob } from './queue.js';
 import { resolveForFal, resolveExtraFiles } from './inputs.js';
 import { checkExtraParams } from './extra-params.js';
 import { type FalGenerateMusicParams, falGenerateMusicSchema } from './types-audio.js';
@@ -67,16 +67,19 @@ export function registerFalMusicTools(server: McpServer): void {
     'fal_generate_music',
     'Generate music, songs, or sound effects via any fal-hosted text-to-audio model. Transport tool — pass explicit `model`. Covers music.general / music.song / music.sfx sub-classes in the catalog. Returns JSON with `audio` (written output) and `source_url`. Uses FAL_KEY env var.',
     falGenerateMusicSchema.shape,
-    async ({
-      model,
-      prompt,
-      output,
-      lyrics,
-      reference_audio,
-      extra_params,
-      extra_files,
-      poll_timeout_seconds,
-    }) => {
+    async (
+      {
+        model,
+        prompt,
+        output,
+        lyrics,
+        reference_audio,
+        extra_params,
+        extra_files,
+        poll_timeout_seconds,
+      },
+      extra,
+    ) => {
       const client = getFalClient();
 
       const audioResolved = reference_audio
@@ -112,22 +115,15 @@ export function registerFalMusicTools(server: McpServer): void {
           console.error(warning);
         }
 
-        let result;
-        try {
-          result = await client.subscribe(model, {
-            input,
-            logs: false,
-            startTimeout: poll_timeout_seconds,
-          });
-        } catch (err) {
-          const falErr = parseFalError(err);
-          throw new Error(
-            `fal_generate_music failed (${falErr.constructor.name}: ${falErr.errorType}, ` +
-              `status=${falErr.status}, retryable=${falErr.retryable}, ` +
-              `requestId=${falErr.requestId ?? 'unknown'}): ${falErr.message}`,
-            { cause: err },
-          );
-        }
+        const result = await runFalJob(client, {
+          tool: 'fal_generate_music',
+          model,
+          input,
+          logs: false,
+          timeoutSeconds: poll_timeout_seconds,
+          output,
+          extra,
+        });
 
         const audioUrl = extractMusicOutput(result.data);
         const { mime, bytes } = await downloadAndWrite(audioUrl, output, {

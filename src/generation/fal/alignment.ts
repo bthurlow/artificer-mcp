@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { registerTool } from '../../utils/register.js';
 import { getProvider } from '../../storage/providers/registry.js';
 import { getFalClient } from './client.js';
-import { parseFalError } from './errors.js';
+import { falPollTimeout, runFalJob } from './queue.js';
 import { resolveForFal } from './inputs.js';
 import { checkExtraParams } from './extra-params.js';
 import {
@@ -69,11 +69,7 @@ export const alignTextToAudioSchema = z.object({
     .record(z.unknown())
     .optional()
     .describe('Passthrough for model-specific knobs, spread into the fal input.'),
-  poll_timeout_seconds: z
-    .number()
-    .positive()
-    .default(600)
-    .describe('Maximum seconds to wait for the fal job. Default 600.'),
+  poll_timeout_seconds: falPollTimeout(600),
 });
 
 function pickFormat(output: string | undefined, format: AlignFormat | undefined): AlignFormat {
@@ -94,7 +90,7 @@ export function registerAlignmentTools(server: McpServer): void {
     'align_text_to_audio',
     "Forced alignment: time a KNOWN transcript (lyrics, script, voiceover) against its audio. Returns word-level and line-level start/end times, flags words the aligner matched poorly, and can write LRC (synced lyrics), SRT (subtitles) or JSON. Unlike ASR (fal_transcribe), the words are exactly your text, so proper nouns and lyrics are never misheard. Lines come from the text's own line breaks. Default model: fal's ElevenLabs forced aligner ($0.22 per started hour of audio). Uses FAL_KEY.",
     alignTextToAudioSchema.shape,
-    async ({ audio, text, model, output, format, extra_params, poll_timeout_seconds }) => {
+    async ({ audio, text, model, output, format, extra_params, poll_timeout_seconds }, extra) => {
       if (splitLines(text).length === 0) throw new Error('text has no non-empty lines to align');
       const client = getFalClient();
       const audioResolved = await resolveForFal(audio, (b) => client.storage.upload(b));
@@ -106,22 +102,14 @@ export function registerAlignmentTools(server: McpServer): void {
           console.error(warning);
         }
 
-        let result;
-        try {
-          result = await client.subscribe(model, {
-            input,
-            logs: true,
-            startTimeout: poll_timeout_seconds,
-          });
-        } catch (err) {
-          const falErr = parseFalError(err);
-          throw new Error(
-            `align_text_to_audio failed (${falErr.constructor.name}: ${falErr.errorType}, ` +
-              `status=${falErr.status}, retryable=${falErr.retryable}, ` +
-              `requestId=${falErr.requestId ?? 'unknown'}): ${falErr.message}`,
-            { cause: err },
-          );
-        }
+        const result = await runFalJob(client, {
+          tool: 'align_text_to_audio',
+          model,
+          input,
+          logs: true,
+          timeoutSeconds: poll_timeout_seconds,
+          extra,
+        });
 
         const { words, loss } = parseAlignerWords(result.data);
         const lines = alignLines(text, words);

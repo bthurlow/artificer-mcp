@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { falPollTimeout } from './queue.js';
 
 /**
  * Input schema for the `fal_generate_image` transport tool.
@@ -107,9 +108,5 @@ export const falGenerateImageSchema = z.object({
     .describe(
       'File-bearing extra_params: each value is resolved like `image` (uploaded if local) and merged into the payload under its key. Use for secondary file inputs such as reference_image_urls, person_image_url, garment_image_urls, mask_image_url. Wins over extra_params on key collision.',
     ),
-  poll_timeout_seconds: z
-    .number()
-    .positive()
-    .default(300)
-    .describe('Maximum seconds to wait for the fal job before giving up. Default 300.'),
+  poll_timeout_seconds: falPollTimeout(300),
 });

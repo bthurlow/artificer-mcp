@@ -1,3 +1,4 @@
+import { queueFromSubscribe } from '../../helpers/fal-queue.js';
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 import {
   alignLines,
@@ -117,7 +118,7 @@ describe('LRC / SRT', () => {
 const mockSubscribe = vi.fn();
 const mockUpload = vi.fn(async () => 'https://fal.media/uploaded/vocal.wav');
 vi.mock('../../../src/generation/fal/client.js', () => ({
-  getFalClient: () => ({ subscribe: mockSubscribe, storage: { upload: mockUpload } }),
+  getFalClient: () => ({ subscribe: mockSubscribe, queue: queueFromSubscribe(mockSubscribe), storage: { upload: mockUpload } }),
 }));
 const mockProviderWrite = vi.fn();
 vi.mock('../../../src/storage/providers/registry.js', async () => {

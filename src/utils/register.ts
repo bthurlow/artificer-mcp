@@ -7,6 +7,21 @@ export interface ToolResult {
 }
 
 /**
+ * The parts of the SDK's per-request `extra` that handlers use. Declared
+ * here rather than imported so tsc does not resolve the SDK's request
+ * generics (see below).
+ */
+export interface ToolExtra {
+  /** Aborted when the client cancels the call. */
+  signal?: AbortSignal;
+  _meta?: { progressToken?: string | number };
+  sendNotification?: (notification: {
+    method: string;
+    params?: Record<string, unknown>;
+  }) => Promise<void>;
+}
+
+/**
  * Type-erased wrapper around server.tool() to prevent tsc from resolving
  * Zod's deeply nested generics across 57 tool registrations, which causes OOM.
  *
@@ -22,7 +37,7 @@ export function registerTool<TParams>(
   name: string,
   description: string,
   schema: Record<string, unknown>,
-  handler: (params: TParams) => Promise<ToolResult>,
+  handler: (params: TParams, extra: ToolExtra) => Promise<ToolResult>,
 ): void {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (server as any).tool(name, description, schema, handler);

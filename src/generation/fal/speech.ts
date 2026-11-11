@@ -2,7 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerTool } from '../../utils/register.js';
 import { downloadAndWrite } from '../utils/download-and-write.js';
 import { getFalClient } from './client.js';
-import { parseFalError } from './errors.js';
+import { runFalJob } from './queue.js';
 import { checkExtraParams } from './extra-params.js';
 import { resolveForFal, resolveExtraFiles } from './inputs.js';
 import { type FalGenerateSpeechParams, falGenerateSpeechSchema } from './types-audio.js';
@@ -77,16 +77,19 @@ export function registerFalSpeechTools(server: McpServer): void {
     'fal_generate_speech',
     'Generate speech via any fal-hosted TTS, voice-clone, or dialogue model. Transport tool — pass explicit `model`. Returns JSON with `audio_uri` (when audio was generated) and `custom_voice_id` (when the model returned one, e.g. voice-cloning). Uses FAL_KEY env var.',
     falGenerateSpeechSchema.shape,
-    async ({
-      model,
-      text,
-      output,
-      voice,
-      reference_audio,
-      extra_params,
-      extra_files,
-      poll_timeout_seconds,
-    }) => {
+    async (
+      {
+        model,
+        text,
+        output,
+        voice,
+        reference_audio,
+        extra_params,
+        extra_files,
+        poll_timeout_seconds,
+      },
+      extra,
+    ) => {
       const client = getFalClient();
 
       const audioResolved = reference_audio
@@ -117,22 +120,15 @@ export function registerFalSpeechTools(server: McpServer): void {
           console.error(warning);
         }
 
-        let result;
-        try {
-          result = await client.subscribe(model, {
-            input,
-            logs: false,
-            startTimeout: poll_timeout_seconds,
-          });
-        } catch (err) {
-          const falErr = parseFalError(err);
-          throw new Error(
-            `fal_generate_speech failed (${falErr.constructor.name}: ${falErr.errorType}, ` +
-              `status=${falErr.status}, retryable=${falErr.retryable}, ` +
-              `requestId=${falErr.requestId ?? 'unknown'}): ${falErr.message}`,
-            { cause: err },
-          );
-        }
+        const result = await runFalJob(client, {
+          tool: 'fal_generate_speech',
+          model,
+          input,
+          logs: false,
+          timeoutSeconds: poll_timeout_seconds,
+          output,
+          extra,
+        });
 
         const { audioUrl, customVoiceId } = extractSpeechOutput(result.data);
 
