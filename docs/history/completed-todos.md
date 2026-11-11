@@ -806,3 +806,35 @@ Plus: `target_duration` (clamp or pad to a platform window, e.g. Canvas 3-8s), a
 - **Update 2026-11-10:** a second identical submit (`01a1c77c-b6c5-7cd2-a565-bd7a673345bd`) did the same: IN_PROGRESS,
   empty logs, no params shown, no charge. Two earlier OmniHuman calls the same afternoon ran fine. Looks like a fal-side
   OmniHuman outage, not Artificer, but (1)-(4) still stand: the caller had no visibility either time.
+
+---
+
+## 34. `audio_beat_grid`: beat grid + downbeat/kick phase detection — DONE 2026-11-11
+
+**Shipped** as `audio_beat_grid({input, start?, end?, output?, beats_per_bar = 4, bpm_hint?})`, in TypeScript with ffmpeg decoding (no Python): `src/audio/dsp.ts` (FFT, mel spectrogram, onset strength, band envelopes) and `src/audio/beat-grid.ts`.
+- **Grid:** librosa `beat_track`'s method and defaults: 22.05 kHz, hop 512, mel spectral flux with the median across bands, windowed-autocorrelation tempo with a log-normal prior, the Ellis DP tracker with tightness 100, weak-end trimming. `tempo_bpm` is the slope of the tracked beats.
+- **Accents:** kick (40-120 Hz) and snare/clap (1.5-5 kHz) peak energy within ±80 ms of each beat, from 2 ms envelopes. `phase_strength` tables (relative energy per bar position plus contrast), `kick_phase`, `downbeats`, `half_bar` (in 2/4 every beat; in odd meters the downbeats), `kick_ref` (first downbeat with a clear kick), `sections` (8-bar windows stepped by 4 bars, merged; `kick_phase: null` where contrast < 1.5).
+- **`offset_s`:** median of (kick attack − grid) over downbeats with a kick. The attack is where the kick's low-band energy first reaches 10% of its peak. Cuts belong on the attack.
+- **Output:** the reply carries the full grid; with `output` it writes the JSON file and replies with a summary.
+
+**Validated on Thought and Memory** against the btmusic librosa grid (`video/beats.json`): 377 of 378 beats within 50 ms (median 0), downbeat at 49.807 (the EDL's `kick_ref` was 49.81), kick contrast 3.85, `offset_s` −0.025 (btmusic measured about −0.04 by ear), one real kick-phase change at 210–220 s that librosa's grid shows too. 2.9 s for the full 4:10 track (0.5 s decode).
+**Findings while matching librosa:** hop 256, mean aggregation across bands, or HPSS each let the tracker drift a quarter beat onto a syncopated figure for about 18 s (112–130 s), which wrecked the bar phase. So the beat stage uses librosa's own defaults and no HPSS, despite the original note. Like librosa's, the grid sits one to two frames after the attack; `offset_s` is the correction. A 75 BPM loop with off-beat hats reads as 150 without `bpm_hint`.
+
+### Original filing (kept for history)
+
+- **Need:** beat-synced editing needs more than beat times; it needs to know WHICH beat the listener feels. On btmusic
+  "Thought and Memory" (92.3 BPM) a once-per-bar kick/808 is ~5x stronger than the other beats. Cutting on arbitrary
+  beats put half the cuts a beat early, and Brian heard it immediately. Today this is a hand-run librosa snippet.
+- **Ask:** `audio_beat_grid({audio, start?, end?, output?})` returning:
+  1. `tempo_bpm` and `beats[]` (seconds; librosa `beat_track` or better);
+  2. **per-beat band energy** for kick (40-120 Hz) and snare/clap (~1.5-5 kHz), and the **phase strength table**
+     (mean energy per beat position mod 4), so the caller sees the accent pattern;
+  3. **`downbeats[]` / `kick_phase`**: the beat index mod 4 with the strongest kick, plus `half_bar[]` (kick + mid-bar);
+  4. **`offset_s`**: median offset between the grid and the actual kick peaks (measured -0.04 s here: librosa sits
+     ~1 frame after the hit), so cuts can land on the felt peak;
+  5. optional JSON file output (the EDL reads `beats` + `kick_ref` + `beat_offset`).
+- **Notes:** HPSS (percussive) before onset analysis helps; kick-phase may change between sections (intro/breakdown
+  without drums), so report it per window or let the caller pass `start`/`end`. Long tracks: analyze at 22.05 kHz
+  (a 90 s window at 44.1 kHz with hop 128 took >5 min). Reference implementation: the snippets in
+  `btmusic/albums/04-do-you-know-yet/tracks/thought-and-memory/video/tests/test-log.md` t05 +
+  `btmusic/scripts/assemble-edl.py` (`snap` modes `kick` / `half`).

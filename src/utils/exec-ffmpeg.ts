@@ -81,6 +81,38 @@ export async function ffprobe(
 }
 
 /**
+ * Decode an audio (or video) file's first audio stream to mono 32-bit float
+ * PCM at `sampleRate`, optionally only [start, end) seconds. For analysis
+ * tools that work on raw samples.
+ */
+export async function decodeAudioMono(
+  path: string,
+  sampleRate: number,
+  opts: { start?: number; end?: number } = {},
+): Promise<Float32Array> {
+  const args = ['-v', 'error', '-nostdin'];
+  if (opts.start !== undefined) args.push('-ss', String(opts.start));
+  if (opts.end !== undefined) args.push('-t', String(opts.end - (opts.start ?? 0)));
+  args.push('-i', path, '-vn', '-ac', '1', '-ar', String(sampleRate), '-f', 'f32le', 'pipe:1');
+  try {
+    const { stdout } = await execFileAsync('ffmpeg', args, {
+      encoding: 'buffer',
+      timeout: BATCH_TIMEOUT,
+      // An hour of mono float at 22.05 kHz is ~320 MB.
+      maxBuffer: 1024 * 1024 * 1024,
+    });
+    // Copy into an aligned buffer: Buffer slices may start at an odd offset.
+    const out = new Float32Array(stdout.byteLength >> 2);
+    new Uint8Array(out.buffer).set(stdout.subarray(0, out.length * 4));
+    return out;
+  } catch (error: unknown) {
+    const err = error as { stderr?: Buffer | string; message?: string };
+    const message = err.stderr?.toString() || err.message || 'Unknown FFmpeg error';
+    throw new Error(`FFmpeg failed to decode ${path}: ${message}`, { cause: error });
+  }
+}
+
+/**
  * Parsed video metadata from ffprobe.
  */
 export interface VideoInfo {

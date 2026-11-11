@@ -201,26 +201,7 @@ From btmusic's 2026-11-06 video-model cost review. Checked against fal's own pag
 - **Gotchas found building it:** (1) `blend` in YUV tints everything green: blend in RGB (`gbrp`); (2) a studio-lit
   element (raven on white) reads far too bright over a night plate: needs a grade; (3) `multiply` on a dark element
   is see-through (ghost wings): use a luma matte + overlay instead.
-- **Ask:** a `video_assemble_edl` tool with this model (or absorb the script). Beat grid: see #34.
-
-## 34. `audio_beat_grid`: beat grid + downbeat/kick phase detection (NEW, filed 2026-11-11)
-
-- **Need:** beat-synced editing needs more than beat times; it needs to know WHICH beat the listener feels. On btmusic
-  "Thought and Memory" (92.3 BPM) a once-per-bar kick/808 is ~5x stronger than the other beats. Cutting on arbitrary
-  beats put half the cuts a beat early, and Brian heard it immediately. Today this is a hand-run librosa snippet.
-- **Ask:** `audio_beat_grid({audio, start?, end?, output?})` returning:
-  1. `tempo_bpm` and `beats[]` (seconds; librosa `beat_track` or better);
-  2. **per-beat band energy** for kick (40-120 Hz) and snare/clap (~1.5-5 kHz), and the **phase strength table**
-     (mean energy per beat position mod 4), so the caller sees the accent pattern;
-  3. **`downbeats[]` / `kick_phase`**: the beat index mod 4 with the strongest kick, plus `half_bar[]` (kick + mid-bar);
-  4. **`offset_s`**: median offset between the grid and the actual kick peaks (measured -0.04 s here: librosa sits
-     ~1 frame after the hit), so cuts can land on the felt peak;
-  5. optional JSON file output (the EDL reads `beats` + `kick_ref` + `beat_offset`).
-- **Notes:** HPSS (percussive) before onset analysis helps; kick-phase may change between sections (intro/breakdown
-  without drums), so report it per window or let the caller pass `start`/`end`. Long tracks: analyze at 22.05 kHz
-  (a 90 s window at 44.1 kHz with hop 128 took >5 min). Reference implementation: the snippets in
-  `btmusic/albums/04-do-you-know-yet/tracks/thought-and-memory/video/tests/test-log.md` t05 +
-  `btmusic/scripts/assemble-edl.py` (`snap` modes `kick` / `half`).
+- **Ask:** a `video_assemble_edl` tool with this model (or absorb the script). Beat grid: `audio_beat_grid` (#34, done) writes the JSON this should read.
 
 ---
 
