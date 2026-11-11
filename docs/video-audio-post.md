@@ -36,7 +36,7 @@
 | `video_set_codec` | Change codec + quality | `video_codec`, `audio_codec`, `crf`, `preset` |
 | `video_set_frame_rate` | Change fps | `frame_rate`, `drop_duplicate_frames` (true=fps filter, false=-r flag) |
 
-## Audio tools (9)
+## Audio tools (10)
 
 | Tool | Description | Key params |
 |------|-------------|------------|
@@ -49,8 +49,17 @@
 | `audio_set_channels` | Mono/stereo/5.1 conversion | `channels` (1/2/6/8) |
 | `audio_set_sample_rate` | Resample audio | `sample_rate` (22050/44100/48000/96000) |
 | `audio_remove_silence` | Trim silence | `threshold_db`, `min_silence_duration`, `remove` (start/end/both/all) |
+| `audio_beat_grid` | Beat grid for cutting to music: tempo, beats, the bar position carrying the kick (`downbeats`, `half_bar`), the grid-to-attack `offset_s`, and the kick phase per section. Local analysis, a few seconds per song | `start`, `end` (song time), `output` (JSON), `beats_per_bar`, `bpm_hint` |
 
 ## Common patterns
+
+### Cut on the beat the listener feels
+
+```
+audio_beat_grid input=./master.wav output=./beats.json
+```
+
+Snap cuts to `downbeats` (or `half_bar` for a faster pace), not to every beat: in most pop and hip-hop one beat per bar carries the kick, and a cut on any other beat reads as early or late. Add `offset_s` (usually a few hundredths of a second, negative) to a beat time to land on the kick's attack. If `sections` shows a different `kick_phase` or `null` somewhere, use that section's phase there. If `tempo_bpm` is double or half what you hear, rerun with `bpm_hint`.
 
 ### Convert landscape video to portrait for Reels/Shorts
 

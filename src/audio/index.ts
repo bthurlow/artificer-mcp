@@ -4,6 +4,7 @@ import { dirname } from 'node:path';
 import { registerTool } from '../utils/register.js';
 import { ffmpegBatch, ffprobe } from '../utils/exec-ffmpeg.js';
 import { resolveInput, resolveOutput } from '../utils/resource.js';
+import { registerBeatGridTool } from './beat-grid-tool.js';
 import {
   type AudioInfoParams,
   type AudioExtractFromVideoParams,
@@ -119,9 +120,11 @@ function probeNumber(value: string | undefined): number | undefined {
  * Covers: audio_info, audio_extract_from_video, audio_normalize,
  * audio_convert_format, audio_convert_properties, audio_set_bitrate,
  * audio_set_channels, audio_set_sample_rate, audio_remove_silence,
- * audio_mix, audio_pad.
+ * audio_mix, audio_pad, audio_beat_grid.
  */
 export function registerAudioTools(server: McpServer): void {
+  registerBeatGridTool(server);
+
   // ── audio_info ─────────────────────────────────────────────────────────
   registerTool<AudioInfoParams>(
     server,

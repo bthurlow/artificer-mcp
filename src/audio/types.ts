@@ -326,3 +326,54 @@ export const audioMixSchema = z.object({
     .default(250)
     .describe('Sidechain release time in ms — how fast volume recovers after voice ends.'),
 });
+
+/** Parameters for the audio_beat_grid tool */
+export interface AudioBeatGridParams {
+  input: string;
+  start?: number;
+  end?: number;
+  output?: string;
+  beats_per_bar: number;
+  bpm_hint?: number;
+}
+
+export const audioBeatGridSchema = z.object({
+  input: z
+    .string()
+    .describe(
+      'Audio file to analyse (or a video file: its first audio stream). Use the mastered mix.',
+    ),
+  start: z
+    .number()
+    .min(0)
+    .optional()
+    .describe(
+      "Analyse from this many seconds in. Reported times stay in the full file's time (song time).",
+    ),
+  end: z
+    .number()
+    .positive()
+    .optional()
+    .describe('Stop analysing at this many seconds. Default: end of file.'),
+  output: z
+    .string()
+    .optional()
+    .describe(
+      'Write the full grid as JSON here (beats, downbeats, half_bar, kick_phase, offset_s, kick_ref, phase tables, sections, per-beat band energy). With it, the reply carries a summary instead of every beat.',
+    ),
+  beats_per_bar: z
+    .number()
+    .int()
+    .min(2)
+    .max(12)
+    .default(4)
+    .describe('Beats per bar for the phase analysis. Default 4.'),
+  bpm_hint: z
+    .number()
+    .min(30)
+    .max(320)
+    .optional()
+    .describe(
+      'Expected tempo. Narrows the tempo search around it; use it when the grid comes back at double or half the tempo you hear.',
+    ),
+});
