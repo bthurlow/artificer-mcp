@@ -12,7 +12,7 @@ Generate natural-sounding speech from text. Returns PCM wrapped in WAV; other ex
 |-------|---------|-------------|
 | `text` | required | Script to narrate |
 | `output` | required | Output path or URI (.wav / .mp3 / ...) |
-| `model` | `gemini-2.5-flash-preview-tts` | Override via `ARTIFICER_TTS_MODEL`. Also valid: `gemini-2.5-pro-preview-tts`. |
+| `model` | `gemini-3.8-flash-tts` | Override via `ARTIFICER_TTS_MODEL`. Also valid: `gemini-3.8-flash-lite-tts`, and the preview models `gemini-3.1-flash-tts-preview` and `gemini-2.5-pro-preview-tts`. |
 | `voice` | `Kore` (or brand spec) | Prebuilt voice name — `Kore`, `Puck`, `Zephyr`, `Charon`, `Fenrir`, `Leda`, `Aoede`, `Orus`, `Sage`, etc. |
 | `language_code` | — | Optional ISO code (e.g., `en-US`). |
 | `style` | — | Natural-language delivery style (tone / pace / emotion). Composed with `tts.accent` from the brand spec when set. |

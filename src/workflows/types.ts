@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { envDefault } from '../generation/types.js';
 
 // ── workflow_brand_asset_pack ──────────────────────────────────────────────
 
@@ -407,7 +408,7 @@ export const narratedExplainerSchema = z.object({
     ),
   tts_model: z
     .string()
-    .default('gemini-2.5-flash-preview-tts')
+    .default(envDefault('ARTIFICER_TTS_MODEL', 'gemini-3.8-flash-tts'))
     .describe('Gemini TTS model ID. Override via ARTIFICER_TTS_MODEL env var.'),
   music_prompt: z
     .string()

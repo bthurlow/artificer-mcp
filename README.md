@@ -97,7 +97,7 @@ Add to your MCP config:
 | `ARTIFICER_VEO_MODEL` | Override default model for `gemini_generate_video` (fallback: `veo-2.0-generate-001`). |
 | `ARTIFICER_OMNI_VIDEO_MODEL` | Override default model for `gemini_omni_generate_video` (fallback: `gemini-omni-1.2-flash`). |
 | `ARTIFICER_NANOBANANA_MODEL` | Override default model for `gemini_nanobanana_generate_image` (fallback: `gemini-3.1-flash-image`). |
-| `ARTIFICER_TTS_MODEL` | Override default model for `gemini_generate_speech` (fallback: `gemini-2.5-flash-preview-tts`). |
+| `ARTIFICER_TTS_MODEL` | Override default model for `gemini_generate_speech` (fallback: `gemini-3.8-flash-tts`). |
 | `ARTIFICER_LYRIA_MODEL` | Override default model for `gemini_generate_music` (fallback: `lyria-3-clip-preview`). Also valid: `lyria-3-pro-preview`. |
 | `ARTIFICER_LYRIA_LIVE_MODEL` | Override default model for `gemini_generate_music_live` (fallback: `models/lyria-realtime-exp`). |
 | `ARTIFICER_BRAND_SPEC` | Optional JSON with project-wide brand defaults (colors, fonts, TTS voice, music prompt, logo variants). All fields optional. See [docs/brand-spec.md](docs/brand-spec.md). |
