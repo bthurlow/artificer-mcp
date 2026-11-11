@@ -23,7 +23,7 @@
 | Tool | Description | Key params |
 |------|-------------|------------|
 | `video_add_transitions` | xfade transitions between clips: one for every cut, or one per cut | `inputs[]`, `transition` (fade/wipeleft/dissolve/...), `transitions[]` (per cut), `duration` |
-| `video_assemble_edl` | Music-video cut from an edit decision list in song time: shots on the beat grid, per-shot cut or flash, punch-in zoom, lip-synced clips kept in sync. Frame-exact; checks every shot before rendering | `edl` or `edl_path`, `output` |
+| `video_assemble_edl` | Music-video cut from an edit decision list in song time: shots on the beat grid, per-shot cut, flash or composited element (fire, smoke, a raven wing), punch-in zoom, lip-synced clips kept in sync. Frame-exact; checks every shot before rendering | `edl` or `edl_path`, `output` |
 | `video_add_image_overlay` | Logo/watermark overlay | `overlay` (image path), `x`, `y`, `opacity`, `start_seconds`, `end_seconds` |
 | `video_add_text_overlay` | Burn text onto video | `text`, `font_file`, `font_size`, `color`, `box`, time range |
 | `video_add_subtitles` | SRT/VTT/ASS subtitles | `subtitle_file`, `burn_in` (true=rendered, false=soft track), `force_style` |
@@ -90,6 +90,23 @@ video_assemble_edl edl_path=./edl.json output=./cut.mp4
 - Every shot is checked before anything renders (clip too short, a start before the clip begins, a shot shorter than a frame, an unknown transition), and all problems come back at once.
 - Shots are placed on the output frame grid from the absolute timeline, so cuts never drift. More than 24 shots render in batches through lossless intermediates (`ARTIFICER_EDL_SHOTS_PER_PASS` changes the batch size; each shot holds a decoder, so lower it on a small machine).
 - Output is tagged BT.709 limited range, the convention for HD.
+
+**Elements over a cut.** Name them under `fx` and use the name as a shot's `in`:
+
+```json
+"fx": {
+  "burn":  {"src": "fx/fire.mp4",  "peak": 3.7, "max_lead": 0.9, "mode": "screen", "zoom": 1.4, "cx": 0.62, "cy": 0.55},
+  "smoke": {"src": "fx/smoke.mp4", "peak": 2.3, "max_lead": 0.8, "mode": "matte_light", "lo": 25, "hi": 120,
+            "grade": "colorchannelmixer=rr=0.80:gg=0.84:bb=0.92", "zoom": 2.1},
+  "raven": {"src": "fx/raven.mp4", "peak": 1.2, "mode": "matte_dark", "post_speed": 2.2, "tail": 1.0}
+}
+```
+
+- `peak` is the moment in the element (thickest smoke, wings spread) that lands on the cut; `max_lead` caps how early it appears over the previous shot.
+- `screen` for light elements shot on black (fire). `matte_light` makes grey-on-black elements opaque (smoke, which `screen` leaves thin); `matte_dark` does the same for dark-on-white elements (a raven). `lo`/`hi` set the matte's luma ramp. `multiply` is see-through on dark elements: use `matte_dark`.
+- `grade` is an ffmpeg filter chain for the element's colour: a studio-lit element needs darkening and cooling to sit in a night plate.
+- `zoom`/`cx`/`cy` crop into elements that fill only part of their frame; `post_speed` speeds up everything after the peak; `tail` ends the element that long after its peak, fading out.
+- Elements composite in RGB (blending in YUV tints everything green). Each adds an input to the final pass, two for a matte.
 
 ### Convert landscape video to portrait for Reels/Shorts
 

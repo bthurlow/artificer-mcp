@@ -54,7 +54,96 @@ export const edlShotSchema = z.object({
   in: z
     .string()
     .default('cut')
-    .describe('Transition INTO this shot: "cut" or "flash" (a white flash decaying from the cut).'),
+    .describe(
+      'Transition INTO this shot: "cut", "flash" (a white flash decaying from the cut), or the name of an element in `fx`, composited so its peak lands on the cut.',
+    ),
+});
+
+/**
+ * An element composited over a cut (fire, smoke, a raven wing): a video
+ * whose `peak` moment lands on the cut. From the prototype, including the
+ * fixes it found: blends run in RGB (YUV blending tints everything green),
+ * `multiply` is see-through on a dark element (use `matte_dark`), and a
+ * studio-lit element needs a `grade` to sit in a night plate.
+ */
+export const edlFxSchema = z.object({
+  type: z
+    .enum(['overlay', 'sweep'])
+    .default('overlay')
+    .describe(
+      '"overlay" (this) or "sweep" (a still element wiping across the frame; not available yet).',
+    ),
+  src: z.string().min(1).describe('The element video (path or URI).'),
+  peak: z
+    .number()
+    .min(0)
+    .describe(
+      'Seconds into the element where it is fullest (thickest smoke, wings spread). Lands on the cut.',
+    ),
+  max_lead: z
+    .number()
+    .positive()
+    .optional()
+    .describe(
+      'At most this many seconds of the element before the cut (stops fire appearing seconds early over the previous shot).',
+    ),
+  mode: z
+    .enum([
+      'screen',
+      'lighten',
+      'addition',
+      'multiply',
+      'darken',
+      'overlay',
+      'softlight',
+      'matte_dark',
+      'matte_light',
+    ])
+    .default('screen')
+    .describe(
+      'How the element combines with the picture. "screen" for light elements shot on black (fire, sparks). "matte_light": opaque, alpha from luma, for grey elements on black that screen leaves too thin (smoke). "matte_dark": opaque, alpha from inverted luma, for dark elements on white (a raven). Other values are ffmpeg blend modes; "multiply" is see-through on dark elements.',
+    ),
+  zoom: z
+    .number()
+    .min(1)
+    .default(1)
+    .describe('Crop into the element (it often fills only part of its frame).'),
+  cx: z.number().min(0).max(1).default(0.5).describe('Zoom centre, fraction of the width.'),
+  cy: z.number().min(0).max(1).default(0.5).describe('Zoom centre, fraction of the height.'),
+  lo: z
+    .number()
+    .min(0)
+    .max(255)
+    .default(40)
+    .describe(
+      'Matte modes: luma at or below this is fully transparent (matte_light) or opaque (matte_dark).',
+    ),
+  hi: z
+    .number()
+    .min(0)
+    .max(255)
+    .default(170)
+    .describe('Matte modes: the other end of the luma ramp.'),
+  grade: z
+    .string()
+    .optional()
+    .describe(
+      'ffmpeg filters applied to the element\'s colour before compositing, e.g. "colorchannelmixer=rr=0.8:gg=0.84:bb=0.92" to darken and cool a studio-lit element for a night plate.',
+    ),
+  post_speed: z
+    .number()
+    .positive()
+    .default(1)
+    .describe(
+      'Play the element this much faster after its peak (2 = twice as fast), e.g. a raven that must clear the frame.',
+    ),
+  tail: z
+    .number()
+    .positive()
+    .optional()
+    .describe(
+      'End the element this many output seconds after its peak, fading out over the last 0.25 s.',
+    ),
 });
 
 export const edlSegmentSchema = z.object({
@@ -99,6 +188,10 @@ export const edlSchema = z.object({
     })
     .default({})
     .describe('The "flash" transition: peak brightness added and decay time in seconds.'),
+  fx: z
+    .record(edlFxSchema)
+    .default({})
+    .describe('Named elements a shot can use as its `in` transition.'),
   crf: z.number().int().min(0).max(51).default(18),
   preset: z.string().default('medium'),
   segments: z.array(edlSegmentSchema).min(1),
@@ -106,6 +199,7 @@ export const edlSchema = z.object({
 
 export type Edl = z.infer<typeof edlSchema>;
 export type EdlShot = z.infer<typeof edlShotSchema>;
+export type EdlFx = z.infer<typeof edlFxSchema>;
 export type EdlInput = z.input<typeof edlSchema>;
 
 /** Parameters for the video_assemble_edl tool */
@@ -120,7 +214,7 @@ export const videoAssembleEdlSchema = z.object({
     .record(z.unknown())
     .optional()
     .describe(
-      'The edit decision list, inline. Shape: {audio, width?, height?, fps?, beat_grid?, beats?, kick_ref?, beat_offset?, beats_per_bar?, flash?, crf?, preset?, segments: [{song: [a, b], shots: [{clip, clip_song_start?, start?, snap?, punch?, fx?, fy?, in?}]}]}. Relative paths resolve against the working directory.',
+      'The edit decision list, inline. Shape: {audio, width?, height?, fps?, beat_grid?, beats?, kick_ref?, beat_offset?, beats_per_bar?, flash?, fx?: {name: {src, peak, max_lead?, mode?, zoom?, cx?, cy?, lo?, hi?, grade?, post_speed?, tail?}}, crf?, preset?, segments: [{song: [a, b], shots: [{clip, clip_song_start?, start?, snap?, punch?, fx?, fy?, in?}]}]}. A shot\'s `in` is "cut", "flash" or an fx name. Relative paths resolve against the working directory.',
     ),
   edl_path: z
     .string()

@@ -1,4 +1,4 @@
-import type { Edl } from './schema.js';
+import type { Edl, EdlFx } from './schema.js';
 
 /**
  * Planning and filter-graph construction for `video_assemble_edl`. Pure:
@@ -63,6 +63,24 @@ export interface PlannedShot {
   transition: string;
 }
 
+/**
+ * An element placed over a cut. Times follow the prototype: element time
+ * `elIn` appears at output time `delay`, so the element's peak lands on
+ * the cut, starting no earlier than `max_lead` before it.
+ */
+export interface PlannedEffect {
+  name: string;
+  /** Output frame of the cut. */
+  outFrame: number;
+  fx: EdlFx;
+  /** Element seconds skipped at its start. */
+  elIn: number;
+  /** Output seconds before the element appears. */
+  delay: number;
+  /** Seconds from the element's first shown frame to its peak. */
+  toPeak: number;
+}
+
 export interface EdlPlan {
   width: number;
   height: number;
@@ -71,6 +89,7 @@ export interface EdlPlan {
   segments: Array<[number, number]>;
   totalFrames: number;
   flash: { strength: number; duration: number };
+  effects: PlannedEffect[];
 }
 
 export interface PlanContext {
@@ -80,7 +99,10 @@ export interface PlanContext {
   grid?: BeatSource;
 }
 
-const TRANSITIONS = new Set(['cut', 'flash']);
+const BUILT_IN_TRANSITIONS = new Set(['cut', 'flash']);
+
+/** A grade is spliced into the graph, so it must stay one filter chain. */
+const GRADE_FORBIDDEN = /[;[\]]/;
 const fmt = (t: number): string => t.toFixed(3);
 
 /**
@@ -93,7 +115,25 @@ export function planEdl(edl: Edl, ctx: PlanContext): { plan: EdlPlan; errors: st
   const errors: string[] = [];
   const fps = edl.fps;
   const shots: PlannedShot[] = [];
+  const effects: PlannedEffect[] = [];
   let outT = 0;
+
+  const fxNames = Object.keys(edl.fx);
+  for (const [name, fx] of Object.entries(edl.fx)) {
+    if (fx.type === 'sweep') {
+      errors.push(
+        `fx "${name}": the sweep type is not available yet; use an overlay mode for now.`,
+      );
+    }
+    if (fx.grade && GRADE_FORBIDDEN.test(fx.grade)) {
+      errors.push(`fx "${name}": grade must be a plain filter chain (no ";", "[" or "]").`);
+    }
+    if (fx.hi <= fx.lo) errors.push(`fx "${name}": hi (${fx.hi}) must be above lo (${fx.lo}).`);
+    const len = ctx.clipDuration(fx.src);
+    if (len !== undefined && fx.peak > len) {
+      errors.push(`fx "${name}": peak ${fx.peak}s is past the end of ${fx.src} (${fmt(len)}s).`);
+    }
+  }
 
   edl.segments.forEach((seg, si) => {
     const [a, b] = seg.song;
@@ -138,8 +178,11 @@ export function planEdl(edl: Edl, ctx: PlanContext): { plan: EdlPlan; errors: st
       const label = `${where} shot ${k} (${sh.clip})`;
       const s0 = starts[k];
       const s1 = k + 1 < seg.shots.length ? starts[k + 1] : b;
-      if (!TRANSITIONS.has(sh.in)) {
-        errors.push(`${label}: unknown transition "${sh.in}" (use "cut" or "flash").`);
+      const isFx = !BUILT_IN_TRANSITIONS.has(sh.in);
+      if (isFx && !(sh.in in edl.fx)) {
+        errors.push(
+          `${label}: unknown transition "${sh.in}" (use "cut", "flash"${fxNames.length ? ` or an fx: ${fxNames.join(', ')}` : ' or define it under fx'}).`,
+        );
       }
       if (Number.isNaN(s0)) return;
       const srcIn = s0 - sh.clip_song_start;
@@ -183,6 +226,19 @@ export function planEdl(edl: Edl, ctx: PlanContext): { plan: EdlPlan; errors: st
         fy: sh.fy,
         transition: sh.in,
       });
+      const fx = edl.fx[sh.in];
+      if (isFx && fx) {
+        const t = f0 / fps;
+        const elIn = Math.max(0, fx.peak - t, fx.peak - (fx.max_lead ?? Infinity));
+        effects.push({
+          name: sh.in,
+          outFrame: f0,
+          fx,
+          elIn,
+          delay: t - (fx.peak - elIn),
+          toPeak: fx.peak - elIn,
+        });
+      }
       outT += dur;
     });
   });
@@ -196,6 +252,7 @@ export function planEdl(edl: Edl, ctx: PlanContext): { plan: EdlPlan; errors: st
       segments: edl.segments.map((s) => s.song),
       totalFrames: Math.round(outT * fps),
       flash: edl.flash,
+      effects,
     },
     errors,
   };
@@ -319,10 +376,10 @@ function shotChains(
   return { inputs, filters };
 }
 
-/** The "flash" transitions over the joined picture, from [base] to [vout]. */
-function flashChain(plan: EdlPlan): string {
+/** The "flash" transitions over the joined picture, from [base] to `out`. */
+function flashChain(plan: EdlPlan, out: string): string {
   const flashes = plan.shots.filter((s) => s.transition === 'flash' && s.outFrame > 0);
-  if (flashes.length === 0) return '[base]null[vout]';
+  if (flashes.length === 0) return `[base]null${out}`;
   const { strength, duration } = plan.flash;
   // Time from the frame number (n / fps), not `t`: batch intermediates store
   // millisecond timestamps, and t = 5.708 for frame 137 missed a flash
@@ -332,7 +389,81 @@ function flashChain(plan: EdlPlan): string {
     const t = (s.outFrame / plan.fps).toFixed(4);
     return `if(between(${now}\\,${t}\\,${t}+${duration})\\,${strength}*(1-(${now}-${t})/${duration})\\,0)`;
   });
-  return `[base]eq=brightness=${terms.join('+')}:eval=frame[vout]`;
+  return `[base]eq=brightness=${terms.join('+')}:eval=frame${out}`;
+}
+
+/**
+ * One element stream, padded to the whole timeline so its peak lands on the
+ * cut: the prototype's element chain, with the zoom crop computed like the
+ * punch-in. Pad colour is the blend's neutral (black, or white for
+ * multiply-like and dark mattes), so outside its window it changes nothing.
+ */
+function elementChain(plan: EdlPlan, e: PlannedEffect, input: number, out: string): string {
+  const { width: W, height: H, fps } = plan;
+  const { fx } = e;
+  const pad = ['multiply', 'darken', 'matte_dark'].includes(fx.mode) ? 'white' : 'black';
+  const speed =
+    fx.post_speed !== 1
+      ? `setpts=if(lt(T\\,${e.toPeak.toFixed(4)})\\,PTS\\,(${e.toPeak.toFixed(4)}+(T-${e.toPeak.toFixed(4)})/${fx.post_speed})/TB),`
+      : '';
+  let tail = '';
+  if (fx.tail !== undefined) {
+    const len = e.toPeak + fx.tail;
+    tail = `trim=duration=${len.toFixed(4)},fade=t=out:st=${Math.max(0, len - 0.25).toFixed(4)}:d=0.25:color=${pad},`;
+  }
+  const zoom = punchCrop(plan, { punch: fx.zoom, fx: fx.cx, fy: fx.cy });
+  // Padded and cut in FRAMES to exactly the timeline's length. The
+  // prototype's trim=duration came out a frame short, and with shortest=1 on
+  // the blend then dropped the video's last frame.
+  return (
+    `[${input}:v]trim=start=${e.elIn.toFixed(4)},setpts=PTS-STARTPTS,${speed}${tail}` +
+    `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},${zoom}fps=${fps},setsar=1,format=gbrp,` +
+    `tpad=start=${Math.round(e.delay * fps)}:start_mode=add:color=${pad}:` +
+    `stop=${plan.totalFrames}:stop_mode=add:color=${pad},trim=end_frame=${plan.totalFrames}${out}`
+  );
+}
+
+/**
+ * Everything after the shots are joined, from [base] to [vout]: flashes,
+ * then each element in cut order. Elements composite in planar RGB (blending
+ * in YUV tinted everything green in the prototype), converted once for the
+ * whole chain; the prototype converted to RGB and back for every element.
+ * Each element adds an input (two for a matte: reading the file twice keeps
+ * the matte from sharing buffers with, and tinting, the colour copy).
+ */
+function finishChain(
+  plan: EdlPlan,
+  firstInput: number,
+  clipPath: (clip: string) => string,
+): { inputs: GraphInput[]; filters: string[] } {
+  if (plan.effects.length === 0) return { inputs: [], filters: [flashChain(plan, '[vout]')] };
+  const inputs: GraphInput[] = [];
+  const filters = [flashChain(plan, '[fl]'), '[fl]format=gbrp[c0]'];
+  const addInput = (path: string): number => {
+    inputs.push({ options: ['-threads', '2'], path });
+    return firstInput + inputs.length - 1;
+  };
+  plan.effects.forEach((e, n) => {
+    const { fx } = e;
+    const grade = fx.grade ? `,${fx.grade}` : '';
+    filters.push(elementChain(plan, e, addInput(clipPath(fx.src)), `[e${n}]`));
+    if (fx.mode === 'matte_dark' || fx.mode === 'matte_light') {
+      filters.push(elementChain(plan, e, addInput(clipPath(fx.src)), `[em${n}]`));
+      const negate = fx.mode === 'matte_dark' ? 'negate,' : '';
+      filters.push(
+        `[em${n}]format=gray,${negate}lut=y=clip((val-${fx.lo})*255/(${fx.hi}-${fx.lo})\\,0\\,255)[ea${n}]`,
+        `[e${n}]format=rgba${grade}[er${n}]`,
+        `[er${n}][ea${n}]alphamerge[eo${n}]`,
+        `[c${n}][eo${n}]overlay=format=gbrp[c${n + 1}]`,
+      );
+    } else {
+      const graded = grade ? `[e${n}]format=gbrp${grade},format=gbrp[eg${n}]` : '';
+      if (graded) filters.push(graded);
+      filters.push(`[c${n}][${graded ? `eg${n}` : `e${n}`}]blend=all_mode=${fx.mode}[c${n + 1}]`);
+    }
+  });
+  filters.push(`[c${plan.effects.length}]format=yuv420p,${COLOR_TAGS}[vout]`);
+  return { inputs, filters };
 }
 
 /** Single pass: input 0 is the audio, then one input per shot. */
@@ -341,9 +472,10 @@ export function buildFilterGraph(
   paths: { audio: string; clip: (clip: string) => string },
 ): FilterGraph {
   const shots = shotChains(plan, plan.shots, paths.clip, 1, '[base]');
+  const finish = finishChain(plan, 1 + shots.inputs.length, paths.clip);
   return {
-    inputs: [{ options: [], path: paths.audio }, ...shots.inputs],
-    filter: [...audioChain(plan, 0), ...shots.filters, flashChain(plan)].join(';\n'),
+    inputs: [{ options: [], path: paths.audio }, ...shots.inputs, ...finish.inputs],
+    filter: [...audioChain(plan, 0), ...shots.filters, ...finish.filters].join(';\n'),
     video: '[vout]',
     audio: '[aout]',
   };
@@ -369,16 +501,26 @@ export function buildBatchGraphs(
   return graphs;
 }
 
-/** Batched pass 2: input 0 is the audio, then the batch files in order. */
-export function buildJoinGraph(plan: EdlPlan, audio: string, batches: string[]): FilterGraph {
+/** Batched pass 2: input 0 is the audio, then the batch files in order, then elements. */
+export function buildJoinGraph(
+  plan: EdlPlan,
+  audio: string,
+  batches: string[],
+  clipPath: (clip: string) => string,
+): FilterGraph {
   const inputs: GraphInput[] = [
     { options: [], path: audio },
     ...batches.map((path) => ({ options: [], path })),
   ];
-  const join = `${batches.map((_, i) => `[${i + 1}:v]`).join('')}concat=n=${batches.length}:v=1:a=0[base]`;
+  // fps= puts the batch files' millisecond timestamps back on the exact
+  // frame grid (each is within half a frame, so nothing is dropped or
+  // doubled). Off-grid, an element blend's frame sync emitted an extra frame.
+  const join = `${batches.map((_, i) => `[${i + 1}:v]`).join('')}concat=n=${batches.length}:v=1:a=0,fps=${plan.fps}[base]`;
+  const finish = finishChain(plan, inputs.length, clipPath);
+  inputs.push(...finish.inputs);
   return {
     inputs,
-    filter: [...audioChain(plan, 0), join, flashChain(plan)].join(';\n'),
+    filter: [...audioChain(plan, 0), join, ...finish.filters].join(';\n'),
     video: '[vout]',
     audio: '[aout]',
   };
