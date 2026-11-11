@@ -48,7 +48,7 @@ export const falSeparateAudioSchema = z.object({
       'Which stems to return → `stems`, e.g. ["vocals"] for an isolated vocal. Omit for all of them. Accepted names are model-specific (Demucs: vocals, drums, bass, other, guitar, piano; the last two only with its 6-stem network).',
     ),
   extra_params: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .optional()
     .describe(
       'Model-specific knobs spread into the fal input, e.g. Demucs {"model": "htdemucs_ft", "output_format": "wav"}. Note that a model\'s own `model` input (its network choice) goes here; the top-level `model` arg is the fal endpoint.',

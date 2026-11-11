@@ -21,6 +21,21 @@ const grid: BeatSource = {
   beatsPerBar: 4,
 };
 
+describe('edlSchema', () => {
+  const base: EdlInput = {
+    audio: 'a.wav',
+    segments: [{ song: [0, 1], shots: [{ clip: 'c.mp4' }] }],
+  };
+
+  it('fills in the flash defaults when flash is omitted or partial', () => {
+    expect(parse(base).flash).toEqual({ strength: 0.75, duration: 0.25 });
+    expect(parse({ ...base, flash: { strength: 0.5 } }).flash).toEqual({
+      strength: 0.5,
+      duration: 0.25,
+    });
+  });
+});
+
 describe('snapTime', () => {
   it('snaps to the nearest beat', () => {
     expect(snapTime(3.2, grid, true)).toBe(3);
