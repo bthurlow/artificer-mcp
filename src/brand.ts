@@ -51,7 +51,7 @@ const colorsSchema = z
       .describe('Highlight/contrast tone that sits on the background, e.g. "#F4ECD8". Hex string.'),
     highlight_name: z.string().optional(),
     extras: z
-      .record(z.string())
+      .record(z.string(), z.string())
       .optional()
       .describe(
         'Any additional named colors, e.g. {"phosphor_green": "#39FF14"}. Use this for multi-mode palettes rather than inventing top-level keys — unknown top-level keys are rejected.',
@@ -90,7 +90,7 @@ const fontsSchema = z
       .optional()
       .describe('Display/wordmark family, for titles and headline treatments.'),
     extras: z
-      .record(z.string())
+      .record(z.string(), z.string())
       .optional()
       .describe(
         'Any additional named font families or weights. Use this rather than inventing top-level keys — unknown top-level keys are rejected.',
@@ -202,7 +202,7 @@ const ACCEPTED_KEYS: Record<string, readonly string[]> = (() => {
   for (const [key, node] of Object.entries(brandSpecSchema.shape)) {
     let inner: z.ZodTypeAny = node;
     while (inner instanceof z.ZodOptional || inner instanceof z.ZodDefault) {
-      inner = inner._def.innerType as z.ZodTypeAny;
+      inner = inner.unwrap() as z.ZodTypeAny;
     }
     if (inner instanceof z.ZodObject) {
       map[key] = Object.keys(inner.shape as Record<string, unknown>);

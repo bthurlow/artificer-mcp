@@ -97,13 +97,13 @@ export const falGenerateImageSchema = z.object({
     .optional()
     .describe('Content to discourage. Pass-through; many current models ignore or reject it.'),
   extra_params: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .optional()
     .describe(
       'Passthrough for model-specific knobs not covered above: output_format, seed, upscale_factor, guidance, safety settings, etc. Keys are spread as top-level fal input fields. Keys the model does not accept trigger a stderr warning (fal drops them silently).',
     ),
   extra_files: z
-    .record(z.union([z.string(), z.array(z.string())]))
+    .record(z.string(), z.union([z.string(), z.array(z.string())]))
     .optional()
     .describe(
       'File-bearing extra_params: each value is resolved like `image` (uploaded if local) and merged into the payload under its key. Use for secondary file inputs such as reference_image_urls, person_image_url, garment_image_urls, mask_image_url. Wins over extra_params on key collision.',

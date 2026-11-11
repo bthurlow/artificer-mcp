@@ -89,13 +89,13 @@ export const falGenerateVideoSchema = z.object({
     .optional()
     .describe('Content to discourage. Pass-through — model support varies.'),
   extra_params: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .optional()
     .describe(
       'Free-form passthrough to the fal payload for any model-specific knobs not covered above (seed, negative_prompt variations, face_swap settings, etc.). Keys are spread as top-level input fields. Unknown keys go to fal as-is; fal responds with 422 if the model rejects them — that error surfaces verbatim, we do not silently drop.',
     ),
   extra_files: z
-    .record(z.union([z.string(), z.array(z.string())]))
+    .record(z.string(), z.union([z.string(), z.array(z.string())]))
     .optional()
     .describe(
       'File-bearing extension to extra_params. Each value is treated like the structural `image` / `audio` args — public http(s) passes through, gs:// / s3:// / file:// / local paths are uploaded to fal storage — and the resulting URL is merged into the fal payload under the same key. Use this for secondary file inputs (start_image_url, end_image_url, reference_image_urls[], mask_url, etc.) that fal models expose only via extra params. extra_files wins over extra_params on key collision because the caller deliberately marked those keys as files.',
