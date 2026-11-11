@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { falPollTimeout } from './queue.js';
 
 /**
  * Input schema for `fal_generate_speech`.
@@ -50,13 +51,7 @@ export const falGenerateSpeechSchema = z.object({
     .describe(
       'File-bearing extension to extra_params. Each value is uploaded through fal storage (or passed through if already https) and the resulting URL is merged into the fal payload under the same key. Use for secondary audio refs (e.g. dialogue scene guidance) the model exposes only via extra params. extra_files wins on key collision with extra_params.',
     ),
-  poll_timeout_seconds: z
-    .number()
-    .positive()
-    .default(300)
-    .describe(
-      "Maximum seconds to wait for the fal job. Default 300 (matches the video transports). Fal's subscribe() polls internally — no separate interval knob.",
-    ),
+  poll_timeout_seconds: falPollTimeout(300),
 });
 
 export interface FalGenerateSpeechParams {
@@ -115,7 +110,7 @@ export const falGenerateMusicSchema = z.object({
     .describe(
       'File-bearing extension to extra_params. Each value is uploaded through fal storage (or passed through if already https) and the resulting URL is merged into the fal payload under the same key. Use for secondary audio refs the model exposes only via extra params. extra_files wins on key collision with extra_params.',
     ),
-  poll_timeout_seconds: z.number().positive().default(300),
+  poll_timeout_seconds: falPollTimeout(300),
 });
 
 export interface FalGenerateMusicParams {

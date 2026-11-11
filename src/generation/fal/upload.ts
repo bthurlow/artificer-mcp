@@ -10,7 +10,7 @@ export const falUploadSchema = z.object({
     .string()
     .min(1)
     .describe(
-      'File to expose to fal. Public http(s) URLs pass through unchanged. gs:// / s3:// / file:// / bare local paths are uploaded to fal storage; the returned URL stays valid for fal.subscribe() calls. Use this when a fal model needs a secondary image / audio / video reference (start_frame, end_frame, ref images, etc.) that must be supplied via `extra_params`.',
+      'File to expose to fal. Public http(s) URLs pass through unchanged. gs:// / s3:// / file:// / bare local paths are uploaded to fal storage; the returned URL stays valid for later fal calls. Use this when a fal model needs a secondary image / audio / video reference (start_frame, end_frame, ref images, etc.) that must be supplied via `extra_params`.',
     ),
 });
 

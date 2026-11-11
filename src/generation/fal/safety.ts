@@ -2,8 +2,11 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { registerTool } from '../../utils/register.js';
 import { getFalClient } from './client.js';
-import { parseFalError } from './errors.js';
+import { runFalJob } from './queue.js';
 import { loadCatalog } from '../../catalog/catalog.js';
+
+/** A text classifier answers in seconds; this only bounds a stuck job. */
+const SAFETY_TIMEOUT_SECONDS = 120;
 
 /**
  * Input schema for `fal_classify_text`.
@@ -90,7 +93,7 @@ export function registerFalSafetyTools(server: McpServer): void {
     'fal_classify_text',
     'Classify text for safety via a fal-hosted safety model. Returns {safe, label, categories, raw}. When exactly one non-stub safety.text entry exists in the catalog, `model` auto-defaults to it — otherwise `model` is required, which is the case today (fal retired Qwen 3 Guard on 2026-08-15 and hosts no replacement classifier). Uses FAL_KEY env var.',
     falClassifyTextSchema.shape,
-    async ({ text, model }) => {
+    async ({ text, model }, extra) => {
       const client = getFalClient();
 
       let resolvedModel: string;
@@ -107,21 +110,14 @@ export function registerFalSafetyTools(server: McpServer): void {
         resolvedModel = fromCatalog;
       }
 
-      let result;
-      try {
-        result = await client.subscribe(resolvedModel, {
-          input: { prompt: text },
-          logs: false,
-        });
-      } catch (err) {
-        const falErr = parseFalError(err);
-        throw new Error(
-          `fal_classify_text failed (${falErr.constructor.name}: ${falErr.errorType}, ` +
-            `status=${falErr.status}, retryable=${falErr.retryable}, ` +
-            `requestId=${falErr.requestId ?? 'unknown'}): ${falErr.message}`,
-          { cause: err },
-        );
-      }
+      const result = await runFalJob(client, {
+        tool: 'fal_classify_text',
+        model: resolvedModel,
+        input: { prompt: text },
+        logs: false,
+        timeoutSeconds: SAFETY_TIMEOUT_SECONDS,
+        extra,
+      });
 
       const normalized = normalizeSafetyResponse(result.data);
 

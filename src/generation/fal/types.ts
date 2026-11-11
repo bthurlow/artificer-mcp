@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { falPollTimeout } from './queue.js';
 
 /**
  * Input schema for the `fal_generate_video` transport tool.
@@ -99,11 +100,5 @@ export const falGenerateVideoSchema = z.object({
     .describe(
       'File-bearing extension to extra_params. Each value is treated like the structural `image` / `audio` args — public http(s) passes through, gs:// / s3:// / file:// / local paths are uploaded to fal storage — and the resulting URL is merged into the fal payload under the same key. Use this for secondary file inputs (start_image_url, end_image_url, reference_image_urls[], mask_url, etc.) that fal models expose only via extra params. extra_files wins over extra_params on key collision because the caller deliberately marked those keys as files.',
     ),
-  poll_timeout_seconds: z
-    .number()
-    .positive()
-    .default(300)
-    .describe(
-      "Maximum seconds to wait for the fal job before giving up. Default 300 (matches gemini_generate_video). Fal's subscribe() polls the queue internally — there is no separate poll interval knob.",
-    ),
+  poll_timeout_seconds: falPollTimeout(300),
 });

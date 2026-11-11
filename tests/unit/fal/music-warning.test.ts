@@ -1,3 +1,4 @@
+import { queueFromSubscribe } from '../../helpers/fal-queue.js';
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 
 // Deliberately a separate file from music.test.ts, which mocks
@@ -9,7 +10,7 @@ const mockSubscribe = vi.fn();
 
 vi.mock('../../../src/generation/fal/client.js', () => ({
   getFalClient: () => ({
-    subscribe: mockSubscribe,
+    subscribe: mockSubscribe, queue: queueFromSubscribe(mockSubscribe),
     storage: { upload: vi.fn() },
   }),
 }));

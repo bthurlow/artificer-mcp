@@ -3,7 +3,7 @@ import { extname } from 'node:path';
 import { registerTool } from '../../utils/register.js';
 import { downloadAndWrite } from '../utils/download-and-write.js';
 import { getFalClient } from './client.js';
-import { parseFalError } from './errors.js';
+import { runFalJob } from './queue.js';
 import { resolveExtraFiles } from './inputs.js';
 import { checkExtraParams } from './extra-params.js';
 import { type FalGenerateImageParams, falGenerateImageSchema } from './types-image.js';
@@ -123,22 +123,25 @@ export function registerFalImageTools(server: McpServer): void {
     'fal_generate_image',
     'Generate, edit, upscale or cut out images via any fal-hosted image model. Transport tool: pass an explicit `model` (no server-side default); use `model_catalog` (capability "image") to discover models and the matching prompt guide to learn their inputs. Images are saved exactly as the model returns them; choose a format with extra_params.output_format where the model supports it. Uses FAL_KEY env var.',
     falGenerateImageSchema.shape,
-    async ({
-      model,
-      prompt,
-      output,
-      image,
-      images,
-      mask,
-      aspect_ratio,
-      image_size,
-      resolution,
-      num_images,
-      negative_prompt,
-      extra_params,
-      extra_files,
-      poll_timeout_seconds,
-    }) => {
+    async (
+      {
+        model,
+        prompt,
+        output,
+        image,
+        images,
+        mask,
+        aspect_ratio,
+        image_size,
+        resolution,
+        num_images,
+        negative_prompt,
+        extra_params,
+        extra_files,
+        poll_timeout_seconds,
+      },
+      extra,
+    ) => {
       const client = getFalClient();
       const upload = (b: Blob): Promise<string> => client.storage.upload(b);
 
@@ -176,22 +179,15 @@ export function registerFalImageTools(server: McpServer): void {
           console.error(warning);
         }
 
-        let result;
-        try {
-          result = await client.subscribe(model, {
-            input,
-            logs: true,
-            startTimeout: poll_timeout_seconds,
-          });
-        } catch (err) {
-          const falErr = parseFalError(err);
-          throw new Error(
-            `fal_generate_image failed (${falErr.constructor.name}: ${falErr.errorType}, ` +
-              `status=${falErr.status}, retryable=${falErr.retryable}, ` +
-              `requestId=${falErr.requestId ?? 'unknown'}): ${falErr.message}`,
-            { cause: err },
-          );
-        }
+        const result = await runFalJob(client, {
+          tool: 'fal_generate_image',
+          model,
+          input,
+          logs: true,
+          timeoutSeconds: poll_timeout_seconds,
+          output,
+          extra,
+        });
 
         const { images: files, notes } = extractImageOutputs(result.data);
         const lines: string[] = [];

@@ -1,3 +1,4 @@
+import { queueFromSubscribe } from '../../helpers/fal-queue.js';
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 
 const mockSubscribe = vi.fn();
@@ -5,7 +6,7 @@ const mockUpload = vi.fn();
 
 vi.mock('../../../src/generation/fal/client.js', () => ({
   getFalClient: () => ({
-    subscribe: mockSubscribe,
+    subscribe: mockSubscribe, queue: queueFromSubscribe(mockSubscribe),
     storage: { upload: mockUpload },
   }),
 }));

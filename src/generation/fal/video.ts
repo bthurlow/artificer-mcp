@@ -2,7 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerTool } from '../../utils/register.js';
 import { downloadAndWrite } from '../utils/download-and-write.js';
 import { getFalClient } from './client.js';
-import { parseFalError } from './errors.js';
+import { runFalJob } from './queue.js';
 import { resolveForFal, isPublicHttpsUrl, resolveExtraFiles } from './inputs.js';
 import { checkExtraParams } from './extra-params.js';
 import { type FalGenerateVideoParams, falGenerateVideoSchema } from './types.js';
@@ -94,21 +94,24 @@ export function registerFalVideoTools(server: McpServer): void {
     'fal_generate_video',
     'Generate or transform a video via any fal-hosted video model: text/image/audio-to-video, and video-to-video (upscale, restore, edit, restyle, lip-sync) via the `video` input. Transport tool only — pass an explicit `model` (no server-side default). Use `model_catalog` to discover available models and the matching `*_prompt_guide` tool to learn the per-model prompt structure. Uses FAL_KEY env var.',
     falGenerateVideoSchema.shape,
-    async ({
-      model,
-      prompt,
-      output,
-      image,
-      audio,
-      video,
-      duration_seconds,
-      aspect_ratio,
-      resolution,
-      negative_prompt,
-      extra_params,
-      extra_files,
-      poll_timeout_seconds,
-    }) => {
+    async (
+      {
+        model,
+        prompt,
+        output,
+        image,
+        audio,
+        video,
+        duration_seconds,
+        aspect_ratio,
+        resolution,
+        negative_prompt,
+        extra_params,
+        extra_files,
+        poll_timeout_seconds,
+      },
+      extra,
+    ) => {
       const client = getFalClient();
 
       const imageResolved = image
@@ -155,27 +158,15 @@ export function registerFalVideoTools(server: McpServer): void {
           console.error(warning);
         }
 
-        // fal.subscribe's `timeout` is in ms and limits queue + inference.
-        let result;
-        try {
-          result = await client.subscribe(model, {
-            input,
-            logs: true,
-            startTimeout: poll_timeout_seconds,
-          });
-        } catch (err) {
-          const falErr = parseFalError(err);
-          throw new Error(
-            `fal_generate_video failed (${falErr.constructor.name}: ${falErr.errorType}, ` +
-              `status=${falErr.status}, retryable=${falErr.retryable}, ` +
-              `requestId=${falErr.requestId ?? 'unknown'}): ${falErr.message}`,
-            // Preserve the ORIGINAL caught error as cause per eslint's
-            // preserve-caught-error rule. The parsed FalError is already
-            // embedded in the rich message; debug traces keep the raw SDK
-            // error reachable via .cause.
-            { cause: err },
-          );
-        }
+        const result = await runFalJob(client, {
+          tool: 'fal_generate_video',
+          model,
+          input,
+          logs: true,
+          timeoutSeconds: poll_timeout_seconds,
+          output,
+          extra,
+        });
 
         const videoUrl = extractVideoUrl(result.data);
         const { mime, bytes } = await downloadAndWrite(videoUrl, output, {

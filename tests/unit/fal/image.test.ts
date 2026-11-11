@@ -1,3 +1,4 @@
+import { queueFromSubscribe } from '../../helpers/fal-queue.js';
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
 
 // Mocks — set up before importing anything that loads the fal SDK or storage.
@@ -5,7 +6,7 @@ const mockSubscribe = vi.fn();
 const mockUpload = vi.fn(async () => 'https://fal.media/uploaded.png');
 
 vi.mock('../../../src/generation/fal/client.js', () => ({
-  getFalClient: () => ({ subscribe: mockSubscribe, storage: { upload: mockUpload } }),
+  getFalClient: () => ({ subscribe: mockSubscribe, queue: queueFromSubscribe(mockSubscribe), storage: { upload: mockUpload } }),
 }));
 
 const mockProviderWrite = vi.fn();

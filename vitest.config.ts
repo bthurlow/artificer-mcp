@@ -6,6 +6,7 @@ export default defineConfig({
       {
         test: {
           name: 'unit',
+          setupFiles: ['tests/helpers/setup-unit.ts'],
           include: ['tests/unit/**/*.test.ts', 'tests/protocol/**/*.test.ts'],
         },
       },

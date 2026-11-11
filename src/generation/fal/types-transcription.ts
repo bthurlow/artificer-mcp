@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { falPollTimeout } from './queue.js';
 
 /**
  * Input schema for `fal_transcribe`.
@@ -34,13 +35,7 @@ export const falTranscribeSchema = z.object({
     .describe(
       'File-bearing extension to extra_params. Each value is uploaded through fal storage (or passed through if already https) and the resulting URL is merged into the fal payload under the same key. Rarely needed for ASR (audio is the only structural input) — included for symmetry with the other fal transports. extra_files wins on key collision with extra_params.',
     ),
-  poll_timeout_seconds: z
-    .number()
-    .positive()
-    .default(300)
-    .describe(
-      'Maximum seconds to wait for the fal job. Default 300 — same as the other fal transports.',
-    ),
+  poll_timeout_seconds: falPollTimeout(300),
 });
 
 export interface FalTranscribeParams {

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { falPollTimeout } from './queue.js';
 
 /**
  * Input schema for `fal_separate_audio` (TODO #21).
@@ -52,11 +53,5 @@ export const falSeparateAudioSchema = z.object({
     .describe(
       'Model-specific knobs spread into the fal input, e.g. Demucs {"model": "htdemucs_ft", "output_format": "wav"}. Note that a model\'s own `model` input (its network choice) goes here; the top-level `model` arg is the fal endpoint.',
     ),
-  poll_timeout_seconds: z
-    .number()
-    .positive()
-    .default(600)
-    .describe(
-      'Maximum seconds to wait for the fal job. Default 600; separation of a full song can take minutes.',
-    ),
+  poll_timeout_seconds: falPollTimeout(600),
 });

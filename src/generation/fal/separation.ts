@@ -3,7 +3,7 @@ import { basename as pathBasename, extname } from 'node:path';
 import { registerTool } from '../../utils/register.js';
 import { downloadAndWrite } from '../utils/download-and-write.js';
 import { getFalClient } from './client.js';
-import { parseFalError } from './errors.js';
+import { runFalJob } from './queue.js';
 import { resolveForFal } from './inputs.js';
 import { checkExtraParams } from './extra-params.js';
 import { type FalSeparateAudioParams, falSeparateAudioSchema } from './types-separation.js';
@@ -72,7 +72,10 @@ export function registerFalSeparationTools(server: McpServer): void {
     'fal_separate_audio',
     'Split a mixed track into stems (vocals, drums, bass, other, …) via a fal-hosted separation model such as Demucs. Writes one file per stem into output_dir as <basename>-<stem>.<ext> and returns the stem → path map. Use for an isolated vocal (lip-sync, karaoke timing, cleaner transcription) or instrumental versions. Uses FAL_KEY env var.',
     falSeparateAudioSchema.shape,
-    async ({ model, audio, output_dir, basename, stems, extra_params, poll_timeout_seconds }) => {
+    async (
+      { model, audio, output_dir, basename, stems, extra_params, poll_timeout_seconds },
+      extra,
+    ) => {
       const client = getFalClient();
       const audioResolved = await resolveForFal(audio, (b) => client.storage.upload(b));
       try {
@@ -84,22 +87,15 @@ export function registerFalSeparationTools(server: McpServer): void {
           console.error(warning);
         }
 
-        let result;
-        try {
-          result = await client.subscribe(model, {
-            input,
-            logs: true,
-            startTimeout: poll_timeout_seconds,
-          });
-        } catch (err) {
-          const falErr = parseFalError(err);
-          throw new Error(
-            `fal_separate_audio failed (${falErr.constructor.name}: ${falErr.errorType}, ` +
-              `status=${falErr.status}, retryable=${falErr.retryable}, ` +
-              `requestId=${falErr.requestId ?? 'unknown'}): ${falErr.message}`,
-            { cause: err },
-          );
-        }
+        const result = await runFalJob(client, {
+          tool: 'fal_separate_audio',
+          model,
+          input,
+          logs: true,
+          timeoutSeconds: poll_timeout_seconds,
+          output: output_dir,
+          extra,
+        });
 
         const prefix = basename ?? defaultBasename(audio);
         const written: Record<string, string> = {};

@@ -138,6 +138,8 @@ From btmusic's first live run of `video.lipsync` routes (marble-statue bust + is
 
 **Omni: done 2026-10-08.** Google's migration target is `gemini-omni-1.1-flash`. The default, the `gemini-omni-flash` catalog route, the guide, the README and UPGRADING.md all use it now. Still to do: one live call in the consuming project. Also, the 1.1 API adds `response_format.resolution` (`360p` / `720p` / `1080p` / `4k` upscaled) and an `extend` task (up to 40s total). The tool sends neither yet, and the guide says so. Expose them if a caller needs above-720p or longer Omni clips.
 
+**Live confirmation 2026-11-07 (btmusic):** `gemini_generate_video` with the default `veo-3.1-lite-generate-preview` now returns 404 NOT_FOUND. Google's deprecations page names `gemini-omni-1.1-flash` as the replacement for all three Veo preview IDs (or GA Veo via the Gemini Enterprise Agent Platform). The tool's live default is the dead ID, so every default call fails. Workaround in use: `fal_generate_video` with `fal-ai/veo3.1/lite/image-to-video`.
+
 **Veo: open.** The notice names no Veo replacement IDs. Find the successors on Google's deprecations and models pages (ai.google.dev) before changing anything. Do not guess an ID.
 
 **What still references them here:**
@@ -148,6 +150,77 @@ From btmusic's first live run of `video.lipsync` routes (marble-statue bust + is
 **Fix shape:** repoint the Lite route to its successor ID, or retire it the #18b way if there is none (the fal `fal-ai/veo3.1/lite` route stays). Name the successors in `veo_video_prompt_guide`. Make one live call per repointed ID in the consuming project; nothing here has a key.
 
 **Trigger:** now. The deadline is 2026-10-22.
+
+---
+
+## 29. PixVerse V6: guide is stale; transition + extend endpoints not seeded (NEW, filed 2026-11-06)
+
+From btmusic's 2026-11-06 video-model cost review. Checked against fal's own pages (fal.ai/pixverse-v6 + per-endpoint pages + the t2v OpenAPI schema) on 2026-11-06. `pixverse_prompt_guide` was last verified 2026-04-28 and is wrong or incomplete on V6:
+- **Audio:** the guide says V6 has no audio ("only C1 does"). The fal V6 schema has `generate_audio_switch` (boolean, **default false**, "Enable audio generation (BGM, SFX, dialogue)") on t2v, i2v and transition. Pricing is split without/with audio: 360p $0.025/$0.035, 540p $0.035/$0.045, 720p $0.045/$0.060, 1080p $0.090/$0.115 per second.
+- **Missing routes:** `fal-ai/pixverse/v6/transition` (first + last frame: `first_image_url` + `end_image_url`, both required; tagged first-frame-last-frame) and `fal-ai/pixverse/v6/extend` (`video_url` + prompt). Neither is in the catalog. They're callable today through `fal_generate_video` with a raw model ID and `extra_files`, but nothing tells a caller they exist.
+- **Knobs the guide omits** (from the t2v schema): `duration` 1–15 integer (default 5); `resolution` enum `360p/540p/720p/1080p` (default 720p); `aspect_ratio` enum `16:9, 4:3, 1:1, 3:4, 9:16, 2:3, 3:2, 21:9`; `generate_multi_clip_switch` ("multi-clip generation with dynamic camera changes"); `style` (anime, 3d_animation, clay, comic, cyberpunk); `negative_prompt` (≤2048 bytes); `seed`; `thinking_type` (enabled/disabled/auto prompt optimization); `enable_safety_checker` (default true).
+- **Not stated by fal:** whether 1080p is native or upscaled, the frame rate, watermarking, extend's billing for input seconds, and the i2v/transition/extend duration ranges (their schemas weren't fetched). Find out on the first live calls and record the results in the guide.
+
+**Fix shape:** add `pixverse-v6-transition` (FLF) and `pixverse-v6-extend` catalog routes from the synced specs. Rewrite the V6 rows of the guide: audio switch, the price table, the transition/extend modes, and a note that V6 has no reference/identity-image endpoint (so it isn't a substitute for Kling O3 ref on identity-critical shots). Re-sync `src/catalog/fal-specs/` for the V6 slugs.
+
+**Trigger:** low. btmusic reviewed V6 on 2026-11-06 and won't use it: i2v is start-frame only, and `transition` is a scene-to-scene effect rather than within-shot FLF control. The fix is guide accuracy, so the next caller isn't misled.
+
+---
+
+## 30. Kling 4.0: not in the catalog (NEW, filed 2026-11-06)
+
+**What:** Kuaishou's Kling 4.0 launched publicly in mid-October 2026; fal's endpoints reportedly opened 2026-10-24 to 2026-10-28 (third-party sources disagree on the date). It isn't in `model_catalog`. Reported (third-party, **unverified against fal's spec**): native 1080p, single takes up to 30s, and **first + middle + last frame control**. fal pricing per those sources: $0.157/s at 720p and $0.235/s at 1080p ($0.094/s and $0.141/s for video-input runs, billed on input + output seconds with a 2× output minimum). **Kling 4.0 Flash** is a separate, cheaper model: 720p only, 3–20s, first frame only on i2v, about $0.094/s.
+
+**Fix shape:** confirm the fal endpoint IDs, inputs (especially the middle-frame field name) and prices from fal's model pages and OpenAPI specs before seeding. Don't take IDs from the third-party pages. Add routes, and extend `kling_video_prompt_guide` with a Kling 4.0 section (multi-keyframe usage, 30s cap, price vs O3).
+
+**Trigger:** low. btmusic's 2026-11-06 review kept Kling O3 as the chaining tier, since 4.0 is about 2× O3 Pro per second. It becomes worth wiring when a music video needs a long single take where middle-frame control could replace a multi-clip chain.
+
+---
+
+## 31. `storage_upload` fails on video files to gs:// (NEW, filed 2026-11-09)
+
+- **Symptom:** `storage_upload` of a local MP4 (4-9 MB) to `gs://doughmetrics-content/...` fails every time
+  with `Cannot call write after a stream was destroyed`. Bare path and `file:///` source both fail, with or
+  without `mime_type: video/mp4`. Images to the same bucket worked earlier the same day (pixStrand).
+- **Workaround in use:** `gcloud storage cp <files> gs://doughmetrics-content/<brand>/social/<week>/`, then
+  check each public URL returns 200 (btmusic, Cathode Saint Shorts, 2026-11-09).
+- **Likely area:** the stream piping in the gs:// writer (source stream closed or errored before the write
+  finishes); possibly size- or chunking-related.
+
+---
+
+## 33. Edit-list assembly: per-cut transitions, beat snapping, element overlays (NEW, filed 2026-11-11)
+
+- **Gap:** `video_add_transitions` / `video_concatenate` apply ONE xfade type to every cut, with no beat grid
+  and no overlay elements. A fast hip-hop music video (btmusic Album 4) needs a different transition per cut, cuts
+  snapped to beats, and generated elements (fire, smoke, raven wing) composited over the cut.
+- **Prototype that works:** `btmusic/scripts/assemble-edl.py` (JSON EDL in SONG time; lip-synced clips stay in
+  sync via `clip_song_start`; static punch-in zoom per shot; flash via `eq` brightness; elements placed so their
+  peak lands on the cut, `max_lead` cap; modes `screen` (light elements on black), `matte_dark` (dark elements on
+  white → opaque overlay, alpha from inverted luma with levels), per-element `grade`).
+- **Gotchas found building it:** (1) `blend` in YUV tints everything green: blend in RGB (`gbrp`); (2) a studio-lit
+  element (raven on white) reads far too bright over a night plate: needs a grade; (3) `multiply` on a dark element
+  is see-through (ghost wings): use a luma matte + overlay instead.
+- **Ask:** a `video_assemble_edl` tool with this model (or absorb the script). Beat grid: see #34.
+
+## 34. `audio_beat_grid`: beat grid + downbeat/kick phase detection (NEW, filed 2026-11-11)
+
+- **Need:** beat-synced editing needs more than beat times; it needs to know WHICH beat the listener feels. On btmusic
+  "Thought and Memory" (92.3 BPM) a once-per-bar kick/808 is ~5x stronger than the other beats. Cutting on arbitrary
+  beats put half the cuts a beat early, and Brian heard it immediately. Today this is a hand-run librosa snippet.
+- **Ask:** `audio_beat_grid({audio, start?, end?, output?})` returning:
+  1. `tempo_bpm` and `beats[]` (seconds; librosa `beat_track` or better);
+  2. **per-beat band energy** for kick (40-120 Hz) and snare/clap (~1.5-5 kHz), and the **phase strength table**
+     (mean energy per beat position mod 4), so the caller sees the accent pattern;
+  3. **`downbeats[]` / `kick_phase`**: the beat index mod 4 with the strongest kick, plus `half_bar[]` (kick + mid-bar);
+  4. **`offset_s`**: median offset between the grid and the actual kick peaks (measured -0.04 s here: librosa sits
+     ~1 frame after the hit), so cuts can land on the felt peak;
+  5. optional JSON file output (the EDL reads `beats` + `kick_ref` + `beat_offset`).
+- **Notes:** HPSS (percussive) before onset analysis helps; kick-phase may change between sections (intro/breakdown
+  without drums), so report it per window or let the caller pass `start`/`end`. Long tracks: analyze at 22.05 kHz
+  (a 90 s window at 44.1 kHz with hop 128 took >5 min). Reference implementation: the snippets in
+  `btmusic/albums/04-do-you-know-yet/tracks/thought-and-memory/video/tests/test-log.md` t05 +
+  `btmusic/scripts/assemble-edl.py` (`snap` modes `kick` / `half`).
 
 ---
 
