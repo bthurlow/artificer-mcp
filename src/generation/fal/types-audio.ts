@@ -40,13 +40,13 @@ export const falGenerateSpeechSchema = z.object({
       'Audio input URL or local path (voice-clone reference sample, dialogue scene guidance, etc.). Public HTTPS URLs pass through; gs:// / s3:// / local paths are uploaded to fal storage. Passes to fal as `audio_url` — override to a different field name via `extra_params` if the model requires it.',
     ),
   extra_params: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .optional()
     .describe(
       'Free-form passthrough for model-specific knobs (stability, similarity_boost, language_code, apply_text_normalization, etc.). Keys spread as top-level fal input fields. Structural args (text, voice, audio_url) win on collision; fal returns 422 for unknown keys.',
     ),
   extra_files: z
-    .record(z.union([z.string(), z.array(z.string())]))
+    .record(z.string(), z.union([z.string(), z.array(z.string())]))
     .optional()
     .describe(
       'File-bearing extension to extra_params. Each value is uploaded through fal storage (or passed through if already https) and the resulting URL is merged into the fal payload under the same key. Use for secondary audio refs (e.g. dialogue scene guidance) the model exposes only via extra params. extra_files wins on key collision with extra_params.',
@@ -99,13 +99,13 @@ export const falGenerateMusicSchema = z.object({
       'Audio reference for style-transfer models. Public HTTPS passes through; gs:// / s3:// / local paths are uploaded to fal storage. Maps to fal `audio_url`.',
     ),
   extra_params: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .optional()
     .describe(
       'Free-form passthrough for model-specific knobs (music_length_ms, force_instrumental, output_format, duration_seconds, composition_plan, etc.). Keys spread as top-level fal input fields. Structural args win on collision.',
     ),
   extra_files: z
-    .record(z.union([z.string(), z.array(z.string())]))
+    .record(z.string(), z.union([z.string(), z.array(z.string())]))
     .optional()
     .describe(
       'File-bearing extension to extra_params. Each value is uploaded through fal storage (or passed through if already https) and the resulting URL is merged into the fal payload under the same key. Use for secondary audio refs the model exposes only via extra params. extra_files wins on key collision with extra_params.',

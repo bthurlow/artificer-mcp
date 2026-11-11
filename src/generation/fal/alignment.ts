@@ -66,7 +66,7 @@ export const alignTextToAudioSchema = z.object({
     .optional()
     .describe('Output file format. Defaults to the output extension, then json.'),
   extra_params: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .optional()
     .describe('Passthrough for model-specific knobs, spread into the fal input.'),
   poll_timeout_seconds: falPollTimeout(600),
