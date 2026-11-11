@@ -221,10 +221,10 @@ export const edlSchema = z.object({
       strength: z.number().positive().max(1).default(0.75),
       duration: z.number().positive().default(0.25),
     })
-    .default({})
+    .prefault({})
     .describe('The "flash" transition: peak brightness added and decay time in seconds.'),
   fx: z
-    .record(edlFxSchema)
+    .record(z.string(), edlFxSchema)
     .default({})
     .describe('Named elements a shot can use as its `in` transition.'),
   crf: z.number().int().min(0).max(51).default(18),
@@ -246,7 +246,7 @@ export interface VideoAssembleEdlParams {
 
 export const videoAssembleEdlSchema = z.object({
   edl: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .optional()
     .describe(
       'The edit decision list, inline. Shape: {audio, width?, height?, fps?, beat_grid?, beats?, kick_ref?, beat_offset?, beats_per_bar?, flash?, fx?: {name: {type?: "overlay", src, peak, max_lead?, mode?, zoom?, cx?, cy?, lo?, hi?, grade?, post_speed?, tail?} | {type: "sweep", src (image), dur?, scale?, margin_px?, hflip?, blur?, lo?, hi?, grade?}}, crf?, preset?, segments: [{song: [a, b], shots: [{clip, clip_song_start?, start?, snap?, punch?, fx?, fy?, in?}]}]}. A shot\'s `in` is "cut", "flash" or an fx name. Relative paths resolve against the working directory.',

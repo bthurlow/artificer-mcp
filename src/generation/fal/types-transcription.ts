@@ -24,13 +24,13 @@ export const falTranscribeSchema = z.object({
       'Audio input — public HTTPS URL passes through; gs:// / s3:// / local paths are uploaded to fal storage. Maps to fal `audio_url`.',
     ),
   extra_params: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .optional()
     .describe(
       'Free-form passthrough for model-specific knobs (language / language_code, diarize, keyterms, batch_size, num_speakers, chunk_level, max_segment_len, prompt, task, tag_audio_events, etc.). Keys spread as top-level fal input fields. Structural args win on collision.',
     ),
   extra_files: z
-    .record(z.union([z.string(), z.array(z.string())]))
+    .record(z.string(), z.union([z.string(), z.array(z.string())]))
     .optional()
     .describe(
       'File-bearing extension to extra_params. Each value is uploaded through fal storage (or passed through if already https) and the resulting URL is merged into the fal payload under the same key. Rarely needed for ASR (audio is the only structural input) — included for symmetry with the other fal transports. extra_files wins on key collision with extra_params.',
