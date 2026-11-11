@@ -2,7 +2,7 @@
 
 26 FFmpeg-backed tools for video and audio post-processing. Requires FFmpeg 6+ with `ffmpeg` and `ffprobe` in PATH (hard floor is 4.3 for `xfade`; 6+ is the tested baseline). A libass-enabled build is needed for `video_add_subtitles` burn-in.
 
-## Video tools (17)
+## Video tools (18)
 
 ### Core operations
 
@@ -22,7 +22,8 @@
 
 | Tool | Description | Key params |
 |------|-------------|------------|
-| `video_add_transitions` | xfade transitions between clips | `inputs[]`, `transition` (fade/wipeleft/dissolve/...), `duration` |
+| `video_add_transitions` | xfade transitions between clips: one for every cut, or one per cut | `inputs[]`, `transition` (fade/wipeleft/dissolve/...), `transitions[]` (per cut), `duration` |
+| `video_assemble_edl` | Music-video cut from an edit decision list in song time: shots on the beat grid, per-shot cut or flash, punch-in zoom, lip-synced clips kept in sync. Frame-exact; checks every shot before rendering | `edl` or `edl_path`, `output` |
 | `video_add_image_overlay` | Logo/watermark overlay | `overlay` (image path), `x`, `y`, `opacity`, `start_seconds`, `end_seconds` |
 | `video_add_text_overlay` | Burn text onto video | `text`, `font_file`, `font_size`, `color`, `box`, time range |
 | `video_add_subtitles` | SRT/VTT/ASS subtitles | `subtitle_file`, `burn_in` (true=rendered, false=soft track), `force_style` |
@@ -60,6 +61,35 @@ audio_beat_grid input=./master.wav output=./beats.json
 ```
 
 Snap cuts to `downbeats` (or `half_bar` for a faster pace), not to every beat: in most pop and hip-hop one beat per bar carries the kick, and a cut on any other beat reads as early or late. Add `offset_s` (usually a few hundredths of a second, negative) to a beat time to land on the kick's attack. If `sections` shows a different `kick_phase` or `null` somewhere, use that section's phase there. If `tempo_bpm` is double or half what you hear, rerun with `bpm_hint`.
+
+### Assemble a music video on the beat
+
+```
+audio_beat_grid input=./master.wav output=./beats.json
+video_assemble_edl edl_path=./edl.json output=./cut.mp4
+```
+
+`edl.json`, in song time (paths relative to the file):
+
+```json
+{
+  "audio": "master.wav", "beat_grid": "beats.json", "width": 1920, "height": 1080, "fps": 24,
+  "segments": [
+    {"song": [49.3, 59.72], "shots": [
+      {"clip": "takes/verse-a.mp4", "clip_song_start": 49.27},
+      {"clip": "takes/verse-a.mp4", "clip_song_start": 49.27, "start": 51.1, "snap": "half", "punch": 1.3, "fx": 0.56, "fy": 0.38},
+      {"clip": "takes/verse-b.mp4", "clip_song_start": 49.27, "start": 55.0, "snap": "kick", "in": "flash"}
+    ]}
+  ]
+}
+```
+
+- A segment is a range of the song. The output audio is those ranges joined (10 ms fades at each splice), so splice on the same bar position to keep the groove.
+- A shot plays its clip from `start − clip_song_start`. For a lip-synced take, `clip_song_start` is the song time its audio began at, so it stays in sync wherever it is cut in.
+- `snap`: `"kick"` = downbeats, `"half"` = downbeats plus mid-bar, `true` = any beat. `beat_grid` supplies the beats, the kick reference and the grid-to-attack offset.
+- Every shot is checked before anything renders (clip too short, a start before the clip begins, a shot shorter than a frame, an unknown transition), and all problems come back at once.
+- Shots are placed on the output frame grid from the absolute timeline, so cuts never drift. More than 24 shots render in batches through lossless intermediates (`ARTIFICER_EDL_SHOTS_PER_PASS` changes the batch size; each shot holds a decoder, so lower it on a small machine).
+- Output is tagged BT.709 limited range, the convention for HD.
 
 ### Convert landscape video to portrait for Reels/Shorts
 
