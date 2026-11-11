@@ -10,9 +10,7 @@ describe('model env overrides', () => {
   const ORIGINAL_ENV = { ...process.env };
 
   beforeEach(() => {
-    delete process.env.ARTIFICER_IMAGEN_MODEL;
-    delete process.env.ARTIFICER_IMAGEN_EDIT_MODEL;
-    delete process.env.ARTIFICER_IMAGEN_UPSCALE_MODEL;
+    delete process.env.ARTIFICER_TTS_MODEL;
     delete process.env.ARTIFICER_VEO_MODEL;
     vi.resetModules();
   });
@@ -20,45 +18,6 @@ describe('model env overrides', () => {
   afterEach(() => {
     process.env = { ...ORIGINAL_ENV };
     vi.resetModules();
-  });
-
-  it('generateImageSchema picks up ARTIFICER_IMAGEN_MODEL', async () => {
-    process.env.ARTIFICER_IMAGEN_MODEL = 'imagen-4.0-ultra-preview';
-    const { generateImageSchema } = await import('../../../src/generation/types.js');
-    const parsed = generateImageSchema.parse({ prompt: 'x', output: 'y.png' });
-    expect(parsed.model).toBe('imagen-4.0-ultra-preview');
-  });
-
-  // Imagen is deprecated by Google and retired from the catalog, so these
-  // schemas ship no baked default — an unpinned caller must pass `model`.
-  it('generateImageSchema requires an explicit model when env unset', async () => {
-    const { generateImageSchema } = await import('../../../src/generation/types.js');
-    expect(() => generateImageSchema.parse({ prompt: 'x', output: 'y.png' })).toThrow();
-    const parsed = generateImageSchema.parse({
-      prompt: 'x',
-      output: 'y.png',
-      model: 'imagen-4.0-generate-001',
-    });
-    expect(parsed.model).toBe('imagen-4.0-generate-001');
-  });
-
-  it('editImageSchema requires an explicit model when env unset', async () => {
-    const { editImageSchema } = await import('../../../src/generation/types.js');
-    expect(() => editImageSchema.parse({ prompt: 'x', image: 'a.png', output: 'b.png' })).toThrow();
-  });
-
-  it('editImageSchema picks up ARTIFICER_IMAGEN_EDIT_MODEL', async () => {
-    process.env.ARTIFICER_IMAGEN_EDIT_MODEL = 'imagen-3.5-edit';
-    const { editImageSchema } = await import('../../../src/generation/types.js');
-    const parsed = editImageSchema.parse({ prompt: 'x', image: 'a.png', output: 'b.png' });
-    expect(parsed.model).toBe('imagen-3.5-edit');
-  });
-
-  it('upscaleImageSchema picks up ARTIFICER_IMAGEN_UPSCALE_MODEL', async () => {
-    process.env.ARTIFICER_IMAGEN_UPSCALE_MODEL = 'imagen-4.0-upscale-ga';
-    const { upscaleImageSchema } = await import('../../../src/generation/types.js');
-    const parsed = upscaleImageSchema.parse({ image: 'a.png', output: 'b.png' });
-    expect(parsed.model).toBe('imagen-4.0-upscale-ga');
   });
 
   it('generateVideoSchema picks up ARTIFICER_VEO_MODEL', async () => {
@@ -69,21 +28,21 @@ describe('model env overrides', () => {
   });
 
   it('explicit model arg overrides env override', async () => {
-    process.env.ARTIFICER_IMAGEN_MODEL = 'imagen-4.0-ultra-preview';
-    const { generateImageSchema } = await import('../../../src/generation/types.js');
-    const parsed = generateImageSchema.parse({
-      prompt: 'x',
-      output: 'y.png',
-      model: 'imagen-custom',
-    });
-    expect(parsed.model).toBe('imagen-custom');
+    process.env.ARTIFICER_TTS_MODEL = 'gemini-3.8-flash-lite-tts';
+    const { generateSpeechSchema } = await import('../../../src/generation/types.js');
+    expect(generateSpeechSchema.parse({ text: 'x', output: 'y.wav' }).model).toBe(
+      'gemini-3.8-flash-lite-tts',
+    );
+    const parsed = generateSpeechSchema.parse({ text: 'x', output: 'y.wav', model: 'custom-tts' });
+    expect(parsed.model).toBe('custom-tts');
   });
 
-  it('treats empty string env var as unset', async () => {
-    process.env.ARTIFICER_IMAGEN_MODEL = '   ';
-    const { generateImageSchema } = await import('../../../src/generation/types.js');
-    // Whitespace-only pin does not count as a default — model stays required.
-    expect(() => generateImageSchema.parse({ prompt: 'x', output: 'y.png' })).toThrow();
+  it('treats a whitespace-only env var as unset', async () => {
+    process.env.ARTIFICER_TTS_MODEL = '   ';
+    const { generateSpeechSchema } = await import('../../../src/generation/types.js');
+    expect(generateSpeechSchema.parse({ text: 'x', output: 'y.wav' }).model).toBe(
+      'gemini-3.8-flash-tts',
+    );
   });
 
   it('nanobananaGenerateImageSchema defaults to the current Nano Banana 2 model', async () => {

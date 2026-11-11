@@ -117,9 +117,6 @@ const EXPECTED_TOOLS = {
     'audio_beat_grid',
   ],
   generation: [
-    'gemini_generate_image',
-    'gemini_edit_image',
-    'gemini_upscale_image',
     'gemini_generate_video',
     'gemini_omni_generate_video',
     'gemini_nanobanana_generate_image',
@@ -140,7 +137,6 @@ const EXPECTED_TOOLS = {
     'mvsep_separate_audio',
   ],
   guides: [
-    'gemini_image_prompt_guide',
     'gemini_nanobanana_prompt_guide',
     'veo_video_prompt_guide',
     'gemini_omni_video_prompt_guide',
@@ -248,15 +244,15 @@ describe('MCP Protocol — artificer-mcp Server', () => {
   // ── 2. Tool discovery ─────────────────────────────────────────────────────
 
   describe('tool discovery', () => {
-    it('should return exactly 187 tools', () => {
-      expect(tools).toHaveLength(187);
+    it('should return exactly 183 tools', () => {
+      expect(tools).toHaveLength(183);
     });
   });
 
   // ── 3. Tool names ─────────────────────────────────────────────────────────
 
   describe('tool names', () => {
-    it('should contain all 187 expected tool names', () => {
+    it('should contain all 183 expected tool names', () => {
       const registeredNames = tools.map((t) => t.name).sort();
       const expectedNames = [...ALL_TOOL_NAMES].sort();
 

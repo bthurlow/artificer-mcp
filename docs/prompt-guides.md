@@ -6,8 +6,7 @@ Prompt guide tools return structured markdown with best practices for prompting 
 
 | Guide | Provider / model | Covers |
 |-------|------------------|--------|
-| `gemini_image_prompt_guide` | Imagen 3/4 | Style keywords, aspect ratios, negative prompts, safety-filter avoidance, model-version differences |
-| `gemini_nanobanana_prompt_guide` | Gemini 2.5 Flash Image (Nano Banana) | What Nano Banana does better/worse than Imagen, prompt-structure differences, env-var model override |
+| `gemini_nanobanana_prompt_guide` | Nano Banana 2 (`gemini-3.1-flash-image`) | Templates, reference-image tips, aspect ratios, what it does not support (no negative prompts or seed), env-var model override |
 | `veo_video_prompt_guide` | Veo | Camera motion vocabulary, scene structure, image-to-video aspect-ratio interop, dialogue syntax, Dev API quirks, tier selection |
 | `gemini_tts_prompt_guide` | Gemini TTS | Prebuilt voices, natural-language style + accent directives, model tiers (flash vs pro preview) |
 | `gemini_lyria_prompt_guide` | Lyria 3 (batch) + Lyria RealTime | Prompt anatomy (genre / tempo / mood / instruments), Lyria 3 Pro timestamps, negative prompts, realtime session lifecycle, safety-filter notes |

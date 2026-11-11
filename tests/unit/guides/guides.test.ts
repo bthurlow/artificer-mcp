@@ -29,26 +29,6 @@ describe('Guide Tools', () => {
     await cleanup();
   });
 
-  describe('gemini_image_prompt_guide', () => {
-    // Imagen is deprecated by Google; this guide is now a migration pointer
-    // to nano-banana rather than a prompt reference.
-    it('returns a retirement notice pointing at nano-banana', async () => {
-      const result = await client.callTool({
-        name: 'gemini_image_prompt_guide',
-        arguments: {},
-      });
-
-      const content = result.content as Array<{ type: string; text: string }>;
-      const text = content[0].text;
-
-      expect(text).toContain('# Google Imagen — RETIRED');
-      expect(text).toContain('## What to use instead');
-      expect(text).toContain('gemini_nanobanana_generate_image');
-      expect(text).toContain('## Capabilities that do not carry over');
-      expect(text).toContain('## Official References');
-    });
-  });
-
   describe('veo_video_prompt_guide', () => {
     it('returns structured markdown with all sections', async () => {
       const result = await client.callTool({
