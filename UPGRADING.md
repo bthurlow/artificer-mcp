@@ -83,6 +83,25 @@ Google has shut down every Imagen model on the Gemini API (the last,
   prompt, and loop calls for variations. Several fal image models take
   `negative_prompt` and `num_images`.
 
+### 9 dead fal routes retired; `cogvideox_prompt_guide` and `magi_prompt_guide` removed
+
+**Removed because they 404 upstream.** Each route below has returned 404 on
+both fal's OpenAPI and `llms.txt` surfaces since the 2026-11-09 drift run
+(re-checked 2026-11-11).
+
+| Removed slug | Replacement |
+|---|---|
+| `luma-ray-2-t2v`, `luma-ray-2-flash-t2v` | `luma-ray-3.2-t2v` (`luma_ray_prompt_guide`, rewritten for Ray 3.2). There is no Flash tier; 540p is the cheap option |
+| `luma-ray-2-i2v`, `luma-ray-2-flash-i2v` | `luma-ray-3.2-i2v` |
+| `cogvideox-5b-t2v`, `cogvideox-5b-i2v` | An open-weights route: `wan-2.2-5b-t2v` / `wan-2.2-5b-i2v` (`wan_video_prompt_guide`) or `ltx-2.3-22b-t2v` / `ltx-2.3-22b-i2v` (`ltx_video_prompt_guide`). **`cogvideox_prompt_guide` is removed** (unknown-tool error if called) |
+| `magi-distilled-t2v`, `magi-distilled-i2v` | The last MAGI routes (the full `magi-t2v` / `magi-i2v` went in 0.14.0). For physically plausible motion use `veo-3.1-t2v` / `veo-3.1-i2v`. **`magi_prompt_guide` is removed** |
+| `t2v-turbo-t2v` | `fast-animatediff-turbo-t2v` or `fast-svd-lcm-t2v` (`legacy_video_prompt_guide`) |
+
+- **Ray 3.2 differs from Ray 2:** durations are `"5s"` / `"10s"` (Ray 2 had
+  `"9s"`), passed through `extra_params.duration` because `duration_seconds` is
+  sent as an integer, which these routes reject. The aspect ratios add `1:1`
+  and drop `9:21`.
+
 ## 0.13.x → 0.14.0
 
 ### 16 dead fal routes retired, and `mochi_prompt_guide` removed

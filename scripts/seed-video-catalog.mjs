@@ -118,20 +118,6 @@ const cinematic = [
   falEntry('veo-3-i2v', 'fal-ai/veo3/image-to-video', 'veo_video_prompt_guide'),
   falEntry('veo-3-fast-i2v', 'fal-ai/veo3/fast/image-to-video', 'veo_video_prompt_guide'),
 
-  // Luma Ray 2 family
-  falEntry('luma-ray-2-t2v', 'fal-ai/luma-dream-machine/ray-2', 'luma_ray_prompt_guide'),
-  falEntry(
-    'luma-ray-2-i2v',
-    'fal-ai/luma-dream-machine/ray-2/image-to-video',
-    'luma_ray_prompt_guide',
-  ),
-  falEntry('luma-ray-2-flash-t2v', 'fal-ai/luma-dream-machine/ray-2-flash', 'luma_ray_prompt_guide'),
-  falEntry(
-    'luma-ray-2-flash-i2v',
-    'fal-ai/luma-dream-machine/ray-2-flash/image-to-video',
-    'luma_ray_prompt_guide',
-  ),
-
   // Kling 3.0 (Pro / Std / 4K)
   falEntry(
     'kling-3-pro-t2v',
@@ -761,9 +747,6 @@ const general = [
   falEntry('decart-lucy-i2v', 'decart/lucy-i2v', 'decart_lucy_prompt_guide'),
   // decart-lucy-5b-i2v removed — fal endpoint 404 as of 2026-04-28 sync.
 
-  // CogVideoX (open weights)
-  falEntry('cogvideox-5b-t2v', 'fal-ai/cogvideox-5b', 'cogvideox_prompt_guide'),
-  falEntry('cogvideox-5b-i2v', 'fal-ai/cogvideox-5b/image-to-video', 'cogvideox_prompt_guide'),
 
 
   // NVIDIA Cosmos (world-model lineage)
@@ -827,10 +810,6 @@ const general = [
 
   // Sana Video (lightweight/fast)
 
-  // MAGI (physics-aware)
-  falEntry('magi-distilled-t2v', 'fal-ai/magi-distilled', 'magi_prompt_guide'),
-  falEntry('magi-distilled-i2v', 'fal-ai/magi-distilled/image-to-video', 'magi_prompt_guide'),
-
   // Specialty research models
   falEntry('transpixar-t2v', 'fal-ai/transpixar', 'specialized_video_prompt_guide'),
   falEntry('ovi-t2v', 'fal-ai/ovi', 'specialized_video_prompt_guide'),
@@ -857,7 +836,6 @@ const general = [
     'fal-ai/fast-animatediff/turbo/text-to-video',
     'legacy_video_prompt_guide',
   ),
-  falEntry('t2v-turbo-t2v', 'fal-ai/t2v-turbo', 'legacy_video_prompt_guide'),
   falEntry('fast-svd-t2v', 'fal-ai/fast-svd/text-to-video', 'legacy_video_prompt_guide'),
   falEntry('fast-svd-lcm-t2v', 'fal-ai/fast-svd-lcm/text-to-video', 'legacy_video_prompt_guide'),
   falEntry('fast-svd-lcm-i2v', 'fal-ai/fast-svd-lcm', 'legacy_video_prompt_guide'),

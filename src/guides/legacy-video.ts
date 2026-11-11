@@ -18,9 +18,8 @@ Older anime/illustrated-style t2v built on top of Stable Diffusion + temporal mo
 - \`animatediff-sparsectrl-lcm-t2v\` (SparseCtrl LCM) was dropped on 2026-08-15 — fal removed the endpoint and it now 404s. It was the only variant offering SparseCtrl conditioning; the two remaining routes are prompt-only.
 - Example: \`prompt: "anime girl with blue hair waving in a flower field"\`
 
-## T2V Turbo
-Generic open-weights t2v turbo — short clips, cheap. Use only when nothing else fits the budget.
-- Slug: \`t2v-turbo-t2v\` → \`fal-ai/t2v-turbo\`
+## T2V Turbo (retired)
+\`t2v-turbo-t2v\` (\`fal-ai/t2v-turbo\`) was dropped in November 2026: fal removed the endpoint and it now 404s. For a cheap prompt-only clip use \`fast-animatediff-turbo-t2v\` or \`fast-svd-lcm-t2v\` below.
 
 ## Stable Video Diffusion (SVD) lineage
 Stability AI's image-to-video diffusion model. Older but well-known. Three SVD variants on fal: base SVD t2v, SVD-LCM t2v (lightning), SVD-LCM i2v.
@@ -42,7 +41,6 @@ Stability's image-to-clip endpoint. Distinct from the SVD-LCM variant — slower
 |------|--------------|
 | \`fast-animatediff-t2v\` | \`fal-ai/fast-animatediff/text-to-video\` |
 | \`fast-animatediff-turbo-t2v\` | \`fal-ai/fast-animatediff/turbo/text-to-video\` |
-| \`t2v-turbo-t2v\` | \`fal-ai/t2v-turbo\` |
 | \`fast-svd-t2v\` | \`fal-ai/fast-svd/text-to-video\` |
 | \`fast-svd-lcm-t2v\` | \`fal-ai/fast-svd-lcm/text-to-video\` |
 | \`fast-svd-lcm-i2v\` | \`fal-ai/fast-svd-lcm\` |
@@ -60,7 +58,7 @@ export function registerLegacyVideoPromptGuide(server: McpServer): void {
   registerTool<Record<string, never>>(
     server,
     'legacy_video_prompt_guide',
-    'Reference guide for legacy / open-weights fal video models — AnimateDiff variants, T2V Turbo, SVD / SVD-LCM, Stable Video. Cheap fallbacks; not flagship picks. No API call — pure reference.',
+    'Reference guide for legacy / open-weights fal video models — AnimateDiff variants, SVD / SVD-LCM, Stable Video. Cheap fallbacks; not flagship picks. No API call — pure reference.',
     z.object({}).shape,
     async () => ({ content: [{ type: 'text', text: LEGACY_VIDEO_GUIDE }] }),
   );
