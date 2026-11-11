@@ -249,10 +249,121 @@ describe('filter graphs', () => {
     expect(batches[0].filter).toContain('[v0][v1]concat=n=2:v=1:a=0[vout]');
     expect(batches[0].filter).not.toContain(':a]');
 
-    const join = buildJoinGraph(plan, '/m.wav', ['/b0.mkv', '/b1.mkv']);
+    const join = buildJoinGraph(plan, '/m.wav', ['/b0.mkv', '/b1.mkv'], paths.clip);
     expect(join.inputs.map((i) => i.path)).toEqual(['/m.wav', '/b0.mkv', '/b1.mkv']);
-    expect(join.filter).toContain('[1:v][2:v]concat=n=2:v=1:a=0[base]');
+    expect(join.filter).toContain('[1:v][2:v]concat=n=2:v=1:a=0,fps=24[base]');
     expect(join.filter).toContain('[aout]');
     expect(join.filter).toContain('eq=brightness=');
+    expect(join.filter).toContain('[base]eq=');
+  });
+});
+
+describe('element overlays', () => {
+  const paths = { audio: '/m.wav', clip: (c: string) => `/clips/${c}` };
+  const withFx = (fx: Record<string, unknown>, shotIn = 'burn') =>
+    parse({
+      audio: 'm.wav',
+      width: 640,
+      height: 360,
+      fps: 24,
+      fx,
+      segments: [
+        {
+          song: [0, 6],
+          shots: [
+            { clip: 'a.mp4' },
+            { clip: 'b.mp4', start: 3, in: shotIn },
+          ],
+        },
+      ],
+    });
+
+  it('places the element so its peak lands on the cut, capped by max_lead', () => {
+    const { plan, errors } = planEdl(
+      withFx({ burn: { src: 'fire.mp4', peak: 3.7, max_lead: 0.9 } }),
+      longClips,
+    );
+    expect(errors).toEqual([]);
+    expect(plan.effects).toHaveLength(1);
+    const e = plan.effects[0];
+    expect(e.outFrame).toBe(72);
+    // Without the cap it would start at element 0.7 s, 3 s before the cut.
+    expect(e.elIn).toBeCloseTo(2.8, 9);
+    expect(e.toPeak).toBeCloseTo(0.9, 9);
+    expect(e.delay).toBeCloseTo(2.1, 9);
+  });
+
+  it('starts the element at its peak minus the cut time when the cut is early', () => {
+    const { plan } = planEdl(withFx({ burn: { src: 'fire.mp4', peak: 5 } }), longClips);
+    expect(plan.effects[0]).toMatchObject({ delay: 0, toPeak: 3 });
+    expect(plan.effects[0].elIn).toBeCloseTo(2, 9);
+  });
+
+  it('reports unknown names, sweeps, bad grades, bad levels and a peak past the end', () => {
+    const { errors } = planEdl(
+      withFx(
+        {
+          wing: { type: 'sweep', src: 'wing.png', peak: 0 },
+          smoke: { src: 'smoke.mp4', peak: 9, mode: 'matte_light', lo: 120, hi: 25, grade: 'eq=1[x]' },
+        },
+        'fire',
+      ),
+      { clipDuration: (c) => (c === 'smoke.mp4' ? 6 : 1000), audioDuration: 1000 },
+    );
+    const text = errors.join('\n');
+    expect(text).toMatch(/fx "wing": the sweep type is not available yet/);
+    expect(text).toMatch(/fx "smoke": grade must be a plain filter chain/);
+    expect(text).toMatch(/fx "smoke": hi \(25\) must be above lo \(120\)/);
+    expect(text).toMatch(/fx "smoke": peak 9s is past the end of smoke\.mp4 \(6\.000s\)/);
+    expect(text).toMatch(/unknown transition "fire" \(use "cut", "flash" or an fx: wing, smoke\)/);
+  });
+
+  it('blends a screen element in RGB, padded to the timeline in frames', () => {
+    const { plan } = planEdl(
+      withFx({ burn: { src: 'fire.mp4', peak: 3.7, max_lead: 0.9, zoom: 1.4, cx: 0.62 } }),
+      longClips,
+    );
+    const g = buildFilterGraph(plan, paths);
+    expect(g.inputs.map((i) => i.path)).toEqual(['/m.wav', '/clips/a.mp4', '/clips/b.mp4', '/clips/fire.mp4']);
+    expect(g.filter).toContain('[base]null[fl]');
+    expect(g.filter).toContain('[fl]format=gbrp[c0]');
+    expect(g.filter).toContain('[3:v]trim=start=2.8000,setpts=PTS-STARTPTS,');
+    expect(g.filter).toContain('crop=457:257:'); // zoom 1.4 on 640x360
+    expect(g.filter).toContain('tpad=start=50:start_mode=add:color=black:stop=144:stop_mode=add:color=black,trim=end_frame=144[e0]');
+    expect(g.filter).toContain('[c0][e0]blend=all_mode=screen[c1]');
+    expect(g.filter).toContain('[c1]format=yuv420p,setparams=range=tv:colorspace=bt709');
+    expect(g.filter).not.toContain('shortest');
+  });
+
+  it('builds a matte from a second read of the file, with grade, speed-up and tail', () => {
+    const { plan } = planEdl(
+      withFx({
+        wing: {
+          src: 'raven.mp4',
+          peak: 2.4,
+          mode: 'matte_dark',
+          lo: 85,
+          hi: 200,
+          grade: 'colorchannelmixer=rr=0.55',
+          post_speed: 2.2,
+          tail: 1,
+        },
+      }, 'wing'),
+      longClips,
+    );
+    const g = buildFilterGraph(plan, paths);
+    expect(g.inputs.filter((i) => i.path === '/clips/raven.mp4')).toHaveLength(2);
+    expect(g.filter).toContain('setpts=if(lt(T\\,2.4000)\\,PTS\\,(2.4000+(T-2.4000)/2.2)/TB),');
+    expect(g.filter).toContain('trim=duration=3.4000,fade=t=out:st=3.1500:d=0.25:color=white,');
+    expect(g.filter).toContain('[em0]format=gray,negate,lut=y=clip((val-85)*255/(200-85)\\,0\\,255)[ea0]');
+    expect(g.filter).toContain('[e0]format=rgba,colorchannelmixer=rr=0.55[er0]');
+    expect(g.filter).toContain('[c0][eo0]overlay=format=gbrp[c1]');
+  });
+
+  it('adds the elements to the join pass of a batched render', () => {
+    const { plan } = planEdl(withFx({ burn: { src: 'fire.mp4', peak: 1 } }), longClips);
+    const join = buildJoinGraph(plan, '/m.wav', ['/b0.mkv'], paths.clip);
+    expect(join.inputs.map((i) => i.path)).toEqual(['/m.wav', '/b0.mkv', '/clips/fire.mp4']);
+    expect(join.filter).toContain('[2:v]trim=start=');
   });
 });

@@ -136,7 +136,13 @@ export function registerAssembleEdlTool(server: McpServer): void {
 
       const grid = await loadBeatSource(edl, rel);
 
-      const clipNames = [...new Set(edl.segments.flatMap((s) => s.shots.map((sh) => sh.clip)))];
+      // Shot clips and element sources: all resolved and probed up front.
+      const clipNames = [
+        ...new Set([
+          ...edl.segments.flatMap((s) => s.shots.map((sh) => sh.clip)),
+          ...Object.values(edl.fx).map((f) => f.src),
+        ]),
+      ];
       const resolved = new Map<string, Awaited<ReturnType<typeof resolveInput>>>();
       const durations = new Map<string, number | undefined>();
       const audioR = await resolveInput(rel(edl.audio));
@@ -193,7 +199,7 @@ export function registerAssembleEdlTool(server: McpServer): void {
             );
             files.push(file);
           }
-          graph = buildJoinGraph(plan, audioR.localPath, files);
+          graph = buildJoinGraph(plan, audioR.localPath, files, clipPath);
           passes = files.length + 1;
         }
         await runGraph(

@@ -173,6 +173,47 @@ describe.runIf(run)('Integration: video_assemble_edl', () => {
     expect(shots[1]).toMatchObject({ song_start: 4, requested_start: 3.7, out_start: 2 });
   }, 120_000);
 
+  it('screens an element so it appears max_lead before the cut, keeping every frame', async () => {
+    // A flat white 3 s element, peak 1 s, at most 0.5 s before the cut at
+    // 1.5 s (frame 36): element seconds 0.5-3 cover output frames 24-83.
+    const white = join(dir, 'white.mp4');
+    await execFileAsync('ffmpeg', [
+      '-v', 'error', '-y', '-f', 'lavfi', '-i', 'color=c=white:s=64x36:r=24:d=3',
+      '-c:v', 'libx264', '-qp', '0', '-preset', 'ultrafast', '-pix_fmt', 'yuv420p', white,
+    ]);
+    const fxEdl = {
+      ...edl,
+      fx: { burn: { src: white, peak: 1, max_lead: 0.5, mode: 'screen' } },
+      segments: [
+        {
+          song: [2, 5],
+          shots: [
+            { clip: clipA, clip_song_start: 0 },
+            { clip: clipB, clip_song_start: 1, start: 3.5, in: 'burn' },
+          ],
+        },
+        edl.segments[1],
+      ],
+    };
+    const output = join(dir, 'fx.mp4');
+    const res = await call({ edl: fxEdl, output });
+    expect(res.isError, res.text).toBeFalsy();
+    const luma = await lumaPerFrame(output);
+    expect(luma).toHaveLength(120);
+    const base = expected();
+    // Before the element: the shot, give or take the RGB round trip.
+    for (const i of [0, 12, 23]) expect(Math.abs(luma[i] - base[i])).toBeLessThanOrEqual(2);
+    // Under it: white (limited range).
+    for (const i of [24, 36, 60, 83]) expect(luma[i]).toBeGreaterThanOrEqual(233);
+    // After it.
+    for (const i of [84, 100, 119]) expect(Math.abs(luma[i] - base[i])).toBeLessThanOrEqual(2);
+
+    process.env['ARTIFICER_EDL_SHOTS_PER_PASS'] = '1';
+    const batched = join(dir, 'fx-batched.mp4');
+    expect((await call({ edl: fxEdl, output: batched })).isError).toBeFalsy();
+    expect(await frameHashes(batched)).toEqual(await frameHashes(output));
+  }, 180_000);
+
   it('lists every problem and renders nothing', async () => {
     const output = join(dir, 'never.mp4');
     const { isError, text } = await call({
