@@ -13,15 +13,18 @@ Completed items move to [docs/history/completed-todos.md](docs/history/completed
 **Why:** Today's script runs three candidate video models against a fixed avatar + audio fixture, produces a markdown summary, and scores against a talking-head-specific rubric. The pattern is reusable. Every time a new capability's bake-off is needed (image portrait vs landscape, music vs SFX, TTS vs ASR), we'd re-author ~300 lines of near-identical script.
 
 **Pros:**
+
 - Each new bake-off becomes a config file + run command, not a script-rewrite.
 - Cross-capability rubrics (lip-sync accuracy, character consistency) can be reused.
 - Output format stabilizes into something `/qa` and downstream tools can consume.
 
 **Cons:**
+
 - Abstraction tax up front. Script is small enough that rewriting takes ~1h; generalizing takes longer.
 - Abstraction risk: over-generalizing before the second use case reveals what's actually variable.
 
 **Context:**
+
 - Current script location: `scripts/fal-bakeoff.mjs` (landed 2026-04-23 in commit 7beac7f).
 - Shape: submit N models in parallel to fal's queue API, poll, download outputs, write summary markdown.
 - Rubric today is talking-head-specific (lip-sync, character consistency, tail silence preservation). Any generalization needs to make rubrics pluggable.
@@ -40,16 +43,19 @@ Completed items move to [docs/history/completed-todos.md](docs/history/completed
 **Why:** The downstream pipeline produces many clips per piece. Real-world questions: "how much did we spend on reels this week?", "is Wan or Kling cheaper per finished second in practice?", "which model has the highest failure rate on our inputs?". None of these are answerable today — callers would have to wrap every tool call themselves.
 
 **Pros:**
+
 - Enables spend tracking across the pipeline without each caller building its own logging.
 - Catalog's `cost` strings become the source of truth for cost estimates (already derived from llms.txt).
 - Failure-rate observability comes for free.
 
 **Cons:**
+
 - Logging surface needs a policy: where do logs go? stdout? a file? a sink the caller configures?
 - Adds weight to the tools. The design's "thin transport" stance partially conflicts — logging is not routing, but it IS an opinion.
 - Cost estimation is approximate (720p vs 1080p tiered, etc.) — log says "estimated $0.70" but actual bill could differ.
 
 **Context:**
+
 - Design doc today has tools return `{uri: output}` and that's it. No logging surface defined.
 - If built: probably a `ToolLogger` interface injected via the MCP server's init, with a no-op default. Avoids forcing a logging library choice.
 - Structured event shape suggestion: `{tool, model, input_summary, elapsed_ms, estimated_cost_usd, status, request_id}` as JSONL.
@@ -97,6 +103,7 @@ Completed items move to [docs/history/completed-todos.md](docs/history/completed
 ## 22. Luma Ray 3.2 keyframe guide write-up (remaining from #22)
 
 **What:** The routes shipped 2026-09-24 (see #22 in [the history](docs/history/completed-todos.md)), but `luma_ray_prompt_guide` still describes Ray 2. Extend it rather than forking it, and spell out:
+
 - The keyframe-index math: `keyframe_indexes` are output-frame positions at 24 fps, not seconds (5s → 0–120, 10s → 0–240).
 - `keyframes` (1–64) and first/last frame are mutually exclusive. 10s and HDR unlock only with multi-keyframe input.
 - Cost framing: about 2× Kling O3 Pro per second at 1080p, so present it as a hero-shot and repair tool, not the default chain model.
@@ -122,6 +129,7 @@ Completed items move to [docs/history/completed-todos.md](docs/history/completed
 ## 27. Lip-sync guide: H3 Max gotchas from the first live singing test (NEW, filed 2026-09-24)
 
 From btmusic's first live run of `video.lipsync` routes (marble-statue bust + isolated vocal stem, 10-12s phrases):
+
 - **`minimax/h3-max/lip-sync/image-to-video` rejects lowercase resolution.** `resolution: "1080p"` → 422 `literal_error: Input should be '480P', '768P', '1080P' or '2K'`. The `fal_generate_video` schema text says "e.g. 480p, 720p, 1080p" and the lip-sync guide doesn't mention casing. Add the enum to `fal_lipsync_prompt_guide` (and consider case-normalizing the pass-through where a route's enum is known).
 - **H3 Max hallucinates scene content and camera moves on stylized subjects:** it added a museum placard with text into every frame, zoomed the camera from bust to close-up unprompted, and drifted the face. Note: H3 Max lip-sync has **no prompt input**, so these behaviors can't be prompted away. The only knobs are `resolution` (native `768P` default; `1080P` is a refinement pass over a 768P base, a plausible source of the zoom/drift), `enable_transcription`, and `seed`. The guide should say this and warn that it's untested for locked-framing / identity-critical shots.
 - **Confirmed working live:** OmniHuman 1.5 (`fal-ai/bytedance/omnihuman/v1.5`, `resolution: "1080p"` → 1248×1664 for a 3:4 input), sync-3 avatar (`fal-ai/sync-lipsync/v3/image-to-video`, returns native input resolution), `fal_separate_audio` (Demucs `htdemucs_ft`), and `align_text_to_audio` (33/33 lines matched; note the first word's start can stretch back across a long instrumental intro).
@@ -131,6 +139,7 @@ From btmusic's first live run of `video.lipsync` routes (marble-statue bust + is
 ## 28. Google preview video models deprecated on 2026-10-22 (NEW, filed 2026-10-08)
 
 **Notice (Google, received 2026-10-08):** these Gemini API models are deprecated effective **October 22, 2026**:
+
 - `gemini-omni-flash-preview`
 - `veo-3.1-generate-preview`
 - `veo-3.1-fast-generate-preview`
@@ -143,6 +152,7 @@ From btmusic's first live run of `video.lipsync` routes (marble-statue bust + is
 **Veo: open.** The notice names no Veo replacement IDs. Find the successors on Google's deprecations and models pages (ai.google.dev) before changing anything. Do not guess an ID.
 
 **What still references them here:**
+
 - **`veo-3.1-lite-generate-preview`:** the google route on `veo-3.1-lite-t2v` (`models.json`), two lines in `src/guides/veo.ts`, `scripts/seed-video-catalog.mjs` and the `tests/unit/catalog/catalog.test.ts` fixture (a fixture string, so it can stay or move).
 - **`veo-3.1-generate-preview` / `veo-3.1-fast-generate-preview`:** not referenced. Callers may still pass them by hand, so the Veo guide should name the successors.
 - **Not affected:** the fal routes (`fal-ai/veo3.1*`, `google/gemini-omni-flash/v1.1/*`), which fal versions separately. The `gemini_generate_video` default is `veo-2.0-generate-001`, which isn't on this list. Check while you're there whether it's on a separate notice.
@@ -156,6 +166,7 @@ From btmusic's first live run of `video.lipsync` routes (marble-statue bust + is
 ## 29. PixVerse V6: guide is stale; transition + extend endpoints not seeded (NEW, filed 2026-11-06)
 
 From btmusic's 2026-11-06 video-model cost review. Checked against fal's own pages (fal.ai/pixverse-v6 + per-endpoint pages + the t2v OpenAPI schema) on 2026-11-06. `pixverse_prompt_guide` was last verified 2026-04-28 and is wrong or incomplete on V6:
+
 - **Audio:** the guide says V6 has no audio ("only C1 does"). The fal V6 schema has `generate_audio_switch` (boolean, **default false**, "Enable audio generation (BGM, SFX, dialogue)") on t2v, i2v and transition. Pricing is split without/with audio: 360p $0.025/$0.035, 540p $0.035/$0.045, 720p $0.045/$0.060, 1080p $0.090/$0.115 per second.
 - **Missing routes:** `fal-ai/pixverse/v6/transition` (first + last frame: `first_image_url` + `end_image_url`, both required; tagged first-frame-last-frame) and `fal-ai/pixverse/v6/extend` (`video_url` + prompt). Neither is in the catalog. They're callable today through `fal_generate_video` with a raw model ID and `extra_files`, but nothing tells a caller they exist.
 - **Knobs the guide omits** (from the t2v schema): `duration` 1–15 integer (default 5); `resolution` enum `360p/540p/720p/1080p` (default 720p); `aspect_ratio` enum `16:9, 4:3, 1:1, 3:4, 9:16, 2:3, 3:2, 21:9`; `generate_multi_clip_switch` ("multi-clip generation with dynamic camera changes"); `style` (anime, 3d_animation, clay, comic, cyberpunk); `negative_prompt` (≤2048 bytes); `seed`; `thinking_type` (enabled/disabled/auto prompt optimization); `enable_safety_checker` (default true).
@@ -189,23 +200,32 @@ From btmusic's 2026-11-06 video-model cost review. Checked against fal's own pag
 
 ---
 
-## 33. Edit-list assembly: per-cut transitions, beat snapping, element overlays (NEW, filed 2026-11-11)
+## 35. Singer separation (duets): MVSep male/female route (NEW, filed 2026-11-11)
 
-- **Gap:** `video_add_transitions` / `video_concatenate` apply ONE xfade type to every cut, with no beat grid
-  and no overlay elements. A fast hip-hop music video (btmusic Album 4) needs a different transition per cut, cuts
-  snapped to beats, and generated elements (fire, smoke, raven wing) composited over the cut.
-- **Prototype that works:** `btmusic/scripts/assemble-edl.py` (JSON EDL in SONG time; lip-synced clips stay in
-  sync via `clip_song_start`; static punch-in zoom per shot; flash via `eq` brightness; elements placed so their
-  peak lands on the cut, `max_lead` cap; modes `screen` (light elements on black), `matte_dark` (dark elements on
-  white → opaque overlay, alpha from inverted luma with levels), per-element `grade`).
-- **Gotchas found building it:** (1) `blend` in YUV tints everything green: blend in RGB (`gbrp`); (2) a studio-lit
-  element (raven on white) reads far too bright over a night plate: needs a grade; (3) `multiply` on a dark element
-  is see-through (ghost wings): use a luma matte + overlay instead.
-- **Ask:** a `video_assemble_edl` tool with this model (or absorb the script). Beat grid: `audio_beat_grid` (#34, done) writes the JSON this should read.
-- **Progress 2026-11-11, PR A shipped:** `video_assemble_edl` with segments and shots in song time, `clip_song_start` sync, punch-in, `cut` / `flash`, snap `true` / `kick` / `half` from a `beat_grid` file (or `beats` + `kick_ref` + `beat_offset`), all problems reported before rendering, batched rendering past 24 shots. Plus `transitions[]` (one per cut) on `video_add_transitions`. Rendering the btmusic reel-v6 EDL (effects swapped for cuts) gave frames and audio bit-identical to `assemble-edl.py`, except the one Kling shot: the prototype colour-converted it (tagged BT.709 among untagged clips); the tool tags every shot BT.709 and leaves pixels alone.
-  - **Found and fixed while matching the prototype:** `trim=start_frame` after a seek put shots a frame off (the fps filter can start at slot 1; trim by pts instead); mixed colour tags made a batched render colour-convert a whole batch; batch files' millisecond timestamps moved a flash edge by a frame (flash now timed from the frame number).
-- **Progress 2026-11-11, PR B:** element overlays: an `fx` table (`src`, `peak`, `max_lead`, `mode` = `screen` / `matte_light` / `matte_dark` / blend modes, `zoom`/`cx`/`cy`, `lo`/`hi`, `grade`, `post_speed`, `tail`) and a shot's `in` naming one. The reel-v6 burn and smoke renders match the prototype visually (37.8-43 dB everywhere, from one RGB round trip instead of one per element). Fixed on the way, in the prototype too: elements trimmed in seconds came out a frame short and `shortest=1` dropped the video's last frame; in a batched render, the batch files' millisecond timestamps made an element blend emit an extra frame.
-- **Still to do:** PR C, the `sweep` wipe (a still element crossing the frame, the next shot revealed behind it). Until then btmusic keeps `assemble-edl.py` for the wing wipe.
+- **Gap:** the only separator is `fal-ai/demucs`, which puts both singers of a duet in one vocal stem (the guide's
+  own gotcha). Lip-sync (OmniHuman etc.) mouths whatever vocal it is fed, so a duet music video needs one stem per
+  singer. Timestamp splitting fails wherever the two voices overlap.
+- **Proven 2026-11-11 (btmusic Album 4 "Thought and Memory", t06):** MVSep "Male/Female separation" via the web UI,
+  model MelRoformer 2025.01, "Extract vocals first with BS Roformer", full master in. 0 ms offset vs the master;
+  wrong-singer leakage −29 to −61 dB in solo sections; overlaps (sustained F note under an M line, and the reverse)
+  split to one voice per stem by ear. One weak spot: a last F line routed into the M stem at full level, so callers
+  still gate each stem to its singer's timestamps. Feeding a Demucs stem in instead (job B) was cleaner in F solo
+  sections, worse in M ones; not better overall.
+- **API (mvsep.com/en/full_api, read 2026-11-11):** `POST https://mvsep.com/api/separation/create` multipart
+  (`api_token`, `audiofile`, `sep_type=57`, `add_opt1` model: 0 BSRoformer Sucial / 3 BSRoformer aufr33 / 1 SCNet
+  XL / **2 MelRoformer (default, best SDR 13.03)**, `add_opt2` 0 = direct / **1 = vocals first with BS Roformer**,
+  `output_format` 1 = wav16 / 4 = wav32, **`is_demo` must stay 0**: 1 publishes the job on a public demo page).
+  Poll `GET /api/separation/get?hash=` (`waiting` / `processing` / `done` / `failed` ...); outputs in `data.files`
+  (key structure not documented: read a live response). Token from `POST /api/app/login` (`email`, `password`).
+  Regions: mvsep.com (geo), de / de2 / sg pinned; jobs live in the region that created them.
+- **Plans:** free registered = 50 jobs/day, 10 min, 100 MB, 1 concurrent, API "Limited"; unregistered = MP3 output
+  only (WAV needs an account). Premium = credits (~1 credit / audio minute for standard models; check
+  `price_coefficient` in `GET /api/app/algorithms`).
+- **Ask:** a separator route (or `fal_separate_audio`-style tool) for MVSep with `sep_type` / model / extract options,
+  WAV output, `is_demo` forced to 0, token from config; optionally a helper that gates each returned stem to given
+  time windows. Update the stem-separation guide to point duets here.
+- **Check first:** mvsep.com links a "Security incident (October 2026)" page (not read yet). Read it before storing
+  a token; never use the third-party PyPI `mvsep-cli` (the API page warns it asks for your token).
 
 ---
 

@@ -178,7 +178,9 @@ describe('punchCrop', () => {
   });
 
   it('clamps the window inside the frame', () => {
-    expect(punchCrop(frame, { punch: 2, fx: 1, fy: 0 })).toBe('crop=960:540:960:0,scale=1920:1080,');
+    expect(punchCrop(frame, { punch: 2, fx: 1, fy: 0 })).toBe(
+      'crop=960:540:960:0,scale=1920:1080,',
+    );
   });
 });
 
@@ -205,7 +207,10 @@ describe('filter graphs', () => {
   it('seeks long in-points to a whole frame and trims by pts', () => {
     const g = buildFilterGraph(plan, paths);
     // shot 0: src_in 10 s = frame 240; seek 1 s earlier (frame 216 = 9 s); trim local pts 24..96
-    expect(g.inputs[1]).toEqual({ options: ['-threads', '2', '-ss', '9.000000'], path: '/clips/a.mp4' });
+    expect(g.inputs[1]).toEqual({
+      options: ['-threads', '2', '-ss', '9.000000'],
+      path: '/clips/a.mp4',
+    });
     expect(g.filter).toContain('[1:v]fps=24,trim=start_pts=24:end_pts=96,setpts=PTS-STARTPTS');
     // shot 1: src_in 0, no seek
     expect(g.inputs[2]).toEqual({ options: ['-threads', '2'], path: '/clips/b.mp4' });
@@ -270,10 +275,7 @@ describe('element overlays', () => {
       segments: [
         {
           song: [0, 6],
-          shots: [
-            { clip: 'a.mp4' },
-            { clip: 'b.mp4', start: 3, in: shotIn },
-          ],
+          shots: [{ clip: 'a.mp4' }, { clip: 'b.mp4', start: 3, in: shotIn }],
         },
       ],
     });
@@ -299,23 +301,35 @@ describe('element overlays', () => {
     expect(plan.effects[0].elIn).toBeCloseTo(2, 9);
   });
 
-  it('reports unknown names, sweeps, bad grades, bad levels and a peak past the end', () => {
+  it('reports unknown names, bad sweeps, a missing peak, bad grades, bad levels and a peak past the end', () => {
     const { errors } = planEdl(
       withFx(
         {
-          wing: { type: 'sweep', src: 'wing.png', peak: 0 },
-          smoke: { src: 'smoke.mp4', peak: 9, mode: 'matte_light', lo: 120, hi: 25, grade: 'eq=1[x]' },
+          wing: { type: 'sweep', src: 'wing.mp4', dur: 0.05 },
+          smoke: {
+            src: 'smoke.mp4',
+            peak: 9,
+            mode: 'matte_light',
+            lo: 120,
+            hi: 25,
+            grade: 'eq=1[x]',
+          },
+          burn: { src: 'fire.mp4' },
         },
         'fire',
       ),
       { clipDuration: (c) => (c === 'smoke.mp4' ? 6 : 1000), audioDuration: 1000 },
     );
     const text = errors.join('\n');
-    expect(text).toMatch(/fx "wing": the sweep type is not available yet/);
+    expect(text).toMatch(/fx "wing": a sweep's src must be a still image .*not wing\.mp4/);
+    expect(text).toMatch(/fx "wing": dur 0\.05s is under two frames at 24 fps/);
+    expect(text).toMatch(/fx "burn": an overlay needs a peak/);
     expect(text).toMatch(/fx "smoke": grade must be a plain filter chain/);
     expect(text).toMatch(/fx "smoke": hi \(25\) must be above lo \(120\)/);
     expect(text).toMatch(/fx "smoke": peak 9s is past the end of smoke\.mp4 \(6\.000s\)/);
-    expect(text).toMatch(/unknown transition "fire" \(use "cut", "flash" or an fx: wing, smoke\)/);
+    expect(text).toMatch(
+      /unknown transition "fire" \(use "cut", "flash" or an fx: wing, smoke, burn\)/,
+    );
   });
 
   it('blends a screen element in RGB, padded to the timeline in frames', () => {
@@ -324,12 +338,19 @@ describe('element overlays', () => {
       longClips,
     );
     const g = buildFilterGraph(plan, paths);
-    expect(g.inputs.map((i) => i.path)).toEqual(['/m.wav', '/clips/a.mp4', '/clips/b.mp4', '/clips/fire.mp4']);
+    expect(g.inputs.map((i) => i.path)).toEqual([
+      '/m.wav',
+      '/clips/a.mp4',
+      '/clips/b.mp4',
+      '/clips/fire.mp4',
+    ]);
     expect(g.filter).toContain('[base]null[fl]');
     expect(g.filter).toContain('[fl]format=gbrp[c0]');
     expect(g.filter).toContain('[3:v]trim=start=2.8000,setpts=PTS-STARTPTS,');
     expect(g.filter).toContain('crop=457:257:'); // zoom 1.4 on 640x360
-    expect(g.filter).toContain('tpad=start=50:start_mode=add:color=black:stop=144:stop_mode=add:color=black,trim=end_frame=144[e0]');
+    expect(g.filter).toContain(
+      'tpad=start=50:start_mode=add:color=black:stop=144:stop_mode=add:color=black,trim=end_frame=144[e0]',
+    );
     expect(g.filter).toContain('[c0][e0]blend=all_mode=screen[c1]');
     expect(g.filter).toContain('[c1]format=yuv420p,setparams=range=tv:colorspace=bt709');
     expect(g.filter).not.toContain('shortest');
@@ -337,25 +358,30 @@ describe('element overlays', () => {
 
   it('builds a matte from a second read of the file, with grade, speed-up and tail', () => {
     const { plan } = planEdl(
-      withFx({
-        wing: {
-          src: 'raven.mp4',
-          peak: 2.4,
-          mode: 'matte_dark',
-          lo: 85,
-          hi: 200,
-          grade: 'colorchannelmixer=rr=0.55',
-          post_speed: 2.2,
-          tail: 1,
+      withFx(
+        {
+          wing: {
+            src: 'raven.mp4',
+            peak: 2.4,
+            mode: 'matte_dark',
+            lo: 85,
+            hi: 200,
+            grade: 'colorchannelmixer=rr=0.55',
+            post_speed: 2.2,
+            tail: 1,
+          },
         },
-      }, 'wing'),
+        'wing',
+      ),
       longClips,
     );
     const g = buildFilterGraph(plan, paths);
     expect(g.inputs.filter((i) => i.path === '/clips/raven.mp4')).toHaveLength(2);
     expect(g.filter).toContain('setpts=if(lt(T\\,2.4000)\\,PTS\\,(2.4000+(T-2.4000)/2.2)/TB),');
     expect(g.filter).toContain('trim=duration=3.4000,fade=t=out:st=3.1500:d=0.25:color=white,');
-    expect(g.filter).toContain('[em0]format=gray,negate,lut=y=clip((val-85)*255/(200-85)\\,0\\,255)[ea0]');
+    expect(g.filter).toContain(
+      '[em0]format=gray,negate,lut=y=clip((val-85)*255/(200-85)\\,0\\,255)[ea0]',
+    );
     expect(g.filter).toContain('[e0]format=rgba,colorchannelmixer=rr=0.55[er0]');
     expect(g.filter).toContain('[c0][eo0]overlay=format=gbrp[c1]');
   });
@@ -365,5 +391,119 @@ describe('element overlays', () => {
     const join = buildJoinGraph(plan, '/m.wav', ['/b0.mkv'], paths.clip);
     expect(join.inputs.map((i) => i.path)).toEqual(['/m.wav', '/b0.mkv', '/clips/fire.mp4']);
     expect(join.filter).toContain('[2:v]trim=start=');
+  });
+});
+
+describe('sweep wipe', () => {
+  const paths = { audio: '/m.wav', clip: (c: string) => `/clips/${c}` };
+  const wing = {
+    type: 'sweep',
+    src: 'wing.png',
+    dur: 0.5,
+    scale: 1.35,
+    margin_px: 430,
+    hflip: true,
+    blur: 9,
+  };
+  // a.mp4 plays song 0-3, b.mp4 song 3-6 (from its own 3 s); the cut is frame 72.
+  const edl = (
+    over: { song?: [number, number]; b?: Record<string, unknown>; wingIn?: number } = {},
+  ) =>
+    parse({
+      audio: 'm.wav',
+      width: 640,
+      height: 360,
+      fps: 24,
+      fx: { wing },
+      segments: [
+        {
+          song: over.song ?? [0, 6],
+          shots: [
+            { clip: 'a.mp4', in: over.wingIn === 0 ? 'wing' : 'cut' },
+            { clip: 'b.mp4', start: 3, in: 'wing', ...over.b },
+          ],
+        },
+      ],
+    });
+
+  it('centres the window on the cut and re-times both shots to it in song sync', () => {
+    const { plan, errors } = planEdl(edl(), longClips);
+    expect(errors).toEqual([]);
+    expect(plan.effects).toHaveLength(1);
+    const { sweep } = plan.effects[0];
+    // 0.5 s = 12 frames, starting 6 before the cut.
+    expect(sweep).toMatchObject({ startFrame: 66, frames: 12 });
+    // a.mp4 carries on past its shot; b.mp4 starts 6 frames before its own in-point.
+    expect(sweep?.from).toMatchObject({ clip: 'a.mp4', srcFrame: 66, frames: 12, outFrame: 66 });
+    expect(sweep?.to).toMatchObject({ clip: 'b.mp4', srcFrame: 66, frames: 12, outFrame: 66 });
+  });
+
+  it('refuses a sweep across a segment boundary, outside the segment, or past either clip', () => {
+    const first = planEdl(edl({ wingIn: 0 }), longClips).errors.join('\n');
+    expect(first).toMatch(/shot 0 .*a sweep wipes from the previous shot in the same segment/);
+
+    const early = planEdl(edl({ song: [2.9, 6] }), longClips).errors.join('\n');
+    expect(early).toMatch(
+      /shot 1 .*sweep window \(output -0\.167 to 0\.333s\) runs outside its segment/,
+    );
+
+    const late = planEdl(edl({ b: { clip_song_start: 3 } }), longClips).errors.join('\n');
+    expect(late).toMatch(/the sweep starts 0\.250s before b\.mp4 begins/);
+
+    const short = planEdl(edl(), {
+      clipDuration: (c) => (c === 'a.mp4' ? 3 : 1000),
+      audioDuration: 1000,
+    });
+    expect(short.errors.join('\n')).toMatch(
+      /the sweep plays a\.mp4 up to 3\.250s, but it is 3\.000s long/,
+    );
+  });
+
+  it('splits the shots at the edge, mattes the still over it, and composites only the window', () => {
+    const { plan } = planEdl(edl(), longClips);
+    const g = buildFilterGraph(plan, paths);
+    expect(g.inputs.map((i) => i.path)).toEqual([
+      '/m.wav',
+      '/clips/a.mp4',
+      '/clips/b.mp4',
+      '/clips/a.mp4',
+      '/clips/b.mp4',
+      '/clips/wing.png',
+      '/clips/wing.png',
+    ]);
+    expect(g.inputs[5].options).toEqual(['-loop', '1', '-t', '1.000']);
+    const q = (v: string) => `min(1\\,max(0\\,round(${v}*24)/11))`;
+    const edge = (v: string) => `(-430+1500*${q(v)}*${q(v)}*(3-2*${q(v)}))`;
+    // Window sources: frame 66 of each clip, seeked to frame 42.
+    expect(g.inputs[3].options).toEqual(['-threads', '2', '-ss', '1.750000']);
+    expect(g.filter).toContain('[3:v]fps=24,trim=start_pts=24:end_pts=36,');
+    expect(g.filter).toContain(`[sa0][sb0]blend=all_expr=if(lt(X\\,${edge('T')})\\,B\\,A)[sx0]`);
+    expect(g.filter).toContain(
+      '[5:v]hflip,scale=-2:486,fps=24,format=rgba,avgblur=sizeX=9:sizeY=1[wc0]',
+    );
+    expect(g.filter).toContain(
+      '[6:v]hflip,scale=-2:486,fps=24,format=gray,negate,lut=y=clip((val-40)*255/(170-40)\\,0\\,255),avgblur=sizeX=9:sizeY=1[wa0]',
+    );
+    expect(g.filter).toContain(
+      `[sx0][wo0]overlay=x=${edge('t')}-overlay_w/2:y=(main_h-overlay_h)/2:format=gbrp:shortest=1,tpad=start=66:start_mode=add[sw0]`,
+    );
+    expect(g.filter).toContain(
+      '[c0][sw0]overlay=format=gbrp:eof_action=pass:enable=between(t\\,2.729167\\,3.229167)[c1]',
+    );
+  });
+
+  it('runs in the join pass of a batched render', () => {
+    const { plan } = planEdl(edl(), longClips);
+    const join = buildJoinGraph(plan, '/m.wav', ['/b0.mkv'], paths.clip);
+    expect(join.inputs.map((i) => i.path)).toEqual([
+      '/m.wav',
+      '/b0.mkv',
+      '/clips/a.mp4',
+      '/clips/b.mp4',
+      '/clips/wing.png',
+      '/clips/wing.png',
+    ]);
+    expect(join.filter).toContain('[2:v]fps=24,trim=start_pts=');
+    expect(join.filter).toContain('[4:v]hflip,');
   });
 });

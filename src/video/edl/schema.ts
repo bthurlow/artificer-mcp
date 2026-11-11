@@ -71,14 +71,18 @@ export const edlFxSchema = z.object({
     .enum(['overlay', 'sweep'])
     .default('overlay')
     .describe(
-      '"overlay" (this) or "sweep" (a still element wiping across the frame; not available yet).',
+      '"overlay": a video element composited over the cut (the fields below up to tail). "sweep": a still image (a dark element on white, e.g. a raven wing) crossing the frame left to right, the next shot revealed behind its centre line (src, dur, scale, margin_px, hflip, blur, lo, hi, grade).',
     ),
-  src: z.string().min(1).describe('The element video (path or URI).'),
+  src: z
+    .string()
+    .min(1)
+    .describe('The element: a video for an overlay, an image for a sweep (path or URI).'),
   peak: z
     .number()
     .min(0)
+    .optional()
     .describe(
-      'Seconds into the element where it is fullest (thickest smoke, wings spread). Lands on the cut.',
+      'Overlay (required): seconds into the element where it is fullest (thickest smoke, wings spread). Lands on the cut.',
     ),
   max_lead: z
     .number()
@@ -116,14 +120,14 @@ export const edlFxSchema = z.object({
     .max(255)
     .default(40)
     .describe(
-      'Matte modes: luma at or below this is fully transparent (matte_light) or opaque (matte_dark).',
+      'Matte modes and sweep: luma at or below this is fully transparent (matte_light) or opaque (matte_dark, sweep).',
     ),
   hi: z
     .number()
     .min(0)
     .max(255)
     .default(170)
-    .describe('Matte modes: the other end of the luma ramp.'),
+    .describe('Matte modes and sweep: the other end of the luma ramp.'),
   grade: z
     .string()
     .optional()
@@ -144,6 +148,37 @@ export const edlFxSchema = z.object({
     .describe(
       'End the element this many output seconds after its peak, fading out over the last 0.25 s.',
     ),
+  dur: z
+    .number()
+    .positive()
+    .default(0.4)
+    .describe(
+      'Sweep: seconds the wipe takes, centred on the cut. Both shots keep playing in song sync through it.',
+    ),
+  scale: z
+    .number()
+    .positive()
+    .default(1.3)
+    .describe('Sweep: element height as a multiple of the frame height.'),
+  margin_px: z
+    .number()
+    .min(0)
+    .default(450)
+    .describe(
+      "Sweep: the element's centre travels from this many pixels left of the frame to this many right of it. At least half the element's width keeps it fully off-frame at both ends.",
+    ),
+  hflip: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Sweep: mirror the element. A wing's leading edge must face the direction of travel (rightward), or it reads as flying backward.",
+    ),
+  blur: z
+    .number()
+    .int()
+    .min(0)
+    .default(0)
+    .describe('Sweep: horizontal motion blur, in pixels (avgblur radius).'),
 });
 
 export const edlSegmentSchema = z.object({
@@ -214,7 +249,7 @@ export const videoAssembleEdlSchema = z.object({
     .record(z.unknown())
     .optional()
     .describe(
-      'The edit decision list, inline. Shape: {audio, width?, height?, fps?, beat_grid?, beats?, kick_ref?, beat_offset?, beats_per_bar?, flash?, fx?: {name: {src, peak, max_lead?, mode?, zoom?, cx?, cy?, lo?, hi?, grade?, post_speed?, tail?}}, crf?, preset?, segments: [{song: [a, b], shots: [{clip, clip_song_start?, start?, snap?, punch?, fx?, fy?, in?}]}]}. A shot\'s `in` is "cut", "flash" or an fx name. Relative paths resolve against the working directory.',
+      'The edit decision list, inline. Shape: {audio, width?, height?, fps?, beat_grid?, beats?, kick_ref?, beat_offset?, beats_per_bar?, flash?, fx?: {name: {type?: "overlay", src, peak, max_lead?, mode?, zoom?, cx?, cy?, lo?, hi?, grade?, post_speed?, tail?} | {type: "sweep", src (image), dur?, scale?, margin_px?, hflip?, blur?, lo?, hi?, grade?}}, crf?, preset?, segments: [{song: [a, b], shots: [{clip, clip_song_start?, start?, snap?, punch?, fx?, fy?, in?}]}]}. A shot\'s `in` is "cut", "flash" or an fx name. Relative paths resolve against the working directory.',
     ),
   edl_path: z
     .string()

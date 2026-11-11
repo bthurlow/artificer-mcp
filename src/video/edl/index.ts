@@ -112,7 +112,7 @@ export function registerAssembleEdlTool(server: McpServer): void {
   registerTool<VideoAssembleEdlParams>(
     server,
     'video_assemble_edl',
-    'Assemble a music-video cut from an edit decision list in SONG time: segments are ranges of the master audio, each holding shots that play a clip from a song time, with lip-synced clips kept in sync via clip_song_start. Per-shot transition ("cut" or "flash"), static punch-in zoom, and cut times snapped to the beat grid (beat_grid = audio_beat_grid output; snap "kick" for downbeats, "half" for kick + mid-bar). Shots are placed frame-exact on the output timeline, so cuts and lip-sync do not drift. Checks every shot before rendering and reports all problems at once. Output: H.264/AAC MP4.',
+    'Assemble a music-video cut from an edit decision list in SONG time: segments are ranges of the master audio, each holding shots that play a clip from a song time, with lip-synced clips kept in sync via clip_song_start. Per-shot transition ("cut", "flash", a composited element such as fire or smoke whose peak lands on the cut, or a "sweep" wipe behind a still crossing the frame), static punch-in zoom, and cut times snapped to the beat grid (beat_grid = audio_beat_grid output; snap "kick" for downbeats, "half" for kick + mid-bar). Shots are placed frame-exact on the output timeline, so cuts and lip-sync do not drift. Checks every shot before rendering and reports all problems at once. Output: H.264/AAC MP4.',
     videoAssembleEdlSchema.shape,
     async ({ edl: inline, edl_path, output }) => {
       if ((inline === undefined) === (edl_path === undefined)) {
