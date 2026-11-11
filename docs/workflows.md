@@ -147,7 +147,7 @@ Compose a finished narrated-explainer reel (9:16, H.264 + AAC 48kHz, 30 fps) fro
 | `output` | string | required | Final MP4 path |
 | `voice` | string? | — | TTS voice. Falls back to `ARTIFICER_BRAND_SPEC.tts.voice`, else `Kore`. |
 | `style` | string? | — | Natural-language TTS delivery style. Composed from brand spec `tts.style` + `tts.accent` when omitted. |
-| `tts_model` | string | `gemini-2.5-flash-preview-tts` | Override via `ARTIFICER_TTS_MODEL`. |
+| `tts_model` | string | `gemini-3.8-flash-tts` | Override via `ARTIFICER_TTS_MODEL`. |
 | `music_prompt` | string? | — | Lyria prompt. Falls back to `ARTIFICER_BRAND_SPEC.music.default_prompt`. Ignored if `music_input` is set. |
 | `music_input` | string? | — | Pre-existing music track. Skips music generation. |
 | `music_model` | string | `lyria-3-clip-preview` | Lyria 3 batch model. |

@@ -9,6 +9,27 @@ because they landed under a commit type it hides.
 
 ---
 
+## 0.14.x → 0.15.0
+
+### TTS default is now `gemini-3.8-flash-tts`
+
+Google shuts down `gemini-2.5-flash-preview-tts`, the old default for
+`gemini_generate_speech` and `workflow_narrated_explainer`'s `tts_model`, on
+**2026-11-17**. The default is now its named replacement,
+`gemini-3.8-flash-tts`, called through the Interactions API.
+
+- **If you pinned the old model** (`ARTIFICER_TTS_MODEL` or a per-call
+  `model`), change it before 11-17: to `gemini-3.8-flash-tts`, or
+  `gemini-3.8-flash-lite-tts` for the cheaper tier.
+- **3.8 reads `text` verbatim.** Delivery instructions written into the text
+  ("Say warmly: …") are now spoken aloud: move them to `style`. Inline tags
+  for momentary sounds use angle brackets (`<whispers>`); the preview models'
+  square-bracket tags are for those models only.
+- **`workflow_narrated_explainer` now honours `ARTIFICER_TTS_MODEL`**, as its
+  description always said. Before, it ignored the variable.
+- The `speech.general` catalog slug `gemini-tts-2.5-flash` is now
+  `gemini-tts-3.8-flash`.
+
 ## 0.13.x → 0.14.0
 
 ### 16 dead fal routes retired, and `mochi_prompt_guide` removed

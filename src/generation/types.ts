@@ -4,7 +4,7 @@ import { z } from 'zod';
  * Resolve a model default, preferring an environment override when set.
  * Lets operators pin models in `.mcp.json` env without editing callers.
  */
-const envDefault = (envVar: string, fallback: string): string =>
+export const envDefault = (envVar: string, fallback: string): string =>
   process.env[envVar]?.trim() || fallback;
 
 /**
@@ -211,14 +211,14 @@ export interface GenerateSpeechParams {
 export const generateSpeechSchema = z.object({
   model: z
     .string()
-    .default(envDefault('ARTIFICER_TTS_MODEL', 'gemini-2.5-flash-preview-tts'))
+    .default(envDefault('ARTIFICER_TTS_MODEL', 'gemini-3.8-flash-tts'))
     .describe(
-      'Gemini TTS model ID. Default: gemini-2.5-flash-preview-tts (override via ARTIFICER_TTS_MODEL env var). Also valid: gemini-2.5-pro-preview-tts.',
+      'Gemini TTS model ID. Default: gemini-3.8-flash-tts (override via ARTIFICER_TTS_MODEL env var). Also valid: gemini-3.8-flash-lite-tts (cheaper, 100+ languages), and until Google retires them the preview models gemini-3.1-flash-tts-preview and gemini-2.5-pro-preview-tts. gemini-2.5-flash-preview-tts shuts down 2026-11-17.',
     ),
   text: z
     .string()
     .describe(
-      'Text to speak. Keep under ~1000 chars per call for best results. May include natural-language style prompts inline (e.g., "Say warmly: Hello baker").',
+      'Text to speak. Keep under ~1000 chars per call for best results. On the default 3.8 models it is read verbatim, so put delivery instructions in `style`, not here (inline <tags> for momentary sounds are fine). The preview models also accept style prompts inline (e.g., "Say warmly: Hello baker").',
     ),
   output: z
     .string()

@@ -99,6 +99,17 @@ export async function generateSpeechToFile(params: {
     style: effectiveStyle,
     language_code: effectiveLanguageCode,
   } = resolveTtsParams(params);
+
+  if (usesInteractions(params.model)) {
+    const audio = await synthesizeViaInteractions(client, {
+      model: params.model,
+      text: params.text,
+      voice: effectiveVoice,
+      style: effectiveStyle,
+      language: effectiveLanguageCode,
+    });
+    return writeSpeech(params.output, audio, effectiveVoice);
+  }
   const fullText = effectiveStyle ? `${effectiveStyle}: ${params.text}` : params.text;
 
   const config: Record<string, unknown> = {
@@ -143,13 +154,31 @@ export async function generateSpeechToFile(params: {
     throw new Error(`Speech generation failed — ${reason}.`);
   }
 
-  const pcm = Buffer.from(audio.data, 'base64');
   const { sampleRate, channels } = parsePcmMime(audio.mimeType);
+  return writeSpeech(
+    params.output,
+    { pcm: Buffer.from(audio.data, 'base64'), sampleRate, channels },
+    effectiveVoice,
+  );
+}
+
+interface SpeechPcm {
+  pcm: Buffer;
+  sampleRate: number;
+  channels: number;
+}
+
+/** Wrap PCM in WAV and write it, transcoding via ffmpeg for other extensions. */
+async function writeSpeech(
+  output: string,
+  { pcm, sampleRate, channels }: SpeechPcm,
+  voice: string,
+): Promise<{ voice: string; durationSeconds: number; sampleRate: number; channels: number }> {
   const wav = pcmToWav(pcm, sampleRate, channels);
 
-  const ext = extname(params.output).toLowerCase();
+  const ext = extname(output).toLowerCase();
   if (ext === '.wav' || ext === '') {
-    await getProvider(params.output).write(params.output, wav, 'audio/wav');
+    await getProvider(output).write(output, wav, 'audio/wav');
   } else {
     const tmpWav = tempPath('.wav');
     try {
@@ -157,7 +186,7 @@ export async function generateSpeechToFile(params: {
       const tmpOut = tempPath(ext);
       await ffmpegBatch(['-y', '-i', tmpWav, tmpOut]);
       const bytes = await (await import('node:fs/promises')).readFile(tmpOut);
-      await getProvider(params.output).write(params.output, bytes);
+      await getProvider(output).write(output, bytes);
       await rm(tmpOut, { force: true }).catch(() => {});
     } finally {
       await rm(tmpWav, { force: true }).catch(() => {});
@@ -165,18 +194,156 @@ export async function generateSpeechToFile(params: {
   }
 
   return {
-    voice: effectiveVoice,
+    voice,
     durationSeconds: pcm.length / (sampleRate * channels * 2),
     sampleRate,
     channels,
   };
 }
 
+/**
+ * Gemini 3.8 TTS (gemini-3.8-flash-tts, -flash-lite-tts) is served through
+ * the Interactions API, not generateContent. The preview models it replaces
+ * (gemini-2.5-flash-preview-tts shuts down 2026-11-17) stay on generateContent.
+ */
+export function usesInteractions(model: string): boolean {
+  return /^(models\/)?gemini-3\.8-/.test(model);
+}
+
+/** Sample rate requested from the Interactions API (its default, 24 kHz). */
+const INTERACTIONS_SAMPLE_RATE = 24000;
+
+/**
+ * The Interactions request for one TTS call. The text is a verbatim
+ * transcript: 3.8 speaks everything in `text`, so a style goes in a
+ * `speech_metadata` annotation instead of being prefixed as the preview
+ * models' stage direction was. Audio comes back as raw 16-bit PCM
+ * (`audio/l16`; the unary default would be WAV), like generateContent's.
+ */
+export function buildTtsInteraction(p: {
+  model: string;
+  text: string;
+  voice: string;
+  style?: string;
+  language?: string;
+}): Record<string, unknown> {
+  const text: Record<string, unknown> = { type: 'text', text: p.text };
+  if (p.style) text['annotations'] = [{ type: 'speech_metadata', style: p.style }];
+  return {
+    model: p.model,
+    input: [{ type: 'user_input', content: [text] }],
+    response_format: {
+      type: 'audio',
+      mime_type: 'audio/l16',
+      sample_rate: INTERACTIONS_SAMPLE_RATE,
+    },
+    generation_config: {
+      speech_config: [{ voice: p.voice, ...(p.language ? { language: p.language } : {}) }],
+    },
+  };
+}
+
+interface TtsInteraction {
+  id?: string;
+  status?: string;
+  output_audio?: { data?: string; mime_type?: string };
+  steps?: Array<{
+    type?: string;
+    content?: Array<{ type?: string; data?: string; mime_type?: string }>;
+  }>;
+  errors?: Array<{ message?: string }>;
+}
+
+/** The audio of a finished interaction: the SDK's output_audio, else the last audio block of the steps. */
+export function extractInteractionAudio(
+  interaction: TtsInteraction,
+): { data: string; mimeType?: string } | undefined {
+  if (interaction.output_audio?.data) {
+    return { data: interaction.output_audio.data, mimeType: interaction.output_audio.mime_type };
+  }
+  let found: { data: string; mimeType?: string } | undefined;
+  for (const step of interaction.steps ?? []) {
+    for (const c of step.content ?? []) {
+      if (c.type === 'audio' && c.data) found = { data: c.data, mimeType: c.mime_type };
+    }
+  }
+  return found;
+}
+
+/** PCM from an audio block: raw L16 as requested, or a WAV's data chunk if one comes back anyway. */
+export function audioToPcm(audio: { data: string; mimeType?: string }): SpeechPcm {
+  const bytes = Buffer.from(audio.data, 'base64');
+  if (bytes.length >= 12 && bytes.toString('ascii', 0, 4) === 'RIFF') {
+    let sampleRate = INTERACTIONS_SAMPLE_RATE;
+    let channels = 1;
+    let off = 12;
+    while (off + 8 <= bytes.length) {
+      const id = bytes.toString('ascii', off, off + 4);
+      const size = bytes.readUInt32LE(off + 4);
+      if (id === 'fmt ') {
+        channels = bytes.readUInt16LE(off + 10);
+        sampleRate = bytes.readUInt32LE(off + 12);
+      } else if (id === 'data') {
+        return { pcm: bytes.subarray(off + 8, off + 8 + size), sampleRate, channels };
+      }
+      off += 8 + size + (size % 2);
+    }
+    throw new Error('Speech generation failed — WAV response has no data chunk.');
+  }
+  const { sampleRate, channels } = parsePcmMime(audio.mimeType);
+  return { pcm: bytes, sampleRate, channels };
+}
+
+const TTS_POLL_TIMEOUT_MS = 120_000;
+const TTS_FAILED = new Set(['failed', 'cancelled', 'incomplete']);
+
+async function synthesizeViaInteractions(
+  client: ReturnType<typeof getGenAIClient>,
+  p: { model: string; text: string; voice: string; style?: string; language?: string },
+): Promise<SpeechPcm> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const interactions = (client as any).interactions;
+  if (!interactions?.create) {
+    throw new Error(
+      `${p.model} needs the Interactions API, which the installed @google/genai does not expose.`,
+    );
+  }
+  let interaction = (await interactions.create(buildTtsInteraction(p))) as TtsInteraction;
+  // A unary TTS call normally comes back completed; poll briefly if not.
+  const deadline = Date.now() + TTS_POLL_TIMEOUT_MS;
+  while (
+    interaction.status &&
+    interaction.status !== 'completed' &&
+    !TTS_FAILED.has(interaction.status)
+  ) {
+    if (Date.now() > deadline || !interaction.id) {
+      throw new Error(
+        `Speech generation timed out (interaction ${interaction.id ?? '?'}, status "${interaction.status}").`,
+      );
+    }
+    await new Promise((r) => setTimeout(r, 1000));
+    interaction = (await interactions.get(interaction.id)) as TtsInteraction;
+  }
+  const audio = extractInteractionAudio(interaction);
+  if (!audio) {
+    const detail = interaction.errors
+      ?.map((e) => e.message)
+      .filter(Boolean)
+      .join('; ');
+    const what =
+      interaction.status && interaction.status !== 'completed'
+        ? `interaction ${interaction.status}`
+        : 'no audio data returned';
+    throw new Error(`Speech generation failed — ${what}${detail ? `: ${detail}` : ''}.`);
+  }
+  return audioToPcm(audio);
+}
+
 export function registerSpeechGenTools(server: McpServer): void {
   registerTool<GenerateSpeechParams>(
     server,
     'gemini_generate_speech',
-    'Generate natural-sounding speech from text via Gemini TTS (gemini-2.5-flash-preview-tts by default). Returns PCM wrapped in WAV; other extensions are transcoded via ffmpeg. Uses GOOGLE_API_KEY.',
+    'Generate natural-sounding speech from text via Gemini TTS (gemini-3.8-flash-tts by default). Returns PCM wrapped in WAV; other extensions are transcoded via ffmpeg. Uses GOOGLE_API_KEY.',
     generateSpeechSchema.shape,
     async ({ model, text, output, voice, language_code, style }) => {
       try {
