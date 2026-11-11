@@ -25,6 +25,18 @@ vi.mock('../../../src/generation/client.js', () => ({
   },
 }));
 
+// Storage URIs (a Vertex gs:// result) resolve to a local temp file.
+const mockResolveInput = vi.fn(async (uri: string) => ({
+  localPath: `/tmp/fake-${uri.split('/').pop()}`,
+  cleanup: vi.fn(),
+}));
+vi.mock('../../../src/utils/resource.js', async () => {
+  const actual = await vi.importActual<typeof import('../../../src/utils/resource.js')>(
+    '../../../src/utils/resource.js',
+  );
+  return { ...actual, resolveInput: (uri: string) => mockResolveInput(uri) };
+});
+
 // Mock fs operations so tests don't hit the real filesystem.
 vi.mock('node:fs/promises', async () => {
   const actual = await vi.importActual<typeof import('node:fs/promises')>('node:fs/promises');
@@ -73,6 +85,55 @@ describe('Generation Tools', () => {
   // ── gemini_generate_video ──────────────────────────────────────────────
 
   describe('gemini_generate_video', () => {
+    // Veo is Vertex-only (shut down on the Gemini API 2026-10-22).
+    beforeEach(() => {
+      process.env.GOOGLE_CLOUD_PROJECT = 'test-project';
+    });
+    afterEach(() => {
+      delete process.env.GOOGLE_CLOUD_PROJECT;
+    });
+
+    it('fails fast with a configuration message when Vertex is not configured', async () => {
+      delete process.env.GOOGLE_CLOUD_PROJECT;
+      const result = await client.callTool({
+        name: 'gemini_generate_video',
+        arguments: { prompt: 'x', output: '/tmp/v.mp4' },
+      });
+      expect(result.isError).toBe(true);
+      const text = (result.content as Array<{ text: string }>)[0].text;
+      expect(text).toMatch(/gemini_generate_video requires Vertex AI credentials/);
+      expect(mockGenerateVideos).not.toHaveBeenCalled();
+    });
+
+    it('defaults to the Vertex GA model veo-3.1-generate-001', async () => {
+      mockGenerateVideos.mockResolvedValue({ done: true, response: { generatedVideos: [] } });
+      await client.callTool({
+        name: 'gemini_generate_video',
+        arguments: { prompt: 'x', output: '/tmp/v.mp4' },
+      });
+      expect(mockGenerateVideos.mock.calls[0][0].model).toBe('veo-3.1-generate-001');
+    });
+
+    it('copies a gs:// result through the storage layer', async () => {
+      mockGenerateVideos.mockResolvedValue({
+        done: true,
+        response: {
+          generatedVideos: [
+            { video: { uri: 'gs://bucket/out/sample_0.mp4', mimeType: 'video/mp4' } },
+          ],
+        },
+      });
+      const result = await client.callTool({
+        name: 'gemini_generate_video',
+        arguments: { prompt: 'x', output: '/tmp/v.mp4' },
+      });
+      const text = (result.content as Array<{ text: string }>)[0].text;
+      expect(text).toBe(
+        'Video generated and saved to /tmp/v.mp4 (copied from gs://bucket/out/sample_0.mp4)',
+      );
+      expect(mockResolveInput).toHaveBeenCalledWith('gs://bucket/out/sample_0.mp4');
+    });
+
     it('polls until done and saves video bytes', async () => {
       mockGenerateVideos.mockResolvedValue({
         done: false,

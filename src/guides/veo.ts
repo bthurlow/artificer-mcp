@@ -48,7 +48,7 @@ Default picks:
 - **Source-image aspect must match output aspect** for image-to-video. A 1:1 source with \`aspect_ratio: "9:16"\` produces a landscape-composed shot awkwardly cropped vertical — the #1 i2v pitfall. Pre-generate the source at the target aspect.
 - **Reference-to-video is Pro-only.** Veo 3.1 Lite and Fast return errors if you try to pass reference images. Use single-image i2v instead.
 - **Veo 3.1 Lite caps resolution at 1080p**, no 4k. The schema enum reflects this.
-- **\`generate_audio\`**: defaults to \`true\` on all 3.x. The Gemini Developer API rejects this field if passed; on fal it works — but most callers should leave it as default.
+- **\`generate_audio\`**: defaults to \`true\` on all 3.x. On Vertex (the only Google route for Veo now) and on fal it is accepted; most callers should leave it at the default.
 - **Duration enum**, not arbitrary integer. Veo 3.x accepts \`"4s" | "6s" | "8s"\`. The artificer transport's \`duration_seconds\` is an integer; pass the integer and the transport stringifies — but if you want \`"6s"\` you pass \`6\`. Other values 4xx.
 - **\`auto_fix\`** rewrites prompts that hit content-policy. Default \`true\` on most 3.x t2v, default \`false\` on i2v / FLF / ref. If you depend on exact prompt wording, pass \`auto_fix: false\` via \`extra_params\`.
 - Complex physics (explosions, dense particle fields, fast crowd action) tends to artifact. Plan multi-shot stories as 4-8s segments and concatenate.
@@ -121,7 +121,7 @@ For first-last-frame, describe the transition / motion between the two anchored 
 |------|-----------------|
 | \`veo-3.1-t2v\` | \`fal-ai/veo3.1\` |
 | \`veo-3.1-fast-t2v\` | \`fal-ai/veo3.1/fast\` |
-| \`veo-3.1-lite-t2v\` | \`fal-ai/veo3.1/lite\` (also has google route \`veo-3.1-lite-generate-preview\` via \`gemini_generate_video\`) |
+| \`veo-3.1-lite-t2v\` | \`fal-ai/veo3.1/lite\` |
 | \`veo-3.1-i2v\` | \`fal-ai/veo3.1/image-to-video\` |
 | \`veo-3.1-fast-i2v\` | \`fal-ai/veo3.1/fast/image-to-video\` |
 | \`veo-3.1-lite-i2v\` | \`fal-ai/veo3.1/lite/image-to-video\` |
@@ -134,9 +134,10 @@ For first-last-frame, describe the transition / motion between the two anchored 
 | \`veo-3-i2v\` | \`fal-ai/veo3/image-to-video\` |
 | \`veo-3-fast-i2v\` | \`fal-ai/veo3/fast/image-to-video\` |
 
-All fal slugs route through \`fal_generate_video\` with \`FAL_KEY\`. The Lite t2v slug also has a Google route via \`gemini_generate_video\` (model id \`veo-3.1-lite-generate-preview\`) for callers who already have GOOGLE_API_KEY plumbing.
+All fal slugs route through \`fal_generate_video\` with \`FAL_KEY\`. The Veo 3.1 t2v and i2v slugs (standard, fast, lite) also have a Google route via \`gemini_generate_video\` on **Vertex AI** (\`veo-3.1-generate-001\`, \`veo-3.1-fast-generate-001\`, \`veo-3.1-lite-generate-001\`; needs \`GOOGLE_CLOUD_PROJECT\` + Application Default Credentials). Google shut Veo down on the Gemini API on 2026-10-22, so a \`GOOGLE_API_KEY\` alone no longer reaches Veo.
 
 ## Last verified
+2026-11-11 — Google routes moved to Vertex AI (the Gemini API's Veo models were shut down 2026-10-22; Vertex model ids from Google Cloud's Veo docs).
 2026-11-06 — \`veo-2-t2v\` retired: \`fal-ai/veo2\` returns 404 on both fal surfaces.
 2026-04-28 — initial seed of full fal video catalog. Pricing and input schemas grounded in committed fal-specs (veo-3.1, veo-3.1-t2v, veo-3.1-flf, veo-3.1-ref-to-video, veo-3.1-lite-t2v, veo-3-fast-t2v). Some Fast-tier per-second prices are not currently in synced specs and reference the live fal.ai listing.
 

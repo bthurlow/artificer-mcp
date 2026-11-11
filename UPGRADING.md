@@ -30,6 +30,29 @@ Google shuts down `gemini-2.5-flash-preview-tts`, the old default for
 - The `speech.general` catalog slug `gemini-tts-2.5-flash` is now
   `gemini-tts-3.8-flash`.
 
+### `gemini_generate_video` (Veo) needs Vertex AI; `@google/genai` 3
+
+Google shut Veo down on the Gemini API (the last models,
+`veo-3.1-*-generate-preview`, on 2026-10-22), and `@google/genai` 3 refuses
+`generateVideos` there. `gemini_generate_video` now uses the Vertex client.
+
+- **Set `GOOGLE_CLOUD_PROJECT`** (optionally `GOOGLE_CLOUD_LOCATION`, default
+  `us-central1`) and authenticate with Application Default Credentials. With
+  only `GOOGLE_API_KEY` the tool fails fast with a configuration message; use
+  `gemini_omni_generate_video` (the replacement Google names) or a fal Veo
+  route instead.
+- **The default model is `veo-3.1-generate-001`** (was `veo-2.0-generate-001`,
+  shut down 2026-06-30). If you pinned `ARTIFICER_VEO_MODEL` to a Gemini API
+  id (`veo-2.0-*`, `veo-3.0-*`, `*-generate-preview`), change it to a Vertex
+  id: `veo-3.1-generate-001`, `veo-3.1-fast-generate-001` or
+  `veo-3.1-lite-generate-001`.
+- **Catalog:** the Veo 3.1 t2v and i2v slugs (standard, fast, lite) have a
+  Google route keyed on `GOOGLE_CLOUD_PROJECT`; the dead
+  `veo-3.1-lite-generate-preview` route is gone.
+- **Other Gemini tools are unchanged.** `@google/genai` 3 defaults to API
+  version `v1`; artificer pins `v1beta`, where the preview models it uses are
+  served, so `GOOGLE_GENAI_API_VERSION` has no effect on it.
+
 ### Imagen tools removed
 
 Google has shut down every Imagen model on the Gemini API (the last,

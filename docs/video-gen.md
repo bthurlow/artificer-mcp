@@ -1,6 +1,6 @@
 # Video Generation
 
-artificer-mcp ships AI-powered video generation via Google Veo.
+artificer-mcp ships AI-powered video generation via Google Veo (on Vertex AI), Gemini Omni, and fal-hosted models.
 
 ## Tool
 
@@ -13,7 +13,9 @@ The operation is long-running; the tool polls until complete or the poll timeout
 
 ## Model selection
 
-Pass any valid Veo model string via the `model` param, or set `ARTIFICER_VEO_MODEL` as the default. There is no hardcoded enum — new Veo tiers work the moment Google exposes them.
+**Veo runs on Vertex AI only.** Google shut Veo down on the Gemini API (the last models on 2026-10-22), so `gemini_generate_video` uses the Vertex client: set `GOOGLE_CLOUD_PROJECT` (and optionally `GOOGLE_CLOUD_LOCATION`) and authenticate with Application Default Credentials. A `GOOGLE_API_KEY` alone is not enough; with only a key, use `gemini_omni_generate_video` (the replacement Google names) or a fal Veo route.
+
+The default model is `veo-3.1-generate-001`; also `veo-3.1-fast-generate-001` and `veo-3.1-lite-generate-001` (preview). Pass any Vertex Veo model string via `model`, or set `ARTIFICER_VEO_MODEL`. The result comes back as bytes, or as a `gs://` URI that is copied through the storage layer.
 
 ## Key params
 
@@ -21,7 +23,7 @@ Pass any valid Veo model string via the `model` param, or set `ARTIFICER_VEO_MOD
 |-------|-------------|
 | `prompt` | Scene description. See `veo_video_prompt_guide` for structure. |
 | `image` | Optional reference image for image-to-video. Aspect ratio must match Veo's expectations — see the prompt guide. |
-| `duration_seconds` | Clip length; model-dependent. |
+| `duration_seconds` | Clip length; Veo 3.1 takes 4, 6 or 8. |
 | `aspect_ratio` | e.g., `16:9`, `9:16`. |
 | `resolution` | `720p` / `1080p` on tiers that support it. |
 | `fps` | Frame rate. |
@@ -34,11 +36,11 @@ Pass any valid Veo model string via the `model` param, or set `ARTIFICER_VEO_MOD
 
 ## Prompt guide
 
-Pair the tool with `veo_video_prompt_guide` — it returns model-specific notes (aspect-ratio interop for image-to-video, dialogue syntax, Dev API vs Vertex differences) plus field-tested templates and examples.
+Pair the tool with `veo_video_prompt_guide` — it returns model-specific notes (aspect-ratio interop for image-to-video, dialogue syntax) plus field-tested templates and examples.
 
 ## Prerequisites
 
-- `GOOGLE_API_KEY` environment variable
+- `GOOGLE_CLOUD_PROJECT` and Application Default Credentials (`gcloud auth application-default login`, or `GOOGLE_APPLICATION_CREDENTIALS` pointing at a service-account key)
 - GCS credentials only if you're writing output to `gs://`
 
 ## Brand spec integration

@@ -14,7 +14,7 @@
 **artificer-mcp** is a public MCP server for AI-powered creative media generation and processing. One server covering the full creative pipeline:
 
 - **Image generation** via Gemini Nano Banana and fal-hosted models
-- **Video generation** via Veo
+- **Video generation** via Veo (Vertex AI), Gemini Omni and fal-hosted models
 - **Speech generation** via Gemini TTS (prebuilt voices, natural-language style/accent control)
 - **Music generation** via Lyria 3 (batch) + Lyria RealTime (streaming)
 - **Image processing** via ImageMagick (57 tools — resize, composite, text, social cards, ad creatives, app icons, and more)
@@ -86,12 +86,12 @@ Add to your MCP config:
 |---|---|
 | `GOOGLE_API_KEY` | Required for all Gemini tools. |
 | `GOOGLE_APPLICATION_CREDENTIALS` | Required for `gs://` storage URIs. Path to a GCP service-account JSON. |
-| `GOOGLE_CLOUD_PROJECT` | Vertex AI project, for Google methods that are Vertex-only. |
+| `GOOGLE_CLOUD_PROJECT` | Vertex AI project, for Google methods that are Vertex-only: `gemini_generate_video` (Veo). Authenticate with Application Default Credentials. |
 | `GOOGLE_CLOUD_LOCATION` | Vertex AI region (default: `us-central1`). |
 | `FAL_KEY` | Required for all `fal_*` tools. |
 | `MVSEP_API_TOKEN` | Required for `mvsep_separate_audio` (MVSep: one stem per singer of a duet). Get it at mvsep.com/user-api; keys from before 6 October 2026 were reset after MVSep's security incident. |
 | `MVSEP_API_URL` | Optional MVSep API base (default `https://mvsep.com/api`, geo-routed). Pin a region, e.g. `https://de.mvsep.com/api`; a job can only be collected from the region that created it. |
-| `ARTIFICER_VEO_MODEL` | Override default model for `gemini_generate_video` (fallback: `veo-2.0-generate-001`). |
+| `ARTIFICER_VEO_MODEL` | Override default model for `gemini_generate_video` (fallback: `veo-3.1-generate-001`, on Vertex AI). |
 | `ARTIFICER_OMNI_VIDEO_MODEL` | Override default model for `gemini_omni_generate_video` (fallback: `gemini-omni-1.2-flash`). |
 | `ARTIFICER_NANOBANANA_MODEL` | Override default model for `gemini_nanobanana_generate_image` (fallback: `gemini-3.1-flash-image`). |
 | `ARTIFICER_TTS_MODEL` | Override default model for `gemini_generate_speech` (fallback: `gemini-3.8-flash-tts`). |
