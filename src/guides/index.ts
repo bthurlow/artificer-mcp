@@ -34,7 +34,6 @@ import { registerViduPromptGuide } from './vidu.js';
 import { registerKandinskyVideoPromptGuide } from './kandinsky-video.js';
 import { registerGrokImaginePromptGuide } from './grok-imagine.js';
 import { registerDecartLucyPromptGuide } from './decart-lucy.js';
-import { registerNvidiaCosmosPromptGuide } from './nvidia-cosmos.js';
 import { registerLongcatPromptGuide } from './longcat-video.js';
 import { registerSpecializedVideoPromptGuide } from './specialized-video.js';
 import { registerLegacyVideoPromptGuide } from './legacy-video.js';
@@ -117,7 +116,6 @@ export function registerGuideTools(server: McpServer): void {
   registerKandinskyVideoPromptGuide(server);
   registerGrokImaginePromptGuide(server);
   registerDecartLucyPromptGuide(server);
-  registerNvidiaCosmosPromptGuide(server);
   registerLongcatPromptGuide(server);
   registerSpecializedVideoPromptGuide(server);
   registerLegacyVideoPromptGuide(server);

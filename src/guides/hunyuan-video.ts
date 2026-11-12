@@ -13,7 +13,8 @@ Tencent's open-weights video lineage. Best for research workflows, fine-tuning e
 | \`hunyuan-video-1.5-t2v\` | t2v | v1.5 | Latest Hunyuan, best quality |
 | \`hunyuan-video-1.5-i2v\` | i2v | v1.5 | Latest i2v |
 | \`hunyuan-video-t2v\` | t2v | v1 | Older Hunyuan |
-| \`hunyuan-video-i2v\` | i2v | v1 | Older i2v |
+
+\`hunyuan-video-i2v\` (v1, \`fal-ai/hunyuan-video-image-to-video\`) was retired in 2026-11 and now 404s; use \`hunyuan-video-1.5-i2v\`.
 
 **No LoRA support any more.** Both Hunyuan LoRA routes are gone: \`hunyuan-video-img2vid-lora-i2v\` was dropped on 2026-08-15 and \`hunyuan-video-lora-t2v\` on 2026-09-24 — fal removed \`fal-ai/hunyuan-video-img2vid-lora\` and \`fal-ai/hunyuan-video-lora\`, and both now 404. For custom-style work, use the LTX LoRA variants, which cover both t2v and i2v (\`ltx_video_prompt_guide\`).
 
@@ -41,7 +42,6 @@ Standard t2v / i2v phrasing.
 | \`hunyuan-video-t2v\` | \`fal-ai/hunyuan-video\` |
 | \`hunyuan-video-1.5-t2v\` | \`fal-ai/hunyuan-video-v1.5/text-to-video\` |
 | \`hunyuan-video-1.5-i2v\` | \`fal-ai/hunyuan-video-v1.5/image-to-video\` |
-| \`hunyuan-video-i2v\` | \`fal-ai/hunyuan-video-image-to-video\` |
 
 ## Last verified
 2026-09-24 — \`hunyuan-video-lora-t2v\` retired (endpoint 404s), leaving no LoRA-capable Hunyuan route. 2026-08-15 — route list re-synced against fal; \`hunyuan-video-img2vid-lora-i2v\` retired (endpoint 404s). Capability notes and prompt guidance are unchanged since the 2026-04-28 initial seed and were not re-verified.

@@ -46,7 +46,6 @@ Wan 2.6 is **image-to-video only** as of 2026-08-15 — fal removed the \`wan/v2
 |------|----------|----------|
 | \`wan-2.2-5b-t2v\` | t2v | Open 5B base |
 | \`wan-2.2-5b-fastvideo-t2v\` | t2v | **Cheapest Wan** at $0.0125–0.025/video |
-| \`wan-2.2-5b-distill-t2v\` | t2v | Distilled fast variant |
 | \`wan-2.2-5b-i2v\` | i2v | Open 5B i2v |
 
 ### Wan 2.1 (compact pricing)
@@ -54,15 +53,8 @@ Wan 2.6 is **image-to-video only** as of 2026-08-15 — fal removed the \`wan/v2
 |------|----------|----------|
 | \`wan-2.1-t2v\` | t2v | $0.20 480p / $0.40 720p per video |
 | \`wan-2.1-i2v\` | i2v | Compact i2v pricing |
-| \`wan-2.1-pro-t2v\` | t2v Pro | 1080p 30fps |
-| \`wan-2.1-pro-i2v\` | i2v Pro | 1080p 30fps i2v |
-| \`wan-2.1-t2v-lora\` | t2v + LoRA | Custom-style 2.1 t2v |
-| \`wan-2.1-i2v-lora\` | i2v + LoRA | Custom-style 2.1 i2v |
 
-### Krea Wan
-| Slug | Modality | Best for |
-|------|----------|----------|
-| \`krea-wan-14b-t2v\` | t2v | Krea-tuned Wan 14B fast endpoint |
+**Retired in 2026-11** (fal removed the endpoints; they 404): Wan 2.1 Pro (\`wan-2.1-pro-t2v\` / \`-i2v\`), the Wan 2.1 LoRA routes (\`wan-2.1-t2v-lora\` / \`wan-2.1-i2v-lora\`), \`wan-2.2-5b-distill-t2v\` and Krea Wan 14B (\`krea-wan-14b-t2v\`). For 1080p use Wan 3.0 or 2.6; for a LoRA on t2v use \`wan-2.2-a14b-lora-t2v\`. No Wan i2v LoRA route remains: use the LTX-2.3 LoRA i2v routes (\`ltx_video_prompt_guide\`).
 
 ## Wan 2.7 talking-head — KNOWN LANDMINES
 
@@ -79,9 +71,8 @@ Validated 2026-04-24 against artificer-mcp v0.9.0 in the Q2 talking-head bake-of
 ## Known strengths (family-wide)
 - **Wan 2.7** is the default talking-head pick (fastest, cheapest with rubric-parity to Kling Avatar v2 Pro).
 - Wan 2.1 and 2.2 5b lineages give the cheapest video options on fal — Wan 2.2 5B FastVideo at $0.0125/video.
-- LoRA endpoints (a14b, 2.1) accept caller-supplied custom-style fine-tunes.
+- The a14b LoRA endpoint (t2v) accepts caller-supplied custom-style fine-tunes.
 - **No alpha channel any more.** Wan Alpha (\`fal-ai/wan-alpha\`) was retired upstream in 2026-11, and TransPixar before it, so no catalog route outputs transparent video. See \`specialized_video_prompt_guide\` for the key-it-out fallback.
-- Krea Wan 14B brings a Krea-tuned style without leaving the Wan family.
 
 ## Known weaknesses
 - Wan family is sprawling — picking the right version requires reading this guide.
@@ -126,15 +117,9 @@ Validated 2026-04-24 against artificer-mcp v0.9.0 in the Q2 talking-head bake-of
 | \`wan-2.2-a14b-turbo-i2v\` | \`fal-ai/wan/v2.2-a14b/image-to-video/turbo\` |
 | \`wan-2.2-5b-t2v\` | \`fal-ai/wan/v2.2-5b/text-to-video\` |
 | \`wan-2.2-5b-fastvideo-t2v\` | \`fal-ai/wan/v2.2-5b/text-to-video/fast-wan\` |
-| \`wan-2.2-5b-distill-t2v\` | \`fal-ai/wan/v2.2-5b/text-to-video/distill\` |
 | \`wan-2.2-5b-i2v\` | \`fal-ai/wan/v2.2-5b/image-to-video\` |
 | \`wan-2.1-t2v\` | \`fal-ai/wan-t2v\` |
 | \`wan-2.1-i2v\` | \`fal-ai/wan-i2v\` |
-| \`wan-2.1-pro-t2v\` | \`fal-ai/wan-pro/text-to-video\` |
-| \`wan-2.1-pro-i2v\` | \`fal-ai/wan-pro/image-to-video\` |
-| \`wan-2.1-t2v-lora\` | \`fal-ai/wan-t2v-lora\` |
-| \`wan-2.1-i2v-lora\` | \`fal-ai/wan-i2v-lora\` |
-| \`krea-wan-14b-t2v\` | \`fal-ai/krea-wan-14b/text-to-video\` |
 
 ## Newer routes (added 2026-09-24)
 Added in the 2026-09-24 fal catalog refresh. Model descriptions are fal's own; inputs come from each route's committed spec (\`src/catalog/fal-specs/<slug>/openapi.json\`). The sections above predate these routes and were not re-verified against them, so check a newer model's spec before assuming it matches.
@@ -162,7 +147,7 @@ export function registerWanPromptGuide(server: McpServer): void {
   registerTool<Record<string, never>>(
     server,
     'wan_video_prompt_guide',
-    'Reference guide for Alibaba Wan Video — full lineage from Wan 2.1 (compact pricing) through Wan 2.7 (default talking-head). Covers t2v / i2v / reference / talking-head / LoRA modes across Wan 2.1, 2.2 a14b, 2.2 5b, 2.5, 2.6, 2.7, and Krea Wan. Includes the 3 mandatory talking-head landmines for the Wan 2.7 i2v audio-driven path. No API call — pure reference.',
+    'Reference guide for Alibaba Wan Video — full lineage from Wan 2.1 (compact pricing) through Wan 2.7 (default talking-head). Covers t2v / i2v / reference / talking-head / LoRA modes across Wan 2.1, 2.2 a14b, 2.2 5b, 2.5, 2.6, 2.7 and 3.0. Includes the 3 mandatory talking-head landmines for the Wan 2.7 i2v audio-driven path. No API call — pure reference.',
     z.object({}).shape,
     async () => ({ content: [{ type: 'text', text: WAN_GUIDE }] }),
   );

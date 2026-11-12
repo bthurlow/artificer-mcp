@@ -5,21 +5,12 @@ import { z } from 'zod';
 const LEGACY_VIDEO_GUIDE = `# Legacy Video Models — Prompt Guide
 
 ## What's in this guide
-Older / open-weights video models in the fal catalog. These exist for completeness — they are **not** flagship picks. Reach for these only when:
-- You need an open-weights / replicable model (AnimateDiff, SVD lineage).
-- You want the cheapest possible per-clip fallback for non-critical work.
-- A downstream pipeline specifically expects one of these model lineages.
+Older open-weights video models in the fal catalog: today, only the Stable Video Diffusion (SVD) lineage. These exist for completeness — they are **not** flagship picks. Reach for these only when:
+- You need an open-weights / replicable model from the SVD lineage.
+- You want a cheap per-clip fallback for non-critical work.
+- A downstream pipeline specifically expects SVD output.
 
-For new production work, prefer the modern catalog: Veo / Kling / Wan / Hailuo / LTX-2.x.
-
-## AnimateDiff lineage
-Older anime/illustrated-style t2v built on top of Stable Diffusion + temporal modules. Stylized aesthetic. Two variants remain on fal: Fast AnimateDiff and AnimateDiff Turbo. Turbo is fastest but lowest quality.
-- Slugs: \`fast-animatediff-t2v\`, \`fast-animatediff-turbo-t2v\`
-- \`animatediff-sparsectrl-lcm-t2v\` (SparseCtrl LCM) was dropped on 2026-08-15 — fal removed the endpoint and it now 404s. It was the only variant offering SparseCtrl conditioning; the two remaining routes are prompt-only.
-- Example: \`prompt: "anime girl with blue hair waving in a flower field"\`
-
-## T2V Turbo (retired)
-\`t2v-turbo-t2v\` (\`fal-ai/t2v-turbo\`) was dropped in November 2026: fal removed the endpoint and it now 404s. For a cheap prompt-only clip use \`fast-animatediff-turbo-t2v\` or \`fast-svd-lcm-t2v\` below.
+For new production work, prefer the modern catalog: Veo / Kling / Wan / Hailuo / LTX-2.x. For the cheapest clip on fal, \`wan-2.2-5b-fastvideo-t2v\` (\`wan_video_prompt_guide\`) usually beats these on both price and quality.
 
 ## Stable Video Diffusion (SVD) lineage
 Stability AI's image-to-video diffusion model. Older but well-known. Three SVD variants on fal: base SVD t2v, SVD-LCM t2v (lightning), SVD-LCM i2v.
@@ -27,38 +18,35 @@ Stability AI's image-to-video diffusion model. Older but well-known. Three SVD v
 - Use when: you specifically want SVD output, or your downstream pipeline expects it.
 - Example: \`prompt: "subject smoothly turns head, gentle camera drift"\`
 
-## Stable Video (i2v)
-Stability's image-to-clip endpoint. Distinct from the SVD-LCM variant — slower but slightly higher quality.
-- Slug: \`stable-video-i2v\` → \`fal-ai/stable-video\`
-- Input: source image. Mostly motion-only, no rich prompt control.
+## Retired from this guide
+fal removed these endpoints and they now 404, so their slugs were dropped from the catalog:
+- **AnimateDiff** — \`animatediff-sparsectrl-lcm-t2v\` on 2026-08-15; \`fast-animatediff-t2v\` and \`fast-animatediff-turbo-t2v\` in 2026-11. No AnimateDiff route remains. For a cheap prompt-only clip use \`fast-svd-lcm-t2v\` or \`wan-2.2-5b-fastvideo-t2v\`.
+- **T2V Turbo** — \`t2v-turbo-t2v\` (\`fal-ai/t2v-turbo\`), 2026-11.
+- **Stable Video** — \`stable-video-i2v\` (\`fal-ai/stable-video\`), 2026-11. \`fast-svd-lcm-i2v\` is the remaining SVD image-to-video route.
 
 ## Wire-key quirks
-- AnimateDiff models often accept \`negative_prompt\` and respond to anime-tag style prompting (booru-style tags). Test before committing to a prompt format.
 - SVD variants typically take \`motion_bucket_id\` (controls motion intensity) via \`extra_params\`. Higher = more motion; default works for most subjects.
+- \`fast-svd-lcm-i2v\` is mostly motion-only: the source image carries the scene, with little prompt control.
 
 ## Access routes (combined)
 | Slug | fal endpoint |
 |------|--------------|
-| \`fast-animatediff-t2v\` | \`fal-ai/fast-animatediff/text-to-video\` |
-| \`fast-animatediff-turbo-t2v\` | \`fal-ai/fast-animatediff/turbo/text-to-video\` |
 | \`fast-svd-t2v\` | \`fal-ai/fast-svd/text-to-video\` |
 | \`fast-svd-lcm-t2v\` | \`fal-ai/fast-svd-lcm/text-to-video\` |
 | \`fast-svd-lcm-i2v\` | \`fal-ai/fast-svd-lcm\` |
-| \`stable-video-i2v\` | \`fal-ai/stable-video\` |
 
 ## Last verified
-2026-04-28 — initial seed of full fal video catalog.
+2026-04-28 — initial seed of full fal video catalog. Trimmed to the SVD lineage on 2026-11-12 after fal's retirements.
 
 ## Official references
 - Stability SVD: https://stability.ai/news/stable-video-diffusion-open-ai-video-model
-- AnimateDiff: https://github.com/guoyww/AnimateDiff
 `;
 
 export function registerLegacyVideoPromptGuide(server: McpServer): void {
   registerTool<Record<string, never>>(
     server,
     'legacy_video_prompt_guide',
-    'Reference guide for legacy / open-weights fal video models — AnimateDiff variants, SVD / SVD-LCM, Stable Video. Cheap fallbacks; not flagship picks. No API call — pure reference.',
+    'Reference guide for legacy open-weights fal video models — the Stable Video Diffusion lineage (SVD / SVD-LCM). AnimateDiff, T2V Turbo and Stable Video were retired upstream. Cheap fallbacks; not flagship picks. No API call — pure reference.',
     z.object({}).shape,
     async () => ({ content: [{ type: 'text', text: LEGACY_VIDEO_GUIDE }] }),
   );
