@@ -1,5 +1,39 @@
 # Changelog
 
+## [0.15.0](https://github.com/bthurlow/artificer-mcp/compare/v0.14.0...v0.15.0) (2026-11-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **catalog:** the 16 catalog slugs above and the nvidia_cosmos_prompt_guide tool are removed. See UPGRADING.md (0.14.x -> 0.15.0) for replacements.
+* **catalog:** the 9 catalog slugs above and the cogvideox_prompt_guide and magi_prompt_guide tools are removed. See UPGRADING.md (0.14.x -> 0.15.0) for replacements.
+* Node.js 24 or newer is required (was 22).
+* **generation:** gemini_generate_video needs Vertex AI (GOOGLE_CLOUD_PROJECT + Application Default Credentials); GOOGLE_API_KEY alone no longer works for it (Google shut Veo down on the Gemini API). Its default model is veo-3.1-generate-001; an ARTIFICER_VEO_MODEL pinned to a Gemini API id must move to a Vertex id. See UPGRADING.md.
+* **generation:** gemini_generate_image, gemini_edit_image, gemini_upscale_image and gemini_image_prompt_guide are removed, and ARTIFICER_IMAGEN_MODEL, ARTIFICER_IMAGEN_EDIT_MODEL and ARTIFICER_IMAGEN_UPSCALE_MODEL are no longer read. Use gemini_nanobanana_generate_image (with reference_images for edits) or a fal image.general / image.edit route, and a fal image.upscale route for upscaling. See UPGRADING.md.
+
+### Features
+
+* **audio:** audio_beat_grid, a beat grid with kick phase, downbeats and grid-to-attack offset ([#74](https://github.com/bthurlow/artificer-mcp/issues/74)) ([f718297](https://github.com/bthurlow/artificer-mcp/commit/f7182973cde7031863f8921322072d6047b47dad))
+* **audio:** mvsep_separate_audio (one stem per singer of a duet) and audio_gate ([#78](https://github.com/bthurlow/artificer-mcp/issues/78)) ([c49743f](https://github.com/bthurlow/artificer-mcp/commit/c49743f6bad4c042d9771937a757194d181776fe))
+* **fal:** enforced timeout that cancels, request_id on submit, fal_fetch_result and fal_cancel ([#72](https://github.com/bthurlow/artificer-mcp/issues/72)) ([0453b34](https://github.com/bthurlow/artificer-mcp/commit/0453b3472a6c397519c29e6b2884ebde67eb6227))
+* **generation:** @google/genai 3.2; gemini_generate_video (Veo) runs on Vertex AI ([#82](https://github.com/bthurlow/artificer-mcp/issues/82)) ([3aacc5d](https://github.com/bthurlow/artificer-mcp/commit/3aacc5d5bba5011bea082d9ad0bb94018f8bbb09))
+* **generation:** remove the Imagen tools (Google shut Imagen down) ([#81](https://github.com/bthurlow/artificer-mcp/issues/81)) ([2585357](https://github.com/bthurlow/artificer-mcp/commit/2585357c779a81d0ecf3526ee42360943c8fe544))
+* **video:** element overlays in video_assemble_edl (fire, smoke, raven: screen and luma mattes) ([#76](https://github.com/bthurlow/artificer-mcp/issues/76)) ([035089b](https://github.com/bthurlow/artificer-mcp/commit/035089b75c9c7a84984f5e0b0eda550a7a1a975d))
+* **video:** sweep wipe in video_assemble_edl (a still crossing the frame, the next shot revealed behind it) ([#77](https://github.com/bthurlow/artificer-mcp/issues/77)) ([b8bbd97](https://github.com/bthurlow/artificer-mcp/commit/b8bbd974245d39c80e314b448149339886aa6d04))
+* **video:** video_assemble_edl, beat-synced music-video assembly from an edit list; per-cut transitions ([#75](https://github.com/bthurlow/artificer-mcp/issues/75)) ([c116510](https://github.com/bthurlow/artificer-mcp/commit/c11651045746305a9fa12c37d62e6641b4f35ebe))
+
+
+### Bug Fixes
+
+* **catalog:** retire 16 more fal routes culled upstream; remove nvidia_cosmos_prompt_guide ([#90](https://github.com/bthurlow/artificer-mcp/issues/90)) ([9902682](https://github.com/bthurlow/artificer-mcp/commit/9902682daac558e103d2194cc3fc99431ef78b16))
+* **catalog:** retire 9 fal routes culled upstream; remove cogvideox and magi prompt guides ([#89](https://github.com/bthurlow/artificer-mcp/issues/89)) ([2f7d1cb](https://github.com/bthurlow/artificer-mcp/commit/2f7d1cbcf98893825a864360245cea6ea718ee50))
+* **speech:** default TTS to gemini-3.8-flash-tts (gemini-2.5-flash-preview-tts shuts down 2026-11-17) ([#80](https://github.com/bthurlow/artificer-mcp/issues/80)) ([5c7ec49](https://github.com/bthurlow/artificer-mcp/commit/5c7ec49dfea53dc48ab68f633840d6fb158ece29))
+
+
+### Build System
+
+* require Node.js 24; CI and releases on Node 26 (Active LTS) ([#83](https://github.com/bthurlow/artificer-mcp/issues/83)) ([4916264](https://github.com/bthurlow/artificer-mcp/commit/491626474d4b01dc7f952eeba87de70be1e741cb))
+
 ## [0.14.0](https://github.com/bthurlow/artificer-mcp/compare/v0.13.0...v0.14.0) (2026-11-06)
 
 
