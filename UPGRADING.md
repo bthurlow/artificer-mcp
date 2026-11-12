@@ -83,11 +83,13 @@ Google has shut down every Imagen model on the Gemini API (the last,
   prompt, and loop calls for variations. Several fal image models take
   `negative_prompt` and `num_images`.
 
-### 9 dead fal routes retired; `cogvideox_prompt_guide` and `magi_prompt_guide` removed
+### 25 dead fal routes retired; `cogvideox_prompt_guide`, `magi_prompt_guide` and `nvidia_cosmos_prompt_guide` removed
 
-**Removed because they 404 upstream.** Each route below has returned 404 on
-both fal's OpenAPI and `llms.txt` surfaces since the 2026-11-09 drift run
-(re-checked 2026-11-11).
+**Removed because they 404 upstream.** Each route below returned 404 on both
+fal's OpenAPI and `llms.txt` surfaces in a drift run (the first nine on
+2026-11-09, the rest on 2026-11-12), and again when re-checked before
+removal. The three guide tools lost their last models; calling one now gives
+an unknown-tool error.
 
 | Removed slug | Replacement |
 |---|---|
@@ -95,7 +97,18 @@ both fal's OpenAPI and `llms.txt` surfaces since the 2026-11-09 drift run
 | `luma-ray-2-i2v`, `luma-ray-2-flash-i2v` | `luma-ray-3.2-i2v` |
 | `cogvideox-5b-t2v`, `cogvideox-5b-i2v` | An open-weights route: `wan-2.2-5b-t2v` / `wan-2.2-5b-i2v` (`wan_video_prompt_guide`) or `ltx-2.3-22b-t2v` / `ltx-2.3-22b-i2v` (`ltx_video_prompt_guide`). **`cogvideox_prompt_guide` is removed** (unknown-tool error if called) |
 | `magi-distilled-t2v`, `magi-distilled-i2v` | The last MAGI routes (the full `magi-t2v` / `magi-i2v` went in 0.14.0). For physically plausible motion use `veo-3.1-t2v` / `veo-3.1-i2v`. **`magi_prompt_guide` is removed** |
-| `t2v-turbo-t2v` | `fast-animatediff-turbo-t2v` or `fast-svd-lcm-t2v` (`legacy_video_prompt_guide`) |
+| `t2v-turbo-t2v`, `fast-animatediff-t2v`, `fast-animatediff-turbo-t2v` | `fast-svd-lcm-t2v` (`legacy_video_prompt_guide`) or `wan-2.2-5b-fastvideo-t2v`, the cheapest clip on fal |
+| `stable-video-i2v` | `fast-svd-lcm-i2v` |
+| `wan-2.1-pro-t2v`, `wan-2.1-pro-i2v` | `wan-3.0-t2v` / `wan-3.0-i2v` (1080p by default) (`wan_video_prompt_guide`) |
+| `wan-2.1-t2v-lora` | `wan-2.2-a14b-lora-t2v` |
+| `wan-2.1-i2v-lora` | No Wan i2v LoRA route remains: `ltx-2.3-22b-lora-i2v` (`ltx_video_prompt_guide`) |
+| `wan-2.2-5b-distill-t2v` | `wan-2.2-5b-fastvideo-t2v` |
+| `krea-wan-14b-t2v` | `wan-2.2-a14b-t2v` (no Krea-tuned variant remains) |
+| `pika-2.2-pikascenes-i2v` | A reference-to-video route: `wan-3.0-ref` (up to 10 images) or `grok-imagine-ref-i2v` (up to 7) |
+| `hunyuan-video-i2v` | `hunyuan-video-1.5-i2v` |
+| `kandinsky-5-pro-t2v` | `kandinsky-5-t2v` / `kandinsky-5-distill-t2v` |
+| `kandinsky-5-pro-i2v` | No Kandinsky i2v remains: a general i2v route (Wan, Kling, Veo 3.1) |
+| `cosmos-2.5-t2v`, `cosmos-2.5-i2v`, `cosmos-2.5-distilled-t2v` | No NVIDIA Cosmos route remains. For physically plausible motion use `veo-3.1-t2v` / `veo-3.1-i2v`. **`nvidia_cosmos_prompt_guide` is removed** |
 
 - **Ray 3.2 differs from Ray 2:** durations are `"5s"` / `"10s"` (Ray 2 had
   `"9s"`), passed through `extra_params.duration` because `duration_seconds` is

@@ -10,12 +10,12 @@ Russian AI lab AIRI's Kandinsky 5 video lineage. Open-ish weights, distinctive a
 ## Picking a model
 | Slug | Modality | Tier | Cost | Best for |
 |------|----------|------|------|----------|
-| \`kandinsky-5-pro-t2v\` | t2v | Pro | flat-rate per duration | Quality-first t2v |
-| \`kandinsky-5-pro-i2v\` | i2v | Pro | flat-rate per duration | Quality-first i2v |
 | \`kandinsky-5-distill-t2v\` | t2v | distilled | cheaper | Faster t2v iteration |
 | \`kandinsky-5-t2v\` | t2v | base | cheaper | Cheapest Kandinsky |
 
 Pricing is flat-rate per duration: typically $0.08 for 5s, $0.16 for 10s.
+
+**Kandinsky 5 Pro is gone.** fal removed \`fal-ai/kandinsky5-pro\` (t2v and i2v) in 2026-11, so \`kandinsky-5-pro-t2v\` / \`-i2v\` were retired. Only t2v remains in this family; for i2v use a general route (Wan, Kling, Veo 3.1).
 
 ## Known strengths
 - Distinctive painterly / European-cinema aesthetic.
@@ -43,8 +43,6 @@ Describe scene + style cues. Kandinsky responds well to art-historical reference
 | Slug | fal endpoint |
 |------|--------------|
 | \`kandinsky-5-t2v\` | \`fal-ai/kandinsky5/text-to-video\` |
-| \`kandinsky-5-pro-t2v\` | \`fal-ai/kandinsky5-pro/text-to-video\` |
-| \`kandinsky-5-pro-i2v\` | \`fal-ai/kandinsky5-pro/image-to-video\` |
 | \`kandinsky-5-distill-t2v\` | \`fal-ai/kandinsky5/text-to-video/distill\` |
 
 ## Last verified
@@ -58,7 +56,7 @@ export function registerKandinskyVideoPromptGuide(server: McpServer): void {
   registerTool<Record<string, never>>(
     server,
     'kandinsky_video_prompt_guide',
-    'Reference guide for Kandinsky 5 Video — t2v + i2v from AIRI with a painterly / European-cinema aesthetic. No API call — pure reference.',
+    'Reference guide for Kandinsky 5 Video — t2v from AIRI with a painterly / European-cinema aesthetic. No API call — pure reference.',
     z.object({}).shape,
     async () => ({ content: [{ type: 'text', text: KANDINSKY_GUIDE }] }),
   );

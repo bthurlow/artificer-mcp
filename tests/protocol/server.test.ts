@@ -172,7 +172,6 @@ const EXPECTED_TOOLS = {
     'kandinsky_video_prompt_guide',
     'grok_imagine_prompt_guide',
     'decart_lucy_prompt_guide',
-    'nvidia_cosmos_prompt_guide',
     'longcat_prompt_guide',
     'specialized_video_prompt_guide',
     'legacy_video_prompt_guide',
@@ -242,15 +241,15 @@ describe('MCP Protocol — artificer-mcp Server', () => {
   // ── 2. Tool discovery ─────────────────────────────────────────────────────
 
   describe('tool discovery', () => {
-    it('should return exactly 181 tools', () => {
-      expect(tools).toHaveLength(181);
+    it('should return exactly 180 tools', () => {
+      expect(tools).toHaveLength(180);
     });
   });
 
   // ── 3. Tool names ─────────────────────────────────────────────────────────
 
   describe('tool names', () => {
-    it('should contain all 181 expected tool names', () => {
+    it('should contain all 180 expected tool names', () => {
       const registeredNames = tools.map((t) => t.name).sort();
       const expectedNames = [...ALL_TOOL_NAMES].sort();
 

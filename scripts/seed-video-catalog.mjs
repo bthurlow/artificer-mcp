@@ -310,25 +310,13 @@ const general = [
     'fal-ai/wan/v2.2-5b/text-to-video/fast-wan',
     'wan_video_prompt_guide',
   ),
-  falEntry(
-    'wan-2.2-5b-distill-t2v',
-    'fal-ai/wan/v2.2-5b/text-to-video/distill',
-    'wan_video_prompt_guide',
-  ),
   falEntry('wan-2.2-5b-i2v', 'fal-ai/wan/v2.2-5b/image-to-video', 'wan_video_prompt_guide'),
 
   // Wan 2.1 (compact pricing)
   falEntry('wan-2.1-t2v', 'fal-ai/wan-t2v', 'wan_video_prompt_guide'),
   falEntry('wan-2.1-i2v', 'fal-ai/wan-i2v', 'wan_video_prompt_guide'),
-  falEntry('wan-2.1-pro-t2v', 'fal-ai/wan-pro/text-to-video', 'wan_video_prompt_guide'),
-  falEntry('wan-2.1-pro-i2v', 'fal-ai/wan-pro/image-to-video', 'wan_video_prompt_guide'),
   // wan-2.1-1.3b-t2v removed — fal endpoint 404 as of 2026-04-28 sync.
-  falEntry('wan-2.1-t2v-lora', 'fal-ai/wan-t2v-lora', 'wan_video_prompt_guide'),
-  falEntry('wan-2.1-i2v-lora', 'fal-ai/wan-i2v-lora', 'wan_video_prompt_guide'),
 
-
-  // Krea-tuned Wan
-  falEntry('krea-wan-14b-t2v', 'fal-ai/krea-wan-14b/text-to-video', 'wan_video_prompt_guide'),
 
   // Kling 2.6 (mid-tier with audio)
   falEntry(
@@ -549,7 +537,6 @@ const general = [
   falEntry('pika-2.1-i2v', 'fal-ai/pika/v2.1/image-to-video', 'pika_prompt_guide'),
   falEntry('pika-2-turbo-t2v', 'fal-ai/pika/v2/turbo/text-to-video', 'pika_prompt_guide'),
   falEntry('pika-2-turbo-i2v', 'fal-ai/pika/v2/turbo/image-to-video', 'pika_prompt_guide'),
-  falEntry('pika-2.2-pikascenes-i2v', 'fal-ai/pika/v2.2/pikascenes', 'pika_prompt_guide'),
 
   // PixVerse C1 / v6 / v5.x / v4.x / v3.5 / v4 — recent + legacy
   falEntry('pixverse-c1-t2v', 'fal-ai/pixverse/c1/text-to-video', 'pixverse_prompt_guide'),
@@ -677,11 +664,6 @@ const general = [
     'hunyuan_video_prompt_guide',
   ),
   falEntry(
-    'hunyuan-video-i2v',
-    'fal-ai/hunyuan-video-image-to-video',
-    'hunyuan_video_prompt_guide',
-  ),
-  falEntry(
     'hunyuan-video-img2vid-lora-i2v',
     'fal-ai/hunyuan-video-img2vid-lora',
     'hunyuan_video_prompt_guide',
@@ -715,16 +697,6 @@ const general = [
   // Kandinsky 5
   falEntry('kandinsky-5-t2v', 'fal-ai/kandinsky5/text-to-video', 'kandinsky_video_prompt_guide'),
   falEntry(
-    'kandinsky-5-pro-t2v',
-    'fal-ai/kandinsky5-pro/text-to-video',
-    'kandinsky_video_prompt_guide',
-  ),
-  falEntry(
-    'kandinsky-5-pro-i2v',
-    'fal-ai/kandinsky5-pro/image-to-video',
-    'kandinsky_video_prompt_guide',
-  ),
-  falEntry(
     'kandinsky-5-distill-t2v',
     'fal-ai/kandinsky5/text-to-video/distill',
     'kandinsky_video_prompt_guide',
@@ -748,23 +720,6 @@ const general = [
   // decart-lucy-5b-i2v removed — fal endpoint 404 as of 2026-04-28 sync.
 
 
-
-  // NVIDIA Cosmos (world-model lineage)
-  falEntry(
-    'cosmos-2.5-t2v',
-    'fal-ai/cosmos-predict-2.5/text-to-video',
-    'nvidia_cosmos_prompt_guide',
-  ),
-  falEntry(
-    'cosmos-2.5-i2v',
-    'fal-ai/cosmos-predict-2.5/image-to-video',
-    'nvidia_cosmos_prompt_guide',
-  ),
-  falEntry(
-    'cosmos-2.5-distilled-t2v',
-    'fal-ai/cosmos-predict-2.5/distilled/text-to-video',
-    'nvidia_cosmos_prompt_guide',
-  ),
 
   // Meituan LongCat (long-form)
   falEntry(
@@ -826,20 +781,9 @@ const general = [
     'fal-ai/animatediff-sparsectrl-lcm',
     'legacy_video_prompt_guide',
   ),
-  falEntry(
-    'fast-animatediff-t2v',
-    'fal-ai/fast-animatediff/text-to-video',
-    'legacy_video_prompt_guide',
-  ),
-  falEntry(
-    'fast-animatediff-turbo-t2v',
-    'fal-ai/fast-animatediff/turbo/text-to-video',
-    'legacy_video_prompt_guide',
-  ),
   falEntry('fast-svd-t2v', 'fal-ai/fast-svd/text-to-video', 'legacy_video_prompt_guide'),
   falEntry('fast-svd-lcm-t2v', 'fal-ai/fast-svd-lcm/text-to-video', 'legacy_video_prompt_guide'),
   falEntry('fast-svd-lcm-i2v', 'fal-ai/fast-svd-lcm', 'legacy_video_prompt_guide'),
-  falEntry('stable-video-i2v', 'fal-ai/stable-video', 'legacy_video_prompt_guide'),
 ];
 
 // ── video.stylized ─────────────────────────────────────────────────────────
