@@ -102,7 +102,7 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated images.
   - Array of ImageFile
-  - Examples: [{"url":"https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png","content_type":"image/png","file_name":"nano-banana-lite-t2i-output.png"}]
+  - Examples: [{"content_type":"image/png","url":"https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png","file_name":"nano-banana-lite-t2i-output.png"}]
 
 - **`description`** (`string`, _required_):
   The description of the generated images.
@@ -115,8 +115,8 @@ The API returns the following output format:
 {
   "images": [
     {
-      "url": "https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png",
       "content_type": "image/png",
+      "url": "https://storage.googleapis.com/falserverless/example_outputs/nano-banana-2-t2i-output.png",
       "file_name": "nano-banana-lite-t2i-output.png"
     }
   ],

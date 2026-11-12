@@ -34,6 +34,10 @@ The API accepts the following input parameters:
   The text to convert to speech
   - Examples: "Hello! This is a test of the text to speech system, powered by ElevenLabs. How does it sound?"
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Check input content for safety. Disabling requires account authorization. Default value: `true`
+  - Default: `true`
+
 - **`voice`** (`string`, _optional_):
   The voice to use for speech generation Default value: `"Rachel"`
   - Default: `"Rachel"`
@@ -56,6 +60,11 @@ The API accepts the following input parameters:
   - Default: `"auto"`
   - Options: `"auto"`, `"on"`, `"off"`
 
+- **`output_format`** (`OutputFormatEnum`, _optional_):
+  Output audio format (codec_sample_rate_bitrate). PCM is raw signed 16-bit little-endian audio, without a WAV header. PCM at 44.1 kHz requires an ElevenLabs Pro plan or above; MP3 at 192 kbps requires Creator or above. Default value: `"mp3_44100_128"`
+  - Default: `"mp3_44100_128"`
+  - Options: `"mp3_22050_32"`, `"mp3_44100_32"`, `"mp3_44100_64"`, `"mp3_44100_96"`, `"mp3_44100_128"`, `"mp3_44100_192"`, `"pcm_8000"`, `"pcm_16000"`, `"pcm_22050"`, `"pcm_24000"`, `"pcm_44100"`, `"pcm_48000"`, `"ulaw_8000"`, `"alaw_8000"`, `"opus_48000_32"`, `"opus_48000_64"`, `"opus_48000_96"`, `"opus_48000_128"`, `"opus_48000_192"`
+
 
 
 **Required Parameters Example**:
@@ -71,9 +80,11 @@ The API accepts the following input parameters:
 ```json
 {
   "text": "Hello! This is a test of the text to speech system, powered by ElevenLabs. How does it sound?",
+  "enable_safety_checker": true,
   "voice": "Aria",
   "stability": 0.5,
-  "apply_text_normalization": "auto"
+  "apply_text_normalization": "auto",
+  "output_format": "mp3_44100_128"
 }
 ```
 

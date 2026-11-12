@@ -34,6 +34,10 @@ The API accepts the following input parameters:
   The text to convert to speech
   - Examples: "Hello! This is a test of the text to speech system, powered by ElevenLabs. How does it sound?"
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Check input content for safety. Disabling requires account authorization. Default value: `true`
+  - Default: `true`
+
 - **`voice`** (`string`, _optional_):
   The voice to use for speech generation Default value: `"Rachel"`
   - Default: `"Rachel"`
@@ -92,6 +96,7 @@ The API accepts the following input parameters:
 ```json
 {
   "text": "Hello! This is a test of the text to speech system, powered by ElevenLabs. How does it sound?",
+  "enable_safety_checker": true,
   "voice": "Aria",
   "stability": 0.5,
   "similarity_boost": 0.75,

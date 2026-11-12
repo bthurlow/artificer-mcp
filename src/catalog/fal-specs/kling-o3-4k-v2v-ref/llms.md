@@ -116,7 +116,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video.
-  - Examples: {"file_size":15809901,"url":"https://storage.googleapis.com/falserverless/example_outputs/kling-o3/pro-v2v-reference/output.mp4","file_name":"output.mp4","content_type":"video/mp4"}
+  - Examples: {"file_size":15809901,"content_type":"video/mp4","file_name":"output.mp4","url":"https://storage.googleapis.com/falserverless/example_outputs/kling-o3/pro-v2v-reference/output.mp4"}
 
 
 
@@ -126,9 +126,9 @@ The API returns the following output format:
 {
   "video": {
     "file_size": 15809901,
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/kling-o3/pro-v2v-reference/output.mp4",
+    "content_type": "video/mp4",
     "file_name": "output.mp4",
-    "content_type": "video/mp4"
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/kling-o3/pro-v2v-reference/output.mp4"
   }
 }
 ```

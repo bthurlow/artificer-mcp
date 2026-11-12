@@ -71,54 +71,16 @@
         ]
       },
       "Sfx16TextToAudioInput": {
-        "required": [
-          "text_prompt"
-        ],
+        "title": "TextToAudioInput",
         "properties": {
-          "num_samples": {
-            "default": 2,
-            "minimum": 1,
-            "title": "Num Samples",
-            "maximum": 4,
-            "description": "Number of variations to generate.",
-            "type": "integer"
-          },
           "ambience": {
+            "description": "When true, generate a seamlessly loopable ambience tile (room tone, rain, drones, etc.). When false, generate a generic text-conditioned SFX of `duration` seconds.",
             "default": false,
             "title": "Ambience",
-            "description": "When true, generate a seamlessly loopable ambience tile (room tone, rain, drones, etc.). When false, generate a generic text-conditioned SFX of `duration` seconds.",
             "type": "boolean"
           },
-          "text_prompt": {
-            "type": "string",
-            "description": "Text prompt for the generated audio.",
-            "title": "Text Prompt",
-            "examples": [
-              "city ambience"
-            ],
-            "minLength": 4
-          },
-          "duration": {
-            "default": 10,
-            "minimum": 0.1,
-            "title": "Duration",
-            "maximum": 60,
-            "description": "Duration of the generated audio in seconds. The minimum is 0.1s for ordinary sound effects and 1s when ambience=true.",
-            "type": "number"
-          },
-          "upload_audio_format": {
-            "default": "wav",
-            "description": "Audio format for the returned files.",
-            "title": "Upload Audio Format",
-            "enum": [
-              "wav",
-              "mp3",
-              "aac",
-              "flac"
-            ],
-            "type": "string"
-          },
           "seed": {
+            "description": "Seed for generation. -1 or None for random.",
             "anyOf": [
               {
                 "minimum": -1,
@@ -129,17 +91,52 @@
                 "type": "null"
               }
             ],
-            "title": "Seed",
-            "description": "Seed for generation. -1 or None for random."
+            "title": "Seed"
+          },
+          "num_samples": {
+            "description": "Number of variations to generate.",
+            "default": 2,
+            "title": "Num Samples",
+            "minimum": 1,
+            "type": "integer",
+            "maximum": 4
+          },
+          "text_prompt": {
+            "minLength": 4,
+            "description": "Text prompt for the generated audio.",
+            "title": "Text Prompt",
+            "type": "string",
+            "examples": [
+              "city ambience"
+            ]
           },
           "double_output": {
+            "description": "Only used when ambience=true: concatenate the loop with itself for a 2x-length output.",
             "default": false,
             "title": "Double Output",
-            "description": "Only used when ambience=true: concatenate the loop with itself for a 2x-length output.",
             "type": "boolean"
+          },
+          "duration": {
+            "description": "Duration of the generated audio in seconds. The minimum is 0.1s for ordinary sound effects and 1s when ambience=true.",
+            "default": 10,
+            "title": "Duration",
+            "minimum": 0.1,
+            "type": "number",
+            "maximum": 60
+          },
+          "upload_audio_format": {
+            "description": "Audio format for the returned files.",
+            "default": "wav",
+            "title": "Upload Audio Format",
+            "enum": [
+              "wav",
+              "mp3",
+              "aac",
+              "flac"
+            ],
+            "type": "string"
           }
         },
-        "title": "TextToAudioInput",
         "x-fal-order-properties": [
           "text_prompt",
           "duration",
@@ -149,20 +146,26 @@
           "seed",
           "upload_audio_format"
         ],
+        "required": [
+          "text_prompt"
+        ],
         "type": "object"
       },
       "Sfx16TextToAudioOutput": {
-        "required": [
-          "model",
-          "audio"
-        ],
+        "title": "TextToAudioOutput",
         "properties": {
           "model": {
-            "pattern": "^sfx-[0-9]+\\.[0-9]+$",
             "title": "Model",
-            "type": "string"
+            "type": "string",
+            "pattern": "^sfx-[0-9]+\\.[0-9]+$"
           },
           "audio": {
+            "description": "Generated SFX audio from a text prompt.",
+            "title": "Audio",
+            "items": {
+              "$ref": "#/components/schemas/Audio"
+            },
+            "type": "array",
             "examples": [
               [
                 {
@@ -171,28 +174,25 @@
                   "url": "https://v3b.fal.media/files/b/kangaroo/text_to_audio_example.wav"
                 }
               ]
-            ],
-            "description": "Generated SFX audio from a text prompt.",
-            "title": "Audio",
-            "items": {
-              "$ref": "#/components/schemas/Audio"
-            },
-            "type": "array"
+            ]
           }
         },
-        "title": "TextToAudioOutput",
         "x-fal-order-properties": [
+          "model",
+          "audio"
+        ],
+        "required": [
           "model",
           "audio"
         ],
         "type": "object"
       },
       "Audio": {
-        "required": [
-          "url"
-        ],
+        "type": "object",
+        "title": "Audio",
         "properties": {
           "content_type": {
+            "description": "The mime type of the file.",
             "anyOf": [
               {
                 "type": "string"
@@ -204,10 +204,10 @@
             "title": "Content Type",
             "examples": [
               "image/png"
-            ],
-            "description": "The mime type of the file."
+            ]
           },
           "file_size": {
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -219,10 +219,10 @@
             "title": "File Size",
             "examples": [
               4404019
-            ],
-            "description": "The size of the file in bytes."
+            ]
           },
           "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -234,23 +234,23 @@
             "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+            ]
           },
           "url": {
-            "title": "Url",
             "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
             "type": "string"
           }
         },
-        "title": "Audio",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "type": "object"
+        "required": [
+          "url"
+        ]
       }
     }
   },

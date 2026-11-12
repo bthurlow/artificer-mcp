@@ -34,6 +34,10 @@ The API accepts the following input parameters:
   The text describing the sound effect to generate
   - Examples: "Spacious braam suitable for high-impact movie trailer moments", "A gentle wind chime tinkling in a soft breeze"
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Check input content for safety. Disabling requires account authorization. Default value: `true`
+  - Default: `true`
+
 - **`duration_seconds`** (`float`, _optional_):
   Duration in seconds (0.5-22). If None, optimal duration will be determined from prompt.
   - Range: `0.5` to `22`
@@ -67,6 +71,7 @@ The API accepts the following input parameters:
 ```json
 {
   "text": "Spacious braam suitable for high-impact movie trailer moments",
+  "enable_safety_checker": true,
   "prompt_influence": 0.3,
   "output_format": "mp3_44100_128"
 }

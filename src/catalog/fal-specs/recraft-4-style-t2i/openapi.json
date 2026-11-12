@@ -82,13 +82,32 @@
           "image_urls",
           "style_match"
         ],
-        "type": "object",
+        "required": [
+          "prompt"
+        ],
         "properties": {
-          "enable_safety_checker": {
-            "title": "Enable Safety Checker",
-            "default": true,
-            "type": "boolean",
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked."
+          "image_size": {
+            "title": "Image Size",
+            "examples": [
+              "landscape_16_9"
+            ],
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageSize"
+              },
+              {
+                "enum": [
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9"
+                ],
+                "type": "string"
+              }
+            ],
+            "default": "square_hd"
           },
           "style_id": {
             "title": "Style ID",
@@ -103,80 +122,6 @@
             ],
             "description": "The ID of an existing V4 custom style."
           },
-          "style_match": {
-            "title": "Style Match",
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "precise",
-                  "flexible"
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Override how closely the generation follows the custom style."
-          },
-          "image_size": {
-            "title": "Image Size",
-            "default": "square_hd",
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ImageSize"
-              },
-              {
-                "type": "string",
-                "enum": [
-                  "square_hd",
-                  "square",
-                  "portrait_4_3",
-                  "portrait_16_9",
-                  "landscape_4_3",
-                  "landscape_16_9"
-                ]
-              }
-            ],
-            "examples": [
-              "landscape_16_9"
-            ]
-          },
-          "colors": {
-            "title": "Colors",
-            "default": [],
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RGBColor"
-            },
-            "description": "An array of preferable colors"
-          },
-          "image_urls": {
-            "title": "Image URLs",
-            "anyOf": [
-              {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "type": "string"
-                },
-                "maxItems": 10
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The URLs of the style reference images. Supports PNG, JPG, and WEBP; provide between 1 and 10 images."
-          },
-          "prompt": {
-            "title": "Prompt",
-            "minLength": 1,
-            "type": "string",
-            "maxLength": 10000,
-            "examples": [
-              "Tilt-shift miniature effect on a real Portuguese fishing village at golden hour, colorful boats in the harbor appearing toy-like, selective focus band across the middle, saturated primary colors of blue red and yellow boats against white buildings, 90mm tilt-shift lens, the familiar made fantastical, Wes Anderson color sensibility"
-            ]
-          },
           "background_color": {
             "anyOf": [
               {
@@ -187,11 +132,66 @@
               }
             ],
             "description": "The preferable background color of the generated images."
+          },
+          "colors": {
+            "title": "Colors",
+            "items": {
+              "$ref": "#/components/schemas/RGBColor"
+            },
+            "description": "An array of preferable colors",
+            "default": [],
+            "type": "array"
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "default": true,
+            "type": "boolean"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "Tilt-shift miniature effect on a real Portuguese fishing village at golden hour, colorful boats in the harbor appearing toy-like, selective focus band across the middle, saturated primary colors of blue red and yellow boats against white buildings, 90mm tilt-shift lens, the familiar made fantastical, Wes Anderson color sensibility"
+            ],
+            "maxLength": 10000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "image_urls": {
+            "title": "Image URLs",
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "maxItems": 10,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The URLs of the style reference images. Supports PNG, JPG, and WEBP; provide between 1 and 10 images."
+          },
+          "style_match": {
+            "title": "Style Match",
+            "anyOf": [
+              {
+                "enum": [
+                  "precise",
+                  "flexible"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Override how closely the generation follows the custom style."
           }
         },
-        "required": [
-          "prompt"
-        ]
+        "type": "object"
       },
       "V4StyleTextToImageOutput": {
         "title": "RecraftV4StyleTextToImageOutput",
@@ -199,8 +199,27 @@
           "images",
           "style_id"
         ],
-        "type": "object",
+        "required": [
+          "images"
+        ],
         "properties": {
+          "images": {
+            "title": "Images",
+            "examples": [
+              [
+                {
+                  "content_type": "image/webp",
+                  "url": "https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/standard-output.webp",
+                  "file_name": "image.webp",
+                  "file_size": 272628
+                }
+              ]
+            ],
+            "items": {
+              "$ref": "#/components/schemas/File"
+            },
+            "type": "array"
+          },
           "style_id": {
             "title": "Style Id",
             "anyOf": [
@@ -213,28 +232,9 @@
               }
             ],
             "description": "The custom style used or created for this generation."
-          },
-          "images": {
-            "title": "Images",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/File"
-            },
-            "examples": [
-              [
-                {
-                  "url": "https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/standard-output.webp",
-                  "file_size": 272628,
-                  "content_type": "image/webp",
-                  "file_name": "image.webp"
-                }
-              ]
-            ]
           }
         },
-        "required": [
-          "images"
-        ]
+        "type": "object"
       },
       "ImageSize": {
         "title": "ImageSize",
@@ -242,25 +242,25 @@
           "width",
           "height"
         ],
-        "type": "object",
         "properties": {
-          "width": {
-            "title": "Width",
-            "exclusiveMinimum": 0,
-            "maximum": 14142,
-            "default": 512,
-            "type": "integer",
-            "description": "The width of the generated image."
-          },
           "height": {
             "title": "Height",
             "exclusiveMinimum": 0,
             "maximum": 14142,
+            "description": "The height of the generated image.",
             "default": 512,
-            "type": "integer",
-            "description": "The height of the generated image."
+            "type": "integer"
+          },
+          "width": {
+            "title": "Width",
+            "exclusiveMinimum": 0,
+            "maximum": 14142,
+            "description": "The width of the generated image.",
+            "default": 512,
+            "type": "integer"
           }
-        }
+        },
+        "type": "object"
       },
       "RGBColor": {
         "title": "RGBColor",
@@ -269,33 +269,33 @@
           "g",
           "b"
         ],
-        "type": "object",
         "properties": {
-          "g": {
-            "title": "G",
-            "minimum": 0,
-            "maximum": 255,
-            "default": 0,
-            "type": "integer",
-            "description": "Green color value"
-          },
           "r": {
             "title": "R",
-            "minimum": 0,
-            "maximum": 255,
             "default": 0,
-            "type": "integer",
-            "description": "Red color value"
+            "maximum": 255,
+            "description": "Red color value",
+            "minimum": 0,
+            "type": "integer"
           },
           "b": {
             "title": "B",
-            "minimum": 0,
-            "maximum": 255,
             "default": 0,
-            "type": "integer",
-            "description": "Blue color value"
+            "maximum": 255,
+            "description": "Blue color value",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "g": {
+            "title": "G",
+            "default": 0,
+            "maximum": 255,
+            "description": "Green color value",
+            "minimum": 0,
+            "type": "integer"
           }
-        }
+        },
+        "type": "object"
       },
       "File": {
         "title": "File",
@@ -305,15 +305,50 @@
           "file_name",
           "file_size"
         ],
-        "type": "object",
+        "required": [
+          "url"
+        ],
         "properties": {
+          "content_type": {
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file."
+          },
           "url": {
             "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "file_name": {
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
           },
           "file_size": {
             "title": "File Size",
+            "examples": [
+              4404019
+            ],
             "anyOf": [
               {
                 "type": "integer"
@@ -322,45 +357,10 @@
                 "type": "null"
               }
             ],
-            "examples": [
-              4404019
-            ],
             "description": "The size of the file in bytes."
-          },
-          "content_type": {
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file."
-          },
-          "file_name": {
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
           }
         },
-        "required": [
-          "url"
-        ]
+        "type": "object"
       }
     }
   },

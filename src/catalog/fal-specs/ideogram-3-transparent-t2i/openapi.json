@@ -71,11 +71,6 @@
         ]
       },
       "IdeogramV3GenerateTransparentInput": {
-        "title": "TransparentInputV3",
-        "required": [
-          "prompt"
-        ],
-        "type": "object",
         "x-fal-order-properties": [
           "prompt",
           "aspect_ratio",
@@ -88,24 +83,55 @@
           "enable_safety_checker"
         ],
         "properties": {
-          "negative_prompt": {
-            "type": "string",
-            "description": "Description of what to exclude from an image. Descriptions in the prompt take precedence to descriptions in the negative prompt.",
-            "title": "Negative Prompt",
-            "default": ""
+          "seed": {
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Seed for the random number generator"
           },
           "prompt": {
+            "title": "Prompt",
             "type": "string",
             "examples": [
               "A logo for Ideogram Coffee."
-            ],
-            "title": "Prompt"
+            ]
           },
-          "enable_safety_checker": {
+          "sync_mode": {
+            "title": "Sync Mode",
+            "default": false,
             "type": "boolean",
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "title": "Enable Safety Checker",
-            "default": true
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
+          },
+          "rendering_speed": {
+            "enum": [
+              "TURBO",
+              "BALANCED",
+              "QUALITY"
+            ],
+            "title": "Rendering Speed",
+            "default": "BALANCED",
+            "type": "string",
+            "description": "The rendering speed to use."
+          },
+          "num_images": {
+            "title": "Num Images",
+            "maximum": 8,
+            "default": 1,
+            "minimum": 1,
+            "type": "integer",
+            "description": "Number of images to generate."
+          },
+          "negative_prompt": {
+            "title": "Negative Prompt",
+            "default": "",
+            "type": "string",
+            "description": "Description of what to exclude from an image. Descriptions in the prompt take precedence to descriptions in the negative prompt."
           },
           "aspect_ratio": {
             "enum": [
@@ -125,77 +151,46 @@
               "5:4",
               "1:1"
             ],
-            "description": "The aspect ratio of the generated image.",
-            "type": "string",
             "title": "Aspect Ratio",
-            "default": "1:1"
-          },
-          "num_images": {
-            "minimum": 1,
-            "type": "integer",
-            "description": "Number of images to generate.",
-            "maximum": 8,
-            "title": "Num Images",
-            "default": 1
-          },
-          "sync_mode": {
-            "type": "boolean",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "title": "Sync Mode",
-            "default": false
-          },
-          "seed": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Seed for the random number generator",
-            "title": "Seed"
+            "default": "1:1",
+            "type": "string",
+            "description": "The aspect ratio of the generated image."
           },
           "enable_prompt_expansion": {
-            "type": "boolean",
-            "description": "Determine if MagicPrompt should be used in generating the request or not.",
             "title": "Enable Prompt Expansion",
-            "default": true
+            "default": true,
+            "type": "boolean",
+            "description": "Determine if MagicPrompt should be used in generating the request or not."
           },
-          "rendering_speed": {
-            "enum": [
-              "TURBO",
-              "BALANCED",
-              "QUALITY"
-            ],
-            "description": "The rendering speed to use.",
-            "type": "string",
-            "title": "Rendering Speed",
-            "default": "BALANCED"
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "default": true,
+            "type": "boolean",
+            "description": "Authorized callers may set false to request relaxed screening."
           }
-        }
-      },
-      "IdeogramV3GenerateTransparentOutput": {
-        "title": "TransparentOutputV3",
+        },
         "required": [
-          "images",
-          "seed"
+          "prompt"
         ],
         "type": "object",
+        "title": "TransparentInputV3"
+      },
+      "IdeogramV3GenerateTransparentOutput": {
         "x-fal-order-properties": [
           "images",
           "seed"
         ],
         "properties": {
           "seed": {
-            "type": "integer",
             "description": "Seed used for the random number generator",
+            "title": "Seed",
+            "type": "integer",
             "examples": [
               123456
-            ],
-            "title": "Seed"
+            ]
           },
           "images": {
+            "title": "Images",
             "items": {
               "$ref": "#/components/schemas/File"
             },
@@ -206,17 +201,17 @@
                   "url": "https://v3.fal.media/files/lion/AUfCjtLkLOsdc9zEFrV-5_image.png"
                 }
               ]
-            ],
-            "title": "Images"
+            ]
           }
-        }
-      },
-      "File": {
-        "title": "File",
+        },
         "required": [
-          "url"
+          "images",
+          "seed"
         ],
         "type": "object",
+        "title": "TransparentOutputV3"
+      },
+      "File": {
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -224,12 +219,24 @@
           "file_size"
         ],
         "properties": {
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
+          "content_type": {
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ]
           },
           "file_size": {
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -238,28 +245,13 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
             "examples": [
               4404019
-            ],
-            "title": "File Size"
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type"
+            ]
           },
           "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -268,13 +260,21 @@
                 "type": "null"
               }
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
-            ],
-            "title": "File Name"
+            ]
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
           }
-        }
+        },
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "title": "File"
       }
     }
   },

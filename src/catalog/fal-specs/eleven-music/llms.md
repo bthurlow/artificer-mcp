@@ -34,6 +34,10 @@ The API accepts the following input parameters:
   The text prompt describing the music to generate
   - Examples: "Mysterious original soundtrack, themes of jungle, rainforest, nature, woodwinds, busy rhythmic tribal percussion."
 
+- **`enable_safety_checker`** (`boolean`, _optional_):
+  Check input content for safety. Disabling requires account authorization. Default value: `true`
+  - Default: `true`
+
 - **`composition_plan`** (`MusicCompositionPlan`, _optional_):
   The composition plan for the music
 
@@ -67,6 +71,7 @@ The API accepts the following input parameters:
 ```json
 {
   "prompt": "Mysterious original soundtrack, themes of jungle, rainforest, nature, woodwinds, busy rhythmic tribal percussion.",
+  "enable_safety_checker": true,
   "respect_sections_durations": true,
   "output_format": "mp3_44100_128"
 }
@@ -79,7 +84,7 @@ The API returns the following output format:
 
 - **`audio`** (`File`, _required_):
   The generated music audio file in MP3 format
-  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/elevenlabs/music_generated.mp3","file_name":"music_generated.mp3","content_type":"audio/mpeg"}
+  - Examples: {"content_type":"audio/mpeg","file_name":"music_generated.mp3","url":"https://storage.googleapis.com/falserverless/example_outputs/elevenlabs/music_generated.mp3"}
 
 
 
@@ -88,9 +93,9 @@ The API returns the following output format:
 ```json
 {
   "audio": {
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/elevenlabs/music_generated.mp3",
+    "content_type": "audio/mpeg",
     "file_name": "music_generated.mp3",
-    "content_type": "audio/mpeg"
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/elevenlabs/music_generated.mp3"
   }
 }
 ```

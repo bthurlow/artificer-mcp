@@ -60,8 +60,11 @@ The API accepts the following input parameters:
 - **`end_image_url`** (`string`, _optional_):
   Optional URL of the image to use as the last frame. The video ends exactly on this image.
 
+- **`target_audio_url`** (`string`, _optional_):
+  Optional URL of an audio clip at least 2 seconds long (maximum 15 MB) to pin to the generated soundtrack. Cannot be combined with reference audio. Longer clips are trimmed to the generated video's length, keeping the beginning; shorter clips are padded with silence. The clip is resampled to 32 kHz stereo and replaces the output soundtrack without changing playback speed. Accepts an HTTP(S) URL or a base64 data URI.
+
 - **`duration`** (`float`, _optional_):
-  Video length in seconds. The output can run up to about 0.7 s longer than requested. Default value: `5`
+  Video length in seconds. The output can run up to about 0.7 s longer than requested. Use at least 2 s with target_audio_url. Default value: `5`
   - Default: `5`
   - Range: `0.92` to `15`
 

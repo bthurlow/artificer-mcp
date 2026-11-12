@@ -71,48 +71,19 @@
         ]
       },
       "MusicV25Input": {
+        "description": "Request format for the ElevenLabs Music v2 / v2.5 API.",
         "title": "MusicV2Request",
-        "type": "object",
         "properties": {
-          "force_instrumental": {
-            "title": "Force Instrumental",
-            "type": "boolean",
-            "default": false,
-            "description": "If true, guarantees that the generated song will be instrumental. If false, the song may or may not be instrumental depending on the prompt. Can only be used with prompt."
-          },
-          "prompt": {
-            "examples": [
-              "Mysterious original soundtrack, themes of jungle, rainforest, nature, woodwinds, busy rhythmic tribal percussion."
-            ],
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 4100
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Prompt",
-            "description": "The text prompt describing the music to generate"
-          },
-          "music_length_ms": {
-            "title": "Music Length Ms",
-            "anyOf": [
-              {
-                "maximum": 600000,
-                "type": "integer",
-                "minimum": 3000
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The length of the song to generate in milliseconds. Used only in conjunction with prompt. Must be between 3000ms and 600000ms. Optional - if not provided, the model will choose a length based on the prompt."
+          "enable_safety_checker": {
+            "description": "Check input content for safety. Disabling requires account authorization.",
+            "title": "Enable Safety Checker",
+            "default": true,
+            "type": "boolean"
           },
           "output_format": {
+            "description": "Output format of the generated audio. Formatted as codec_sample_rate_bitrate. So an mp3 with 22.05kHz sample rate at 32kbs is represented as mp3_22050_32. Note that the μ-law format (sometimes written mu-law, often approximated as u-law) is commonly used for Twilio audio inputs.",
             "title": "Output Format",
-            "type": "string",
+            "default": "mp3_48000_192",
             "enum": [
               "mp3_22050_32",
               "mp3_24000_48",
@@ -140,10 +111,32 @@
               "opus_48000_128",
               "opus_48000_192"
             ],
-            "default": "mp3_48000_192",
-            "description": "Output format of the generated audio. Formatted as codec_sample_rate_bitrate. So an mp3 with 22.05kHz sample rate at 32kbs is represented as mp3_22050_32. Note that the μ-law format (sometimes written mu-law, often approximated as u-law) is commonly used for Twilio audio inputs."
+            "type": "string"
+          },
+          "prompt": {
+            "description": "The text prompt describing the music to generate",
+            "title": "Prompt",
+            "examples": [
+              "Mysterious original soundtrack, themes of jungle, rainforest, nature, woodwinds, busy rhythmic tribal percussion."
+            ],
+            "anyOf": [
+              {
+                "maxLength": 4100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "force_instrumental": {
+            "description": "If true, guarantees that the generated song will be instrumental. If false, the song may or may not be instrumental depending on the prompt. Can only be used with prompt.",
+            "title": "Force Instrumental",
+            "default": false,
+            "type": "boolean"
           },
           "composition_plan": {
+            "description": "The chunk-based composition plan for the music",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/MusicV2CompositionPlan"
@@ -151,10 +144,10 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The chunk-based composition plan for the music"
+            ]
           },
           "seed": {
+            "description": "Random seed to initialize the music generation process. Can only be used with composition_plan. The same seed with the same parameters gives more consistent results, but exact reproducibility is not guaranteed.",
             "title": "Seed",
             "anyOf": [
               {
@@ -163,38 +156,52 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "Random seed to initialize the music generation process. Can only be used with composition_plan. The same seed with the same parameters gives more consistent results, but exact reproducibility is not guaranteed."
+            ]
+          },
+          "music_length_ms": {
+            "description": "The length of the song to generate in milliseconds. Used only in conjunction with prompt. Must be between 3000ms and 600000ms. Optional - if not provided, the model will choose a length based on the prompt.",
+            "title": "Music Length Ms",
+            "anyOf": [
+              {
+                "maximum": 600000,
+                "minimum": 3000,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "x-fal-order-properties": [
           "prompt",
+          "enable_safety_checker",
           "composition_plan",
           "music_length_ms",
           "force_instrumental",
           "seed",
           "output_format"
         ],
-        "description": "Request format for the ElevenLabs Music v2 / v2.5 API."
+        "type": "object"
       },
       "MusicV25Output": {
         "title": "MusicOutput",
+        "properties": {
+          "audio": {
+            "description": "The generated music audio file in MP3 format",
+            "examples": [
+              {
+                "content_type": "audio/mpeg",
+                "file_name": "music_generated.mp3",
+                "url": "https://storage.googleapis.com/falserverless/example_outputs/elevenlabs/music_generated.mp3"
+              }
+            ],
+            "$ref": "#/components/schemas/File"
+          }
+        },
         "required": [
           "audio"
         ],
-        "properties": {
-          "audio": {
-            "examples": [
-              {
-                "url": "https://storage.googleapis.com/falserverless/example_outputs/elevenlabs/music_generated.mp3",
-                "file_name": "music_generated.mp3",
-                "content_type": "audio/mpeg"
-              }
-            ],
-            "$ref": "#/components/schemas/File",
-            "description": "The generated music audio file in MP3 format"
-          }
-        },
         "x-fal-order-properties": [
           "audio"
         ],
@@ -202,21 +209,21 @@
       },
       "MusicV2CompositionPlan": {
         "title": "MusicV2CompositionPlan",
-        "required": [
-          "chunks"
-        ],
         "properties": {
           "chunks": {
             "items": {
               "$ref": "#/components/schemas/MusicGenerationChunk"
             },
             "title": "Chunks",
-            "type": "array",
+            "description": "The chunks that make up the generation, in order. At most 30 chunks, totalling between 3000ms and 600000ms.",
             "maxItems": 30,
             "minItems": 1,
-            "description": "The chunks that make up the generation, in order. At most 30 chunks, totalling between 3000ms and 600000ms."
+            "type": "array"
           }
         },
+        "required": [
+          "chunks"
+        ],
         "x-fal-order-properties": [
           "chunks"
         ],
@@ -224,46 +231,10 @@
       },
       "File": {
         "title": "File",
-        "required": [
-          "url"
-        ],
         "properties": {
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
-          },
           "content_type": {
+            "description": "The mime type of the file.",
+            "title": "Content Type",
             "examples": [
               "image/png"
             ],
@@ -274,11 +245,47 @@
               {
                 "type": "null"
               }
+            ]
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
             ],
-            "title": "Content Type",
-            "description": "The mime type of the file."
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -288,31 +295,26 @@
         "type": "object"
       },
       "MusicGenerationChunk": {
+        "description": "One generation chunk of a ``music_v2`` / ``music_v2.5`` composition plan.\n\nThe v2 models replaced v1's ``sections`` (``MusicPrompt``) with ``chunks``\n(``CompositionPlan``); the two shapes are not interchangeable -- sending a\nv1 section plan to a v2 model (or vice versa) is rejected by ElevenLabs.",
         "title": "MusicGenerationChunk",
-        "required": [
-          "text",
-          "duration_ms",
-          "positive_styles"
-        ],
         "properties": {
-          "context_adherence": {
-            "title": "Context Adherence",
-            "anyOf": [
-              {
-                "type": "string",
-                "enum": [
-                  "low",
-                  "medium",
-                  "high"
-                ]
-              },
-              {
-                "type": "null"
-              }
+          "positive_styles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Positive Styles",
+            "examples": [
+              [
+                "synthwave",
+                "analog drum machine",
+                "great production quality"
+              ]
             ],
-            "description": "How closely this chunk follows the context of its surrounding chunks. Low adherence lets the model deviate and be more creative, high adherence keeps it consistent with the surrounding context."
+            "description": "The styles and musical directions that should be present in this chunk. Use English for best results. The styles of the first chunk matter most as they set the overall tone and genre; later chunks can add nuance, progression or change direction.",
+            "type": "array"
           },
           "negative_styles": {
+            "description": "The styles and musical directions that should not be present in this chunk. Leaving this empty is a good default; only set it to explicitly avoid a particular style or direction.",
             "title": "Negative Styles",
             "anyOf": [
               {
@@ -324,40 +326,42 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The styles and musical directions that should not be present in this chunk. Leaving this empty is a good default; only set it to explicitly avoid a particular style or direction."
+            ]
           },
           "text": {
+            "description": "The text to generate for this chunk. Can start with an optional section name in square brackets, e.g. [Verse 1], followed by lyric lines, plus inline directions in curly braces, e.g. {scratching}. Section names must be between 1 and 100 characters. At most 30 lines are allowed, each at most 200 characters.",
+            "title": "Text",
             "examples": [
               "[Verse 1]\nNeon rain on empty streets\nI keep walking to the beat"
             ],
-            "title": "Text",
-            "type": "string",
-            "description": "The text to generate for this chunk. Can start with an optional section name in square brackets, e.g. [Verse 1], followed by lyric lines, plus inline directions in curly braces, e.g. {scratching}. Section names must be between 1 and 100 characters. At most 30 lines are allowed, each at most 200 characters."
+            "type": "string"
           },
-          "positive_styles": {
-            "items": {
-              "type": "string"
-            },
-            "examples": [
-              [
-                "synthwave",
-                "analog drum machine",
-                "great production quality"
-              ]
-            ],
-            "title": "Positive Styles",
-            "type": "array",
-            "description": "The styles and musical directions that should be present in this chunk. Use English for best results. The styles of the first chunk matter most as they set the overall tone and genre; later chunks can add nuance, progression or change direction."
+          "context_adherence": {
+            "description": "How closely this chunk follows the context of its surrounding chunks. Low adherence lets the model deviate and be more creative, high adherence keeps it consistent with the surrounding context.",
+            "title": "Context Adherence",
+            "anyOf": [
+              {
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "duration_ms": {
-            "maximum": 120000,
-            "title": "Duration Ms",
             "description": "The duration of the chunk in milliseconds. Must be between 3000ms and 120000ms.",
-            "type": "integer",
-            "minimum": 3000
+            "title": "Duration Ms",
+            "maximum": 120000,
+            "minimum": 3000,
+            "type": "integer"
           },
           "audio_reference": {
+            "description": "An audio clip whose style conditions this chunk. The reference on the first chunk matters most: it influences every later chunk, so condition from the first chunk to style the whole song.",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/MusicAudioReference"
@@ -365,10 +369,14 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "An audio clip whose style conditions this chunk. The reference on the first chunk matters most: it influences every later chunk, so condition from the first chunk to style the whole song."
+            ]
           }
         },
+        "required": [
+          "text",
+          "duration_ms",
+          "positive_styles"
+        ],
         "x-fal-order-properties": [
           "text",
           "duration_ms",
@@ -377,70 +385,69 @@
           "context_adherence",
           "audio_reference"
         ],
-        "type": "object",
-        "description": "One generation chunk of a ``music_v2`` / ``music_v2.5`` composition plan.\n\nThe v2 models replaced v1's ``sections`` (``MusicPrompt``) with ``chunks``\n(``CompositionPlan``); the two shapes are not interchangeable -- sending a\nv1 section plan to a v2 model (or vice versa) is rejected by ElevenLabs."
+        "type": "object"
       },
       "MusicAudioReference": {
+        "description": "An audio clip whose style conditions a ``music_v2`` / ``music_v2.5`` chunk.\n\nElevenLabs conditions on a *song id*, which only exists after the clip has\nbeen uploaded to them, so the app uploads on the caller's behalf and caches\nthe resulting id (see ``ElevenLabsTTS._resolve_audio_reference``).",
         "title": "MusicAudioReference",
-        "required": [
-          "audio_url"
-        ],
         "properties": {
-          "end_ms": {
-            "title": "End Ms",
-            "anyOf": [
-              {
-                "type": "integer",
-                "exclusiveMinimum": 0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Offset into the clip where the referenced window ends, in milliseconds. Defaults to 30000ms after start_ms, or the end of the clip if it is shorter. The window must be at most 30000ms long."
-          },
-          "audio_url": {
-            "examples": [
-              "https://storage.googleapis.com/falserverless/example_outputs/elevenlabs/music_generated.mp3"
-            ],
-            "title": "Audio Url",
-            "type": "string",
-            "description": "URL of the audio clip to use as the style reference."
-          },
           "start_ms": {
             "description": "Offset into the clip where the referenced window starts, in milliseconds.",
             "title": "Start Ms",
-            "type": "integer",
             "default": 0,
-            "minimum": 0
+            "minimum": 0,
+            "type": "integer"
           },
           "strength": {
+            "description": "How strongly the model follows the reference. Low lets it deviate and be more creative, high keeps it close to the reference.",
             "title": "Strength",
             "anyOf": [
               {
-                "type": "string",
                 "enum": [
                   "low",
                   "medium",
                   "high",
                   "xhigh"
-                ]
+                ],
+                "type": "string"
               },
               {
                 "type": "null"
               }
+            ]
+          },
+          "end_ms": {
+            "description": "Offset into the clip where the referenced window ends, in milliseconds. Defaults to 30000ms after start_ms, or the end of the clip if it is shorter. The window must be at most 30000ms long.",
+            "title": "End Ms",
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "audio_url": {
+            "description": "URL of the audio clip to use as the style reference.",
+            "title": "Audio Url",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_outputs/elevenlabs/music_generated.mp3"
             ],
-            "description": "How strongly the model follows the reference. Low lets it deviate and be more creative, high keeps it close to the reference."
+            "type": "string"
           }
         },
+        "required": [
+          "audio_url"
+        ],
         "x-fal-order-properties": [
           "audio_url",
           "start_ms",
           "end_ms",
           "strength"
         ],
-        "type": "object",
-        "description": "An audio clip whose style conditions a ``music_v2`` / ``music_v2.5`` chunk.\n\nElevenLabs conditions on a *song id*, which only exists after the clip has\nbeen uploaded to them, so the app uploads on the caller's behalf and caches\nthe resulting id (see ``ElevenLabsTTS._resolve_audio_reference``)."
+        "type": "object"
       }
     }
   },

@@ -80,23 +80,46 @@
           "generate_audio_switch",
           "enable_safety_checker"
         ],
+        "title": "TextToVideoRequestC1",
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
         "properties": {
-          "resolution": {
-            "default": "720p",
-            "description": "The resolution of the generated video",
-            "title": "Resolution",
-            "enum": [
-              "360p",
-              "540p",
-              "720p",
-              "1080p"
+          "prompt": {
+            "examples": [
+              "Epic low-cut camera capture of a girl clad in ultraviolet threads, luminous diamond skin glistening under a vast moon's radiance, hyper-detailed"
             ],
-            "type": "string"
+            "title": "Prompt",
+            "type": "string",
+            "description": "Text prompt for the video generation. Limited to 2048 UTF-8 encoded bytes. Because the limit counts bytes rather than characters, emoji and non-Latin or accented characters (which use multiple bytes each) can push a visually short prompt over the cap."
+          },
+          "generate_audio_switch": {
+            "default": false,
+            "type": "boolean",
+            "title": "Generate Audio Switch",
+            "description": "Enable audio generation (BGM, SFX, dialogue)"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "\n            The same seed and the same prompt given to the same version of the model\n            will output the same video every time.\n        "
+          },
+          "enable_safety_checker": {
+            "default": true,
+            "title": "Enable Safety Checker",
+            "type": "boolean",
+            "description": "Authorized callers may set false to request relaxed screening."
           },
           "aspect_ratio": {
             "default": "16:9",
-            "description": "The aspect ratio of the generated video",
-            "title": "Aspect Ratio",
             "enum": [
               "16:9",
               "4:3",
@@ -107,57 +130,39 @@
               "3:2",
               "21:9"
             ],
-            "type": "string"
-          },
-          "prompt": {
-            "examples": [
-              "Epic low-cut camera capture of a girl clad in ultraviolet threads, luminous diamond skin glistening under a vast moon's radiance, hyper-detailed"
-            ],
-            "description": "Text prompt for the video generation. Limited to 2048 UTF-8 encoded bytes. Because the limit counts bytes rather than characters, emoji and non-Latin or accented characters (which use multiple bytes each) can push a visually short prompt over the cap.",
-            "title": "Prompt",
-            "type": "string"
-          },
-          "seed": {
-            "description": "\n            The same seed and the same prompt given to the same version of the model\n            will output the same video every time.\n        ",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Seed"
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "title": "Enable Safety Checker",
-            "type": "boolean"
+            "type": "string",
+            "title": "Aspect Ratio",
+            "description": "The aspect ratio of the generated video"
           },
           "duration": {
-            "default": 5,
-            "maximum": 15,
             "description": "The duration of the generated video in seconds (1-15)",
+            "default": 5,
             "title": "Duration",
-            "minimum": 1,
-            "type": "integer"
+            "type": "integer",
+            "maximum": 15,
+            "minimum": 1
           },
-          "generate_audio_switch": {
-            "default": false,
-            "description": "Enable audio generation (BGM, SFX, dialogue)",
-            "title": "Generate Audio Switch",
-            "type": "boolean"
+          "resolution": {
+            "default": "720p",
+            "enum": [
+              "360p",
+              "540p",
+              "720p",
+              "1080p"
+            ],
+            "type": "string",
+            "title": "Resolution",
+            "description": "The resolution of the generated video"
           }
-        },
-        "required": [
-          "prompt"
-        ],
-        "title": "TextToVideoRequestC1",
-        "type": "object"
+        }
       },
       "PixverseC1TextToVideoOutput": {
         "x-fal-order-properties": [
+          "video"
+        ],
+        "title": "VideoOutputC1",
+        "type": "object",
+        "required": [
           "video"
         ],
         "properties": {
@@ -165,12 +170,7 @@
             "$ref": "#/components/schemas/File",
             "description": "The generated video file."
           }
-        },
-        "required": [
-          "video"
-        ],
-        "title": "VideoOutputC1",
-        "type": "object"
+        }
       },
       "File": {
         "x-fal-order-properties": [
@@ -179,17 +179,13 @@
           "file_name",
           "file_size"
         ],
+        "title": "File",
+        "type": "object",
+        "required": [
+          "url"
+        ],
         "properties": {
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
           "file_size": {
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -198,13 +194,28 @@
                 "type": "null"
               }
             ],
-            "title": "File Size"
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes."
           },
           "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
             "examples": [
               "image/png"
             ],
-            "description": "The mime type of the file.",
+            "description": "The mime type of the file."
+          },
+          "file_name": {
             "anyOf": [
               {
                 "type": "string"
@@ -213,29 +224,18 @@
                 "type": "null"
               }
             ],
-            "title": "Content Type"
-          },
-          "file_name": {
+            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name"
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
           }
-        },
-        "required": [
-          "url"
-        ],
-        "title": "File",
-        "type": "object"
+        }
       }
     }
   },
