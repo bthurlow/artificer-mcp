@@ -71,48 +71,58 @@
         ]
       },
       "ElevenlabsTtsElevenV3Input": {
+        "description": "Request model for eleven_v3 which doesn't support previous_text/next_text",
         "title": "TextToSpeechRequestV3",
-        "required": [
-          "text"
-        ],
         "properties": {
-          "timestamps": {
-            "title": "Timestamps",
-            "type": "boolean",
-            "default": false,
-            "description": "Whether to return timestamps for each word in the generated speech"
+          "enable_safety_checker": {
+            "description": "Check input content for safety. Disabling requires account authorization.",
+            "title": "Enable Safety Checker",
+            "default": true,
+            "type": "boolean"
           },
-          "apply_text_normalization": {
-            "title": "Apply Text Normalization",
-            "type": "string",
+          "output_format": {
+            "description": "Output audio format (codec_sample_rate_bitrate). PCM is raw signed 16-bit little-endian audio, without a WAV header. PCM at 44.1 kHz requires an ElevenLabs Pro plan or above; MP3 at 192 kbps requires Creator or above.",
+            "title": "Output Format",
+            "default": "mp3_44100_128",
             "enum": [
-              "auto",
-              "on",
-              "off"
+              "mp3_22050_32",
+              "mp3_44100_32",
+              "mp3_44100_64",
+              "mp3_44100_96",
+              "mp3_44100_128",
+              "mp3_44100_192",
+              "pcm_8000",
+              "pcm_16000",
+              "pcm_22050",
+              "pcm_24000",
+              "pcm_44100",
+              "pcm_48000",
+              "ulaw_8000",
+              "alaw_8000",
+              "opus_48000_32",
+              "opus_48000_64",
+              "opus_48000_96",
+              "opus_48000_128",
+              "opus_48000_192"
             ],
-            "default": "auto",
-            "description": "This parameter controls text normalization with three modes: 'auto', 'on', and 'off'. When set to 'auto', the system will automatically decide whether to apply text normalization (e.g., spelling out numbers). With 'on', text normalization will always be applied, while with 'off', it will be skipped."
+            "type": "string"
           },
-          "stability": {
-            "maximum": 1,
-            "title": "Stability",
-            "description": "Voice stability (0-1)",
-            "type": "number",
-            "default": 0.5,
-            "minimum": 0
-          },
-          "text": {
-            "examples": [
-              "Hello! This is a test of the text to speech system, powered by ElevenLabs. How does it sound?"
-            ],
-            "title": "Text",
-            "minLength": 1,
-            "type": "string",
-            "maxLength": 5000,
-            "description": "The text to convert to speech"
+          "language_code": {
+            "description": "Language code (ISO 639-1) used to enforce a language for the model.",
+            "title": "Language Code",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "voice": {
+            "description": "The voice to use for speech generation",
             "title": "Voice",
+            "default": "Rachel",
             "examples": [
               "Aria",
               "Roger",
@@ -135,41 +145,73 @@
               "Lily",
               "Bill"
             ],
-            "type": "string",
-            "default": "Rachel",
-            "description": "The voice to use for speech generation"
+            "type": "string"
           },
-          "language_code": {
-            "title": "Language Code",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+          "text": {
+            "description": "The text to convert to speech",
+            "title": "Text",
+            "examples": [
+              "Hello! This is a test of the text to speech system, powered by ElevenLabs. How does it sound?"
             ],
-            "description": "Language code (ISO 639-1) used to enforce a language for the model."
+            "minLength": 1,
+            "maxLength": 5000,
+            "type": "string"
+          },
+          "stability": {
+            "description": "Voice stability (0-1)",
+            "title": "Stability",
+            "maximum": 1,
+            "minimum": 0,
+            "default": 0.5,
+            "type": "number"
+          },
+          "apply_text_normalization": {
+            "description": "This parameter controls text normalization with three modes: 'auto', 'on', and 'off'. When set to 'auto', the system will automatically decide whether to apply text normalization (e.g., spelling out numbers). With 'on', text normalization will always be applied, while with 'off', it will be skipped.",
+            "title": "Apply Text Normalization",
+            "default": "auto",
+            "enum": [
+              "auto",
+              "on",
+              "off"
+            ],
+            "type": "string"
+          },
+          "timestamps": {
+            "description": "Whether to return timestamps for each word in the generated speech",
+            "title": "Timestamps",
+            "default": false,
+            "type": "boolean"
           }
         },
+        "required": [
+          "text"
+        ],
         "x-fal-order-properties": [
           "text",
+          "enable_safety_checker",
           "voice",
           "stability",
           "timestamps",
           "language_code",
-          "apply_text_normalization"
+          "apply_text_normalization",
+          "output_format"
         ],
-        "type": "object",
-        "description": "Request model for eleven_v3 which doesn't support previous_text/next_text"
+        "type": "object"
       },
       "ElevenlabsTtsElevenV3Output": {
         "title": "TTSOutput",
-        "required": [
-          "audio"
-        ],
         "properties": {
+          "audio": {
+            "description": "The generated audio file",
+            "examples": [
+              {
+                "url": "https://v3.fal.media/files/zebra/zJL_oRY8h5RWwjoK1w7tx_output.mp3"
+              }
+            ],
+            "$ref": "#/components/schemas/File"
+          },
           "timestamps": {
+            "description": "Timestamps for each word in the generated speech. Only returned if `timestamps` is set to True in the request.",
             "title": "Timestamps",
             "anyOf": [
               {
@@ -179,19 +221,12 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "Timestamps for each word in the generated speech. Only returned if `timestamps` is set to True in the request."
-          },
-          "audio": {
-            "examples": [
-              {
-                "url": "https://v3.fal.media/files/zebra/zJL_oRY8h5RWwjoK1w7tx_output.mp3"
-              }
-            ],
-            "$ref": "#/components/schemas/File",
-            "description": "The generated audio file"
+            ]
           }
         },
+        "required": [
+          "audio"
+        ],
         "x-fal-order-properties": [
           "audio",
           "timestamps"
@@ -200,46 +235,10 @@
       },
       "File": {
         "title": "File",
-        "required": [
-          "url"
-        ],
         "properties": {
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
-          },
           "content_type": {
+            "description": "The mime type of the file.",
+            "title": "Content Type",
             "examples": [
               "image/png"
             ],
@@ -250,11 +249,47 @@
               {
                 "type": "null"
               }
+            ]
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "examples": [
+              "z9RV14K95DvU.png"
             ],
-            "title": "Content Type",
-            "description": "The mime type of the file."
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",

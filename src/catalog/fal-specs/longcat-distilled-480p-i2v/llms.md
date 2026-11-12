@@ -123,7 +123,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video file.
-  - Examples: {"url":"https://v3b.fal.media/files/b/panda/4-MoAje_CCMAGH8d-9kmA_nQEkcRc2.mp4","content_type":"video/mp4"}
+  - Examples: {"content_type":"video/mp4","url":"https://v3b.fal.media/files/b/panda/4-MoAje_CCMAGH8d-9kmA_nQEkcRc2.mp4"}
 
 
 
@@ -134,8 +134,8 @@ The API returns the following output format:
   "prompt": "First-person view from the cockpit of a Formula 1 car. The driver's gloved hands firmly grip the intricate, carbon-fiber steering wheel adorned with numerous colorful buttons and a vibrant digital display showing race data. Beyond the windshield, a sun-drenched racetrack stretches ahead, lined with cheering spectators in the grandstands. Several rival cars are visible in the distance, creating a dynamic sense of competition. The sky above is a clear, brilliant blue, reflecting the exhilarating atmosphere of a high-speed race. high resolution 4k",
   "seed": 916581,
   "video": {
-    "url": "https://v3b.fal.media/files/b/panda/4-MoAje_CCMAGH8d-9kmA_nQEkcRc2.mp4",
-    "content_type": "video/mp4"
+    "content_type": "video/mp4",
+    "url": "https://v3b.fal.media/files/b/panda/4-MoAje_CCMAGH8d-9kmA_nQEkcRc2.mp4"
   }
 }
 ```

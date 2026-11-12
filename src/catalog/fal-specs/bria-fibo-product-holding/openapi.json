@@ -71,45 +71,10 @@
         ]
       },
       "FiboEdit15ProductHoldingInput": {
-        "title": "ProductHoldingInputModel",
-        "required": [
-          "person_image_url",
-          "product_image_urls"
-        ],
-        "type": "object",
-        "x-fal-order-properties": [
-          "person_image_url",
-          "product_image_urls",
-          "instruction",
-          "aspect_ratio",
-          "seed",
-          "sync_mode"
-        ],
         "properties": {
-          "person_image_url": {
-            "examples": [
-              "https://labs-assets.bria.ai/fal-examples/fibo-edit-1.5/product-holding/person.jpg"
-            ],
-            "title": "Person Image Url",
-            "description": "Photo of the person who will hold the product. Their identity, face, expression, clothing, pose and the background are preserved; only the arm and hand move.",
-            "type": "string"
-          },
-          "sync_mode": {
-            "title": "Sync Mode",
-            "default": false,
-            "description": "Return the image inline in the response instead of as a hosted URL. Adds latency.",
-            "type": "boolean"
-          },
-          "seed": {
-            "title": "Seed",
-            "default": 5555,
-            "description": "Random seed. The same seed with the same inputs returns the same image.",
-            "type": "integer"
-          },
           "aspect_ratio": {
             "anyOf": [
               {
-                "type": "string",
                 "enum": [
                   "1:1",
                   "2:3",
@@ -120,7 +85,8 @@
                   "5:4",
                   "9:16",
                   "16:9"
-                ]
+                ],
+                "type": "string"
               },
               {
                 "type": "null"
@@ -144,43 +110,64 @@
             "title": "Instruction",
             "description": "Optional. A complete product-holding instruction already runs; this is appended to it. Use it for which hand, which way the label faces, or what must stay untouched."
           },
+          "person_image_url": {
+            "examples": [
+              "https://labs-assets.bria.ai/fal-examples/fibo-edit-1.5/product-holding/person.jpg"
+            ],
+            "description": "Photo of the person who will hold the product. Their identity, face, expression, clothing, pose and the background are preserved; only the arm and hand move.",
+            "title": "Person Image Url",
+            "type": "string"
+          },
           "product_image_urls": {
-            "title": "Product Image Urls",
-            "maxItems": 3,
-            "type": "array",
-            "description": "One to three reference images of the product to place: extra angles, its packaging, or a companion item. They describe one holding scene rather than three separate products. The product's geometry, colors, materials, branding and label text are reproduced as given.",
-            "minItems": 1,
             "examples": [
               [
                 "https://labs-assets.bria.ai/fal-examples/fibo-edit-1.5/product-holding/product.jpg"
               ]
             ],
+            "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "minItems": 1,
+            "maxItems": 3,
+            "title": "Product Image Urls",
+            "description": "One to three reference images of the product to place: extra angles, its packaging, or a companion item. They describe one holding scene rather than three separate products. The product's geometry, colors, materials, branding and label text are reproduced as given."
+          },
+          "sync_mode": {
+            "default": false,
+            "description": "Return the image inline in the response instead of as a hosted URL. Adds latency.",
+            "title": "Sync Mode",
+            "type": "boolean"
+          },
+          "seed": {
+            "default": 5555,
+            "description": "Random seed. The same seed with the same inputs returns the same image.",
+            "title": "Seed",
+            "type": "integer"
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "person_image_url",
+          "product_image_urls",
+          "instruction",
+          "aspect_ratio",
+          "seed",
+          "sync_mode"
+        ],
+        "required": [
+          "person_image_url",
+          "product_image_urls"
+        ],
+        "title": "ProductHoldingInputModel",
+        "type": "object"
       },
       "FiboEdit15ProductHoldingOutput": {
-        "title": "FiboEditOutputModel",
-        "required": [
-          "image",
-          "structured_instruction"
-        ],
-        "type": "object",
-        "x-fal-order-properties": [
-          "image",
-          "images",
-          "structured_instruction"
-        ],
         "properties": {
-          "structured_instruction": {
-            "title": "Structured Instruction",
-            "description": "The structured instruction the model ran, expanded from the built-in instruction plus anything passed in `instruction`. Returned so you can see how the brief was interpreted.",
-            "type": "object",
-            "additionalProperties": true
-          },
           "images": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/Image"
+            },
             "examples": [
               [
                 {
@@ -188,56 +175,35 @@
                 }
               ]
             ],
-            "title": "Images",
-            "default": [],
             "description": "Single-element list holding the same image, kept for callers of the earlier Fibo Edit endpoint.",
-            "items": {
-              "$ref": "#/components/schemas/Image"
-            },
+            "title": "Images",
             "type": "array"
           },
           "image": {
-            "description": "The edited image, in the source aspect ratio unless aspect_ratio was set.",
-            "$ref": "#/components/schemas/Image"
+            "$ref": "#/components/schemas/Image",
+            "description": "The edited image, in the source aspect ratio unless aspect_ratio was set."
+          },
+          "structured_instruction": {
+            "description": "The structured instruction the model ran, expanded from the built-in instruction plus anything passed in `instruction`. Returned so you can see how the brief was interpreted.",
+            "additionalProperties": true,
+            "title": "Structured Instruction",
+            "type": "object"
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "image",
+          "images",
+          "structured_instruction"
+        ],
+        "required": [
+          "image",
+          "structured_instruction"
+        ],
+        "title": "FiboEditOutputModel",
+        "type": "object"
       },
       "Image": {
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size",
-          "width",
-          "height"
-        ],
-        "title": "Image",
-        "required": [
-          "url"
-        ],
-        "type": "object",
-        "description": "Represents an image file.",
         "properties": {
-          "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
-          },
           "content_type": {
             "examples": [
               "image/png"
@@ -253,20 +219,20 @@
             "title": "Content Type",
             "description": "The mime type of the file."
           },
-          "width": {
+          "file_name": {
             "examples": [
-              1024
+              "z9RV14K95DvU.png"
             ],
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Width",
-            "description": "The width of the image in pixels."
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided."
           },
           "file_size": {
             "examples": [
@@ -283,6 +249,11 @@
             "title": "File Size",
             "description": "The size of the file in bytes."
           },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
           "height": {
             "examples": [
               1024
@@ -297,8 +268,37 @@
             ],
             "title": "Height",
             "description": "The height of the image in pixels."
+          },
+          "width": {
+            "examples": [
+              1024
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Width",
+            "description": "The width of the image in pixels."
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "description": "Represents an image file.",
+        "required": [
+          "url"
+        ],
+        "title": "Image",
+        "type": "object"
       }
     }
   },

@@ -71,15 +71,134 @@
         ]
       },
       "WanV27ReferenceToVideoInput": {
-        "required": [
-          "prompt"
+        "description": "Input for Wan 2.7 reference-to-video generation.\n\nSupports single or multi-character video generation from reference images\nand/or videos. Also supports multi-shot narration.",
+        "x-fal-order-properties": [
+          "prompt",
+          "reference_image_urls",
+          "reference_video_urls",
+          "negative_prompt",
+          "aspect_ratio",
+          "resolution",
+          "duration",
+          "multi_shots",
+          "seed",
+          "enable_safety_checker"
         ],
         "properties": {
+          "seed": {
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Random seed for reproducibility (0-2147483647)."
+          },
+          "prompt": {
+            "description": "Text prompt describing the desired video. Max 5000 characters.",
+            "examples": [
+              "A person walking through a beautiful garden, cinematic style."
+            ],
+            "type": "string",
+            "minLength": 1,
+            "title": "Prompt"
+          },
+          "reference_video_urls": {
+            "description": "Reference video URLs for character/object appearance and motion. Pass multiple videos for multi-subject generation. Max 100 MB each.",
+            "anyOf": [
+              {
+                "items": {
+                  "limit_description": "Max file size: 100.0MB, Max duration: 30s, Timeout: 30.0s",
+                  "ui": {
+                    "field": "video"
+                  },
+                  "_fal_ui_field": "video",
+                  "x-fal": {
+                    "timeout": 30,
+                    "max_duration": 30,
+                    "max_file_size": 104857600
+                  },
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Video Urls"
+          },
+          "resolution": {
+            "enum": [
+              "720p",
+              "1080p"
+            ],
+            "title": "Resolution",
+            "type": "string",
+            "default": "1080p",
+            "description": "Output video resolution tier."
+          },
+          "aspect_ratio": {
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1",
+              "4:3",
+              "3:4"
+            ],
+            "title": "Aspect Ratio",
+            "type": "string",
+            "default": "16:9",
+            "description": "Aspect ratio of the generated video."
+          },
+          "duration": {
+            "enum": [
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10
+            ],
+            "title": "Duration",
+            "examples": [
+              5,
+              10
+            ],
+            "type": "integer",
+            "default": 5,
+            "description": "Output video duration in seconds (2-10)."
+          },
           "multi_shots": {
-            "description": "When true, enables intelligent multi-shot segmentation. When false (default), generates a single continuous shot.",
-            "type": "boolean",
             "title": "Multi Shots",
-            "default": false
+            "type": "boolean",
+            "default": false,
+            "description": "When true, enables intelligent multi-shot segmentation. When false (default), generates a single continuous shot."
+          },
+          "reference_image_urls": {
+            "description": "Reference image URLs for character/object appearance. Pass multiple images for multi-subject generation. Max 20 MB each.",
+            "anyOf": [
+              {
+                "items": {
+                  "ui": {
+                    "field": "image"
+                  },
+                  "_fal_ui_field": "image",
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Image Urls"
           },
           "negative_prompt": {
             "description": "Content to avoid in the video. Max 500 characters.",
@@ -97,265 +216,76 @@
             "title": "Negative Prompt"
           },
           "enable_safety_checker": {
-            "description": "Enable content moderation for input and output. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "type": "boolean",
             "title": "Enable Safety Checker",
-            "default": true
-          },
-          "reference_image_urls": {
-            "description": "Reference image URLs for character/object appearance. Pass multiple images for multi-subject generation. Max 20 MB each.",
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "_fal_ui_field": "image",
-                  "type": "string",
-                  "ui": {
-                    "field": "image"
-                  }
-                }
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reference Image Urls"
-          },
-          "aspect_ratio": {
-            "description": "Aspect ratio of the generated video.",
-            "type": "string",
-            "enum": [
-              "16:9",
-              "9:16",
-              "1:1",
-              "4:3",
-              "3:4"
-            ],
-            "title": "Aspect Ratio",
-            "default": "16:9"
-          },
-          "reference_video_urls": {
-            "description": "Reference video URLs for character/object appearance and motion. Pass multiple videos for multi-subject generation. Max 100 MB each.",
-            "anyOf": [
-              {
-                "type": "array",
-                "items": {
-                  "_fal_ui_field": "video",
-                  "type": "string",
-                  "x-fal": {
-                    "max_duration": 30,
-                    "timeout": 30,
-                    "max_file_size": 104857600
-                  },
-                  "limit_description": "Max file size: 100.0MB, Max duration: 30s, Timeout: 30.0s",
-                  "ui": {
-                    "field": "video"
-                  }
-                }
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reference Video Urls"
-          },
-          "seed": {
-            "description": "Random seed for reproducibility (0-2147483647).",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Seed"
-          },
-          "resolution": {
-            "description": "Output video resolution tier.",
-            "type": "string",
-            "enum": [
-              "720p",
-              "1080p"
-            ],
-            "title": "Resolution",
-            "default": "1080p"
-          },
-          "prompt": {
-            "description": "Text prompt describing the desired video. Max 5000 characters.",
-            "examples": [
-              "A person walking through a beautiful garden, cinematic style."
-            ],
-            "type": "string",
-            "minLength": 1,
-            "title": "Prompt"
-          },
-          "duration": {
-            "description": "Output video duration in seconds (2-10).",
-            "examples": [
-              5,
-              10
-            ],
-            "enum": [
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-              8,
-              9,
-              10
-            ],
-            "type": "integer",
-            "title": "Duration",
-            "default": 5
+            "type": "boolean",
+            "default": true,
+            "description": "Enable content moderation for input and output. Disabling it requires account authorization; unauthorized requests are always checked."
           }
         },
-        "description": "Input for Wan 2.7 reference-to-video generation.\n\nSupports single or multi-character video generation from reference images\nand/or videos. Also supports multi-shot narration.",
+        "required": [
+          "prompt"
+        ],
         "type": "object",
-        "title": "Wan27ReferenceToVideoInput",
-        "x-fal-order-properties": [
-          "prompt",
-          "reference_image_urls",
-          "reference_video_urls",
-          "negative_prompt",
-          "aspect_ratio",
-          "resolution",
-          "duration",
-          "multi_shots",
-          "seed",
-          "enable_safety_checker"
-        ]
+        "title": "Wan27ReferenceToVideoInput"
       },
       "WanV27ReferenceToVideoOutput": {
-        "required": [
-          "video",
-          "seed"
-        ],
-        "properties": {
-          "actual_prompt": {
-            "description": "The actual prompt used if prompt rewriting was enabled.",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Actual Prompt"
-          },
-          "video": {
-            "description": "The generated video file.",
-            "$ref": "#/components/schemas/VideoFile"
-          },
-          "seed": {
-            "description": "The seed used for generation.",
-            "type": "integer",
-            "title": "Seed"
-          }
-        },
         "description": "Output for Wan 2.7 reference-to-video generation.",
-        "type": "object",
-        "title": "Wan27ReferenceToVideoOutput",
         "x-fal-order-properties": [
           "video",
           "seed",
           "actual_prompt"
-        ]
-      },
-      "VideoFile": {
-        "type": "object",
-        "required": [
-          "url"
         ],
         "properties": {
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
+          "seed": {
+            "title": "Seed",
+            "type": "integer",
+            "description": "The seed used for generation."
+          },
+          "actual_prompt": {
+            "title": "Actual Prompt",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The actual prompt used if prompt rewriting was enabled."
+          },
+          "video": {
+            "$ref": "#/components/schemas/VideoFile",
+            "description": "The generated video file."
+          }
+        },
+        "required": [
+          "video",
+          "seed"
+        ],
+        "type": "object",
+        "title": "Wan27ReferenceToVideoOutput"
+      },
+      "VideoFile": {
+        "title": "VideoFile",
+        "properties": {
+          "height": {
+            "title": "Height",
+            "description": "The height of the video",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "file_name": {
             "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "file_size": {
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes."
-          },
-          "height": {
-            "title": "Height",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The height of the video"
-          },
-          "fps": {
-            "title": "Fps",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The FPS of the video"
-          },
-          "num_frames": {
-            "title": "Num Frames",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The number of frames in the video"
-          },
-          "duration": {
-            "title": "Duration",
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The duration of the video"
-          },
-          "content_type": {
-            "title": "Content Type",
             "anyOf": [
               {
                 "type": "string"
@@ -363,14 +293,11 @@
               {
                 "type": "null"
               }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file."
+            ]
           },
-          "width": {
-            "title": "Width",
+          "num_frames": {
+            "title": "Num Frames",
+            "description": "The number of frames in the video",
             "anyOf": [
               {
                 "type": "integer"
@@ -378,10 +305,83 @@
               {
                 "type": "null"
               }
+            ]
+          },
+          "file_size": {
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
             ],
-            "description": "The width of the video"
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "fps": {
+            "title": "Fps",
+            "description": "The FPS of the video",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duration": {
+            "title": "Duration",
+            "description": "The duration of the video",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "width": {
+            "title": "Width",
+            "description": "The width of the video",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
+          "content_type": {
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ],
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -393,7 +393,7 @@
           "duration",
           "num_frames"
         ],
-        "title": "VideoFile"
+        "type": "object"
       }
     }
   },

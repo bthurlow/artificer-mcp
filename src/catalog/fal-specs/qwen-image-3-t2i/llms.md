@@ -43,7 +43,7 @@ The API accepts the following input parameters:
   The size of the generated image. Total number of pixels must be between 512x512 and 2048x2048. Default value: `square_hd`
   - Default: `"square_hd"`
   - One of: ImageSize | Enum
-  - Examples: {"height":1024,"width":1024}
+  - Examples: {"width":1024,"height":1024}
 
 - **`enable_prompt_expansion`** (`boolean`, _optional_):
   Enable automatic LLM prompt rewriting for better results. Default value: `true`
@@ -87,8 +87,8 @@ The API accepts the following input parameters:
   "prompt": "A cute baby koala holding a card that says \"Qwen Image 3 is now available on fal\" while on a water slide",
   "negative_prompt": "low resolution, error, worst quality, low quality, deformed",
   "image_size": {
-    "height": 1024,
-    "width": 1024
+    "width": 1024,
+    "height": 1024
   },
   "enable_prompt_expansion": true,
   "enable_safety_checker": true,
