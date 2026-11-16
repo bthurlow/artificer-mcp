@@ -122,7 +122,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "A casual street interview on a busy New York City sidewalk in the afternoon. The interviewer holds a plain, unbranded microphone and asks: Have you seen Google's new Veo3 model It is a super good model. Person replies: Yeah I saw it, it's already available on fal. It's crazy good."
+     "prompt": "A casual street interview on a busy New York City sidewalk in the afternoon. The interviewer holds a plain, unbranded microphone and asks: Have you seen Google'\''s new Veo3 model It is a super good model. Person replies: Yeah I saw it, it'\''s already available on fal. It'\''s crazy good."
    }'
 ```
 

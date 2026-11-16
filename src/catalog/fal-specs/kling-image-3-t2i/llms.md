@@ -103,7 +103,7 @@ The API returns the following output format:
 - **`images`** (`list<Image>`, _required_):
   Generated images
   - Array of Image
-  - Examples: [{"url":"https://v3b.fal.media/files/b/0a8d0681/Qos5QbCS93YpsPzZ3i8zT_a889cacced76430d85d08c60ca3d023d.png","file_name":"a889cacced76430d85d08c60ca3d023d.png","content_type":"image/png","file_size":1637946}]
+  - Examples: [{"file_name":"a889cacced76430d85d08c60ca3d023d.png","file_size":1637946,"url":"https://v3b.fal.media/files/b/0a8d0681/Qos5QbCS93YpsPzZ3i8zT_a889cacced76430d85d08c60ca3d023d.png","content_type":"image/png"}]
 
 
 
@@ -113,10 +113,10 @@ The API returns the following output format:
 {
   "images": [
     {
-      "url": "https://v3b.fal.media/files/b/0a8d0681/Qos5QbCS93YpsPzZ3i8zT_a889cacced76430d85d08c60ca3d023d.png",
       "file_name": "a889cacced76430d85d08c60ca3d023d.png",
-      "content_type": "image/png",
-      "file_size": 1637946
+      "file_size": 1637946,
+      "url": "https://v3b.fal.media/files/b/0a8d0681/Qos5QbCS93YpsPzZ3i8zT_a889cacced76430d85d08c60ca3d023d.png",
+      "content_type": "image/png"
     }
   ]
 }
@@ -133,7 +133,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "Extremely realistic image of a scholar's study filled with maps and curiosities, roaring fireplace, rain against round windows, stacks of handwritten journals, warm tungsten lighting, inviting atmosphere. The scholar is sitting on a chair."
+     "prompt": "Extremely realistic image of a scholar'\''s study filled with maps and curiosities, roaring fireplace, rain against round windows, stacks of handwritten journals, warm tungsten lighting, inviting atmosphere. The scholar is sitting on a chair."
    }'
 ```
 

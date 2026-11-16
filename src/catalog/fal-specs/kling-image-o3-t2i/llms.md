@@ -110,7 +110,7 @@ The API returns the following output format:
 - **`images`** (`list<Image>`, _required_):
   Generated images
   - Array of Image
-  - Examples: [{"url":"https://v3b.fal.media/files/b/0a8d069f/8kVewB_BV3u0f8vORGZYy_4b654d5a07b64b498ebdb091a76611ad.png","file_name":"4b654d5a07b64b498ebdb091a76611ad.png","content_type":"image/png","file_size":1748857}]
+  - Examples: [{"file_name":"4b654d5a07b64b498ebdb091a76611ad.png","file_size":1748857,"url":"https://v3b.fal.media/files/b/0a8d069f/8kVewB_BV3u0f8vORGZYy_4b654d5a07b64b498ebdb091a76611ad.png","content_type":"image/png"}]
 
 
 
@@ -120,10 +120,10 @@ The API returns the following output format:
 {
   "images": [
     {
-      "url": "https://v3b.fal.media/files/b/0a8d069f/8kVewB_BV3u0f8vORGZYy_4b654d5a07b64b498ebdb091a76611ad.png",
       "file_name": "4b654d5a07b64b498ebdb091a76611ad.png",
-      "content_type": "image/png",
-      "file_size": 1748857
+      "file_size": 1748857,
+      "url": "https://v3b.fal.media/files/b/0a8d069f/8kVewB_BV3u0f8vORGZYy_4b654d5a07b64b498ebdb091a76611ad.png",
+      "content_type": "image/png"
     }
   ]
 }
@@ -140,7 +140,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "A poster design says 'Kling Omni 3 Image is available on fal' with a cool font in the background as several rows and big font size. Big gap between the rows. High fashion model wearing a dress made entirely of living moss and small white flowers, standing in an abandoned greenhouse, shafts of light, editorial photography."
+     "prompt": "A poster design says '\''Kling Omni 3 Image is available on fal'\'' with a cool font in the background as several rows and big font size. Big gap between the rows. High fashion model wearing a dress made entirely of living moss and small white flowers, standing in an abandoned greenhouse, shafts of light, editorial photography."
    }'
 ```
 

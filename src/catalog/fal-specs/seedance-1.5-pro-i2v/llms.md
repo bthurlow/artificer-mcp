@@ -134,7 +134,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "A man is crying and he says \"I shouldn't have done it. I regret everything\"",
+     "prompt": "A man is crying and he says \"I shouldn'\''t have done it. I regret everything\"",
      "image_url": "https://v3b.fal.media/files/b/0a8773cd/REzCWn1BKUVuMFTxR-R3W_image_317.png"
    }'
 ```

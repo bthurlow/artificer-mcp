@@ -71,27 +71,14 @@
         ]
       },
       "Gemini31FlashTtsInput": {
+        "required": [
+          "prompt"
+        ],
         "properties": {
-          "temperature": {
-            "default": 1,
-            "description": "Controls the randomness of the speech output. Higher values produce more creative and varied delivery, while lower values make the output more predictable and focused.",
-            "minimum": 0,
-            "title": "Temperature",
-            "type": "number",
-            "maximum": 2
-          },
-          "output_format": {
-            "enum": [
-              "wav",
-              "mp3",
-              "ogg_opus"
-            ],
-            "default": "mp3",
-            "title": "Output Format",
-            "type": "string",
-            "description": "Audio output format. mp3: compressed, small file size (recommended). wav: uncompressed PCM wrapped in WAV (24 kHz, 16-bit mono). ogg_opus: Ogg container with Opus codec, good quality-to-size ratio."
-          },
           "voice": {
+            "title": "Voice",
+            "default": "Kore",
+            "type": "string",
             "enum": [
               "Achernar",
               "Achird",
@@ -124,31 +111,81 @@
               "Zephyr",
               "Zubenelgenubi"
             ],
-            "default": "Kore",
-            "title": "Voice",
-            "type": "string",
             "description": "Voice preset for single-speaker synthesis. 30 distinct voices are available. Ignored when speakers is set. Popular choices: Kore (strong, firm female), Puck (upbeat, lively male), Charon (calm, professional male), Zephyr (bright, clear female), Aoede (warm, melodic female)."
           },
-          "speakers": {
+          "style_instructions": {
+            "title": "Style Instructions",
             "anyOf": [
               {
-                "minItems": 2,
-                "type": "array",
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "Say the following in a warm, conversational tone",
+              "Read this as a dramatic newscast with gravitas",
+              "Speak with a British accent, cheerfully and energetically"
+            ],
+            "description": "Optional style and delivery instructions prepended to the prompt. Controls expressiveness, accent, pace, tone, and emotional expression using natural language. Use this to separate style control from the text content. Examples: 'Speak warmly and slowly', 'Read this as a dramatic newscast', 'Use a British accent with a cheerful tone', 'Whisper mysteriously'."
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "default": true,
+            "type": "boolean",
+            "description": "Check input content for safety. Disabling requires account authorization."
+          },
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "I can't believe it worked! [laughing] After all those hours of debugging [sigh] it was just a missing semicolon."
+            ],
+            "type": "string",
+            "minLength": 1,
+            "description": "The text to convert to speech. Gemini 3.1 Flash TTS supports natural-language prompting for style, pace, accent, and emotional expression — include delivery instructions inline with the text (e.g. 'Say cheerfully: Have a wonderful day!'). Supports expressive audio tags like [sigh], [laughing], [whispering], [short pause] for fine-grained control over delivery. For multi-speaker synthesis, prefix lines with speaker aliases defined in the speakers field (e.g. 'Alice: Hello!\\nBob: Hi!').",
+            "maxLength": 50000
+          },
+          "temperature": {
+            "title": "Temperature",
+            "default": 1,
+            "type": "number",
+            "description": "Controls the randomness of the speech output. Higher values produce more creative and varied delivery, while lower values make the output more predictable and focused.",
+            "maximum": 2,
+            "minimum": 0
+          },
+          "output_format": {
+            "title": "Output Format",
+            "default": "mp3",
+            "type": "string",
+            "enum": [
+              "wav",
+              "mp3",
+              "ogg_opus"
+            ],
+            "description": "Audio output format. mp3: compressed, small file size (recommended). wav: uncompressed PCM wrapped in WAV (24 kHz, 16-bit mono). ogg_opus: Ogg container with Opus codec, good quality-to-size ratio."
+          },
+          "speakers": {
+            "title": "Speakers",
+            "anyOf": [
+              {
                 "items": {
                   "$ref": "#/components/schemas/SpeakerConfig"
                 },
+                "type": "array",
+                "minItems": 2,
                 "maxItems": 10
               },
               {
-                "minItems": 0,
                 "type": "array",
+                "minItems": 0,
                 "maxItems": 0
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Speakers",
             "examples": [
               [
                 {
@@ -163,25 +200,11 @@
             ],
             "description": "Multi-speaker voice configuration. When set, enables multi-speaker synthesis where different parts of the text are spoken by different voices. Each speaker needs a voice and a speaker_id (alias) that matches prefixes in the prompt."
           },
-          "prompt": {
-            "type": "string",
-            "maxLength": 50000,
-            "title": "Prompt",
-            "minLength": 1,
-            "examples": [
-              "I can't believe it worked! [laughing] After all those hours of debugging [sigh] it was just a missing semicolon."
-            ],
-            "description": "The text to convert to speech. Gemini 3.1 Flash TTS supports natural-language prompting for style, pace, accent, and emotional expression — include delivery instructions inline with the text (e.g. 'Say cheerfully: Have a wonderful day!'). Supports expressive audio tags like [sigh], [laughing], [whispering], [short pause] for fine-grained control over delivery. For multi-speaker synthesis, prefix lines with speaker aliases defined in the speakers field (e.g. 'Alice: Hello!\\nBob: Hi!')."
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "title": "Enable Safety Checker",
-            "type": "boolean",
-            "description": "Check input content for safety. Disabling requires account authorization."
-          },
           "language_code": {
+            "title": "Language Code",
             "anyOf": [
               {
+                "type": "string",
                 "enum": [
                   "Arabic (Egypt)",
                   "Bangla (Bangladesh)",
@@ -270,43 +293,20 @@
                   "Swahili (Kenya)",
                   "Swedish (Sweden)",
                   "Urdu (Pakistan)"
-                ],
-                "type": "string"
+                ]
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Language Code",
             "examples": [
               "English (US)",
               "French (France)",
               "Japanese (Japan)"
             ],
             "description": "Language for multilingual synthesis. When set, steers the model to speak in the specified language. If not set, the model auto-detects the language from the text."
-          },
-          "style_instructions": {
-            "anyOf": [
-              {
-                "maxLength": 4000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Style Instructions",
-            "examples": [
-              "Say the following in a warm, conversational tone",
-              "Read this as a dramatic newscast with gravitas",
-              "Speak with a British accent, cheerfully and energetically"
-            ],
-            "description": "Optional style and delivery instructions prepended to the prompt. Controls expressiveness, accent, pace, tone, and emotional expression using natural language. Use this to separate style control from the text content. Examples: 'Speak warmly and slowly', 'Read this as a dramatic newscast', 'Use a British accent with a cheerful tone', 'Whisper mysteriously'."
           }
         },
-        "required": [
-          "prompt"
-        ],
         "x-fal-order-properties": [
           "prompt",
           "style_instructions",
@@ -317,35 +317,41 @@
           "output_format",
           "enable_safety_checker"
         ],
-        "title": "Gemini31FlashTTSInput",
         "type": "object",
+        "title": "Gemini31FlashTTSInput",
         "description": "Input for Gemini 3.1 Flash TTS preview speech generation."
       },
       "Gemini31FlashTtsOutput": {
+        "required": [
+          "audio"
+        ],
         "properties": {
           "audio": {
-            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v3b.fal.media/files/b/0a935d4f/Ez4NpcnFTuGsu2FHDaJTR_gemini_tts_output.mp3"
               }
             ],
+            "$ref": "#/components/schemas/File",
             "description": "The generated audio file."
           }
         },
-        "required": [
-          "audio"
-        ],
         "x-fal-order-properties": [
           "audio"
         ],
-        "title": "GeminiTTSOutput",
         "type": "object",
+        "title": "GeminiTTSOutput",
         "description": "Output for Gemini text-to-speech generation."
       },
       "SpeakerConfig": {
+        "required": [
+          "voice",
+          "speaker_id"
+        ],
         "properties": {
           "voice": {
+            "title": "Voice",
+            "type": "string",
             "enum": [
               "Achernar",
               "Achird",
@@ -378,57 +384,35 @@
               "Zephyr",
               "Zubenelgenubi"
             ],
-            "title": "Voice",
-            "type": "string",
             "description": "Voice preset for this speaker."
           },
           "speaker_id": {
             "title": "Speaker Id",
-            "pattern": "^\\w+$",
-            "type": "string",
             "examples": [
               "Speaker1",
               "Alice",
               "Narrator"
             ],
-            "description": "Alias used to identify this speaker in the prompt. Use this alias as a prefix in the prompt field, e.g. 'Alice: Hello! Bob: Hi there!'. Must be alphanumeric with no whitespace."
+            "type": "string",
+            "description": "Alias used to identify this speaker in the prompt. Use this alias as a prefix in the prompt field, e.g. 'Alice: Hello! Bob: Hi there!'. Must be alphanumeric with no whitespace.",
+            "pattern": "^\\w+$"
           }
         },
-        "required": [
-          "voice",
-          "speaker_id"
-        ],
         "x-fal-order-properties": [
           "voice",
           "speaker_id"
         ],
-        "title": "SpeakerConfig",
         "type": "object",
+        "title": "SpeakerConfig",
         "description": "Voice configuration for a single speaker in multi-speaker synthesis."
       },
       "File": {
+        "required": [
+          "url"
+        ],
         "properties": {
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
-          },
           "content_type": {
+            "title": "Content Type",
             "anyOf": [
               {
                 "type": "string"
@@ -437,13 +421,28 @@
                 "type": "null"
               }
             ],
-            "title": "Content Type",
             "examples": [
               "image/png"
             ],
             "description": "The mime type of the file."
           },
+          "file_name": {
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
           "file_size": {
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -452,11 +451,15 @@
                 "type": "null"
               }
             ],
-            "title": "File Size",
             "examples": [
               4404019
             ],
             "description": "The size of the file in bytes."
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
           }
         },
         "x-fal-order-properties": [
@@ -465,11 +468,8 @@
           "file_name",
           "file_size"
         ],
-        "title": "File",
         "type": "object",
-        "required": [
-          "url"
-        ]
+        "title": "File"
       }
     }
   },

@@ -71,6 +71,11 @@
         ]
       },
       "Sam31ImageInput": {
+        "required": [
+          "image_url"
+        ],
+        "title": "SAM31ImageInput",
+        "type": "object",
         "x-fal-order-properties": [
           "image_url",
           "prompt",
@@ -84,19 +89,67 @@
           "include_scores",
           "include_boxes"
         ],
-        "required": [
-          "image_url"
-        ],
-        "title": "SAM31ImageInput",
-        "type": "object",
         "properties": {
-          "max_masks": {
-            "maximum": 32,
-            "default": 3,
-            "minimum": 1,
-            "title": "Max Masks",
-            "description": "Maximum number of masks to return when `return_multiple_masks` is enabled.",
-            "type": "integer"
+          "include_boxes": {
+            "description": "Whether to include bounding boxes for each mask (when available).",
+            "title": "Include Boxes",
+            "type": "boolean",
+            "default": false
+          },
+          "point_prompts": {
+            "items": {
+              "$ref": "#/components/schemas/PointPrompt"
+            },
+            "title": "Point Prompts",
+            "type": "array",
+            "default": [],
+            "description": "List of point prompts"
+          },
+          "sync_mode": {
+            "description": "If True, the media will be returned as a data URI.",
+            "title": "Sync Mode",
+            "type": "boolean",
+            "default": false
+          },
+          "apply_mask": {
+            "description": "Apply the mask on the image.",
+            "title": "Apply Mask",
+            "type": "boolean",
+            "default": true
+          },
+          "box_prompts": {
+            "items": {
+              "$ref": "#/components/schemas/BoxPrompt"
+            },
+            "title": "Box Prompts",
+            "type": "array",
+            "default": [],
+            "description": "Box prompt coordinates (x_min, y_min, x_max, y_max). Multiple boxes supported - use object_id to group boxes for the same object or leave empty for separate objects."
+          },
+          "prompt": {
+            "description": "Text prompt for segmentation",
+            "title": "Prompt",
+            "type": "string",
+            "default": "wheel",
+            "examples": [
+              "wheel",
+              "person",
+              "car"
+            ]
+          },
+          "return_multiple_masks": {
+            "description": "If True, upload and return multiple generated masks as defined by `max_masks`.",
+            "title": "Return Multiple Masks",
+            "type": "boolean",
+            "default": false
+          },
+          "image_url": {
+            "description": "URL of the image to be segmented",
+            "title": "Image Url",
+            "type": "string",
+            "examples": [
+              "https://raw.githubusercontent.com/facebookresearch/segment-anything-2/main/notebooks/images/truck.jpg"
+            ]
           },
           "output_format": {
             "enum": [
@@ -104,81 +157,33 @@
               "png",
               "webp"
             ],
-            "default": "png",
-            "title": "Output Format",
             "description": "The format of the generated image.",
-            "type": "string"
+            "title": "Output Format",
+            "type": "string",
+            "default": "png"
           },
-          "include_boxes": {
-            "default": false,
-            "title": "Include Boxes",
-            "description": "Whether to include bounding boxes for each mask (when available).",
-            "type": "boolean"
-          },
-          "return_multiple_masks": {
-            "default": false,
-            "title": "Return Multiple Masks",
-            "description": "If True, upload and return multiple generated masks as defined by `max_masks`.",
-            "type": "boolean"
-          },
-          "point_prompts": {
-            "title": "Point Prompts",
-            "default": [],
-            "items": {
-              "$ref": "#/components/schemas/PointPrompt"
-            },
-            "description": "List of point prompts",
-            "type": "array"
-          },
-          "image_url": {
-            "examples": [
-              "https://raw.githubusercontent.com/facebookresearch/segment-anything-2/main/notebooks/images/truck.jpg"
-            ],
-            "title": "Image Url",
-            "description": "URL of the image to be segmented",
-            "type": "string"
-          },
-          "apply_mask": {
-            "default": true,
-            "title": "Apply Mask",
-            "description": "Apply the mask on the image.",
-            "type": "boolean"
-          },
-          "box_prompts": {
-            "title": "Box Prompts",
-            "default": [],
-            "items": {
-              "$ref": "#/components/schemas/BoxPrompt"
-            },
-            "description": "Box prompt coordinates (x_min, y_min, x_max, y_max). Multiple boxes supported - use object_id to group boxes for the same object or leave empty for separate objects.",
-            "type": "array"
-          },
-          "prompt": {
-            "default": "wheel",
-            "examples": [
-              "wheel",
-              "person",
-              "car"
-            ],
-            "title": "Prompt",
-            "description": "Text prompt for segmentation",
-            "type": "string"
-          },
-          "sync_mode": {
-            "default": false,
-            "title": "Sync Mode",
-            "description": "If True, the media will be returned as a data URI.",
-            "type": "boolean"
+          "max_masks": {
+            "description": "Maximum number of masks to return when `return_multiple_masks` is enabled.",
+            "maximum": 32,
+            "type": "integer",
+            "default": 3,
+            "title": "Max Masks",
+            "minimum": 1
           },
           "include_scores": {
-            "default": false,
-            "title": "Include Scores",
             "description": "Whether to include mask confidence scores.",
-            "type": "boolean"
+            "title": "Include Scores",
+            "type": "boolean",
+            "default": false
           }
         }
       },
       "Sam31ImageOutput": {
+        "required": [
+          "masks"
+        ],
+        "title": "SAM31ImageOutput",
+        "type": "object",
         "x-fal-order-properties": [
           "image",
           "masks",
@@ -186,13 +191,25 @@
           "scores",
           "boxes"
         ],
-        "required": [
-          "masks"
-        ],
-        "title": "SAM31ImageOutput",
-        "type": "object",
         "properties": {
+          "metadata": {
+            "description": "Per-mask metadata including scores and boxes.",
+            "title": "Metadata",
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/MaskMetadata"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "boxes": {
+            "description": "Per-mask normalized bounding boxes [cx, cy, w, h] when requested.",
+            "title": "Boxes",
             "anyOf": [
               {
                 "items": {
@@ -213,11 +230,22 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Boxes",
-            "description": "Per-mask normalized bounding boxes [cx, cy, w, h] when requested."
+            ]
+          },
+          "image": {
+            "description": "Primary segmented mask preview.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Image"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "scores": {
+            "description": "Per-mask confidence scores when requested.",
+            "title": "Scores",
             "anyOf": [
               {
                 "items": {
@@ -235,47 +263,21 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Scores",
-            "description": "Per-mask confidence scores when requested."
-          },
-          "image": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/Image"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Primary segmented mask preview."
+            ]
           },
           "masks": {
-            "title": "Masks",
             "items": {
               "$ref": "#/components/schemas/Image"
             },
-            "description": "Segmented mask images.",
-            "type": "array"
-          },
-          "metadata": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/MaskMetadata"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Metadata",
-            "description": "Per-mask metadata including scores and boxes."
+            "title": "Masks",
+            "type": "array",
+            "description": "Segmented mask images."
           }
         }
       },
       "PointPrompt": {
+        "title": "PointPrompt",
+        "type": "object",
         "x-fal-order-properties": [
           "x",
           "y",
@@ -283,10 +285,10 @@
           "object_id",
           "frame_index"
         ],
-        "title": "PointPrompt",
-        "type": "object",
         "properties": {
           "label": {
+            "description": "1 for foreground, 0 for background",
+            "title": "Label",
             "anyOf": [
               {
                 "enum": [
@@ -298,11 +300,11 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Label",
-            "description": "1 for foreground, 0 for background"
+            ]
           },
           "x": {
+            "description": "X Coordinate of the prompt",
+            "title": "X",
             "anyOf": [
               {
                 "type": "integer"
@@ -310,23 +312,11 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "X",
-            "description": "X Coordinate of the prompt"
+            ]
           },
           "frame_index": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "description": "The frame index to interact with.",
             "title": "Frame Index",
-            "description": "The frame index to interact with."
-          },
-          "object_id": {
             "anyOf": [
               {
                 "type": "integer"
@@ -334,11 +324,11 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Object Id",
-            "description": "Optional object identifier. Prompts sharing an object id refine the same object. When a text prompt is also given, the id selects which detected object the points refine."
+            ]
           },
           "y": {
+            "description": "Y Coordinate of the prompt",
+            "title": "Y",
             "anyOf": [
               {
                 "type": "integer"
@@ -346,13 +336,25 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Y",
-            "description": "Y Coordinate of the prompt"
+            ]
+          },
+          "object_id": {
+            "description": "Optional object identifier. Prompts sharing an object id refine the same object. When a text prompt is also given, the id selects which detected object the points refine.",
+            "title": "Object Id",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         }
       },
       "BoxPrompt": {
+        "title": "BoxPrompt",
+        "type": "object",
         "x-fal-order-properties": [
           "x_min",
           "y_min",
@@ -361,34 +363,10 @@
           "object_id",
           "frame_index"
         ],
-        "title": "BoxPrompt",
-        "type": "object",
         "properties": {
-          "x_max": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "X Max",
-            "description": "X Max Coordinate of the box"
-          },
           "y_max": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "description": "Y Max Coordinate of the box",
             "title": "Y Max",
-            "description": "Y Max Coordinate of the box"
-          },
-          "y_min": {
             "anyOf": [
               {
                 "type": "integer"
@@ -396,23 +374,11 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Y Min",
-            "description": "Y Min Coordinate of the box"
-          },
-          "frame_index": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Frame Index",
-            "description": "The frame index to interact with."
+            ]
           },
           "object_id": {
+            "description": "Optional object identifier. Boxes sharing an object id refine the same object.",
+            "title": "Object Id",
             "anyOf": [
               {
                 "type": "integer"
@@ -420,71 +386,47 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Object Id",
-            "description": "Optional object identifier. Boxes sharing an object id refine the same object."
+            ]
+          },
+          "y_min": {
+            "description": "Y Min Coordinate of the box",
+            "title": "Y Min",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "frame_index": {
+            "description": "The frame index to interact with.",
+            "title": "Frame Index",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "x_max": {
+            "description": "X Max Coordinate of the box",
+            "title": "X Max",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "x_min": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "description": "X Min Coordinate of the box",
             "title": "X Min",
-            "description": "X Min Coordinate of the box"
-          }
-        }
-      },
-      "Image": {
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size",
-          "width",
-          "height"
-        ],
-        "type": "object",
-        "required": [
-          "url"
-        ],
-        "title": "Image",
-        "description": "Represents an image file.",
-        "properties": {
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "title": "Content Type",
-            "description": "The mime type of the file."
-          },
-          "width": {
             "anyOf": [
               {
                 "type": "integer"
@@ -492,63 +434,25 @@
               {
                 "type": "null"
               }
-            ],
-            "examples": [
-              1024
-            ],
-            "title": "Width",
-            "description": "The width of the image in pixels."
-          },
-          "file_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              4404019
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
-          },
-          "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              1024
-            ],
-            "title": "Height",
-            "description": "The height of the image in pixels."
-          },
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
+            ]
           }
         }
       },
       "MaskMetadata": {
-        "x-fal-order-properties": [
-          "index",
-          "score",
-          "box"
-        ],
         "required": [
           "index"
         ],
         "title": "MaskMetadata",
         "type": "object",
+        "x-fal-order-properties": [
+          "index",
+          "score",
+          "box"
+        ],
         "properties": {
           "box": {
+            "description": "Bounding box for the mask in normalized cxcywh coordinates.",
+            "title": "Box",
             "anyOf": [
               {
                 "items": {
@@ -559,11 +463,11 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Box",
-            "description": "Bounding box for the mask in normalized cxcywh coordinates."
+            ]
           },
           "score": {
+            "description": "Score for this mask.",
+            "title": "Score",
             "anyOf": [
               {
                 "type": "number"
@@ -571,16 +475,112 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Score",
-            "description": "Score for this mask."
+            ]
           },
           "index": {
-            "title": "Index",
             "description": "Index of the mask inside the model output.",
+            "title": "Index",
             "type": "integer"
           }
         }
+      },
+      "Image": {
+        "required": [
+          "url"
+        ],
+        "description": "Represents an image file.",
+        "title": "Image",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "properties": {
+          "width": {
+            "description": "The width of the image in pixels.",
+            "title": "Width",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              1024
+            ]
+          },
+          "file_size": {
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ]
+          },
+          "content_type": {
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "file_name": {
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "height": {
+            "description": "The height of the image in pixels.",
+            "title": "Height",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              1024
+            ]
+          }
+        },
+        "type": "object"
       }
     }
   },

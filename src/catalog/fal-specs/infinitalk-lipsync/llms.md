@@ -35,7 +35,7 @@ The API accepts the following input parameters:
   - Examples: "https://v3.fal.media/files/koala/gmpc0QevDF9bBsL1EAYVF_1c637094161147559f0910a68275dc34.png"
 
 - **`audio_url`** (`string`, _required_):
-  The URL of the audio file.
+  The URL of the audio file (max 600 seconds).
   - Examples: "https://v3.fal.media/files/penguin/PtiCYda53E9Dav25QmQYI_output.mp3"
 
 - **`prompt`** (`string`, _required_):
@@ -100,7 +100,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video file.
-  - Examples: {"file_name":"74af6c0bdd6041c3b1130d54885e3eee.mp4","url":"https://v3.fal.media/files/kangaroo/z6VqUwNTwzuWa6YE1g7In_74af6c0bdd6041c3b1130d54885e3eee.mp4","content_type":"application/octet-stream","file_size":515275}
+  - Examples: {"url":"https://v3.fal.media/files/kangaroo/z6VqUwNTwzuWa6YE1g7In_74af6c0bdd6041c3b1130d54885e3eee.mp4","file_size":515275,"file_name":"74af6c0bdd6041c3b1130d54885e3eee.mp4","content_type":"application/octet-stream"}
 
 - **`seed`** (`integer`, _required_):
   The seed used for generation.
@@ -112,10 +112,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_name": "74af6c0bdd6041c3b1130d54885e3eee.mp4",
     "url": "https://v3.fal.media/files/kangaroo/z6VqUwNTwzuWa6YE1g7In_74af6c0bdd6041c3b1130d54885e3eee.mp4",
-    "content_type": "application/octet-stream",
-    "file_size": 515275
+    "file_size": 515275,
+    "file_name": "74af6c0bdd6041c3b1130d54885e3eee.mp4",
+    "content_type": "application/octet-stream"
   }
 }
 ```

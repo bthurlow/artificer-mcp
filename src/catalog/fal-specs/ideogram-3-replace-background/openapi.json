@@ -71,6 +71,11 @@
         ]
       },
       "IdeogramV3ReplaceBackgroundInput": {
+        "title": "ReplaceBackgroundInputV3",
+        "required": [
+          "prompt",
+          "image_url"
+        ],
         "x-fal-order-properties": [
           "image_urls",
           "rendering_speed",
@@ -87,30 +92,37 @@
           "enable_safety_checker"
         ],
         "properties": {
-          "seed": {
-            "title": "Seed",
+          "style_codes": {
+            "title": "Style Codes",
             "anyOf": [
               {
-                "type": "integer"
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Seed for the random number generator"
+            "description": "A list of 8 character hexadecimal codes representing the style of the image. Cannot be used in conjunction with style_reference_images or style"
           },
-          "prompt": {
-            "description": "Cyber punk city with neon lights and skyscrappers",
-            "title": "Prompt",
+          "rendering_speed": {
+            "title": "Rendering Speed",
+            "enum": [
+              "TURBO",
+              "BALANCED",
+              "QUALITY"
+            ],
             "type": "string",
-            "examples": [
-              "A beautiful sunset over mountains that writes Ideogram v3 in fal.ai"
-            ]
+            "default": "BALANCED",
+            "description": "The rendering speed to use."
           },
           "style_preset": {
             "title": "Style Preset",
             "anyOf": [
               {
+                "type": "string",
                 "enum": [
                   "80S_ILLUSTRATION",
                   "90S_NOSTALGIA",
@@ -174,8 +186,7 @@
                   "WATERCOLOR",
                   "WEIRD",
                   "WOODBLOCK_PRINT"
-                ],
-                "type": "string"
+                ]
               },
               {
                 "type": "null"
@@ -183,30 +194,19 @@
             ],
             "description": "Style preset for generation. The chosen style preset will guide the generation."
           },
-          "sync_mode": {
-            "title": "Sync Mode",
-            "default": false,
-            "type": "boolean",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
-          },
-          "rendering_speed": {
-            "enum": [
-              "TURBO",
-              "BALANCED",
-              "QUALITY"
-            ],
-            "title": "Rendering Speed",
-            "default": "BALANCED",
-            "type": "string",
-            "description": "The rendering speed to use."
-          },
           "num_images": {
             "title": "Num Images",
             "maximum": 8,
-            "default": 1,
             "minimum": 1,
             "type": "integer",
+            "default": 1,
             "description": "Number of images to generate."
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "type": "boolean",
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening."
           },
           "color_palette": {
             "anyOf": [
@@ -219,38 +219,39 @@
             ],
             "description": "A color palette for generation, must EITHER be specified via one of the presets (name) or explicitly via hexadecimal representations of the color with optional weights (members)"
           },
-          "style_codes": {
-            "title": "Style Codes",
+          "seed": {
+            "title": "Seed",
             "anyOf": [
               {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "A list of 8 character hexadecimal codes representing the style of the image. Cannot be used in conjunction with style_reference_images or style"
+            "description": "Seed for the random number generator"
           },
-          "style": {
-            "title": "Style",
-            "anyOf": [
-              {
-                "enum": [
-                  "AUTO",
-                  "GENERAL",
-                  "REALISTIC",
-                  "DESIGN"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
+          "sync_mode": {
+            "title": "Sync Mode",
+            "type": "boolean",
+            "default": false,
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
+          },
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "A beautiful sunset over mountains that writes Ideogram v3 in fal.ai"
             ],
-            "description": "The style type to generate with. Cannot be used with style_codes."
+            "type": "string",
+            "description": "Cyber punk city with neon lights and skyscrappers"
+          },
+          "image_url": {
+            "title": "Image URL",
+            "examples": [
+              "https://v3.fal.media/files/rabbit/F6dvKPFL9VzKiM8asJOgm_MJj6yUB6rGjTsv_1YHIcA_image.webp"
+            ],
+            "type": "string",
+            "description": "The image URL whose background needs to be replaced"
           },
           "image_urls": {
             "title": "Image Urls",
@@ -267,98 +268,76 @@
             ],
             "description": "A set of images to use as style references (maximum total size 10MB across all style references). The images should be in JPEG, PNG or WebP format"
           },
+          "style": {
+            "title": "Style",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "AUTO",
+                  "GENERAL",
+                  "REALISTIC",
+                  "DESIGN"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The style type to generate with. Cannot be used with style_codes."
+          },
           "enable_prompt_expansion": {
             "title": "Enable Prompt Expansion",
-            "default": true,
             "type": "boolean",
+            "default": true,
             "description": "Determine if MagicPrompt should be used in generating the request or not."
-          },
-          "image_url": {
-            "description": "The image URL whose background needs to be replaced",
-            "title": "Image URL",
-            "type": "string",
-            "examples": [
-              "https://v3.fal.media/files/rabbit/F6dvKPFL9VzKiM8asJOgm_MJj6yUB6rGjTsv_1YHIcA_image.webp"
-            ]
-          },
-          "enable_safety_checker": {
-            "title": "Enable Safety Checker",
-            "default": true,
-            "type": "boolean",
-            "description": "Authorized callers may set false to request relaxed screening."
           }
         },
-        "required": [
-          "prompt",
-          "image_url"
-        ],
-        "type": "object",
-        "title": "ReplaceBackgroundInputV3"
+        "type": "object"
       },
       "IdeogramV3ReplaceBackgroundOutput": {
+        "title": "ReplaceBackgroundOutputV3",
+        "required": [
+          "images",
+          "seed"
+        ],
         "x-fal-order-properties": [
           "images",
           "seed"
         ],
         "properties": {
-          "seed": {
-            "description": "Seed used for the random number generator",
-            "title": "Seed",
-            "type": "integer",
-            "examples": [
-              123456
-            ]
-          },
           "images": {
             "title": "Images",
             "items": {
               "$ref": "#/components/schemas/File"
             },
-            "type": "array",
             "examples": [
               [
                 {
                   "url": "https://v3.fal.media/files/lion/AUfCjtLkLOsdc9zEFrV-5_image.png"
                 }
               ]
-            ]
+            ],
+            "type": "array"
+          },
+          "seed": {
+            "title": "Seed",
+            "examples": [
+              123456
+            ],
+            "type": "integer",
+            "description": "Seed used for the random number generator"
           }
         },
-        "required": [
-          "images",
-          "seed"
-        ],
-        "type": "object",
-        "title": "ReplaceBackgroundOutputV3"
+        "type": "object"
       },
       "ColorPalette": {
+        "title": "ColorPalette",
         "x-fal-order-properties": [
           "members",
           "name"
         ],
         "properties": {
-          "name": {
-            "title": "Name",
-            "anyOf": [
-              {
-                "enum": [
-                  "EMBER",
-                  "FRESH",
-                  "JUNGLE",
-                  "MAGIC",
-                  "MELON",
-                  "MOSAIC",
-                  "PASTEL",
-                  "ULTRAMARINE"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "A color palette preset value"
-          },
           "members": {
             "title": "Members",
             "anyOf": [
@@ -373,12 +352,37 @@
               }
             ],
             "description": "A list of color palette members that define the color palette"
+          },
+          "name": {
+            "title": "Name",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "EMBER",
+                  "FRESH",
+                  "JUNGLE",
+                  "MAGIC",
+                  "MELON",
+                  "MOSAIC",
+                  "PASTEL",
+                  "ULTRAMARINE"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A color palette preset value"
           }
         },
-        "type": "object",
-        "title": "ColorPalette"
+        "type": "object"
       },
       "File": {
+        "title": "File",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -386,38 +390,12 @@
           "file_size"
         ],
         "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ]
-          },
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              4404019
-            ]
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
           },
           "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "title": "File Name",
             "anyOf": [
               {
@@ -429,21 +407,47 @@
             ],
             "examples": [
               "z9RV14K95DvU.png"
-            ]
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
           },
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
+          "file_size": {
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes."
+          },
+          "content_type": {
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
           }
         },
-        "required": [
-          "url"
-        ],
-        "type": "object",
-        "title": "File"
+        "type": "object"
       },
       "ColorPaletteMember": {
+        "title": "ColorPaletteMember",
+        "required": [
+          "rgb"
+        ],
         "x-fal-order-properties": [
           "rgb",
           "color_weight"
@@ -469,46 +473,42 @@
             "description": "RGB color value for the palette member"
           }
         },
-        "required": [
-          "rgb"
-        ],
-        "type": "object",
-        "title": "ColorPaletteMember"
+        "type": "object"
       },
       "RGBColor": {
+        "title": "RGBColor",
         "x-fal-order-properties": [
           "r",
           "g",
           "b"
         ],
         "properties": {
+          "r": {
+            "title": "R",
+            "maximum": 255,
+            "minimum": 0,
+            "type": "integer",
+            "default": 0,
+            "description": "Red color value"
+          },
           "b": {
             "title": "B",
             "maximum": 255,
-            "default": 0,
             "minimum": 0,
             "type": "integer",
+            "default": 0,
             "description": "Blue color value"
           },
           "g": {
             "title": "G",
             "maximum": 255,
-            "default": 0,
             "minimum": 0,
             "type": "integer",
+            "default": 0,
             "description": "Green color value"
-          },
-          "r": {
-            "title": "R",
-            "maximum": 255,
-            "default": 0,
-            "minimum": 0,
-            "type": "integer",
-            "description": "Red color value"
           }
         },
-        "type": "object",
-        "title": "RGBColor"
+        "type": "object"
       }
     }
   },

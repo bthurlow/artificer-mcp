@@ -85,7 +85,7 @@ The API returns the following output format:
 
 - **`image`** (`Image`, _required_):
   The generated image file info.
-  - Examples: {"file_size":423052,"width":512,"file_name":"36d3ca4791a647678b2ff01a35c87f5a.png","height":512,"content_type":"image/png","url":"https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_restored_1.jpeg"}
+  - Examples: {"file_size":423052,"width":512,"file_name":"36d3ca4791a647678b2ff01a35c87f5a.png","url":"https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_restored_1.jpeg","content_type":"image/png","height":512}
 
 - **`seed`** (`integer`, _required_):
   Seed of the generated Image. It will be the same value of the one passed in the
@@ -101,9 +101,9 @@ The API returns the following output format:
     "file_size": 423052,
     "width": 512,
     "file_name": "36d3ca4791a647678b2ff01a35c87f5a.png",
-    "height": 512,
+    "url": "https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_restored_1.jpeg",
     "content_type": "image/png",
-    "url": "https://storage.googleapis.com/falserverless/model_tests/codeformer/codeformer_restored_1.jpeg"
+    "height": 512
   }
 }
 ```

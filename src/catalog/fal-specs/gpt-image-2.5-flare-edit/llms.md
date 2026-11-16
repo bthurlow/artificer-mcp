@@ -120,7 +120,7 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated images.
   - Array of ImageFile
-  - Examples: [{"content_type":"image/png","url":"https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png","file_name":"yUt7tifLSbg1WzWWgfj2o.png","height":1024,"width":1024}]
+  - Examples: [{"height":1024,"content_type":"image/png","url":"https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png","width":1024,"file_name":"yUt7tifLSbg1WzWWgfj2o.png"}]
 
 
 
@@ -130,11 +130,11 @@ The API returns the following output format:
 {
   "images": [
     {
+      "height": 1024,
       "content_type": "image/png",
       "url": "https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png",
-      "file_name": "yUt7tifLSbg1WzWWgfj2o.png",
-      "height": 1024,
-      "width": 1024
+      "width": 1024,
+      "file_name": "yUt7tifLSbg1WzWWgfj2o.png"
     }
   ]
 }
@@ -151,7 +151,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "Same workers, same beam, same lunch boxes - but they're all on their phones now. One is taking a selfie. One is on a call looking annoyed. Same danger, new priorities. A hard hat has AirPods.",
+     "prompt": "Same workers, same beam, same lunch boxes - but they'\''re all on their phones now. One is taking a selfie. One is on a call looking annoyed. Same danger, new priorities. A hard hat has AirPods.",
      "image_urls": [
        "https://v3b.fal.media/files/b/0a8691af/9Se_1_VX1wzTjjTOpWbs9_bb39c2eb-1a41-4749-b1d0-cf134abc8bbf.png"
      ]

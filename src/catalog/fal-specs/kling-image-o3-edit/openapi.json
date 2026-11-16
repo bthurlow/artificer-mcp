@@ -71,76 +71,33 @@
         ]
       },
       "KlingImageO3ImageToImageInput": {
+        "x-fal-order-properties": [
+          "prompt",
+          "image_urls",
+          "elements",
+          "resolution",
+          "result_type",
+          "num_images",
+          "series_amount",
+          "aspect_ratio",
+          "output_format",
+          "sync_mode",
+          "enable_safety_checker"
+        ],
+        "title": "O3ImageToImageRequest",
+        "type": "object",
+        "required": [
+          "prompt",
+          "image_urls"
+        ],
         "properties": {
-          "series_amount": {
-            "description": "Number of images in series (2-9). Only used when result_type is 'series'.",
-            "title": "Series Amount",
-            "anyOf": [
-              {
-                "maximum": 9,
-                "type": "integer",
-                "minimum": 2
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "resolution": {
-            "enum": [
-              "1K",
-              "2K",
-              "4K"
-            ],
-            "type": "string",
-            "description": "Image generation resolution. 1K: standard, 2K: high-res, 4K: ultra high-res.",
-            "title": "Resolution",
-            "default": "1K"
-          },
-          "output_format": {
-            "enum": [
-              "jpeg",
-              "png",
-              "webp"
-            ],
-            "type": "string",
-            "description": "The format of the generated image.",
-            "title": "Output Format",
-            "default": "png"
-          },
-          "elements": {
-            "description": "Optional: Elements (characters/objects) for face control. Reference in prompt as @Element1, @Element2, etc.",
-            "title": "Elements",
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/ElementInput"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "prompt": {
-            "type": "string",
-            "description": "Text prompt for image generation. Reference images using @Image1, @Image2, etc. (or @Image if only one image). Max 2500 characters.",
-            "title": "Prompt",
-            "examples": [
-              "Transform into photorealistic 3D render, add proper lighting and shadows, realistic materials and textures, maintain exact proportions and design from sketch, product visualization quality"
-            ],
-            "maxLength": 2500
-          },
-          "result_type": {
-            "enum": [
-              "single",
-              "series"
-            ],
-            "type": "string",
-            "description": "Result type. 'single' for one image, 'series' for a series of related images.",
-            "title": "Result Type",
-            "default": "single"
+          "num_images": {
+            "title": "Num Images",
+            "minimum": 1,
+            "type": "integer",
+            "maximum": 9,
+            "description": "Number of images to generate (1-9). Only used when result_type is 'single'.",
+            "default": 1
           },
           "aspect_ratio": {
             "enum": [
@@ -155,212 +112,229 @@
               "auto"
             ],
             "type": "string",
+            "default": "auto",
             "description": "Aspect ratio of generated images. 'auto' intelligently determines based on input content.",
-            "title": "Aspect Ratio",
-            "default": "auto"
+            "title": "Aspect Ratio"
           },
-          "num_images": {
-            "maximum": 9,
-            "type": "integer",
-            "description": "Number of images to generate (1-9). Only used when result_type is 'single'.",
-            "title": "Num Images",
-            "default": 1,
-            "minimum": 1
+          "elements": {
+            "title": "Elements",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/ElementInput"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional: Elements (characters/objects) for face control. Reference in prompt as @Element1, @Element2, etc."
           },
           "sync_mode": {
             "type": "boolean",
+            "default": false,
             "description": "If `True`, the media will be returned as a data URI.",
-            "title": "Sync Mode",
-            "default": false
+            "title": "Sync Mode"
           },
-          "enable_safety_checker": {
-            "type": "boolean",
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "title": "Enable Safety Checker",
-            "default": true
+          "resolution": {
+            "enum": [
+              "1K",
+              "2K",
+              "4K"
+            ],
+            "type": "string",
+            "default": "1K",
+            "description": "Image generation resolution. 1K: standard, 2K: high-res, 4K: ultra high-res.",
+            "title": "Resolution"
+          },
+          "result_type": {
+            "enum": [
+              "single",
+              "series"
+            ],
+            "type": "string",
+            "default": "single",
+            "description": "Result type. 'single' for one image, 'series' for a series of related images.",
+            "title": "Result Type"
+          },
+          "prompt": {
+            "examples": [
+              "Transform into photorealistic 3D render, add proper lighting and shadows, realistic materials and textures, maintain exact proportions and design from sketch, product visualization quality"
+            ],
+            "type": "string",
+            "title": "Prompt",
+            "maxLength": 2500,
+            "description": "Text prompt for image generation. Reference images using @Image1, @Image2, etc. (or @Image if only one image). Max 2500 characters."
+          },
+          "output_format": {
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
+            ],
+            "type": "string",
+            "default": "png",
+            "description": "The format of the generated image.",
+            "title": "Output Format"
           },
           "image_urls": {
-            "items": {
-              "_fal_ui_field": "image",
-              "limit_description": "Max file size: 10.0MB, Min width: 300px, Min height: 300px, Min aspect ratio: 0.40, Max aspect ratio: 2.50, Timeout: 20.0s",
-              "type": "string",
-              "x-fal": {
-                "min_width": 300,
-                "min_height": 300,
-                "max_aspect_ratio": 2.5,
-                "min_aspect_ratio": 0.4,
-                "timeout": 20,
-                "max_file_size": 10485760
-              }
-            },
-            "description": "List of reference images. Reference images in prompt using @Image1, @Image2, etc. (1-indexed). Max 10 images.",
-            "title": "Image Urls",
-            "type": "array",
             "examples": [
               [
                 "https://v3b.fal.media/files/b/0a8d06d1/FTrwBsV9WI5twqMPkqvRh_19db9852c5ed4a109d81c52d27c9e433.png"
               ]
-            ]
+            ],
+            "type": "array",
+            "items": {
+              "_fal_ui_field": "image",
+              "type": "string",
+              "x-fal": {
+                "min_aspect_ratio": 0.4,
+                "min_width": 300,
+                "max_file_size": 10485760,
+                "max_aspect_ratio": 2.5,
+                "timeout": 20,
+                "min_height": 300
+              },
+              "limit_description": "Max file size: 10.0MB, Min width: 300px, Min height: 300px, Min aspect ratio: 0.40, Max aspect ratio: 2.50, Timeout: 20.0s"
+            },
+            "description": "List of reference images. Reference images in prompt using @Image1, @Image2, etc. (1-indexed). Max 10 images.",
+            "title": "Image Urls"
+          },
+          "enable_safety_checker": {
+            "type": "boolean",
+            "default": true,
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "title": "Enable Safety Checker"
+          },
+          "series_amount": {
+            "title": "Series Amount",
+            "anyOf": [
+              {
+                "minimum": 2,
+                "type": "integer",
+                "maximum": 9
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Number of images in series (2-9). Only used when result_type is 'series'."
           }
         },
-        "description": "Request model for Kling O3 Image-to-Image Generation.",
-        "title": "O3ImageToImageRequest",
-        "x-fal-order-properties": [
-          "prompt",
-          "image_urls",
-          "elements",
-          "resolution",
-          "result_type",
-          "num_images",
-          "series_amount",
-          "aspect_ratio",
-          "output_format",
-          "sync_mode",
-          "enable_safety_checker"
-        ],
-        "type": "object",
-        "required": [
-          "prompt",
-          "image_urls"
-        ]
+        "description": "Request model for Kling O3 Image-to-Image Generation."
       },
       "KlingImageO3ImageToImageOutput": {
+        "x-fal-order-properties": [
+          "images"
+        ],
+        "title": "I2IO3ImageOutput",
+        "type": "object",
+        "required": [
+          "images"
+        ],
         "properties": {
           "images": {
+            "examples": [
+              [
+                {
+                  "file_name": "19db9852c5ed4a109d81c52d27c9e433.png",
+                  "file_size": 793847,
+                  "url": "https://v3b.fal.media/files/b/0a8d06d1/FTrwBsV9WI5twqMPkqvRh_19db9852c5ed4a109d81c52d27c9e433.png",
+                  "content_type": "image/png"
+                }
+              ]
+            ],
+            "type": "array",
             "items": {
               "$ref": "#/components/schemas/Image"
             },
             "description": "Generated images",
-            "title": "Images",
-            "type": "array",
-            "examples": [
-              [
-                {
-                  "url": "https://v3b.fal.media/files/b/0a8d06d1/FTrwBsV9WI5twqMPkqvRh_19db9852c5ed4a109d81c52d27c9e433.png",
-                  "file_name": "19db9852c5ed4a109d81c52d27c9e433.png",
-                  "content_type": "image/png",
-                  "file_size": 793847
-                }
-              ]
-            ]
+            "title": "Images"
           }
         },
-        "description": "Output model for Kling O3 Image Generation.",
-        "title": "I2IO3ImageOutput",
-        "x-fal-order-properties": [
-          "images"
-        ],
-        "type": "object",
-        "required": [
-          "images"
-        ]
+        "description": "Output model for Kling O3 Image Generation."
       },
       "ElementInput": {
-        "properties": {
-          "frontal_image_url": {
-            "description": "The frontal image of the element (main view). Optional.",
-            "title": "Frontal Image Url",
-            "anyOf": [
-              {
-                "_fal_ui_field": "image",
-                "limit_description": "Max file size: 10.0MB, Min width: 300px, Min height: 300px, Min aspect ratio: 0.40, Max aspect ratio: 2.50, Timeout: 20.0s",
-                "type": "string",
-                "ui": {
-                  "field": "image"
-                },
-                "x-fal": {
-                  "min_width": 300,
-                  "min_height": 300,
-                  "max_aspect_ratio": 2.5,
-                  "min_aspect_ratio": 0.4,
-                  "timeout": 20,
-                  "max_file_size": 10485760
-                }
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "reference_image_urls": {
-            "description": "Additional reference images from different angles. 0-3 images supported. Optional.",
-            "title": "Reference Image Urls",
-            "anyOf": [
-              {
-                "items": {
-                  "_fal_ui_field": "image",
-                  "limit_description": "Max file size: 10.0MB, Min width: 300px, Min height: 300px, Min aspect ratio: 0.40, Max aspect ratio: 2.50, Timeout: 20.0s",
-                  "type": "string",
-                  "ui": {
-                    "field": "image"
-                  },
-                  "x-fal": {
-                    "min_width": 300,
-                    "min_height": 300,
-                    "max_aspect_ratio": 2.5,
-                    "min_aspect_ratio": 0.4,
-                    "timeout": 20,
-                    "max_file_size": 10485760
-                  }
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "description": "Element input for image generation with face/character control.\n\nCreate an element by providing frontal_image_url (and optionally reference_image_urls).\nAll fields are optional - provide what you have available.",
-        "title": "ElementInput",
         "x-fal-order-properties": [
           "frontal_image_url",
           "reference_image_urls"
         ],
-        "type": "object"
+        "type": "object",
+        "title": "ElementInput",
+        "properties": {
+          "frontal_image_url": {
+            "title": "Frontal Image Url",
+            "anyOf": [
+              {
+                "_fal_ui_field": "image",
+                "ui": {
+                  "field": "image"
+                },
+                "type": "string",
+                "x-fal": {
+                  "min_aspect_ratio": 0.4,
+                  "min_width": 300,
+                  "max_file_size": 10485760,
+                  "max_aspect_ratio": 2.5,
+                  "timeout": 20,
+                  "min_height": 300
+                },
+                "limit_description": "Max file size: 10.0MB, Min width: 300px, Min height: 300px, Min aspect ratio: 0.40, Max aspect ratio: 2.50, Timeout: 20.0s"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The frontal image of the element (main view). Optional."
+          },
+          "reference_image_urls": {
+            "title": "Reference Image Urls",
+            "anyOf": [
+              {
+                "type": "array",
+                "items": {
+                  "_fal_ui_field": "image",
+                  "ui": {
+                    "field": "image"
+                  },
+                  "type": "string",
+                  "x-fal": {
+                    "min_aspect_ratio": 0.4,
+                    "min_width": 300,
+                    "max_file_size": 10485760,
+                    "max_aspect_ratio": 2.5,
+                    "timeout": 20,
+                    "min_height": 300
+                  },
+                  "limit_description": "Max file size: 10.0MB, Min width: 300px, Min height: 300px, Min aspect ratio: 0.40, Max aspect ratio: 2.50, Timeout: 20.0s"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Additional reference images from different angles. 0-3 images supported. Optional."
+          }
+        },
+        "description": "Element input for image generation with face/character control.\n\nCreate an element by providing frontal_image_url (and optionally reference_image_urls).\nAll fields are optional - provide what you have available."
       },
       "Image": {
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "title": "Image",
+        "type": "object",
         "required": [
           "url"
         ],
         "properties": {
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              4404019
-            ]
-          },
-          "url": {
-            "type": "string",
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url"
-          },
-          "width": {
-            "description": "The width of the image in pixels.",
-            "title": "Width",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              1024
-            ]
-          },
           "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "title": "File Name",
             "anyOf": [
               {
@@ -370,27 +344,27 @@
                 "type": "null"
               }
             ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ]
           },
-          "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
+          "width": {
+            "title": "Width",
             "anyOf": [
               {
-                "type": "string"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
+            "description": "The width of the image in pixels.",
             "examples": [
-              "image/png"
+              1024
             ]
           },
           "height": {
-            "description": "The height of the image in pixels.",
             "title": "Height",
             "anyOf": [
               {
@@ -400,22 +374,48 @@
                 "type": "null"
               }
             ],
+            "description": "The height of the image in pixels.",
             "examples": [
               1024
             ]
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "file_size": {
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ]
+          },
+          "content_type": {
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ]
           }
         },
-        "description": "Represents an image file.",
-        "title": "Image",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size",
-          "width",
-          "height"
-        ],
-        "type": "object"
+        "description": "Represents an image file."
       }
     }
   },

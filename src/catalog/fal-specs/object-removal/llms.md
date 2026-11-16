@@ -83,7 +83,7 @@ The API returns the following output format:
 - **`images`** (`list<Image>`, _required_):
   The generated images with objects removed.
   - Array of Image
-  - Examples: [{"file_size":730703,"url":"https://v3.fal.media/files/lion/arYSoJeqWjhbcA8o4budv_85a2309b2c954c85a75120e664adbe17.png","width":1024,"file_name":"85a2309b2c954c85a75120e664adbe17.png","content_type":"image/png","height":768}]
+  - Examples: [{"width":1024,"height":768,"url":"https://v3.fal.media/files/lion/arYSoJeqWjhbcA8o4budv_85a2309b2c954c85a75120e664adbe17.png","content_type":"image/png","file_name":"85a2309b2c954c85a75120e664adbe17.png","file_size":730703}]
 
 
 
@@ -93,12 +93,12 @@ The API returns the following output format:
 {
   "images": [
     {
-      "file_size": 730703,
-      "url": "https://v3.fal.media/files/lion/arYSoJeqWjhbcA8o4budv_85a2309b2c954c85a75120e664adbe17.png",
       "width": 1024,
-      "file_name": "85a2309b2c954c85a75120e664adbe17.png",
+      "height": 768,
+      "url": "https://v3.fal.media/files/lion/arYSoJeqWjhbcA8o4budv_85a2309b2c954c85a75120e664adbe17.png",
       "content_type": "image/png",
-      "height": 768
+      "file_name": "85a2309b2c954c85a75120e664adbe17.png",
+      "file_size": 730703
     }
   ]
 }

@@ -71,6 +71,11 @@
         ]
       },
       "IdeogramV3ReframeInput": {
+        "title": "ReframeImageInputV3",
+        "required": [
+          "image_url",
+          "image_size"
+        ],
         "x-fal-order-properties": [
           "image_urls",
           "rendering_speed",
@@ -86,45 +91,55 @@
           "enable_safety_checker"
         ],
         "properties": {
-          "seed": {
-            "title": "Seed",
+          "style_codes": {
+            "title": "Style Codes",
             "anyOf": [
               {
-                "type": "integer"
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Seed for the random number generator"
+            "description": "A list of 8 character hexadecimal codes representing the style of the image. Cannot be used in conjunction with style_reference_images or style"
           },
-          "image_size": {
-            "description": "The resolution for the reframed output image",
-            "title": "Image Size",
+          "rendering_speed": {
+            "title": "Rendering Speed",
+            "enum": [
+              "TURBO",
+              "BALANCED",
+              "QUALITY"
+            ],
+            "type": "string",
+            "default": "BALANCED",
+            "description": "The rendering speed to use."
+          },
+          "style": {
+            "title": "Style",
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ImageSize"
+                "type": "string",
+                "enum": [
+                  "AUTO",
+                  "GENERAL",
+                  "REALISTIC",
+                  "DESIGN"
+                ]
               },
               {
-                "enum": [
-                  "square_hd",
-                  "square",
-                  "portrait_4_3",
-                  "portrait_16_9",
-                  "landscape_4_3",
-                  "landscape_16_9"
-                ],
-                "type": "string"
+                "type": "null"
               }
             ],
-            "examples": [
-              "square_hd"
-            ]
+            "description": "The style type to generate with. Cannot be used with style_codes."
           },
           "style_preset": {
             "title": "Style Preset",
             "anyOf": [
               {
+                "type": "string",
                 "enum": [
                   "80S_ILLUSTRATION",
                   "90S_NOSTALGIA",
@@ -188,8 +203,7 @@
                   "WATERCOLOR",
                   "WEIRD",
                   "WOODBLOCK_PRINT"
-                ],
-                "type": "string"
+                ]
               },
               {
                 "type": "null"
@@ -197,29 +211,12 @@
             ],
             "description": "Style preset for generation. The chosen style preset will guide the generation."
           },
-          "sync_mode": {
-            "title": "Sync Mode",
-            "default": false,
-            "type": "boolean",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
-          },
-          "rendering_speed": {
-            "enum": [
-              "TURBO",
-              "BALANCED",
-              "QUALITY"
-            ],
-            "title": "Rendering Speed",
-            "default": "BALANCED",
-            "type": "string",
-            "description": "The rendering speed to use."
-          },
           "num_images": {
             "title": "Num Images",
             "maximum": 8,
-            "default": 1,
             "minimum": 1,
             "type": "integer",
+            "default": 1,
             "description": "Number of images to generate."
           },
           "color_palette": {
@@ -233,38 +230,54 @@
             ],
             "description": "A color palette for generation, must EITHER be specified via one of the presets (name) or explicitly via hexadecimal representations of the color with optional weights (members)"
           },
-          "style_codes": {
-            "title": "Style Codes",
+          "seed": {
+            "title": "Seed",
             "anyOf": [
               {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "A list of 8 character hexadecimal codes representing the style of the image. Cannot be used in conjunction with style_reference_images or style"
+            "description": "Seed for the random number generator"
           },
-          "style": {
-            "title": "Style",
+          "sync_mode": {
+            "title": "Sync Mode",
+            "type": "boolean",
+            "default": false,
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
+          },
+          "image_url": {
+            "title": "Image URL",
+            "examples": [
+              "https://v3.fal.media/files/lion/0qJs_qW8nz0wYsXhFa6Tk.png"
+            ],
+            "type": "string",
+            "description": "The image URL to reframe"
+          },
+          "image_size": {
+            "title": "Image Size",
             "anyOf": [
               {
-                "enum": [
-                  "AUTO",
-                  "GENERAL",
-                  "REALISTIC",
-                  "DESIGN"
-                ],
-                "type": "string"
+                "$ref": "#/components/schemas/ImageSize"
               },
               {
-                "type": "null"
+                "type": "string",
+                "enum": [
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9"
+                ]
               }
             ],
-            "description": "The style type to generate with. Cannot be used with style_codes."
+            "examples": [
+              "square_hd"
+            ],
+            "description": "The resolution for the reframed output image"
           },
           "image_urls": {
             "title": "Image Urls",
@@ -281,118 +294,58 @@
             ],
             "description": "A set of images to use as style references (maximum total size 10MB across all style references). The images should be in JPEG, PNG or WebP format"
           },
-          "image_url": {
-            "description": "The image URL to reframe",
-            "title": "Image URL",
-            "type": "string",
-            "examples": [
-              "https://v3.fal.media/files/lion/0qJs_qW8nz0wYsXhFa6Tk.png"
-            ]
-          },
           "enable_safety_checker": {
             "title": "Enable Safety Checker",
-            "default": true,
             "type": "boolean",
+            "default": true,
             "description": "Authorized callers may set false to request relaxed screening."
           }
         },
-        "required": [
-          "image_url",
-          "image_size"
-        ],
-        "type": "object",
-        "title": "ReframeImageInputV3"
+        "type": "object"
       },
       "IdeogramV3ReframeOutput": {
+        "title": "ReframeOutputV3",
+        "required": [
+          "images",
+          "seed"
+        ],
         "x-fal-order-properties": [
           "images",
           "seed"
         ],
         "properties": {
-          "seed": {
-            "description": "Seed used for the random number generator",
-            "title": "Seed",
-            "type": "integer",
-            "examples": [
-              123456
-            ]
-          },
           "images": {
             "title": "Images",
             "items": {
               "$ref": "#/components/schemas/File"
             },
-            "type": "array",
             "examples": [
               [
                 {
                   "url": "https://v3.fal.media/files/zebra/LVW4AhVs3sCxsVKdg3EfT_image.png"
                 }
               ]
-            ]
-          }
-        },
-        "required": [
-          "images",
-          "seed"
-        ],
-        "type": "object",
-        "title": "ReframeOutputV3"
-      },
-      "ImageSize": {
-        "x-fal-order-properties": [
-          "width",
-          "height"
-        ],
-        "properties": {
-          "width": {
-            "title": "Width",
-            "maximum": 14142,
-            "default": 512,
-            "exclusiveMinimum": 0,
-            "type": "integer",
-            "description": "The width of the generated image."
+            ],
+            "type": "array"
           },
-          "height": {
-            "title": "Height",
-            "maximum": 14142,
-            "default": 512,
-            "exclusiveMinimum": 0,
+          "seed": {
+            "title": "Seed",
+            "examples": [
+              123456
+            ],
             "type": "integer",
-            "description": "The height of the generated image."
+            "description": "Seed used for the random number generator"
           }
         },
-        "type": "object",
-        "title": "ImageSize"
+        "type": "object"
       },
       "ColorPalette": {
+        "title": "ColorPalette",
         "x-fal-order-properties": [
           "members",
           "name"
         ],
         "properties": {
-          "name": {
-            "title": "Name",
-            "anyOf": [
-              {
-                "enum": [
-                  "EMBER",
-                  "FRESH",
-                  "JUNGLE",
-                  "MAGIC",
-                  "MELON",
-                  "MOSAIC",
-                  "PASTEL",
-                  "ULTRAMARINE"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "A color palette preset value"
-          },
           "members": {
             "title": "Members",
             "anyOf": [
@@ -407,12 +360,63 @@
               }
             ],
             "description": "A list of color palette members that define the color palette"
+          },
+          "name": {
+            "title": "Name",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "EMBER",
+                  "FRESH",
+                  "JUNGLE",
+                  "MAGIC",
+                  "MELON",
+                  "MOSAIC",
+                  "PASTEL",
+                  "ULTRAMARINE"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "A color palette preset value"
           }
         },
-        "type": "object",
-        "title": "ColorPalette"
+        "type": "object"
+      },
+      "ImageSize": {
+        "title": "ImageSize",
+        "x-fal-order-properties": [
+          "width",
+          "height"
+        ],
+        "properties": {
+          "width": {
+            "title": "Width",
+            "maximum": 14142,
+            "exclusiveMinimum": 0,
+            "type": "integer",
+            "default": 512,
+            "description": "The width of the generated image."
+          },
+          "height": {
+            "title": "Height",
+            "maximum": 14142,
+            "exclusiveMinimum": 0,
+            "type": "integer",
+            "default": 512,
+            "description": "The height of the generated image."
+          }
+        },
+        "type": "object"
       },
       "File": {
+        "title": "File",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -420,38 +424,12 @@
           "file_size"
         ],
         "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ]
-          },
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              4404019
-            ]
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
           },
           "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "title": "File Name",
             "anyOf": [
               {
@@ -463,21 +441,47 @@
             ],
             "examples": [
               "z9RV14K95DvU.png"
-            ]
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
           },
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
+          "file_size": {
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes."
+          },
+          "content_type": {
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
           }
         },
-        "required": [
-          "url"
-        ],
-        "type": "object",
-        "title": "File"
+        "type": "object"
       },
       "ColorPaletteMember": {
+        "title": "ColorPaletteMember",
+        "required": [
+          "rgb"
+        ],
         "x-fal-order-properties": [
           "rgb",
           "color_weight"
@@ -503,46 +507,42 @@
             "description": "RGB color value for the palette member"
           }
         },
-        "required": [
-          "rgb"
-        ],
-        "type": "object",
-        "title": "ColorPaletteMember"
+        "type": "object"
       },
       "RGBColor": {
+        "title": "RGBColor",
         "x-fal-order-properties": [
           "r",
           "g",
           "b"
         ],
         "properties": {
+          "r": {
+            "title": "R",
+            "maximum": 255,
+            "minimum": 0,
+            "type": "integer",
+            "default": 0,
+            "description": "Red color value"
+          },
           "b": {
             "title": "B",
             "maximum": 255,
-            "default": 0,
             "minimum": 0,
             "type": "integer",
+            "default": 0,
             "description": "Blue color value"
           },
           "g": {
             "title": "G",
             "maximum": 255,
-            "default": 0,
             "minimum": 0,
             "type": "integer",
+            "default": 0,
             "description": "Green color value"
-          },
-          "r": {
-            "title": "R",
-            "maximum": 255,
-            "default": 0,
-            "minimum": 0,
-            "type": "integer",
-            "description": "Red color value"
           }
         },
-        "type": "object",
-        "title": "RGBColor"
+        "type": "object"
       }
     }
   },

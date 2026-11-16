@@ -71,6 +71,10 @@
         ]
       },
       "ZImageTurboInput": {
+        "required": [
+          "prompt"
+        ],
+        "type": "object",
         "title": "ZImageTurboTextToImageInput",
         "x-fal-order-properties": [
           "prompt",
@@ -85,34 +89,47 @@
           "enable_prompt_expansion"
         ],
         "properties": {
-          "num_inference_steps": {
-            "type": "integer",
-            "description": "The number of inference steps to perform.",
-            "maximum": 8,
-            "title": "Number of Inference Steps",
+          "num_images": {
+            "title": "Number of Images",
             "minimum": 1,
-            "default": 8
+            "type": "integer",
+            "maximum": 4,
+            "description": "The number of images to generate.",
+            "default": 1
           },
           "acceleration": {
-            "type": "string",
-            "description": "The acceleration level to use.",
-            "title": "Acceleration",
             "enum": [
               "none",
               "regular",
               "high"
             ],
-            "default": "regular"
+            "type": "string",
+            "default": "regular",
+            "description": "The acceleration level to use.",
+            "title": "Acceleration"
           },
-          "enable_safety_checker": {
-            "type": "boolean",
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked, and images flagged as unsafe are returned as black images.",
-            "title": "Enable Safety Checker",
-            "default": true
+          "seed": {
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "\n            The same seed and the same prompt given to the same version of the model\n            will output the same image every time.\n        "
+          },
+          "num_inference_steps": {
+            "title": "Number of Inference Steps",
+            "minimum": 1,
+            "type": "integer",
+            "maximum": 8,
+            "description": "The number of inference steps to perform.",
+            "default": 8
           },
           "image_size": {
-            "description": "The size of the generated image.",
-            "title": "Image Size",
+            "default": "landscape_4_3",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
@@ -129,66 +146,57 @@
                 "type": "string"
               }
             ],
-            "default": "landscape_4_3"
+            "description": "The size of the generated image.",
+            "title": "Image Size"
           },
           "enable_prompt_expansion": {
             "type": "boolean",
+            "default": false,
             "description": "Whether to enable prompt expansion. Note: this will increase the price by 0.0025 credits per request.",
-            "title": "Enable Prompt Expansion",
-            "default": false
+            "title": "Enable Prompt Expansion"
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "The prompt to generate an image from.",
+            "examples": [
+              "A hyper-realistic, close-up portrait of a tribal elder from the Omo Valley, painted with intricate white chalk patterns and adorned with a headdress made of dried flowers, seed pods, and rusted bottle caps. The focus is razor-sharp on the texture of the skin, showing every pore, wrinkle, and scar that tells a story of survival. The background is a blurred, smoky hut interior, with the warm glow of a cooking fire reflecting in the subject's dark, soulful eyes. Shot on a Leica M6 with Kodak Portra 400 film grain aesthetic."
+            ]
+          },
+          "sync_mode": {
+            "type": "boolean",
+            "default": false,
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "title": "Sync Mode"
           },
           "output_format": {
-            "type": "string",
-            "description": "The format of the generated image.",
-            "title": "Output Format",
             "enum": [
               "jpeg",
               "png",
               "webp"
             ],
-            "default": "png"
+            "type": "string",
+            "default": "png",
+            "description": "The format of the generated image.",
+            "title": "Output Format"
           },
-          "num_images": {
-            "type": "integer",
-            "description": "The number of images to generate.",
-            "maximum": 4,
-            "title": "Number of Images",
-            "minimum": 1,
-            "default": 1
-          },
-          "seed": {
-            "description": "\n            The same seed and the same prompt given to the same version of the model\n            will output the same image every time.\n        ",
-            "title": "Seed",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "prompt": {
-            "examples": [
-              "A hyper-realistic, close-up portrait of a tribal elder from the Omo Valley, painted with intricate white chalk patterns and adorned with a headdress made of dried flowers, seed pods, and rusted bottle caps. The focus is razor-sharp on the texture of the skin, showing every pore, wrinkle, and scar that tells a story of survival. The background is a blurred, smoky hut interior, with the warm glow of a cooking fire reflecting in the subject's dark, soulful eyes. Shot on a Leica M6 with Kodak Portra 400 film grain aesthetic."
-            ],
-            "description": "The prompt to generate an image from.",
-            "title": "Prompt",
-            "type": "string"
-          },
-          "sync_mode": {
+          "enable_safety_checker": {
             "type": "boolean",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "title": "Sync Mode",
-            "default": false
+            "default": true,
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked, and images flagged as unsafe are returned as black images.",
+            "title": "Enable Safety Checker"
           }
-        },
-        "required": [
-          "prompt"
-        ],
-        "type": "object"
+        }
       },
       "ZImageTurboOutput": {
+        "required": [
+          "images",
+          "timings",
+          "seed",
+          "has_nsfw_concepts",
+          "prompt"
+        ],
+        "type": "object",
         "title": "ZImageTurboOutput",
         "x-fal-order-properties": [
           "images",
@@ -198,23 +206,13 @@
           "prompt"
         ],
         "properties": {
-          "seed": {
-            "description": "Seed of the generated Image. It will be the same value of the one passed in the input or the randomly generated that was used in case none was passed.",
-            "title": "Seed",
-            "type": "integer"
-          },
-          "prompt": {
-            "description": "The prompt used for generating the image.",
-            "title": "Prompt",
-            "type": "string"
-          },
           "has_nsfw_concepts": {
-            "description": "Whether the generated images contain NSFW concepts.",
             "items": {
               "type": "boolean"
             },
-            "title": "Has Nsfw Concepts",
-            "type": "array"
+            "type": "array",
+            "description": "Whether the generated images contain NSFW concepts.",
+            "title": "Has Nsfw Concepts"
           },
           "images": {
             "examples": [
@@ -222,63 +220,69 @@
                 {
                   "content_type": "image/png",
                   "url": "https://storage.googleapis.com/falserverless/example_outputs/z-image-turbo-output.png",
-                  "width": 1024,
-                  "height": 768
+                  "height": 768,
+                  "width": 1024
                 }
               ]
             ],
-            "description": "The generated image files info.",
             "items": {
               "$ref": "#/components/schemas/ImageFile"
             },
-            "title": "Images",
-            "type": "array"
+            "type": "array",
+            "description": "The generated image files info.",
+            "title": "Images"
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed",
+            "description": "Seed of the generated Image. It will be the same value of the one passed in the input or the randomly generated that was used in case none was passed."
           },
           "timings": {
-            "description": "The timings of the generation process.",
             "additionalProperties": {
               "type": "number"
             },
+            "type": "object",
             "title": "Timings",
-            "type": "object"
+            "description": "The timings of the generation process."
+          },
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "The prompt used for generating the image."
           }
-        },
-        "required": [
-          "images",
-          "timings",
-          "seed",
-          "has_nsfw_concepts",
-          "prompt"
-        ],
-        "type": "object"
+        }
       },
       "ImageSize": {
+        "type": "object",
+        "title": "ImageSize",
         "x-fal-order-properties": [
           "width",
           "height"
         ],
         "properties": {
-          "width": {
-            "type": "integer",
-            "exclusiveMinimum": 0,
-            "description": "The width of the generated image.",
-            "maximum": 14142,
-            "title": "Width",
-            "default": 512
-          },
           "height": {
-            "type": "integer",
-            "exclusiveMinimum": 0,
-            "description": "The height of the generated image.",
-            "maximum": 14142,
+            "default": 512,
             "title": "Height",
-            "default": 512
+            "type": "integer",
+            "maximum": 14142,
+            "description": "The height of the generated image.",
+            "exclusiveMinimum": 0
+          },
+          "width": {
+            "default": 512,
+            "title": "Width",
+            "type": "integer",
+            "maximum": 14142,
+            "description": "The width of the generated image.",
+            "exclusiveMinimum": 0
           }
-        },
-        "title": "ImageSize",
-        "type": "object"
+        }
       },
       "ImageFile": {
+        "required": [
+          "url"
+        ],
+        "type": "object",
         "title": "ImageFile",
         "x-fal-order-properties": [
           "url",
@@ -289,43 +293,7 @@
           "height"
         ],
         "properties": {
-          "file_size": {
-            "examples": [
-              4404019
-            ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
           "width": {
-            "description": "The width of the image",
             "title": "Width",
             "anyOf": [
               {
@@ -334,13 +302,10 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The width of the image"
           },
           "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "title": "File Name",
             "anyOf": [
               {
@@ -349,10 +314,18 @@
               {
                 "type": "null"
               }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
             ]
           },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
           "height": {
-            "description": "The height of the image",
             "title": "Height",
             "anyOf": [
               {
@@ -361,13 +334,40 @@
               {
                 "type": "null"
               }
+            ],
+            "description": "The height of the image"
+          },
+          "content_type": {
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "file_size": {
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
             ]
           }
-        },
-        "required": [
-          "url"
-        ],
-        "type": "object"
+        }
       }
     }
   },

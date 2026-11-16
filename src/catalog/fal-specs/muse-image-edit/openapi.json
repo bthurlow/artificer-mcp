@@ -72,21 +72,36 @@
       },
       "MuseImageEditInput": {
         "title": "MuseImageEditInput",
-        "x-fal-order-properties": [
-          "prompt",
-          "image_urls",
-          "aspect_ratio",
-          "num_images",
-          "output_format",
-          "sync_mode"
-        ],
         "properties": {
+          "sync_mode": {
+            "title": "Sync Mode",
+            "description": "If `True`, the image is returned as a data URI and is not persisted in the request history.",
+            "default": false,
+            "type": "boolean"
+          },
+          "num_images": {
+            "maximum": 10,
+            "title": "Num Images",
+            "description": "The number of edited images to generate.",
+            "default": 1,
+            "type": "integer",
+            "minimum": 1
+          },
+          "prompt": {
+            "minLength": 1,
+            "title": "Prompt",
+            "examples": [
+              "A cinematic editorial portrait in soft window light with crisp typography"
+            ],
+            "description": "The text prompt used to generate or edit the image.",
+            "type": "string"
+          },
           "aspect_ratio": {
+            "title": "Aspect Ratio",
             "examples": [
               "16:9"
             ],
             "description": "Any custom output aspect ratio as \"width:height\", for example \"16:9\", \"5:4\", or \"1920:1200\". Common presets are \"21:9\", \"16:9\", \"4:3\", \"3:2\", \"1:1\", \"2:3\", \"3:4\", \"9:16\", \"9:21\". The ratio must be between 1:16 and 16:1, the range Muse supports. Only the ratio is used: Muse renders it at its own fixed resolution of roughly 2.5 megapixels, so \"1920:1200\" and \"960:600\" both return the same 1920x1200 image. If omitted, Muse chooses the output dimensions automatically.",
-            "title": "Aspect Ratio",
             "anyOf": [
               {
                 "pattern": "^[1-9][0-9]{0,4}:[1-9][0-9]{0,4}$",
@@ -97,53 +112,30 @@
               }
             ]
           },
-          "num_images": {
-            "type": "integer",
-            "description": "The number of edited images to generate.",
-            "maximum": 10,
-            "title": "Num Images",
-            "minimum": 1,
-            "default": 1
-          },
-          "prompt": {
-            "examples": [
-              "A cinematic editorial portrait in soft window light with crisp typography"
-            ],
-            "description": "The text prompt used to generate or edit the image.",
-            "title": "Prompt",
-            "minLength": 1,
-            "type": "string"
-          },
-          "sync_mode": {
-            "type": "boolean",
-            "description": "If `True`, the image is returned as a data URI and is not persisted in the request history.",
-            "title": "Sync Mode",
-            "default": false
-          },
           "image_urls": {
+            "title": "Image URLs",
             "examples": [
               [
                 "https://storage.googleapis.com/falserverless/example_inputs/kontext_example_input.webp"
               ]
             ],
-            "maxItems": 10,
+            "minItems": 1,
             "description": "Reference images used for the edit. Provide between 1 and 10 HTTP(S) or data URLs.",
+            "maxItems": 10,
+            "type": "array",
             "items": {
               "type": "string"
-            },
-            "title": "Image URLs",
-            "minItems": 1,
-            "type": "array"
+            }
           },
           "output_format": {
-            "default": "webp",
-            "description": "The format of the generated image.",
+            "title": "Output Format",
             "enum": [
               "jpeg",
               "png",
               "webp"
             ],
-            "title": "Output Format",
+            "description": "The format of the generated image.",
+            "default": "webp",
             "type": "string"
           }
         },
@@ -151,99 +143,53 @@
           "prompt",
           "image_urls"
         ],
-        "type": "object"
+        "type": "object",
+        "x-fal-order-properties": [
+          "prompt",
+          "image_urls",
+          "aspect_ratio",
+          "num_images",
+          "output_format",
+          "sync_mode"
+        ]
       },
       "MuseImageEditOutput": {
         "title": "MuseImageOutput",
-        "x-fal-order-properties": [
-          "images"
-        ],
         "properties": {
           "images": {
+            "title": "Images",
             "description": "The generated or edited images.",
+            "type": "array",
             "items": {
               "$ref": "#/components/schemas/Image"
-            },
-            "title": "Images",
-            "type": "array"
+            }
           }
         },
         "required": [
           "images"
         ],
-        "type": "object"
+        "type": "object",
+        "x-fal-order-properties": [
+          "images"
+        ]
       },
       "Image": {
-        "description": "Represents an image file.",
         "title": "Image",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size",
-          "width",
-          "height"
-        ],
         "properties": {
+          "url": {
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
+            "type": "string"
+          },
           "file_name": {
+            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
             ],
             "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
-          "width": {
-            "examples": [
-              1024
-            ],
-            "description": "The width of the image in pixels.",
-            "title": "Width",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "height": {
-            "examples": [
-              1024
-            ],
-            "description": "The height of the image in pixels.",
-            "title": "Height",
-            "anyOf": [
-              {
-                "type": "integer"
               },
               {
                 "type": "null"
@@ -251,11 +197,56 @@
             ]
           },
           "file_size": {
+            "title": "File Size",
             "examples": [
               4404019
             ],
             "description": "The size of the file in bytes.",
-            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "width": {
+            "title": "Width",
+            "examples": [
+              1024
+            ],
+            "description": "The width of the image in pixels.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "title": "Content Type",
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "height": {
+            "title": "Height",
+            "examples": [
+              1024
+            ],
+            "description": "The height of the image in pixels.",
             "anyOf": [
               {
                 "type": "integer"
@@ -269,7 +260,16 @@
         "required": [
           "url"
         ],
-        "type": "object"
+        "description": "Represents an image file.",
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ]
       }
     }
   },

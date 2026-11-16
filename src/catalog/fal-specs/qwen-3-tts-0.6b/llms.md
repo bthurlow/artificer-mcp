@@ -137,7 +137,7 @@ The API returns the following output format:
 
 - **`audio`** (`AudioFile`, _required_):
   The generated speech audio file.
-  - Examples: {"channels":1,"duration":9.816875,"content_type":"audio/mpeg","sample_rate":24000,"file_name":"n6Av3SeD5dFENf9-VmQ1v_is3jLh5h.mp3","url":"https://storage.googleapis.com/falserverless/example_outputs/example_outputs/qwen3-tts/tts_out_06b.mp3"}
+  - Examples: {"content_type":"audio/mpeg","file_name":"n6Av3SeD5dFENf9-VmQ1v_is3jLh5h.mp3","channels":1,"duration":9.816875,"url":"https://storage.googleapis.com/falserverless/example_outputs/example_outputs/qwen3-tts/tts_out_06b.mp3","sample_rate":24000}
 
 
 
@@ -146,12 +146,12 @@ The API returns the following output format:
 ```json
 {
   "audio": {
+    "content_type": "audio/mpeg",
+    "file_name": "n6Av3SeD5dFENf9-VmQ1v_is3jLh5h.mp3",
     "channels": 1,
     "duration": 9.816875,
-    "content_type": "audio/mpeg",
-    "sample_rate": 24000,
-    "file_name": "n6Av3SeD5dFENf9-VmQ1v_is3jLh5h.mp3",
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/example_outputs/qwen3-tts/tts_out_06b.mp3"
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/example_outputs/qwen3-tts/tts_out_06b.mp3",
+    "sample_rate": 24000
   }
 }
 ```
@@ -167,7 +167,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "text": "I feel like I'm taking crazy pills! How can something be both a square and a circle at the same time? It defies all logic!"
+     "text": "I feel like I'\''m taking crazy pills! How can something be both a square and a circle at the same time? It defies all logic!"
    }'
 ```
 

@@ -71,6 +71,12 @@
         ]
       },
       "KlingVideoV16ProImageToVideoInput": {
+        "required": [
+          "prompt",
+          "image_url"
+        ],
+        "title": "ProImageToVideoRequest",
+        "type": "object",
         "x-fal-order-properties": [
           "enable_safety_checker",
           "prompt",
@@ -81,57 +87,52 @@
           "negative_prompt",
           "cfg_scale"
         ],
-        "title": "ProImageToVideoRequest",
-        "type": "object",
-        "required": [
-          "prompt",
-          "image_url"
-        ],
         "properties": {
-          "prompt": {
+          "enable_safety_checker": {
+            "description": "Disabling safety checks requires account authorization; unauthorized requests are always checked.",
+            "title": "Enable Safety Checker",
+            "type": "boolean",
+            "default": true
+          },
+          "image_url": {
+            "title": "Image Url",
+            "_fal_ui_field": "image",
             "examples": [
-              "Snowflakes fall as a car moves along the road."
+              "https://storage.googleapis.com/falserverless/kling/kling_input.jpeg"
             ],
-            "title": "Prompt",
-            "type": "string",
-            "maxLength": 2500
+            "type": "string"
           },
           "duration": {
-            "description": "The duration of the generated video in seconds",
-            "title": "Duration",
-            "type": "string",
             "enum": [
               "5",
               "10"
             ],
+            "description": "The duration of the generated video in seconds",
+            "title": "Duration",
+            "type": "string",
             "default": "5"
           },
-          "aspect_ratio": {
-            "description": "The aspect ratio of the generated video frame",
-            "title": "Aspect Ratio",
+          "prompt": {
+            "title": "Prompt",
+            "maxLength": 2500,
             "type": "string",
-            "enum": [
-              "16:9",
-              "9:16",
-              "1:1"
-            ],
-            "default": "16:9"
+            "examples": [
+              "Snowflakes fall as a car moves along the road."
+            ]
+          },
+          "negative_prompt": {
+            "title": "Negative Prompt",
+            "maxLength": 2500,
+            "default": "blur, distort, and low quality",
+            "type": "string"
           },
           "cfg_scale": {
-            "minimum": 0,
             "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt.\n        ",
             "title": "Cfg Scale",
             "type": "number",
+            "default": 0.5,
             "maximum": 1,
-            "default": 0.5
-          },
-          "image_url": {
-            "examples": [
-              "https://storage.googleapis.com/falserverless/kling/kling_input.jpeg"
-            ],
-            "type": "string",
-            "title": "Image Url",
-            "_fal_ui_field": "image"
+            "minimum": 0
           },
           "tail_image_url": {
             "anyOf": [
@@ -139,8 +140,8 @@
                 "ui": {
                   "field": "image"
                 },
-                "type": "string",
-                "_fal_ui_field": "image"
+                "_fal_ui_field": "image",
+                "type": "string"
               },
               {
                 "type": "null"
@@ -149,59 +150,54 @@
             "title": "Tail Image Url",
             "description": "URL of the image to be used for the end of the video"
           },
-          "negative_prompt": {
-            "title": "Negative Prompt",
+          "aspect_ratio": {
+            "enum": [
+              "16:9",
+              "9:16",
+              "1:1"
+            ],
+            "description": "The aspect ratio of the generated video frame",
+            "title": "Aspect Ratio",
             "type": "string",
-            "maxLength": 2500,
-            "default": "blur, distort, and low quality"
-          },
-          "enable_safety_checker": {
-            "description": "Disabling safety checks requires account authorization; unauthorized requests are always checked.",
-            "title": "Enable Safety Checker",
-            "type": "boolean",
-            "default": true
+            "default": "16:9"
           }
         }
       },
       "KlingVideoV16ProImageToVideoOutput": {
-        "x-fal-order-properties": [
+        "required": [
           "video"
         ],
         "title": "I2VOutput",
         "type": "object",
-        "required": [
+        "x-fal-order-properties": [
           "video"
         ],
         "properties": {
           "video": {
+            "description": "The generated video",
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://storage.googleapis.com/falserverless/kling/kling_i2v_output.mp4"
               }
-            ],
-            "$ref": "#/components/schemas/File",
-            "description": "The generated video"
+            ]
           }
         }
       },
       "File": {
+        "required": [
+          "url"
+        ],
+        "title": "File",
+        "type": "object",
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "title": "File",
-        "type": "object",
-        "required": [
-          "url"
-        ],
         "properties": {
           "file_size": {
-            "examples": [
-              4404019
-            ],
-            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -210,42 +206,46 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes."
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ]
           },
           "content_type": {
-            "examples": [
-              "image/png"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
             ],
             "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file."
-          },
-          "file_name": {
+            "description": "The mime type of the file.",
             "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+              "image/png"
+            ]
           },
           "url": {
+            "description": "The URL where the file can be downloaded from.",
             "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
+            "type": "string"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
           }
         }
       }

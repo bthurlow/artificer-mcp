@@ -115,7 +115,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "A close-up of someone's face as they pet a cat, their hands stroking the soft fur in the foreground. Their affectionate expression shows as the cat purrs contentedly in their lap. They say, <S>This little guy has been with me for eight years now. He knows exactly when I need comfort. Animals are pretty amazing that way.<E>.<AUDCAP>Affectionate voice with cat purring and gentle petting sounds<ENDAUDCAP>"
+     "prompt": "A close-up of someone'\''s face as they pet a cat, their hands stroking the soft fur in the foreground. Their affectionate expression shows as the cat purrs contentedly in their lap. They say, <S>This little guy has been with me for eight years now. He knows exactly when I need comfort. Animals are pretty amazing that way.<E>.<AUDCAP>Affectionate voice with cat purring and gentle petting sounds<ENDAUDCAP>"
    }'
 ```
 

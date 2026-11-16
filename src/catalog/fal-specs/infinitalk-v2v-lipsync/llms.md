@@ -35,7 +35,7 @@ The API accepts the following input parameters:
   - Examples: "https://storage.googleapis.com/falserverless/model_tests/video_models/ref_video.mp4"
 
 - **`audio_url`** (`string`, _required_):
-  The URL of the audio file.
+  The URL of the audio file (max 600 seconds).
   - Examples: "https://v3.fal.media/files/penguin/PtiCYda53E9Dav25QmQYI_output.mp3"
 
 - **`prompt`** (`string`, _required_):

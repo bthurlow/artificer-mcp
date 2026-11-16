@@ -35,9 +35,9 @@ The API accepts the following input parameters:
   - Examples: "An octopus finds a football in the ocean and excitedly calls its octopus friends to come and play. Cut scene to an octopus football game under the sea."
 
 - **`resolution`** (`ResolutionEnum`, _optional_):
-  Video resolution - 480p for faster generation, 720p for balance, 1080p for high quality. Default value: `"720p"`
+  Video resolution - 480p for faster generation, 720p for balance, 1080p for high quality, 4k for highest quality. Default value: `"720p"`
   - Default: `"720p"`
-  - Options: `"480p"`, `"720p"`, `"1080p"`
+  - Options: `"480p"`, `"720p"`, `"1080p"`, `"4k"`
 
 - **`draft`** (`boolean`, _optional_):
   Generate a draft preview at 480p, overriding resolution. Returns a draft_id for completing the draft at 1080p within 14 days.

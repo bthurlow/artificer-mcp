@@ -107,7 +107,7 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated image files info.
   - Array of ImageFile
-  - Examples: [{"content_type":"image/png","url":"https://storage.googleapis.com/falserverless/example_outputs/z-image-turbo-output.png","width":1024,"height":768}]
+  - Examples: [{"content_type":"image/png","url":"https://storage.googleapis.com/falserverless/example_outputs/z-image-turbo-output.png","height":768,"width":1024}]
 
 - **`timings`** (`Timings`, _required_):
   The timings of the generation process.
@@ -132,8 +132,8 @@ The API returns the following output format:
     {
       "content_type": "image/png",
       "url": "https://storage.googleapis.com/falserverless/example_outputs/z-image-turbo-output.png",
-      "width": 1024,
-      "height": 768
+      "height": 768,
+      "width": 1024
     }
   ],
   "prompt": ""
@@ -151,7 +151,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "A hyper-realistic, close-up portrait of a tribal elder from the Omo Valley, painted with intricate white chalk patterns and adorned with a headdress made of dried flowers, seed pods, and rusted bottle caps. The focus is razor-sharp on the texture of the skin, showing every pore, wrinkle, and scar that tells a story of survival. The background is a blurred, smoky hut interior, with the warm glow of a cooking fire reflecting in the subject's dark, soulful eyes. Shot on a Leica M6 with Kodak Portra 400 film grain aesthetic."
+     "prompt": "A hyper-realistic, close-up portrait of a tribal elder from the Omo Valley, painted with intricate white chalk patterns and adorned with a headdress made of dried flowers, seed pods, and rusted bottle caps. The focus is razor-sharp on the texture of the skin, showing every pore, wrinkle, and scar that tells a story of survival. The background is a blurred, smoky hut interior, with the warm glow of a cooking fire reflecting in the subject'\''s dark, soulful eyes. Shot on a Leica M6 with Kodak Portra 400 film grain aesthetic."
    }'
 ```
 

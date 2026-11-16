@@ -73,27 +73,38 @@
       "ElevenlabsTextToDialogueElevenV3Input": {
         "title": "TextToDialogueRequest",
         "properties": {
-          "use_speaker_boost": {
-            "description": "This setting boosts the similarity to the original speaker. Using this setting requires a slightly higher computational load, which in turn increases latency.",
-            "title": "Use Speaker Boost",
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "description": "Check input content for safety. Disabling requires account authorization.",
+            "default": true,
+            "type": "boolean"
+          },
+          "pronunciation_dictionary_locators": {
+            "items": {
+              "$ref": "#/components/schemas/PronunciationDictionaryLocator"
+            },
+            "description": "A list of pronunciation dictionary locators (id, version_id) to be applied to the text. They will be applied in order. You may have up to 3 locators per request",
+            "default": [],
+            "title": "Pronunciation Dictionary Locators",
+            "type": "array"
+          },
+          "stability": {
+            "title": "Stability",
+            "description": "Determines how stable the voice is and the randomness between each generation. Lower values introduce broader emotional range for the voice. Higher values can result in a monotonous voice with limited emotion. Must be one of 0.0, 0.5, 1.0, else it will be rounded to the nearest value.",
             "anyOf": [
               {
-                "type": "boolean"
+                "minimum": 0,
+                "maximum": 1,
+                "type": "number"
               },
               {
                 "type": "null"
               }
             ]
           },
-          "enable_safety_checker": {
-            "description": "Check input content for safety. Disabling requires account authorization.",
-            "title": "Enable Safety Checker",
-            "default": true,
-            "type": "boolean"
-          },
           "language_code": {
-            "description": "Language code (ISO 639-1) used to enforce a language for the model. An error will be returned if language code is not supported by the model.",
             "title": "Language Code",
+            "description": "Language code (ISO 639-1) used to enforce a language for the model. An error will be returned if language code is not supported by the model.",
             "anyOf": [
               {
                 "type": "string"
@@ -103,45 +114,23 @@
               }
             ]
           },
-          "stability": {
-            "description": "Determines how stable the voice is and the randomness between each generation. Lower values introduce broader emotional range for the voice. Higher values can result in a monotonous voice with limited emotion. Must be one of 0.0, 0.5, 1.0, else it will be rounded to the nearest value.",
-            "title": "Stability",
+          "use_speaker_boost": {
+            "title": "Use Speaker Boost",
+            "description": "This setting boosts the similarity to the original speaker. Using this setting requires a slightly higher computational load, which in turn increases latency.",
             "anyOf": [
               {
-                "maximum": 1,
-                "minimum": 0,
-                "type": "number"
+                "type": "boolean"
               },
               {
                 "type": "null"
               }
             ]
-          },
-          "seed": {
-            "description": "Random seed for reproducibility.",
-            "title": "Seed",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "pronunciation_dictionary_locators": {
-            "items": {
-              "$ref": "#/components/schemas/PronunciationDictionaryLocator"
-            },
-            "title": "Pronunciation Dictionary Locators",
-            "default": [],
-            "description": "A list of pronunciation dictionary locators (id, version_id) to be applied to the text. They will be applied in order. You may have up to 3 locators per request",
-            "type": "array"
           },
           "inputs": {
             "items": {
               "$ref": "#/components/schemas/DialogueBlock"
             },
+            "description": "A list of dialogue inputs, each containing text and a voice ID which will be converted into speech.",
             "title": "Inputs",
             "examples": [
               [
@@ -155,8 +144,19 @@
                 }
               ]
             ],
-            "description": "A list of dialogue inputs, each containing text and a voice ID which will be converted into speech.",
             "type": "array"
+          },
+          "seed": {
+            "title": "Seed",
+            "description": "Random seed for reproducibility.",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -176,19 +176,19 @@
       "ElevenlabsTextToDialogueElevenV3Output": {
         "title": "TextToDialogueOutput",
         "properties": {
-          "seed": {
-            "description": "Random seed for reproducibility.",
-            "title": "Seed",
-            "type": "integer"
-          },
           "audio": {
+            "$ref": "#/components/schemas/File",
             "description": "The generated audio file",
             "examples": [
               {
                 "url": "https://v3.fal.media/files/zebra/XFeGS8Fq-q1eAPG2sSAo__output.mp3"
               }
-            ],
-            "$ref": "#/components/schemas/File"
+            ]
+          },
+          "seed": {
+            "title": "Seed",
+            "description": "Random seed for reproducibility.",
+            "type": "integer"
           }
         },
         "required": [
@@ -205,8 +205,8 @@
         "title": "PronunciationDictionaryLocator",
         "properties": {
           "version_id": {
-            "description": "The ID of the version of the pronunciation dictionary. If not provided, the latest version will be used.",
             "title": "Version Id",
+            "description": "The ID of the version of the pronunciation dictionary. If not provided, the latest version will be used.",
             "anyOf": [
               {
                 "type": "string"
@@ -217,8 +217,8 @@
             ]
           },
           "pronunciation_dictionary_id": {
-            "description": "The ID of the pronunciation dictionary.",
             "title": "Pronunciation Dictionary Id",
+            "description": "The ID of the pronunciation dictionary.",
             "anyOf": [
               {
                 "type": "string"
@@ -239,8 +239,8 @@
         "title": "DialogueBlock",
         "properties": {
           "voice": {
-            "description": "The name or the ID of the voice to be used for the generation.",
             "title": "Voice",
+            "description": "The name or the ID of the voice to be used for the generation.",
             "examples": [
               "Aria",
               "Roger",
@@ -266,8 +266,8 @@
             "type": "string"
           },
           "text": {
-            "description": "The dialogue text",
             "title": "Text",
+            "description": "The dialogue text",
             "type": "string"
           }
         },
@@ -285,46 +285,28 @@
         "title": "File",
         "properties": {
           "content_type": {
-            "description": "The mime type of the file.",
             "title": "Content Type",
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "examples": [
               "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
             ]
           },
           "url": {
-            "description": "The URL where the file can be downloaded from.",
             "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
             "type": "string"
           },
           "file_size": {
-            "description": "The size of the file in bytes.",
             "title": "File Size",
-            "examples": [
-              4404019
-            ],
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -332,6 +314,24 @@
               {
                 "type": "null"
               }
+            ],
+            "examples": [
+              4404019
+            ]
+          },
+          "file_name": {
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
             ]
           }
         },

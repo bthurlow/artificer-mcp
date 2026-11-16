@@ -109,7 +109,7 @@ The API returns the following output format:
 
 - **`image`** (`ImageFile`, _required_):
   Image with background removed. When `mask_only` is `True`, this contains the segmentation mask instead.
-  - Examples: {"content_type":"image/png","file_name":"birefnet-output.png","width":1024,"height":1024,"url":"https://storage.googleapis.com/falserverless/example_outputs/birefnet-output.png"}
+  - Examples: {"url":"https://storage.googleapis.com/falserverless/example_outputs/birefnet-output.png","height":1024,"width":1024,"file_name":"birefnet-output.png","content_type":"image/png"}
 
 - **`mask_image`** (`ImageFile`, _optional_):
   Mask used to remove the background
@@ -121,11 +121,11 @@ The API returns the following output format:
 ```json
 {
   "image": {
-    "content_type": "image/png",
-    "file_name": "birefnet-output.png",
-    "width": 1024,
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/birefnet-output.png",
     "height": 1024,
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/birefnet-output.png"
+    "width": 1024,
+    "file_name": "birefnet-output.png",
+    "content_type": "image/png"
   }
 }
 ```

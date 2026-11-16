@@ -101,7 +101,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "text": "Hello! This is a demo of Inworld's TTS."
+     "text": "Hello! This is a demo of Inworld'\''s TTS."
    }'
 ```
 

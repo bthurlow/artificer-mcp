@@ -74,14 +74,14 @@
         "title": "TextToSpeechRequest",
         "properties": {
           "enable_safety_checker": {
-            "description": "Check input content for safety. Disabling requires account authorization.",
             "title": "Enable Safety Checker",
+            "description": "Check input content for safety. Disabling requires account authorization.",
             "default": true,
             "type": "boolean"
           },
-          "language_code": {
-            "description": "Language code (ISO 639-1) used to enforce a language for the model. An error will be returned if language code is not supported by the model.",
-            "title": "Language Code",
+          "next_text": {
+            "title": "Next Text",
+            "description": "The text that comes after the text of the current request. Can be used to improve the speech's continuity when concatenating together multiple generations or to influence the speech's continuity in the current generation.",
             "anyOf": [
               {
                 "type": "string"
@@ -91,9 +91,24 @@
               }
             ]
           },
+          "text": {
+            "title": "Text",
+            "description": "The text to convert to speech",
+            "type": "string",
+            "examples": [
+              "Hello! This is a test of the text to speech system, powered by ElevenLabs. How does it sound?"
+            ],
+            "minLength": 1
+          },
+          "timestamps": {
+            "title": "Timestamps",
+            "description": "Whether to return timestamps for each word in the generated speech",
+            "default": false,
+            "type": "boolean"
+          },
           "voice": {
-            "description": "The voice to use for speech generation",
             "title": "Voice",
+            "description": "The voice to use for speech generation",
             "default": "Rachel",
             "examples": [
               "Aria",
@@ -119,74 +134,37 @@
             ],
             "type": "string"
           },
-          "similarity_boost": {
-            "description": "Similarity boost (0-1)",
-            "title": "Similarity Boost",
-            "maximum": 1,
-            "minimum": 0,
-            "default": 0.75,
-            "type": "number"
-          },
-          "previous_text": {
-            "description": "The text that came before the text of the current request. Can be used to improve the speech's continuity when concatenating together multiple generations or to influence the speech's continuity in the current generation.",
-            "title": "Previous Text",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "speed": {
-            "description": "Speech speed (0.7-1.2). Values below 1.0 slow down the speech, above 1.0 speed it up. Extreme values may affect quality.",
-            "title": "Speed",
-            "maximum": 1.2,
-            "minimum": 0.7,
-            "default": 1,
-            "type": "number"
-          },
-          "text": {
-            "description": "The text to convert to speech",
-            "title": "Text",
-            "examples": [
-              "Hello! This is a test of the text to speech system, powered by ElevenLabs. How does it sound?"
-            ],
-            "minLength": 1,
-            "type": "string"
-          },
-          "next_text": {
-            "description": "The text that comes after the text of the current request. Can be used to improve the speech's continuity when concatenating together multiple generations or to influence the speech's continuity in the current generation.",
-            "title": "Next Text",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "stability": {
-            "description": "Voice stability (0-1)",
             "title": "Stability",
-            "maximum": 1,
             "minimum": 0,
             "default": 0.5,
+            "description": "Voice stability (0-1)",
+            "maximum": 1,
             "type": "number"
           },
-          "style": {
-            "description": "Style exaggeration (0-1)",
-            "title": "Style",
-            "maximum": 1,
-            "minimum": 0,
-            "default": 0,
+          "speed": {
+            "title": "Speed",
+            "minimum": 0.7,
+            "default": 1,
+            "description": "Speech speed (0.7-1.2). Values below 1.0 slow down the speech, above 1.0 speed it up. Extreme values may affect quality.",
+            "maximum": 1.2,
             "type": "number"
+          },
+          "language_code": {
+            "title": "Language Code",
+            "description": "Language code (ISO 639-1) used to enforce a language for the model. An error will be returned if language code is not supported by the model.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "apply_text_normalization": {
-            "description": "This parameter controls text normalization with three modes: 'auto', 'on', and 'off'. When set to 'auto', the system will automatically decide whether to apply text normalization (e.g., spelling out numbers). With 'on', text normalization will always be applied, while with 'off', it will be skipped.",
             "title": "Apply Text Normalization",
+            "description": "This parameter controls text normalization with three modes: 'auto', 'on', and 'off'. When set to 'auto', the system will automatically decide whether to apply text normalization (e.g., spelling out numbers). With 'on', text normalization will always be applied, while with 'off', it will be skipped.",
             "default": "auto",
             "enum": [
               "auto",
@@ -195,11 +173,33 @@
             ],
             "type": "string"
           },
-          "timestamps": {
-            "description": "Whether to return timestamps for each word in the generated speech",
-            "title": "Timestamps",
-            "default": false,
-            "type": "boolean"
+          "similarity_boost": {
+            "title": "Similarity Boost",
+            "minimum": 0,
+            "default": 0.75,
+            "description": "Similarity boost (0-1)",
+            "maximum": 1,
+            "type": "number"
+          },
+          "style": {
+            "title": "Style",
+            "minimum": 0,
+            "default": 0,
+            "description": "Style exaggeration (0-1)",
+            "maximum": 1,
+            "type": "number"
+          },
+          "previous_text": {
+            "title": "Previous Text",
+            "description": "The text that came before the text of the current request. Can be used to improve the speech's continuity when concatenating together multiple generations or to influence the speech's continuity in the current generation.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -225,17 +225,17 @@
         "title": "TTSOutput",
         "properties": {
           "audio": {
+            "$ref": "#/components/schemas/File",
             "description": "The generated audio file",
             "examples": [
               {
                 "url": "https://v3.fal.media/files/zebra/zJL_oRY8h5RWwjoK1w7tx_output.mp3"
               }
-            ],
-            "$ref": "#/components/schemas/File"
+            ]
           },
           "timestamps": {
-            "description": "Timestamps for each word in the generated speech. Only returned if `timestamps` is set to True in the request.",
             "title": "Timestamps",
+            "description": "Timestamps for each word in the generated speech. Only returned if `timestamps` is set to True in the request.",
             "anyOf": [
               {
                 "items": {},
@@ -260,46 +260,28 @@
         "title": "File",
         "properties": {
           "content_type": {
-            "description": "The mime type of the file.",
             "title": "Content Type",
+            "description": "The mime type of the file.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "examples": [
               "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
             ]
           },
           "url": {
-            "description": "The URL where the file can be downloaded from.",
             "title": "Url",
+            "description": "The URL where the file can be downloaded from.",
             "type": "string"
           },
           "file_size": {
-            "description": "The size of the file in bytes.",
             "title": "File Size",
-            "examples": [
-              4404019
-            ],
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -307,6 +289,24 @@
               {
                 "type": "null"
               }
+            ],
+            "examples": [
+              4404019
+            ]
+          },
+          "file_name": {
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
             ]
           }
         },

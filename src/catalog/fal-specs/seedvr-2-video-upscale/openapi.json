@@ -71,6 +71,117 @@
         ]
       },
       "SeedvrUpscaleVideoInput": {
+        "required": [
+          "video_url"
+        ],
+        "properties": {
+          "output_write_mode": {
+            "enum": [
+              "fast",
+              "balanced",
+              "small"
+            ],
+            "description": "The write mode of the output video.",
+            "title": "Output Write Mode",
+            "type": "string",
+            "default": "balanced"
+          },
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "type": "boolean",
+            "default": true
+          },
+          "upscale_mode": {
+            "enum": [
+              "target",
+              "factor"
+            ],
+            "description": "The mode to use for the upscale. If 'target', the upscale factor will be calculated based on the target resolution. If 'factor', the upscale factor will be used directly.",
+            "title": "Upscale Mode",
+            "type": "string",
+            "default": "factor"
+          },
+          "video_url": {
+            "description": "The input video to be processed",
+            "title": "Video Url",
+            "type": "string",
+            "examples": [
+              "https://storage.googleapis.com/falserverless/example_inputs/seedvr-input.mp4"
+            ]
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "The random seed used for the generation process."
+          },
+          "sync_mode": {
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "title": "Sync Mode",
+            "type": "boolean",
+            "default": false
+          },
+          "upscale_factor": {
+            "description": "Upscaling factor to be used. Will multiply the dimensions with this factor when `upscale_mode` is `factor`.",
+            "title": "Upscale Factor",
+            "type": "number",
+            "default": 2,
+            "maximum": 10,
+            "minimum": 1
+          },
+          "output_quality": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "maximum"
+            ],
+            "description": "The quality of the output video.",
+            "title": "Output Quality",
+            "type": "string",
+            "default": "high"
+          },
+          "noise_scale": {
+            "default": 0.1,
+            "description": "The noise scale to use for the generation process.",
+            "title": "Noise Scale",
+            "type": "number",
+            "multipleOf": 0.001,
+            "maximum": 1,
+            "minimum": 0
+          },
+          "target_resolution": {
+            "enum": [
+              "720p",
+              "1080p",
+              "1440p",
+              "2160p"
+            ],
+            "description": "The target resolution to upscale to when `upscale_mode` is `target`.",
+            "title": "Target Resolution",
+            "type": "string",
+            "default": "1080p"
+          },
+          "output_format": {
+            "enum": [
+              "X264 (.mp4)",
+              "VP9 (.webm)",
+              "PRORES4444 (.mov)",
+              "GIF (.gif)"
+            ],
+            "description": "The format of the output video.",
+            "title": "Output Format",
+            "type": "string",
+            "default": "X264 (.mp4)"
+          }
+        },
+        "type": "object",
         "x-fal-order-properties": [
           "enable_safety_checker",
           "video_url",
@@ -84,9 +195,43 @@
           "output_write_mode",
           "sync_mode"
         ],
+        "title": "SeedVRVideoInput"
+      },
+      "SeedvrUpscaleVideoOutput": {
+        "required": [
+          "video",
+          "seed"
+        ],
         "properties": {
           "seed": {
             "description": "The random seed used for the generation process.",
+            "title": "Seed",
+            "type": "integer"
+          },
+          "video": {
+            "description": "Upscaled video file after processing",
+            "$ref": "#/components/schemas/File",
+            "examples": [
+              {
+                "content_type": "video/mp4",
+                "url": "https://storage.googleapis.com/falserverless/example_outputs/seedvr-output.mp4"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "x-fal-order-properties": [
+          "video",
+          "seed"
+        ],
+        "title": "SeedVRVideoOutput"
+      },
+      "File": {
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "file_size": {
             "anyOf": [
               {
                 "type": "integer"
@@ -95,200 +240,55 @@
                 "type": "null"
               }
             ],
-            "title": "Seed"
-          },
-          "upscale_factor": {
-            "description": "Upscaling factor to be used. Will multiply the dimensions with this factor when `upscale_mode` is `factor`.",
-            "maximum": 10,
-            "default": 2,
-            "minimum": 1,
-            "type": "number",
-            "title": "Upscale Factor"
-          },
-          "noise_scale": {
-            "multipleOf": 0.001,
-            "maximum": 1,
-            "default": 0.1,
-            "description": "The noise scale to use for the generation process.",
-            "minimum": 0,
-            "type": "number",
-            "title": "Noise Scale"
-          },
-          "sync_mode": {
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "default": false,
-            "type": "boolean",
-            "title": "Sync Mode"
-          },
-          "output_format": {
-            "enum": [
-              "X264 (.mp4)",
-              "VP9 (.webm)",
-              "PRORES4444 (.mov)",
-              "GIF (.gif)"
-            ],
-            "description": "The format of the output video.",
-            "default": "X264 (.mp4)",
-            "type": "string",
-            "title": "Output Format"
-          },
-          "output_quality": {
-            "enum": [
-              "low",
-              "medium",
-              "high",
-              "maximum"
-            ],
-            "description": "The quality of the output video.",
-            "default": "high",
-            "type": "string",
-            "title": "Output Quality"
-          },
-          "upscale_mode": {
-            "enum": [
-              "target",
-              "factor"
-            ],
-            "description": "The mode to use for the upscale. If 'target', the upscale factor will be calculated based on the target resolution. If 'factor', the upscale factor will be used directly.",
-            "default": "factor",
-            "type": "string",
-            "title": "Upscale Mode"
-          },
-          "video_url": {
-            "description": "The input video to be processed",
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "examples": [
-              "https://storage.googleapis.com/falserverless/example_inputs/seedvr-input.mp4"
-            ],
-            "type": "string",
-            "title": "Video Url"
+              4404019
+            ]
           },
-          "target_resolution": {
-            "enum": [
-              "720p",
-              "1080p",
-              "1440p",
-              "2160p"
-            ],
-            "description": "The target resolution to upscale to when `upscale_mode` is `target`.",
-            "default": "1080p",
-            "type": "string",
-            "title": "Target Resolution"
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
           },
-          "output_write_mode": {
-            "enum": [
-              "fast",
-              "balanced",
-              "small"
-            ],
-            "description": "The write mode of the output video.",
-            "default": "balanced",
-            "type": "string",
-            "title": "Output Write Mode"
-          },
-          "enable_safety_checker": {
-            "default": true,
-            "type": "boolean",
-            "title": "Enable Safety Checker"
-          }
-        },
-        "required": [
-          "video_url"
-        ],
-        "type": "object",
-        "title": "SeedVRVideoInput"
-      },
-      "SeedvrUpscaleVideoOutput": {
-        "x-fal-order-properties": [
-          "video",
-          "seed"
-        ],
-        "properties": {
-          "seed": {
-            "description": "The random seed used for the generation process.",
-            "type": "integer",
-            "title": "Seed"
-          },
-          "video": {
-            "examples": [
+          "content_type": {
+            "anyOf": [
               {
-                "content_type": "video/mp4",
-                "url": "https://storage.googleapis.com/falserverless/example_outputs/seedvr-output.mp4"
+                "type": "string"
+              },
+              {
+                "type": "null"
               }
             ],
-            "$ref": "#/components/schemas/File",
-            "description": "Upscaled video file after processing"
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
           }
         },
-        "required": [
-          "video",
-          "seed"
-        ],
         "type": "object",
-        "title": "SeedVRVideoOutput"
-      },
-      "File": {
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Content Type"
-          },
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Size"
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "File Name"
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string",
-            "title": "Url"
-          }
-        },
-        "required": [
-          "url"
-        ],
-        "type": "object",
         "title": "File"
       }
     }

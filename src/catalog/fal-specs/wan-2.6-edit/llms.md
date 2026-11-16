@@ -141,7 +141,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "Place the wizard from image 2 in the ancient library from image 3, holding and studying the magical crystal orb from image 1. The orb's glow illuminates his face with purple and blue light. Floating candles around him, ancient books visible in the background. Mystical, dramatic lighting, fantasy art style, highly detailed.",
+     "prompt": "Place the wizard from image 2 in the ancient library from image 3, holding and studying the magical crystal orb from image 1. The orb'\''s glow illuminates his face with purple and blue light. Floating candles around him, ancient books visible in the background. Mystical, dramatic lighting, fantasy art style, highly detailed.",
      "image_urls": [
        "https://v3b.fal.media/files/b/0a86d6a7/6smIczyPbvAU3IJ1F5Ok3.png",
        "https://v3b.fal.media/files/b/0a86d6a7/nTYVlOfKLD1FqHAGy7KS3.png",

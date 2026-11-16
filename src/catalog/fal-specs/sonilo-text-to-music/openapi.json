@@ -71,90 +71,134 @@
         ]
       },
       "V11TextToMusicInput": {
-        "properties": {
-          "prompt": {
-            "title": "Prompt",
-            "examples": [
-              "A blend of R&B warmth, soul depth, neo-soul texture, gospel spirit, pop clarity, and jazz sophistication."
-            ],
-            "description": "Text prompt describing the music to generate.",
-            "type": "string"
-          },
-          "duration": {
-            "default": 90,
-            "title": "Duration",
-            "minimum": 1,
-            "description": "Requested output duration in seconds (max 600). Also used for billing (one billable unit per second per sample, rounded up; each sample under 10s bills as 10s).",
-            "maximum": 600,
-            "type": "integer"
-          },
-          "num_samples": {
-            "default": 1,
-            "title": "Num Samples",
-            "minimum": 1,
-            "description": "How many distinct music tracks to generate.",
-            "maximum": 3,
-            "type": "integer"
-          }
-        },
-        "required": [
-          "prompt"
-        ],
-        "title": "TextToMusicInput",
         "x-fal-order-properties": [
           "prompt",
           "duration",
           "num_samples"
         ],
-        "type": "object"
+        "title": "TextToMusicInput",
+        "type": "object",
+        "properties": {
+          "duration": {
+            "default": 90,
+            "minimum": 1,
+            "title": "Duration",
+            "maximum": 600,
+            "description": "Requested output duration in seconds (max 600). Also used for billing (one billable unit per second per sample, rounded up; each sample under 10s bills as 10s).",
+            "type": "integer"
+          },
+          "num_samples": {
+            "default": 1,
+            "minimum": 1,
+            "title": "Num Samples",
+            "maximum": 3,
+            "description": "How many distinct music tracks to generate.",
+            "type": "integer"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "type": "string",
+            "description": "Text prompt describing the music to generate.",
+            "examples": [
+              "A blend of R&B warmth, soul depth, neo-soul texture, gospel spirit, pop clarity, and jazz sophistication."
+            ]
+          }
+        },
+        "required": [
+          "prompt"
+        ]
       },
       "V11TextToMusicOutput": {
+        "x-fal-order-properties": [
+          "audio",
+          "audios"
+        ],
+        "title": "TextToMusicOutput",
+        "type": "object",
         "properties": {
           "audio": {
+            "$ref": "#/components/schemas/Audio",
+            "description": "The first generated music track, for quick preview/playback.",
             "examples": [
               {
-                "file_size": 3363482,
                 "file_name": "jazz1.m4a",
                 "content_type": "audio/mp4",
-                "url": "https://fal.media/files/lion/SI-MFSBz0WtUMW4dAhhQs_jazz1.m4a"
+                "url": "https://fal.media/files/lion/SI-MFSBz0WtUMW4dAhhQs_jazz1.m4a",
+                "file_size": 3363482
               }
-            ],
-            "description": "The first generated music track, for quick preview/playback.",
-            "$ref": "#/components/schemas/Audio"
+            ]
           },
           "audios": {
+            "type": "array",
             "title": "Audios",
-            "examples": [
-              [
-                {
-                  "file_size": 3363482,
-                  "file_name": "jazz1.m4a",
-                  "content_type": "audio/mp4",
-                  "url": "https://fal.media/files/lion/SI-MFSBz0WtUMW4dAhhQs_jazz1.m4a"
-                }
-              ]
-            ],
-            "description": "All generated music tracks (AAC/m4a), one per sample.",
             "items": {
               "$ref": "#/components/schemas/Audio"
             },
-            "type": "array"
+            "description": "All generated music tracks (AAC/m4a), one per sample.",
+            "examples": [
+              [
+                {
+                  "file_name": "jazz1.m4a",
+                  "content_type": "audio/mp4",
+                  "url": "https://fal.media/files/lion/SI-MFSBz0WtUMW4dAhhQs_jazz1.m4a",
+                  "file_size": 3363482
+                }
+              ]
+            ]
           }
         },
         "required": [
           "audio",
           "audios"
-        ],
-        "title": "TextToMusicOutput",
-        "x-fal-order-properties": [
-          "audio",
-          "audios"
-        ],
-        "type": "object"
+        ]
       },
       "Audio": {
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "title": "Audio",
+        "type": "object",
         "properties": {
+          "file_name": {
+            "title": "File Name",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
+          },
+          "content_type": {
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
           "file_size": {
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -163,59 +207,15 @@
                 "type": "null"
               }
             ],
+            "description": "The size of the file in bytes.",
             "examples": [
               4404019
-            ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size"
-          },
-          "file_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name"
-          },
-          "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
-            "title": "Content Type"
-          },
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
+            ]
           }
         },
         "required": [
           "url"
-        ],
-        "title": "Audio",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
-        "type": "object"
+        ]
       }
     }
   },

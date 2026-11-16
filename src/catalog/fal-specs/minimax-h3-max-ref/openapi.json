@@ -71,172 +71,92 @@
         ]
       },
       "H3MaxReferenceToVideoInput": {
-        "title": "TurboReferenceToVideoHailuo03Input",
+        "required": [
+          "prompt",
+          "prompt_expansion_mode"
+        ],
         "properties": {
           "reference_audio_urls": {
             "title": "Reference Audio URLs",
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
             "maxItems": 3,
-            "items": {
-              "type": "string"
-            },
-            "description": "URLs of reference audio clips (2-15 seconds each, combined duration at most 15 seconds), referenced in the prompt as Audio 1, Audio 2, and so on. Images, videos, and audio can be provided individually or together. Reference images, videos, and audio clips must add up to at most 12 files.",
-            "type": "array"
+            "description": "URLs of reference audio clips (2-15 seconds each, combined duration at most 15 seconds), referenced in the prompt as Audio 1, Audio 2, and so on. Images, videos, and audio can be provided individually or together. Reference images, videos, and audio clips must add up to at most 12 files."
           },
-          "duration": {
-            "title": "Duration",
-            "description": "Video length in seconds. The output can run up to about 0.7 s longer than requested. Use at least 2 s with target_audio_url.",
-            "minimum": 0.92,
-            "maximum": 15,
-            "type": "number",
-            "default": 5
-          },
-          "reference_conditions": {
-            "title": "Reference Conditions",
-            "maxItems": 12,
-            "items": {
-              "$ref": "#/components/schemas/ReferenceCondition"
-            },
-            "description": "Ordered reference list; cross-modality order is semantic and is preserved end-to-end. Do not combine with reference_*_urls.",
-            "type": "array"
-          },
-          "image_url": {
+          "end_image_url": {
+            "title": "End Image URL",
             "anyOf": [
               {
-                "minLength": 1,
-                "type": "string"
+                "type": "string",
+                "minLength": 1
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Optional URL of the image to use as the first frame. The video opens exactly on this image while the references keep the subjects consistent; the output canvas follows this image.",
-            "title": "Start Image URL"
-          },
-          "seed": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Random seed. A random seed is selected when omitted.",
-            "title": "Seed"
-          },
-          "middle_frame_time": {
-            "anyOf": [
-              {
-                "exclusiveMaximum": 15,
-                "exclusiveMinimum": 0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Target time for the middle image, in seconds from the start. Rounded to the nearest frame at 24 fps; it must fall strictly between the first and last frames of the requested duration. Requires middle_image_url.",
-            "examples": [
-              2.5
-            ],
-            "title": "Time (seconds)"
-          },
-          "reference_image_urls": {
-            "title": "Reference Image URLs",
-            "description": "URLs of subject/style reference images, referenced in the prompt as Image 1, Image 2, and so on. Reference images, videos, and audio clips must add up to at most 12 files.",
-            "items": {
-              "type": "string"
-            },
-            "maxItems": 9,
-            "examples": [
-              [
-                "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg"
-              ]
-            ],
-            "type": "array"
+            "description": "Optional URL of the image to use as the last frame. The video ends exactly on this image."
           },
           "enable_safety_checker": {
-            "title": "Enable Safety Checker",
-            "description": "If set to true, the safety checker will be enabled.",
             "default": true,
-            "type": "boolean"
+            "title": "Enable Safety Checker",
+            "type": "boolean",
+            "description": "If set to true, the safety checker will be enabled."
           },
-          "sync_mode": {
-            "title": "Sync Mode",
-            "description": "Return the generated video as base64 instead of a CDN URL.",
-            "default": false,
-            "type": "boolean"
-          },
-          "resolution": {
-            "title": "Resolution",
-            "description": "The native generation resolution, or 1080P latent refinement from a native 768P source.",
-            "enum": [
-              "480P",
-              "768P",
-              "1080P"
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "Image 1 is the female protagonist. Image 2 is her small dog. Keep the woman and dog consistent with their respective reference images while they walk together through a sunlit garden."
             ],
-            "default": "768P",
-            "type": "string"
-          },
-          "middle_image_url": {
-            "anyOf": [
-              {
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Optional image to guide the video at middle_frame_time. Requires start and end images and native 480P or 768P resolution.",
-            "title": "Middle Image"
+            "type": "string",
+            "minLength": 1,
+            "description": "Text prompt for video generation. Refer to reference assets by their modality and order in the reference lists: Image 1, Image 2, Video 1, Audio 1, and so on.",
+            "maxLength": 50000
           },
           "prompt_expansion_mode": {
-            "title": "Prompt Expansion Mode",
-            "description": "How much effort to spend rewriting the prompt before generation. 'disabled' skips prompt expansion. 'balanced' returns in about a second. 'quality' spends up to ~30s on a richer prompt.",
+            "default": "balanced",
             "examples": [
               "disabled",
               "balanced",
               "quality"
             ],
-            "default": "balanced",
-            "type": "string"
+            "type": "string",
+            "title": "Prompt Expansion Mode",
+            "description": "How much effort to spend rewriting the prompt before generation. 'disabled' skips prompt expansion. 'balanced' returns in about a second. 'quality' spends up to ~30s on a richer prompt."
           },
-          "target_audio_url": {
+          "reference_video_urls": {
+            "title": "Reference Video URLs",
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 3,
+            "description": "URLs of motion/reference video clips (2-15 seconds each, combined duration at most 15 seconds), referenced in the prompt as Video 1, Video 2, and so on. Reference images, videos, and audio clips must add up to at most 12 files."
+          },
+          "image_url": {
+            "title": "Start Image URL",
             "anyOf": [
               {
-                "minLength": 1,
-                "pattern": "\\S",
-                "type": "string"
+                "type": "string",
+                "minLength": 1
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Optional URL of an audio clip at least 2 seconds long (maximum 15 MB) to pin to the generated soundtrack. Cannot be combined with reference audio. Longer clips are trimmed to the generated video's length, keeping the beginning; shorter clips are padded with silence. The clip is resampled to 32 kHz stereo and replaces the output soundtrack without changing playback speed. Accepts an HTTP(S) URL or a base64 data URI.",
-            "title": "Target Audio URL"
+            "description": "Optional URL of the image to use as the first frame. The video opens exactly on this image while the references keep the subjects consistent; the output canvas follows this image."
           },
-          "prompt": {
-            "title": "Prompt",
-            "minLength": 1,
-            "examples": [
-              "Image 1 is the female protagonist. Image 2 is her small dog. Keep the woman and dog consistent with their respective reference images while they walk together through a sunlit garden."
-            ],
-            "description": "Text prompt for video generation. Refer to reference assets by their modality and order in the reference lists: Image 1, Image 2, Video 1, Audio 1, and so on.",
-            "maxLength": 50000,
-            "type": "string"
-          },
-          "reference_video_urls": {
-            "title": "Reference Video URLs",
-            "maxItems": 3,
-            "items": {
-              "type": "string"
-            },
-            "description": "URLs of motion/reference video clips (2-15 seconds each, combined duration at most 15 seconds), referenced in the prompt as Video 1, Video 2, and so on. Reference images, videos, and audio clips must add up to at most 12 files.",
-            "type": "array"
+          "sync_mode": {
+            "default": false,
+            "title": "Sync Mode",
+            "type": "boolean",
+            "description": "Return the generated video as base64 instead of a CDN URL."
           },
           "aspect_ratio": {
+            "default": "adaptive",
             "title": "Aspect Ratio",
+            "type": "string",
             "description": "The aspect ratio of the generated video.",
             "enum": [
               "adaptive",
@@ -246,28 +166,107 @@
               "1:1",
               "3:4",
               "9:16"
-            ],
-            "default": "adaptive",
-            "type": "string"
+            ]
           },
-          "end_image_url": {
+          "duration": {
+            "default": 5,
+            "title": "Duration",
+            "type": "number",
+            "description": "Video length in seconds. The output can run up to about 0.7 s longer than requested. Use at least 2 s with target_audio_url.",
+            "maximum": 15,
+            "minimum": 0.92
+          },
+          "middle_image_url": {
+            "title": "Middle Image",
             "anyOf": [
               {
-                "minLength": 1,
-                "type": "string"
+                "type": "string",
+                "minLength": 1
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Optional URL of the image to use as the last frame. The video ends exactly on this image.",
-            "title": "End Image URL"
+            "description": "Optional image to guide the video at middle_frame_time. Requires start and end images and native 480P or 768P resolution."
+          },
+          "reference_conditions": {
+            "title": "Reference Conditions",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceCondition"
+            },
+            "type": "array",
+            "maxItems": 12,
+            "description": "Ordered reference list; cross-modality order is semantic and is preserved end-to-end. Do not combine with reference_*_urls."
+          },
+          "middle_frame_time": {
+            "title": "Time (seconds)",
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0,
+                "type": "number",
+                "exclusiveMaximum": 15
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              2.5
+            ],
+            "description": "Target time for the middle image, in seconds from the start. Rounded to the nearest frame at 24 fps; it must fall strictly between the first and last frames of the requested duration. Requires middle_image_url."
+          },
+          "seed": {
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Random seed. A random seed is selected when omitted."
+          },
+          "target_audio_url": {
+            "title": "Target Audio URL",
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional URL of an audio clip at least 2 seconds long (maximum 15 MB) to pin to the generated soundtrack. Cannot be combined with reference audio. Longer clips are trimmed to the generated video's length, keeping the beginning; shorter clips are padded with silence. The clip is resampled to 32 kHz stereo and replaces the output soundtrack without changing playback speed. Accepts an HTTP(S) URL or a base64 data URI."
+          },
+          "resolution": {
+            "default": "768P",
+            "title": "Resolution",
+            "type": "string",
+            "description": "The native generation resolution, or 1080P latent refinement from a native 768P source.",
+            "enum": [
+              "480P",
+              "768P",
+              "1080P"
+            ]
+          },
+          "reference_image_urls": {
+            "title": "Reference Image URLs",
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/pro_i2v_in.jpg"
+              ]
+            ],
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 9,
+            "description": "URLs of subject/style reference images, referenced in the prompt as Image 1, Image 2, and so on. Reference images, videos, and audio clips must add up to at most 12 files."
           }
         },
-        "required": [
-          "prompt",
-          "prompt_expansion_mode"
-        ],
         "x-fal-order-properties": [
           "prompt",
           "reference_image_urls",
@@ -287,16 +286,41 @@
           "aspect_ratio",
           "reference_conditions"
         ],
-        "type": "object"
+        "type": "object",
+        "title": "TurboReferenceToVideoHailuo03Input"
       },
       "H3MaxReferenceToVideoOutput": {
-        "title": "TurboReferenceToVideoHailuo03Output",
+        "required": [
+          "video",
+          "seed"
+        ],
         "properties": {
+          "timings": {
+            "title": "Timings",
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number"
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Timing breakdown in seconds. 'inference' is the DiT denoising time on the GPU backend. Null on routes that do not report backend timings."
+          },
           "video": {
-            "description": "The generated video",
-            "$ref": "#/components/schemas/File"
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video"
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "integer",
+            "description": "Base seed for reproducing the generation."
           },
           "expanded_prompt": {
+            "title": "Expanded Prompt",
             "anyOf": [
               {
                 "type": "string"
@@ -305,15 +329,10 @@
                 "type": "null"
               }
             ],
-            "description": "The prompt after expansion, as sent to the model. Null when prompt expansion was disabled, left the prompt unchanged, or was performed internally by MiniMax's hosted API.",
-            "title": "Expanded Prompt"
-          },
-          "seed": {
-            "title": "Seed",
-            "description": "Base seed for reproducing the generation.",
-            "type": "integer"
+            "description": "The prompt after expansion, as sent to the model. Null when prompt expansion was disabled, left the prompt unchanged, or was performed internally by MiniMax's hosted API."
           },
           "reference_tokens": {
+            "title": "Reference Tokens",
             "anyOf": [
               {
                 "type": "integer"
@@ -322,29 +341,9 @@
                 "type": "null"
               }
             ],
-            "description": "Packed reference conditioner rows encoded for this request (images, videos, keyframes, and audio). The first 4096 rows are included in the clip price.",
-            "title": "Reference Tokens"
-          },
-          "timings": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "type": "number"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Timing breakdown in seconds. 'inference' is the DiT denoising time on the GPU backend. Null on routes that do not report backend timings.",
-            "title": "Timings"
+            "description": "Packed reference conditioner rows encoded for this request (images, videos, keyframes, and audio). The first 4096 rows are included in the clip price."
           }
         },
-        "required": [
-          "video",
-          "seed"
-        ],
         "x-fal-order-properties": [
           "video",
           "expanded_prompt",
@@ -352,43 +351,47 @@
           "reference_tokens",
           "timings"
         ],
-        "type": "object"
+        "type": "object",
+        "title": "TurboReferenceToVideoHailuo03Output"
       },
       "ReferenceCondition": {
-        "title": "ReferenceCondition",
+        "required": [
+          "type",
+          "url"
+        ],
         "properties": {
-          "url": {
-            "title": "Url",
-            "minLength": 1,
-            "description": "URL of the reference media.",
-            "type": "string"
-          },
           "type": {
             "title": "Type",
+            "type": "string",
             "description": "Reference modality. Cross-modality list order is semantic.",
             "enum": [
               "image",
               "video",
               "audio"
-            ],
-            "type": "string"
+            ]
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "minLength": 1,
+            "description": "URL of the reference media."
           }
         },
-        "description": "One ordered Ref2VA media condition.",
-        "required": [
-          "type",
-          "url"
-        ],
         "x-fal-order-properties": [
           "type",
           "url"
         ],
-        "type": "object"
+        "type": "object",
+        "title": "ReferenceCondition",
+        "description": "One ordered Ref2VA media condition."
       },
       "File": {
-        "title": "File",
+        "required": [
+          "url"
+        ],
         "properties": {
           "content_type": {
+            "title": "Content Type",
             "anyOf": [
               {
                 "type": "string"
@@ -397,13 +400,13 @@
                 "type": "null"
               }
             ],
-            "description": "The mime type of the file.",
             "examples": [
               "image/png"
             ],
-            "title": "Content Type"
+            "description": "The mime type of the file."
           },
           "file_name": {
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -412,18 +415,13 @@
                 "type": "null"
               }
             ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "title": "File Name"
-          },
-          "url": {
-            "title": "Url",
-            "description": "The URL where the file can be downloaded from.",
-            "type": "string"
+            "description": "The name of the file. It will be auto-generated if not provided."
           },
           "file_size": {
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -432,23 +430,25 @@
                 "type": "null"
               }
             ],
-            "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ],
-            "title": "File Size"
+            "description": "The size of the file in bytes."
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
           }
         },
-        "required": [
-          "url"
-        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
-        "type": "object"
+        "type": "object",
+        "title": "File"
       }
     }
   },

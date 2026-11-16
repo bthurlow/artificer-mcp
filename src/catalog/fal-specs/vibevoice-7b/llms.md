@@ -139,7 +139,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "script": "Speaker 0: VibeVoice is now available on Fal. Isn't that right, Carter?\nSpeaker 1: That's right Frank, and it supports up to four speakers at once. Try it now!",
+     "script": "Speaker 0: VibeVoice is now available on Fal. Isn'\''t that right, Carter?\nSpeaker 1: That'\''s right Frank, and it supports up to four speakers at once. Try it now!",
      "speakers": [
        {
          "preset": "Frank [EN]"
@@ -172,8 +172,7 @@ def on_queue_update(update):
 result = fal_client.subscribe(
     "fal-ai/vibevoice/7b",
     arguments={
-        "script": "Speaker 0: VibeVoice is now available on Fal. Isn't that right, Carter?
-    Speaker 1: That's right Frank, and it supports up to four speakers at once. Try it now!",
+        "script": "Speaker 0: VibeVoice is now available on Fal. Isn't that right, Carter?\nSpeaker 1: That's right Frank, and it supports up to four speakers at once. Try it now!",
         "speakers": [{
             "preset": "Frank [EN]"
         }, {
@@ -201,8 +200,7 @@ import { fal } from "@fal-ai/client";
 
 const result = await fal.subscribe("fal-ai/vibevoice/7b", {
   input: {
-    script: "Speaker 0: VibeVoice is now available on Fal. Isn't that right, Carter?
-  Speaker 1: That's right Frank, and it supports up to four speakers at once. Try it now!",
+    script: "Speaker 0: VibeVoice is now available on Fal. Isn't that right, Carter?\nSpeaker 1: That's right Frank, and it supports up to four speakers at once. Try it now!",
     speakers: [{
       preset: "Frank [EN]"
     }, {

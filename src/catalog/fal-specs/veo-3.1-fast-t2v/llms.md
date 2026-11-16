@@ -147,10 +147,7 @@ def on_queue_update(update):
 result = fal_client.subscribe(
     "fal-ai/veo3.1/fast",
     arguments={
-        "prompt": "Two person street interview in New York City.
-    Sample Dialogue:
-    Host: \"Did you hear the news?\"
-    Person: \"Yes! Veo 3.1 is now available on fal. If you want to see it, go check their website.\""
+        "prompt": "Two person street interview in New York City.\nSample Dialogue:\nHost: \"Did you hear the news?\"\nPerson: \"Yes! Veo 3.1 is now available on fal. If you want to see it, go check their website.\""
     },
     with_logs=True,
     on_queue_update=on_queue_update,
@@ -173,10 +170,7 @@ import { fal } from "@fal-ai/client";
 
 const result = await fal.subscribe("fal-ai/veo3.1/fast", {
   input: {
-    prompt: "Two person street interview in New York City.
-  Sample Dialogue:
-  Host: \"Did you hear the news?\"
-  Person: \"Yes! Veo 3.1 is now available on fal. If you want to see it, go check their website.\""
+    prompt: "Two person street interview in New York City.\nSample Dialogue:\nHost: \"Did you hear the news?\"\nPerson: \"Yes! Veo 3.1 is now available on fal. If you want to see it, go check their website.\""
   },
   logs: true,
   onQueueUpdate: (update) => {

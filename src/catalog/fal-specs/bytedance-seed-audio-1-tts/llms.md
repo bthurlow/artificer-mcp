@@ -132,7 +132,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "Here's a quick look at your day: you've got three meetings, one lunch, and just enough time in between to grab a coffee and relax."
+     "prompt": "Here'\''s a quick look at your day: you'\''ve got three meetings, one lunch, and just enough time in between to grab a coffee and relax."
    }'
 ```
 

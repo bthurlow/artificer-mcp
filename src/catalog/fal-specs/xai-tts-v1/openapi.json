@@ -71,15 +71,6 @@
         ]
       },
       "TtsV1Input": {
-        "description": "Input for xAI text-to-speech generation.",
-        "title": "XAITTSInput",
-        "x-fal-order-properties": [
-          "text",
-          "voice",
-          "language",
-          "output_format",
-          "enable_safety_checker"
-        ],
         "required": [
           "text"
         ],
@@ -87,27 +78,43 @@
           "enable_safety_checker": {
             "description": "Authorized callers may set false to request relaxed screening.",
             "title": "Enable Safety Checker",
-            "default": true,
-            "type": "boolean"
+            "type": "boolean",
+            "default": true
+          },
+          "language": {
+            "enum": [
+              "auto",
+              "en",
+              "ar-EG",
+              "ar-SA",
+              "ar-AE",
+              "bn",
+              "zh",
+              "fr",
+              "de",
+              "hi",
+              "id",
+              "it",
+              "ja",
+              "ko",
+              "pt-BR",
+              "pt-PT",
+              "ru",
+              "es-MX",
+              "es-ES",
+              "tr",
+              "vi"
+            ],
+            "description": "BCP-47 language code or 'auto' for automatic detection. Supported: en, zh, fr, de, hi, id, it, ja, ko, pt-BR, pt-PT, ru, es-MX, es-ES, tr, vi, bn, ar-EG, ar-SA, ar-AE.",
+            "title": "Language",
+            "type": "string",
+            "default": "auto"
           },
           "output_format": {
             "description": "Output format configuration. Defaults to MP3 at 24 kHz / 128 kbps.",
             "$ref": "#/components/schemas/OutputFormat"
           },
-          "text": {
-            "description": "The text to convert to speech. Maximum 15,000 characters. Supports speech tags for expressive delivery: inline tags like [laugh], [pause], [sigh] and wrapping tags like <whisper>text</whisper>, <slow>text</slow>.",
-            "maxLength": 15000,
-            "title": "Text",
-            "minLength": 1,
-            "examples": [
-              "Hello! This is xAI text to speech, brought to you by Fal AI."
-            ],
-            "type": "string"
-          },
           "voice": {
-            "description": "Built-in xAI voice to use for synthesis.",
-            "title": "Voice",
-            "default": "eve",
             "enum": [
               "carina",
               "zagan",
@@ -138,75 +145,59 @@
               "rex",
               "sal"
             ],
-            "type": "string"
+            "description": "Built-in xAI voice to use for synthesis.",
+            "title": "Voice",
+            "type": "string",
+            "default": "eve"
           },
-          "language": {
-            "description": "BCP-47 language code or 'auto' for automatic detection. Supported: en, zh, fr, de, hi, id, it, ja, ko, pt-BR, pt-PT, ru, es-MX, es-ES, tr, vi, bn, ar-EG, ar-SA, ar-AE.",
-            "title": "Language",
-            "default": "auto",
-            "enum": [
-              "auto",
-              "en",
-              "ar-EG",
-              "ar-SA",
-              "ar-AE",
-              "bn",
-              "zh",
-              "fr",
-              "de",
-              "hi",
-              "id",
-              "it",
-              "ja",
-              "ko",
-              "pt-BR",
-              "pt-PT",
-              "ru",
-              "es-MX",
-              "es-ES",
-              "tr",
-              "vi"
+          "text": {
+            "description": "The text to convert to speech. Maximum 15,000 characters. Supports speech tags for expressive delivery: inline tags like [laugh], [pause], [sigh] and wrapping tags like <whisper>text</whisper>, <slow>text</slow>.",
+            "title": "Text",
+            "type": "string",
+            "minLength": 1,
+            "examples": [
+              "Hello! This is xAI text to speech, brought to you by Fal AI."
             ],
-            "type": "string"
+            "maxLength": 15000
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-fal-order-properties": [
+          "text",
+          "voice",
+          "language",
+          "output_format",
+          "enable_safety_checker"
+        ],
+        "title": "XAITTSInput",
+        "description": "Input for xAI text-to-speech generation."
       },
       "TtsV1Output": {
-        "description": "Output for xAI text-to-speech generation.",
-        "title": "XAITTSOutput",
-        "x-fal-order-properties": [
-          "audio"
-        ],
         "required": [
           "audio"
         ],
         "properties": {
           "audio": {
             "description": "The generated audio file.",
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v3b.fal.media/files/b/0a92750b/exZJCm6TDejS5xIulJs2r_xai_tts_output.mp3"
               }
-            ],
-            "$ref": "#/components/schemas/File"
+            ]
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-fal-order-properties": [
+          "audio"
+        ],
+        "title": "XAITTSOutput",
+        "description": "Output for xAI text-to-speech generation."
       },
       "OutputFormat": {
         "description": "Output format configuration for the TTS API.",
-        "title": "OutputFormat",
-        "x-fal-order-properties": [
-          "codec",
-          "sample_rate",
-          "bit_rate"
-        ],
         "properties": {
           "sample_rate": {
-            "description": "Sample rate in Hz.",
-            "title": "Sample Rate",
-            "default": 24000,
             "enum": [
               8000,
               16000,
@@ -215,10 +206,12 @@
               44100,
               48000
             ],
-            "type": "integer"
+            "description": "Sample rate in Hz.",
+            "title": "Sample Rate",
+            "type": "integer",
+            "default": 24000
           },
           "bit_rate": {
-            "description": "Bit rate in bps. Only applicable for MP3 codec. Defaults to 128000 for MP3.",
             "anyOf": [
               {
                 "enum": [
@@ -234,12 +227,10 @@
                 "type": "null"
               }
             ],
-            "title": "Bit Rate"
+            "title": "Bit Rate",
+            "description": "Bit rate in bps. Only applicable for MP3 codec. Defaults to 128000 for MP3."
           },
           "codec": {
-            "description": "Audio codec. Supported: mp3, wav, pcm, mulaw, alaw.",
-            "title": "Codec",
-            "default": "mp3",
             "enum": [
               "mp3",
               "wav",
@@ -247,61 +238,26 @@
               "mulaw",
               "alaw"
             ],
-            "type": "string"
+            "description": "Audio codec. Supported: mp3, wav, pcm, mulaw, alaw.",
+            "title": "Codec",
+            "type": "string",
+            "default": "mp3"
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-fal-order-properties": [
+          "codec",
+          "sample_rate",
+          "bit_rate"
+        ],
+        "title": "OutputFormat"
       },
       "File": {
-        "title": "File",
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
         "required": [
           "url"
         ],
         "properties": {
-          "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "image/png"
-            ]
-          },
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "examples": [
-              "z9RV14K95DvU.png"
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
           "file_size": {
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -310,12 +266,56 @@
                 "type": "null"
               }
             ],
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "examples": [
               4404019
             ]
+          },
+          "content_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Type",
+            "description": "The mime type of the file.",
+            "examples": [
+              "image/png"
+            ]
+          },
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
+          },
+          "file_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "examples": [
+              "z9RV14K95DvU.png"
+            ]
           }
         },
-        "type": "object"
+        "type": "object",
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "title": "File"
       }
     }
   },

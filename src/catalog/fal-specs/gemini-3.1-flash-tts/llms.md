@@ -134,7 +134,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "I can't believe it worked! [laughing] After all those hours of debugging [sigh] it was just a missing semicolon."
+     "prompt": "I can'\''t believe it worked! [laughing] After all those hours of debugging [sigh] it was just a missing semicolon."
    }'
 ```
 
