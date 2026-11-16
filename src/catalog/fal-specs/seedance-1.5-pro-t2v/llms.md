@@ -125,7 +125,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "Defense attorney declaring \"Ladies and gentlemen, reasonable doubt isn't just a phrase, it's the foundation of justice itself\", footsteps on marble, jury shifting, courtroom drama, closing argument power."
+     "prompt": "Defense attorney declaring \"Ladies and gentlemen, reasonable doubt isn'\''t just a phrase, it'\''s the foundation of justice itself\", footsteps on marble, jury shifting, courtroom drama, closing argument power."
    }'
 ```
 

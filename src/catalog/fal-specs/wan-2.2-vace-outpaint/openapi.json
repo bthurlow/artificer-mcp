@@ -71,91 +71,32 @@
         ]
       },
       "Wan22VaceFunA14bOutpaintingInput": {
+        "title": "WanVACEOutpaintingRequest",
+        "type": "object",
         "properties": {
-          "shift": {
-            "default": 5,
-            "description": "Shift parameter for video generation.",
-            "minimum": 1,
-            "title": "Shift",
-            "type": "number",
-            "maximum": 15
-          },
-          "last_frame_url": {
-            "description": "URL to the last frame of the video. If provided, the model will use this frame as a reference.",
-            "title": "Last Frame URL",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "sync_mode": {
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "title": "Sync Mode",
-            "type": "boolean",
-            "examples": [
-              false
-            ],
-            "default": false
-          },
-          "enable_auto_downsample": {
-            "description": "If true, the model will automatically temporally downsample the video to an appropriate frame length for the model, then will interpolate it back to the original frame length.",
-            "title": "Enable Auto Downsample",
-            "type": "boolean",
-            "examples": [
-              false
-            ],
-            "default": false
-          },
-          "sampler": {
-            "enum": [
-              "unipc",
-              "dpm++",
-              "euler"
-            ],
-            "description": "Sampler to use for video generation.",
-            "title": "Sampler",
-            "type": "string",
-            "examples": [
-              "unipc"
-            ],
-            "default": "unipc"
-          },
-          "expand_top": {
-            "description": "Whether to expand the video to the top.",
-            "title": "Expand Top",
-            "type": "boolean",
-            "examples": [
-              true
-            ],
-            "default": false
-          },
           "ref_image_urls": {
             "title": "Reference Image URLs",
             "type": "array",
+            "description": "URLs to source reference image. If provided, the model will use this image as reference.",
             "items": {
               "type": "string"
-            },
-            "description": "URLs to source reference image. If provided, the model will use this image as reference."
+            }
           },
           "acceleration": {
-            "default": "regular",
-            "description": "Acceleration to use for inference. Options are 'none' or 'regular'. Accelerated inference will very slightly affect output, but will be significantly faster.",
-            "title": "Acceleration",
             "examples": [
               "regular"
             ],
+            "default": "regular",
+            "title": "Acceleration",
+            "description": "Acceleration to use for inference. Options are 'none' or 'regular'. Accelerated inference will very slightly affect output, but will be significantly faster.",
             "anyOf": [
               {
+                "type": "string",
                 "enum": [
                   "none",
                   "low",
                   "regular"
-                ],
-                "type": "string"
+                ]
               },
               {
                 "type": "null"
@@ -163,38 +104,36 @@
             ]
           },
           "video_write_mode": {
+            "examples": [
+              "balanced"
+            ],
+            "type": "string",
+            "default": "balanced",
+            "title": "Video Write Mode",
             "enum": [
               "fast",
               "balanced",
               "small"
             ],
-            "description": "The write mode of the generated video.",
-            "title": "Video Write Mode",
-            "type": "string",
-            "examples": [
-              "balanced"
-            ],
-            "default": "balanced"
+            "description": "The write mode of the generated video."
           },
-          "temporal_downsample_factor": {
-            "default": 0,
-            "description": "Temporal downsample factor for the video. This is an integer value that determines how many frames to skip in the video. A value of 0 means no downsampling. For each downsample factor, one upsample factor will automatically be applied.",
-            "minimum": 0,
-            "title": "Temporal Downsample Factor",
-            "type": "integer",
+          "expand_bottom": {
             "examples": [
-              0
+              true
             ],
-            "maximum": 5
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to expand the video to the bottom.",
+            "title": "Expand Bottom"
           },
           "frames_per_second": {
+            "title": "Frames per Second",
             "default": 16,
             "description": "Frames per second of the generated video. Must be between 5 to 30. Ignored if match_input_frames_per_second is true.",
-            "title": "Frames per Second",
             "anyOf": [
               {
-                "minimum": 5,
                 "type": "integer",
+                "minimum": 5,
                 "maximum": 30
               },
               {
@@ -203,26 +142,227 @@
             ]
           },
           "enable_safety_checker": {
-            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "title": "Enable Safety Checker",
-            "type": "boolean",
             "examples": [
               true
             ],
-            "default": false
+            "type": "boolean",
+            "default": false,
+            "title": "Enable Safety Checker",
+            "description": "If set to true, the safety checker will be enabled. Disabling it requires account authorization; unauthorized requests are always checked."
+          },
+          "match_input_num_frames": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "default": false,
+            "title": "Match Input Number of Frames",
+            "description": "If true, the number of frames in the generated video will match the number of frames in the input video. If false, the number of frames will be determined by the num_frames parameter."
+          },
+          "num_frames": {
+            "title": "Number of Frames",
+            "type": "integer",
+            "default": 81,
+            "minimum": 17,
+            "description": "Number of frames to generate. Must be between 81 to 241 (inclusive).",
+            "maximum": 241
+          },
+          "shift": {
+            "title": "Shift",
+            "type": "number",
+            "default": 5,
+            "minimum": 1,
+            "description": "Shift parameter for video generation.",
+            "maximum": 15
+          },
+          "expand_top": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to expand the video to the top.",
+            "title": "Expand Top"
+          },
+          "return_frames_zip": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "default": false,
+            "title": "Return Frames Zip",
+            "description": "If true, also return a ZIP file containing all generated frames."
+          },
+          "enable_auto_downsample": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "default": false,
+            "title": "Enable Auto Downsample",
+            "description": "If true, the model will automatically temporally downsample the video to an appropriate frame length for the model, then will interpolate it back to the original frame length."
+          },
+          "prompt": {
+            "examples": [
+              "A lone woman strides through the neon-drenched streets of Tokyo at night.  Her crimson dress, a vibrant splash of color against the deep blues and blacks of the cityscape, flows slightly with each step. A tailored black jacket, crisp and elegant, contrasts sharply with the dress's rich texture. Medium shot:  The city hums around her, blurred lights creating streaks of color in the background. Close-up:  The fabric of her dress catches the streetlight's glow, revealing a subtle silk sheen and the intricate stitching at the hem. Her black jacket’s subtle texture is visible – a fine wool perhaps, with a matte finish. The overall mood is one of quiet confidence and mystery, a vibrant woman navigating a bustling, nocturnal landscape. High resolution 4k."
+            ],
+            "type": "string",
+            "title": "Prompt",
+            "description": "The text prompt to guide video generation."
+          },
+          "sync_mode": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "default": false,
+            "title": "Sync Mode",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
+          },
+          "expand_left": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to expand the video to the left.",
+            "title": "Expand Left"
+          },
+          "interpolator_model": {
+            "examples": [
+              "film"
+            ],
+            "type": "string",
+            "default": "film",
+            "title": "Interpolator Model",
+            "enum": [
+              "rife",
+              "film"
+            ],
+            "description": "The model to use for frame interpolation. Options are 'rife' or 'film'."
+          },
+          "aspect_ratio": {
+            "title": "Aspect Ratio",
+            "type": "string",
+            "default": "auto",
+            "description": "Aspect ratio of the generated video.",
+            "enum": [
+              "auto",
+              "16:9",
+              "1:1",
+              "9:16"
+            ]
+          },
+          "transparency_mode": {
+            "examples": [
+              "content_aware"
+            ],
+            "type": "string",
+            "default": "content_aware",
+            "title": "Transparency Mode",
+            "enum": [
+              "content_aware",
+              "white",
+              "black"
+            ],
+            "description": "The transparency mode to apply to the first and last frames. This controls how the transparent areas of the first and last frames are filled."
+          },
+          "sampler": {
+            "examples": [
+              "unipc"
+            ],
+            "type": "string",
+            "default": "unipc",
+            "title": "Sampler",
+            "enum": [
+              "unipc",
+              "dpm++",
+              "euler"
+            ],
+            "description": "Sampler to use for video generation."
+          },
+          "auto_downsample_min_fps": {
+            "description": "The minimum frames per second to downsample the video to. This is used to help determine the auto downsample factor to try and find the lowest detail-preserving downsample factor. The default value is appropriate for most videos, if you are using a video with very fast motion, you may need to increase this value. If your video has a very low amount of motion, you could decrease this value to allow for higher downsampling and thus longer sequences.",
+            "examples": [
+              15
+            ],
+            "type": "number",
+            "default": 15,
+            "minimum": 1,
+            "title": "Auto Downsample Min FPS",
+            "maximum": 60
           },
           "expand_right": {
-            "description": "Whether to expand the video to the right.",
-            "title": "Expand Right",
-            "type": "boolean",
             "examples": [
               true
             ],
-            "default": false
+            "type": "boolean",
+            "default": false,
+            "description": "Whether to expand the video to the right.",
+            "title": "Expand Right"
+          },
+          "resolution": {
+            "title": "Resolution",
+            "type": "string",
+            "default": "auto",
+            "description": "Resolution of the generated video.",
+            "enum": [
+              "auto",
+              "240p",
+              "360p",
+              "480p",
+              "580p",
+              "720p"
+            ]
+          },
+          "num_interpolated_frames": {
+            "description": "Number of frames to interpolate between the original frames. A value of 0 means no interpolation.",
+            "examples": [
+              0
+            ],
+            "type": "integer",
+            "default": 0,
+            "minimum": 0,
+            "title": "Number of Interpolated Frames",
+            "maximum": 5
+          },
+          "num_inference_steps": {
+            "title": "Number of Inference Steps",
+            "type": "integer",
+            "default": 30,
+            "minimum": 2,
+            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
+            "maximum": 50
+          },
+          "enable_prompt_expansion": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "default": false,
+            "title": "Enable Prompt Expansion",
+            "description": "Whether to enable prompt expansion."
+          },
+          "video_url": {
+            "examples": [
+              "https://storage.googleapis.com/falserverless/web-examples/wan/t2v.mp4"
+            ],
+            "type": "string",
+            "title": "Video URL",
+            "description": "URL to the source video file. Required for outpainting."
+          },
+          "negative_prompt": {
+            "examples": [
+              "letterboxing, borders, black bars, bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards"
+            ],
+            "type": "string",
+            "default": "letterboxing, borders, black bars, bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards",
+            "title": "Negative Prompt",
+            "description": "Negative prompt for video generation."
           },
           "first_frame_url": {
-            "description": "URL to the first frame of the video. If provided, the model will use this frame as a reference.",
             "title": "First Frame URL",
+            "description": "URL to the first frame of the video. If provided, the model will use this frame as a reference.",
             "anyOf": [
               {
                 "type": "string"
@@ -232,91 +372,32 @@
               }
             ]
           },
-          "match_input_frames_per_second": {
-            "description": "If true, the frames per second of the generated video will match the input video. If false, the frames per second will be determined by the frames_per_second parameter.",
-            "title": "Match Input Frames Per Second",
-            "type": "boolean",
+          "last_frame_url": {
+            "title": "Last Frame URL",
+            "description": "URL to the last frame of the video. If provided, the model will use this frame as a reference.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expand_ratio": {
             "examples": [
-              false
+              0.25
             ],
-            "default": false
-          },
-          "guidance_scale": {
-            "default": 5,
-            "description": "Guidance scale for classifier-free guidance. Higher values encourage the model to generate images closely related to the text prompt.",
-            "minimum": 1,
-            "title": "Guidance Scale",
-            "type": "number",
-            "examples": [
-              5
-            ],
-            "maximum": 10
-          },
-          "resolution": {
-            "enum": [
-              "auto",
-              "240p",
-              "360p",
-              "480p",
-              "580p",
-              "720p"
-            ],
-            "description": "Resolution of the generated video.",
-            "title": "Resolution",
-            "type": "string",
-            "default": "auto"
-          },
-          "aspect_ratio": {
-            "enum": [
-              "auto",
-              "16:9",
-              "1:1",
-              "9:16"
-            ],
-            "description": "Aspect ratio of the generated video.",
-            "title": "Aspect Ratio",
-            "type": "string",
-            "default": "auto"
-          },
-          "num_interpolated_frames": {
-            "default": 0,
-            "description": "Number of frames to interpolate between the original frames. A value of 0 means no interpolation.",
+            "description": "Amount of expansion. This is a float value between 0 and 1, where 0.25 adds 25% to the original video size on the specified sides.",
+            "title": "Expand Ratio",
             "minimum": 0,
-            "title": "Number of Interpolated Frames",
-            "type": "integer",
-            "examples": [
-              0
-            ],
-            "maximum": 5
-          },
-          "prompt": {
-            "title": "Prompt",
-            "type": "string",
-            "examples": [
-              "A lone woman strides through the neon-drenched streets of Tokyo at night.  Her crimson dress, a vibrant splash of color against the deep blues and blacks of the cityscape, flows slightly with each step. A tailored black jacket, crisp and elegant, contrasts sharply with the dress's rich texture. Medium shot:  The city hums around her, blurred lights creating streaks of color in the background. Close-up:  The fabric of her dress catches the streetlight's glow, revealing a subtle silk sheen and the intricate stitching at the hem. Her black jacket’s subtle texture is visible – a fine wool perhaps, with a matte finish. The overall mood is one of quiet confidence and mystery, a vibrant woman navigating a bustling, nocturnal landscape. High resolution 4k."
-            ],
-            "description": "The text prompt to guide video generation."
-          },
-          "expand_left": {
-            "description": "Whether to expand the video to the left.",
-            "title": "Expand Left",
-            "type": "boolean",
-            "examples": [
-              true
-            ],
-            "default": false
-          },
-          "video_url": {
-            "title": "Video URL",
-            "type": "string",
-            "examples": [
-              "https://storage.googleapis.com/falserverless/web-examples/wan/t2v.mp4"
-            ],
-            "description": "URL to the source video file. Required for outpainting."
+            "maximum": 1,
+            "default": 0.25,
+            "type": "number"
           },
           "seed": {
-            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
             "title": "Seed",
+            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
             "anyOf": [
               {
                 "type": "integer"
@@ -326,132 +407,57 @@
               }
             ]
           },
-          "enable_prompt_expansion": {
-            "description": "Whether to enable prompt expansion.",
-            "title": "Enable Prompt Expansion",
-            "type": "boolean",
+          "temporal_downsample_factor": {
+            "description": "Temporal downsample factor for the video. This is an integer value that determines how many frames to skip in the video. A value of 0 means no downsampling. For each downsample factor, one upsample factor will automatically be applied.",
             "examples": [
-              false
+              0
             ],
-            "default": false
-          },
-          "num_frames": {
-            "default": 81,
-            "description": "Number of frames to generate. Must be between 81 to 241 (inclusive).",
-            "minimum": 17,
-            "title": "Number of Frames",
             "type": "integer",
-            "maximum": 241
+            "default": 0,
+            "minimum": 0,
+            "title": "Temporal Downsample Factor",
+            "maximum": 5
           },
           "video_quality": {
+            "examples": [
+              "high"
+            ],
+            "type": "string",
+            "default": "high",
+            "title": "Video Quality",
             "enum": [
               "low",
               "medium",
               "high",
               "maximum"
             ],
-            "description": "The quality of the generated video.",
-            "title": "Video Quality",
-            "type": "string",
-            "examples": [
-              "high"
-            ],
-            "default": "high"
+            "description": "The quality of the generated video."
           },
-          "interpolator_model": {
-            "enum": [
-              "rife",
-              "film"
-            ],
-            "description": "The model to use for frame interpolation. Options are 'rife' or 'film'.",
-            "title": "Interpolator Model",
-            "type": "string",
+          "match_input_frames_per_second": {
             "examples": [
-              "film"
+              false
             ],
-            "default": "film"
+            "type": "boolean",
+            "default": false,
+            "title": "Match Input Frames Per Second",
+            "description": "If true, the frames per second of the generated video will match the input video. If false, the frames per second will be determined by the frames_per_second parameter."
           },
-          "expand_ratio": {
-            "minimum": 0,
-            "maximum": 1,
-            "default": 0.25,
-            "title": "Expand Ratio",
+          "guidance_scale": {
+            "description": "Guidance scale for classifier-free guidance. Higher values encourage the model to generate images closely related to the text prompt.",
+            "examples": [
+              5
+            ],
             "type": "number",
-            "examples": [
-              0.25
-            ],
-            "description": "Amount of expansion. This is a float value between 0 and 1, where 0.25 adds 25% to the original video size on the specified sides."
-          },
-          "transparency_mode": {
-            "enum": [
-              "content_aware",
-              "white",
-              "black"
-            ],
-            "description": "The transparency mode to apply to the first and last frames. This controls how the transparent areas of the first and last frames are filled.",
-            "title": "Transparency Mode",
-            "type": "string",
-            "examples": [
-              "content_aware"
-            ],
-            "default": "content_aware"
-          },
-          "auto_downsample_min_fps": {
-            "default": 15,
-            "description": "The minimum frames per second to downsample the video to. This is used to help determine the auto downsample factor to try and find the lowest detail-preserving downsample factor. The default value is appropriate for most videos, if you are using a video with very fast motion, you may need to increase this value. If your video has a very low amount of motion, you could decrease this value to allow for higher downsampling and thus longer sequences.",
+            "default": 5,
             "minimum": 1,
-            "title": "Auto Downsample Min FPS",
-            "type": "number",
-            "examples": [
-              15
-            ],
-            "maximum": 60
-          },
-          "match_input_num_frames": {
-            "description": "If true, the number of frames in the generated video will match the number of frames in the input video. If false, the number of frames will be determined by the num_frames parameter.",
-            "title": "Match Input Number of Frames",
-            "type": "boolean",
-            "examples": [
-              false
-            ],
-            "default": false
-          },
-          "negative_prompt": {
-            "description": "Negative prompt for video generation.",
-            "title": "Negative Prompt",
-            "type": "string",
-            "examples": [
-              "letterboxing, borders, black bars, bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards"
-            ],
-            "default": "letterboxing, borders, black bars, bright colors, overexposed, static, blurred details, subtitles, style, artwork, painting, picture, still, overall gray, worst quality, low quality, JPEG compression residue, ugly, incomplete, extra fingers, poorly drawn hands, poorly drawn faces, deformed, disfigured, malformed limbs, fused fingers, still picture, cluttered background, three legs, many people in the background, walking backwards"
-          },
-          "num_inference_steps": {
-            "default": 30,
-            "description": "Number of inference steps for sampling. Higher values give better quality but take longer.",
-            "minimum": 2,
-            "title": "Number of Inference Steps",
-            "type": "integer",
-            "maximum": 50
-          },
-          "return_frames_zip": {
-            "description": "If true, also return a ZIP file containing all generated frames.",
-            "title": "Return Frames Zip",
-            "type": "boolean",
-            "examples": [
-              false
-            ],
-            "default": false
-          },
-          "expand_bottom": {
-            "description": "Whether to expand the video to the bottom.",
-            "title": "Expand Bottom",
-            "type": "boolean",
-            "examples": [
-              true
-            ],
-            "default": false
+            "title": "Guidance Scale",
+            "maximum": 10
           }
         },
+        "required": [
+          "prompt",
+          "video_url"
+        ],
         "x-fal-order-properties": [
           "prompt",
           "negative_prompt",
@@ -488,29 +494,25 @@
           "expand_top",
           "expand_bottom",
           "expand_ratio"
-        ],
-        "title": "WanVACEOutpaintingRequest",
-        "type": "object",
-        "required": [
-          "prompt",
-          "video_url"
         ]
       },
       "Wan22VaceFunA14bOutpaintingOutput": {
+        "title": "WanVACEOutpaintingResponse",
+        "type": "object",
         "properties": {
+          "prompt": {
+            "title": "Prompt",
+            "type": "string",
+            "description": "The prompt used for generation."
+          },
           "video": {
-            "$ref": "#/components/schemas/VideoFile",
             "examples": [
               {
                 "url": "https://storage.googleapis.com/falserverless/example_outputs/wan-vace-outpainting-output.mp4"
               }
             ],
-            "description": "The generated outpainting video file."
-          },
-          "prompt": {
-            "title": "Prompt",
-            "type": "string",
-            "description": "The prompt used for generation."
+            "description": "The generated outpainting video file.",
+            "$ref": "#/components/schemas/VideoFile"
           },
           "seed": {
             "title": "Seed",
@@ -529,31 +531,28 @@
             ]
           }
         },
+        "required": [
+          "video",
+          "prompt",
+          "seed"
+        ],
         "x-fal-order-properties": [
           "video",
           "prompt",
           "seed",
           "frames_zip"
-        ],
-        "title": "WanVACEOutpaintingResponse",
-        "type": "object",
-        "required": [
-          "video",
-          "prompt",
-          "seed"
         ]
       },
       "VideoFile": {
+        "title": "VideoFile",
+        "type": "object",
         "properties": {
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
+          "num_frames": {
+            "title": "Num Frames",
+            "description": "The number of frames in the video",
             "anyOf": [
               {
-                "type": "string"
+                "type": "integer"
               },
               {
                 "type": "null"
@@ -566,11 +565,11 @@
             "description": "The URL where the file can be downloaded from."
           },
           "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
             "examples": [
               "image/png"
             ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
             "anyOf": [
               {
                 "type": "string"
@@ -580,9 +579,12 @@
               }
             ]
           },
-          "height": {
-            "description": "The height of the video",
-            "title": "Height",
+          "file_size": {
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -593,8 +595,8 @@
             ]
           },
           "width": {
-            "description": "The width of the video",
             "title": "Width",
+            "description": "The width of the video",
             "anyOf": [
               {
                 "type": "integer"
@@ -604,27 +606,12 @@
               }
             ]
           },
-          "file_size": {
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "examples": [
-              4404019
-            ],
+          "height": {
+            "title": "Height",
+            "description": "The height of the video",
             "anyOf": [
               {
                 "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "duration": {
-            "description": "The duration of the video",
-            "title": "Duration",
-            "anyOf": [
-              {
-                "type": "number"
               },
               {
                 "type": "null"
@@ -632,8 +619,8 @@
             ]
           },
           "fps": {
-            "description": "The FPS of the video",
             "title": "Fps",
+            "description": "The FPS of the video",
             "anyOf": [
               {
                 "type": "number"
@@ -643,12 +630,27 @@
               }
             ]
           },
-          "num_frames": {
-            "description": "The number of frames in the video",
-            "title": "Num Frames",
+          "file_name": {
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
             "anyOf": [
               {
-                "type": "integer"
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duration": {
+            "title": "Duration",
+            "description": "The duration of the video",
+            "anyOf": [
+              {
+                "type": "number"
               },
               {
                 "type": "null"
@@ -656,6 +658,9 @@
             ]
           }
         },
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -666,21 +671,23 @@
           "fps",
           "duration",
           "num_frames"
-        ],
-        "title": "VideoFile",
-        "type": "object",
-        "required": [
-          "url"
         ]
       },
       "File": {
+        "title": "File",
+        "type": "object",
         "properties": {
-          "file_name": {
-            "description": "The name of the file. It will be auto-generated if not provided.",
-            "title": "File Name",
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "content_type": {
             "examples": [
-              "z9RV14K95DvU.png"
+              "image/png"
             ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
             "anyOf": [
               {
                 "type": "string"
@@ -690,17 +697,12 @@
               }
             ]
           },
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
-          },
-          "content_type": {
-            "description": "The mime type of the file.",
-            "title": "Content Type",
+          "file_name": {
             "examples": [
-              "image/png"
+              "z9RV14K95DvU.png"
             ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -711,11 +713,11 @@
             ]
           },
           "file_size": {
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
             "examples": [
               4404019
             ],
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
             "anyOf": [
               {
                 "type": "integer"
@@ -726,16 +728,14 @@
             ]
           }
         },
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
-        ],
-        "title": "File",
-        "type": "object",
-        "required": [
-          "url"
         ]
       }
     }

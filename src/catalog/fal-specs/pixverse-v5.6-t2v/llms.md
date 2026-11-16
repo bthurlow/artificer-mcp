@@ -104,7 +104,7 @@ The API returns the following output format:
 
 - **`video`** (`File`, _required_):
   The generated video
-  - Examples: {"file_size":5485412,"content_type":"video/mp4","file_name":"output.mp4","url":"https://storage.googleapis.com/falserverless/model_tests/video_models/output-4.mp4"}
+  - Examples: {"url":"https://storage.googleapis.com/falserverless/model_tests/video_models/output-4.mp4","content_type":"video/mp4","file_name":"output.mp4","file_size":5485412}
 
 
 
@@ -113,10 +113,10 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "file_size": 5485412,
+    "url": "https://storage.googleapis.com/falserverless/model_tests/video_models/output-4.mp4",
     "content_type": "video/mp4",
     "file_name": "output.mp4",
-    "url": "https://storage.googleapis.com/falserverless/model_tests/video_models/output-4.mp4"
+    "file_size": 5485412
   }
 }
 ```
@@ -132,7 +132,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "Epic low-cut camera capture of a girl clad in ultraviolet threads, Peter Max art style depiction, luminous diamond skin glistening under a vast moon's radiance, embodied in a superhuman flight among mystical ruins, symbolizing a deity's ritual ascent, hyper-detailed"
+     "prompt": "Epic low-cut camera capture of a girl clad in ultraviolet threads, Peter Max art style depiction, luminous diamond skin glistening under a vast moon'\''s radiance, embodied in a superhuman flight among mystical ruins, symbolizing a deity'\''s ritual ascent, hyper-detailed"
    }'
 ```
 

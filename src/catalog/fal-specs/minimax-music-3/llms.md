@@ -157,11 +157,7 @@ result = fal_client.subscribe(
     "minimax/music-3",
     arguments={
         "prompt": "Genre: acoustic pop. BPM: 96. Key: C major. Warm and intimate, building gently into the chorus. Vocals: soft female lead, close and breathy, light stacked harmonies in the chorus. Arrangement: fingerpicked guitar and soft piano; brushed drums and upright bass enter in the chorus.",
-        "lyrics": "[verse]
-    Morning light filtering through the pine
-    Every quiet street is yours and mine
-    [chorus]
-    Softly the world begins to breathe"
+        "lyrics": "[verse]\nMorning light filtering through the pine\nEvery quiet street is yours and mine\n[chorus]\nSoftly the world begins to breathe"
     },
     with_logs=True,
     on_queue_update=on_queue_update,
@@ -185,11 +181,7 @@ import { fal } from "@fal-ai/client";
 const result = await fal.subscribe("minimax/music-3", {
   input: {
     prompt: "Genre: acoustic pop. BPM: 96. Key: C major. Warm and intimate, building gently into the chorus. Vocals: soft female lead, close and breathy, light stacked harmonies in the chorus. Arrangement: fingerpicked guitar and soft piano; brushed drums and upright bass enter in the chorus.",
-    lyrics: "[verse]
-  Morning light filtering through the pine
-  Every quiet street is yours and mine
-  [chorus]
-  Softly the world begins to breathe"
+    lyrics: "[verse]\nMorning light filtering through the pine\nEvery quiet street is yours and mine\n[chorus]\nSoftly the world begins to breathe"
   },
   logs: true,
   onQueueUpdate: (update) => {

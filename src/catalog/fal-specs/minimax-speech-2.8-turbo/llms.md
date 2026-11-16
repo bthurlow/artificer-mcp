@@ -115,7 +115,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "Hello world! Welcome to MiniMax's new text to speech model <#0.1#> Speech 2.8 Turbo (sighs) now available on Fal!"
+     "prompt": "Hello world! Welcome to MiniMax'\''s new text to speech model <#0.1#> Speech 2.8 Turbo (sighs) now available on Fal!"
    }'
 ```
 

@@ -53,9 +53,9 @@ The API accepts the following input parameters:
   - Array of string
 
 - **`resolution`** (`ResolutionEnum`, _optional_):
-  Video resolution - 480p for faster generation, 720p for balance, 1080p for high quality. Default value: `"720p"`
+  Video resolution - 480p for faster generation, 720p for balance, 1080p for high quality, 4k for highest quality. Default value: `"720p"`
   - Default: `"720p"`
-  - Options: `"480p"`, `"720p"`, `"1080p"`
+  - Options: `"480p"`, `"720p"`, `"1080p"`, `"4k"`
 
 - **`draft`** (`boolean`, _optional_):
   Generate a draft preview at 480p, overriding resolution. Returns a draft_id for completing the draft at 1080p within 14 days.

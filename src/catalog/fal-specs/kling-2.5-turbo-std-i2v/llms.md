@@ -115,7 +115,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "Fine grains of salt drift across the flats in a slow, low wind, streaming past the figure's feet. The figure's robe ripples. Light crawls down the face of the monolith as the sun rises millimeter by millimeter — a slow wash of coral replacing indigo. The figure tilts their head upward. Camera creeps forward almost imperceptibly. Monumental, spiritual, glacial.",
+     "prompt": "Fine grains of salt drift across the flats in a slow, low wind, streaming past the figure'\''s feet. The figure'\''s robe ripples. Light crawls down the face of the monolith as the sun rises millimeter by millimeter — a slow wash of coral replacing indigo. The figure tilts their head upward. Camera creeps forward almost imperceptibly. Monumental, spiritual, glacial.",
      "image_url": "https://v3b.fal.media/files/b/0a975417/w4qtfMTu-mh_KUgHIZNAH__4BUACOxwlMAEVXDfeYbj_2UxyAg3W.jpg"
    }'
 ```

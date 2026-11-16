@@ -71,6 +71,11 @@
         ]
       },
       "MaiImage25ProEditInput": {
+        "required": [
+          "prompt"
+        ],
+        "type": "object",
+        "title": "MaiImage25ProImageToImageInput",
         "x-fal-order-properties": [
           "prompt",
           "num_images",
@@ -80,17 +85,21 @@
           "image_url"
         ],
         "properties": {
-          "prompt": {
-            "maxLength": 5000,
+          "output_format": {
             "type": "string",
-            "examples": [
-              "Turn this into a clean, futuristic product shot with soft studio lighting."
+            "default": "png",
+            "title": "Output Format",
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
             ],
-            "title": "Prompt",
-            "minLength": 3,
-            "description": "The instruction describing how to edit the input image(s)."
+            "description": "The format of the generated image."
           },
           "aspect_ratio": {
+            "type": "string",
+            "default": "auto",
+            "title": "Aspect Ratio",
             "enum": [
               "auto",
               "1:1",
@@ -101,80 +110,76 @@
               "3:2",
               "2:3"
             ],
-            "type": "string",
-            "title": "Aspect Ratio",
-            "default": "auto",
             "description": "The aspect ratio of the generated image. Use \"auto\" to match the input or let the model decide."
           },
           "sync_mode": {
-            "title": "Sync Mode",
             "type": "boolean",
             "default": false,
+            "title": "Sync Mode",
             "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
           },
-          "output_format": {
-            "enum": [
-              "jpeg",
-              "png",
-              "webp"
-            ],
-            "title": "Output Format",
-            "type": "string",
-            "default": "png",
-            "description": "The format of the generated image."
-          },
-          "num_images": {
-            "title": "Number of Images",
-            "maximum": 4,
-            "type": "integer",
-            "minimum": 1,
-            "default": 1,
-            "description": "The number of images to generate."
-          },
           "image_url": {
-            "title": "Image URL",
             "examples": [
               "https://storage.googleapis.com/falserverless/example_inputs/nano-banana-edit-input.png"
             ],
             "type": "string",
             "default": "",
+            "title": "Image URL",
             "description": "The URL of the image to edit. Provide one http(s) or data: URL."
+          },
+          "num_images": {
+            "maximum": 4,
+            "minimum": 1,
+            "type": "integer",
+            "default": 1,
+            "title": "Number of Images",
+            "description": "The number of images to generate."
+          },
+          "prompt": {
+            "maxLength": 5000,
+            "examples": [
+              "Turn this into a clean, futuristic product shot with soft studio lighting."
+            ],
+            "type": "string",
+            "minLength": 3,
+            "title": "Prompt",
+            "description": "The instruction describing how to edit the input image(s)."
           }
-        },
-        "required": [
-          "prompt"
-        ],
-        "type": "object",
-        "title": "MaiImage25ProImageToImageInput"
+        }
       },
       "MaiImage25ProEditOutput": {
+        "required": [
+          "images",
+          "description"
+        ],
+        "type": "object",
+        "title": "MaiImage25ProImageToImageOutput",
         "x-fal-order-properties": [
           "images",
           "description"
         ],
         "properties": {
           "images": {
+            "description": "The edited images.",
+            "type": "array",
             "title": "Images",
             "items": {
               "$ref": "#/components/schemas/ImageFile"
-            },
-            "type": "array",
-            "description": "The edited images."
+            }
           },
           "description": {
-            "title": "Description",
             "type": "string",
+            "title": "Description",
             "description": "The description of the generated images."
           }
-        },
-        "required": [
-          "images",
-          "description"
-        ],
-        "type": "object",
-        "title": "MaiImage25ProImageToImageOutput"
+        }
       },
       "ImageFile": {
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "title": "ImageFile",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -184,12 +189,8 @@
           "height"
         ],
         "properties": {
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
-          },
           "width": {
+            "description": "The width of the image",
             "title": "Width",
             "anyOf": [
               {
@@ -198,44 +199,14 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The width of the image"
-          },
-          "content_type": {
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file."
-          },
-          "file_size": {
-            "title": "File Size",
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The size of the file in bytes."
+            ]
           },
           "file_name": {
-            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
             ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -243,10 +214,10 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+            ]
           },
           "height": {
+            "description": "The height of the image",
             "title": "Height",
             "anyOf": [
               {
@@ -255,15 +226,44 @@
               {
                 "type": "null"
               }
+            ]
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "file_size": {
+            "examples": [
+              4404019
             ],
-            "description": "The height of the image"
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
-        },
-        "required": [
-          "url"
-        ],
-        "type": "object",
-        "title": "ImageFile"
+        }
       }
     }
   },

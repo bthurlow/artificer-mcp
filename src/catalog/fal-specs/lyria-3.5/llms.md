@@ -97,7 +97,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "An uplifting pop song with driving electric guitar, energetic drums, and a catchy chorus singing 'Rise up and shine today'. 120 BPM. Two minutes long with a verse-chorus-verse-chorus-bridge-chorus structure."
+     "prompt": "An uplifting pop song with driving electric guitar, energetic drums, and a catchy chorus singing '\''Rise up and shine today'\''. 120 BPM. Two minutes long with a verse-chorus-verse-chorus-bridge-chorus structure."
    }'
 ```
 

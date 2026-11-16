@@ -141,7 +141,7 @@ The API returns the following output format:
 
 - **`audio`** (`AudioFile`, _required_):
   The generated speech audio file.
-  - Examples: {"channels":1,"duration":13.025333333333334,"content_type":"audio/mpeg","sample_rate":24000,"file_name":"n5Ynr2aFKUPw1QjLYjB_4_XEdHoD1K.mp3","url":"https://storage.googleapis.com/falserverless/example_outputs/qwen3-tts/tts_out.mp3"}
+  - Examples: {"content_type":"audio/mpeg","file_name":"n5Ynr2aFKUPw1QjLYjB_4_XEdHoD1K.mp3","channels":1,"duration":13.025333333333334,"url":"https://storage.googleapis.com/falserverless/example_outputs/qwen3-tts/tts_out.mp3","sample_rate":24000}
 
 
 
@@ -150,12 +150,12 @@ The API returns the following output format:
 ```json
 {
   "audio": {
+    "content_type": "audio/mpeg",
+    "file_name": "n5Ynr2aFKUPw1QjLYjB_4_XEdHoD1K.mp3",
     "channels": 1,
     "duration": 13.025333333333334,
-    "content_type": "audio/mpeg",
-    "sample_rate": 24000,
-    "file_name": "n5Ynr2aFKUPw1QjLYjB_4_XEdHoD1K.mp3",
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/qwen3-tts/tts_out.mp3"
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/qwen3-tts/tts_out.mp3",
+    "sample_rate": 24000
   }
 }
 ```
@@ -171,7 +171,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "text": "I am solving the equation: x = [-b ± √(b²-4ac)] / 2a? Nobody can — it's a disaster (◍•͈⌔•͈◍), very sad!"
+     "text": "I am solving the equation: x = [-b ± √(b²-4ac)] / 2a? Nobody can — it'\''s a disaster (◍•͈⌔•͈◍), very sad!"
    }'
 ```
 

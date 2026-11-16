@@ -71,44 +71,16 @@
         ]
       },
       "Wan30ReferenceToVideoInput": {
-        "title": "Wan30ReferenceToVideoInput",
         "properties": {
-          "reference_video_urls": {
-            "title": "Reference Video Urls",
-            "maxItems": 5,
-            "items": {
-              "type": "string"
-            },
-            "description": "Up to 5 reference video URLs totaling at most 15 seconds. Each clip must be at least 16 fps. Input video duration is billed in addition to output duration.",
-            "type": "array"
-          },
-          "reference_image_urls": {
-            "title": "Reference Image Urls",
-            "maxItems": 10,
-            "items": {
-              "type": "string"
-            },
-            "description": "Up to 10 reference image URLs.",
-            "type": "array"
-          },
-          "resolution": {
-            "title": "Resolution",
-            "description": "Output video resolution tier.",
-            "enum": [
-              "480p",
-              "720p",
-              "1080p"
-            ],
-            "type": "string",
-            "default": "1080p"
-          },
-          "enable_prompt_expansion": {
-            "title": "Enable Prompt Expansion",
-            "description": "Enable intelligent prompt rewriting. Disabling it can save roughly 20-60 seconds of latency but is likely to degrade generation quality.",
-            "type": "boolean",
-            "default": true
+          "enable_safety_checker": {
+            "description": "Enable content moderation for input and output. Disabling it requires account authorization; unauthorized requests are always checked.",
+            "default": true,
+            "title": "Enable Safety Checker",
+            "type": "boolean"
           },
           "file_url": {
+            "description": "Document URL to base the video on. Requires enable_thinking=true.",
+            "title": "File Url",
             "anyOf": [
               {
                 "type": "string"
@@ -116,30 +88,11 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "Document URL to base the video on. Requires enable_thinking=true.",
-            "title": "File Url"
-          },
-          "enable_safety_checker": {
-            "title": "Enable Safety Checker",
-            "description": "Enable content moderation for input and output. Disabling it requires account authorization; unauthorized requests are always checked.",
-            "type": "boolean",
-            "default": true
-          },
-          "seed": {
-            "anyOf": [
-              {
-                "minimum": 0,
-                "maximum": 2147483647,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Seed"
+            ]
           },
           "prompt": {
+            "description": "Text prompt directing how the reference media is used. Reference media can be addressed positionally, e.g. 'the subject in Image 1 walks past Video 1'.",
+            "title": "Prompt",
             "anyOf": [
               {
                 "maxLength": 20000,
@@ -148,37 +101,12 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "Text prompt directing how the reference media is used. Reference media can be addressed positionally, e.g. 'the subject in Image 1 walks past Video 1'.",
-            "title": "Prompt"
-          },
-          "web_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Public webpage URL to base the video on. Requires enable_thinking=true. Only pages that do not require login can be read.",
-            "title": "Web Url"
-          },
-          "aspect_ratio": {
-            "title": "Aspect Ratio",
-            "description": "Output aspect ratio, or adaptive selection.",
-            "enum": [
-              "adaptive",
-              "16:9",
-              "4:3",
-              "1:1",
-              "3:4",
-              "9:16"
-            ],
-            "type": "string",
-            "default": "adaptive"
+            ]
           },
           "duration": {
+            "description": "Output duration in seconds. Set to null for smart duration, which lets the model pick a length from the prompt and reference media.",
+            "default": 5,
+            "title": "Duration",
             "anyOf": [
               {
                 "minimum": 2,
@@ -188,31 +116,102 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "Output duration in seconds. Set to null for smart duration, which lets the model pick a length from the prompt and reference media.",
-            "title": "Duration",
-            "default": 5
+            ]
           },
-          "reference_audio_urls": {
-            "title": "Reference Audio Urls",
+          "audio": {
+            "description": "Include generated audio.",
+            "default": true,
+            "title": "Audio",
+            "type": "boolean"
+          },
+          "enable_thinking": {
+            "description": "Enable enhanced reasoning before generation.",
+            "default": false,
+            "title": "Enable Thinking",
+            "type": "boolean"
+          },
+          "reference_video_urls": {
             "maxItems": 5,
+            "description": "Up to 5 reference video URLs totaling at most 15 seconds. Each clip must be at least 16 fps. Input video duration is billed in addition to output duration.",
             "items": {
               "type": "string"
             },
-            "description": "Up to 5 reference audio URLs totaling at most 15 seconds.",
+            "title": "Reference Video Urls",
             "type": "array"
           },
-          "enable_thinking": {
-            "title": "Enable Thinking",
-            "description": "Enable enhanced reasoning before generation.",
-            "type": "boolean",
-            "default": false
+          "resolution": {
+            "description": "Output video resolution tier.",
+            "enum": [
+              "480p",
+              "720p",
+              "1080p"
+            ],
+            "default": "1080p",
+            "title": "Resolution",
+            "type": "string"
           },
-          "audio": {
-            "title": "Audio",
-            "description": "Include generated audio.",
-            "type": "boolean",
-            "default": true
+          "reference_audio_urls": {
+            "maxItems": 5,
+            "description": "Up to 5 reference audio URLs totaling at most 15 seconds.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Reference Audio Urls",
+            "type": "array"
+          },
+          "enable_prompt_expansion": {
+            "description": "Enable intelligent prompt rewriting. Disabling it can save roughly 20-60 seconds of latency but is likely to degrade generation quality.",
+            "default": true,
+            "title": "Enable Prompt Expansion",
+            "type": "boolean"
+          },
+          "reference_image_urls": {
+            "maxItems": 10,
+            "description": "Up to 10 reference image URLs.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Reference Image Urls",
+            "type": "array"
+          },
+          "aspect_ratio": {
+            "description": "Output aspect ratio, or adaptive selection.",
+            "enum": [
+              "adaptive",
+              "16:9",
+              "4:3",
+              "1:1",
+              "3:4",
+              "9:16"
+            ],
+            "default": "adaptive",
+            "title": "Aspect Ratio",
+            "type": "string"
+          },
+          "seed": {
+            "title": "Seed",
+            "anyOf": [
+              {
+                "minimum": 0,
+                "maximum": 2147483647,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "web_url": {
+            "description": "Public webpage URL to base the video on. Requires enable_thinking=true. Only pages that do not require login can be read.",
+            "title": "Web Url",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "x-fal-order-properties": [
@@ -231,26 +230,18 @@
           "file_url",
           "web_url"
         ],
+        "title": "Wan30ReferenceToVideoInput",
         "type": "object"
       },
       "Wan30ReferenceToVideoOutput": {
-        "title": "Wan30Output",
         "properties": {
-          "video": {
-            "description": "The generated video file.",
-            "$ref": "#/components/schemas/VideoFile"
-          },
-          "seed": {
-            "title": "Seed",
-            "description": "The seed used for generation.",
-            "type": "integer"
-          },
           "duration": {
-            "title": "Duration",
             "description": "Generated video duration in seconds.",
+            "title": "Duration",
             "type": "number"
           },
           "actual_prompt": {
+            "title": "Actual Prompt",
             "anyOf": [
               {
                 "type": "string"
@@ -258,8 +249,16 @@
               {
                 "type": "null"
               }
-            ],
-            "title": "Actual Prompt"
+            ]
+          },
+          "seed": {
+            "description": "The seed used for generation.",
+            "title": "Seed",
+            "type": "integer"
+          },
+          "video": {
+            "description": "The generated video file.",
+            "$ref": "#/components/schemas/VideoFile"
           }
         },
         "required": [
@@ -273,23 +272,11 @@
           "duration",
           "actual_prompt"
         ],
+        "title": "Wan30Output",
         "type": "object"
       },
       "VideoFile": {
-        "title": "VideoFile",
         "properties": {
-          "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The height of the video",
-            "title": "Height"
-          },
           "file_name": {
             "anyOf": [
               {
@@ -304,69 +291,6 @@
               "z9RV14K95DvU.png"
             ],
             "title": "File Name"
-          },
-          "num_frames": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The number of frames in the video",
-            "title": "Num Frames"
-          },
-          "file_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The size of the file in bytes.",
-            "examples": [
-              4404019
-            ],
-            "title": "File Size"
-          },
-          "fps": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The FPS of the video",
-            "title": "Fps"
-          },
-          "duration": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The duration of the video",
-            "title": "Duration"
-          },
-          "width": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The width of the video",
-            "title": "Width"
           },
           "content_type": {
             "anyOf": [
@@ -383,10 +307,85 @@
             ],
             "title": "Content Type"
           },
+          "fps": {
+            "description": "The FPS of the video",
+            "title": "Fps",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "url": {
-            "title": "Url",
             "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
             "type": "string"
+          },
+          "width": {
+            "description": "The width of the video",
+            "title": "Width",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "duration": {
+            "description": "The duration of the video",
+            "title": "Duration",
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "num_frames": {
+            "description": "The number of frames in the video",
+            "title": "Num Frames",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "file_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "title": "File Size"
+          },
+          "height": {
+            "description": "The height of the video",
+            "title": "Height",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -403,6 +402,7 @@
           "duration",
           "num_frames"
         ],
+        "title": "VideoFile",
         "type": "object"
       }
     }

@@ -136,7 +136,7 @@ The API returns the following output format:
 - **`images`** (`list<ImageFile>`, _required_):
   The generated image files info.
   - Array of ImageFile
-  - Examples: [{"content_type":"image/png","url":"https://v3b.fal.media/files/b/0a9276c3/6KxxMb0bPmfNLH3DqcuSf_qRUe8cIL.png","width":2048,"height":2048}]
+  - Examples: [{"content_type":"image/png","url":"https://v3b.fal.media/files/b/0a9276c3/6KxxMb0bPmfNLH3DqcuSf_qRUe8cIL.png","height":2048,"width":2048}]
 
 - **`timings`** (`Timings`, _required_):
   The timings of the generation process.
@@ -161,8 +161,8 @@ The API returns the following output format:
     {
       "content_type": "image/png",
       "url": "https://v3b.fal.media/files/b/0a9276c3/6KxxMb0bPmfNLH3DqcuSf_qRUe8cIL.png",
-      "width": 2048,
-      "height": 2048
+      "height": 2048,
+      "width": 2048
     }
   ],
   "prompt": ""

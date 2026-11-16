@@ -127,7 +127,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "A monkey and polar bear host a casual podcast about AI inference, bringing their unique perspectives from different environments (tropical vs. arctic) to discuss how AI systems make decisions and process information.\nSample Dialogue:\nMonkey (Banana): \"Welcome back to Bananas & Ice! I am Banana\"\nPolar Bear (Ice): \"And I'm Ice!\"",
+     "prompt": "A monkey and polar bear host a casual podcast about AI inference, bringing their unique perspectives from different environments (tropical vs. arctic) to discuss how AI systems make decisions and process information.\nSample Dialogue:\nMonkey (Banana): \"Welcome back to Bananas & Ice! I am Banana\"\nPolar Bear (Ice): \"And I'\''m Ice!\"",
      "image_url": "https://storage.googleapis.com/falserverless/example_inputs/veo31_i2v_input.jpg"
    }'
 ```
@@ -153,10 +153,7 @@ def on_queue_update(update):
 result = fal_client.subscribe(
     "fal-ai/veo3.1/fast/image-to-video",
     arguments={
-        "prompt": "A monkey and polar bear host a casual podcast about AI inference, bringing their unique perspectives from different environments (tropical vs. arctic) to discuss how AI systems make decisions and process information.
-    Sample Dialogue:
-    Monkey (Banana): \"Welcome back to Bananas & Ice! I am Banana\"
-    Polar Bear (Ice): \"And I'm Ice!\"",
+        "prompt": "A monkey and polar bear host a casual podcast about AI inference, bringing their unique perspectives from different environments (tropical vs. arctic) to discuss how AI systems make decisions and process information.\nSample Dialogue:\nMonkey (Banana): \"Welcome back to Bananas & Ice! I am Banana\"\nPolar Bear (Ice): \"And I'm Ice!\"",
         "image_url": "https://storage.googleapis.com/falserverless/example_inputs/veo31_i2v_input.jpg"
     },
     with_logs=True,
@@ -180,10 +177,7 @@ import { fal } from "@fal-ai/client";
 
 const result = await fal.subscribe("fal-ai/veo3.1/fast/image-to-video", {
   input: {
-    prompt: "A monkey and polar bear host a casual podcast about AI inference, bringing their unique perspectives from different environments (tropical vs. arctic) to discuss how AI systems make decisions and process information.
-  Sample Dialogue:
-  Monkey (Banana): \"Welcome back to Bananas & Ice! I am Banana\"
-  Polar Bear (Ice): \"And I'm Ice!\"",
+    prompt: "A monkey and polar bear host a casual podcast about AI inference, bringing their unique perspectives from different environments (tropical vs. arctic) to discuss how AI systems make decisions and process information.\nSample Dialogue:\nMonkey (Banana): \"Welcome back to Bananas & Ice! I am Banana\"\nPolar Bear (Ice): \"And I'm Ice!\"",
     image_url: "https://storage.googleapis.com/falserverless/example_inputs/veo31_i2v_input.jpg"
   },
   logs: true,

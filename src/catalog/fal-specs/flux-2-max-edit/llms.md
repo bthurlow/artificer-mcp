@@ -131,7 +131,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "A high-fashion magazine cover featuring an android in an avant-garde geometric cloth dress, with logo prints from @Image1. The backdrop is an eye-catching scenery. The title text 'FAL MAGAZINE' spans the top in bold white serif font. Overlay text at the bottom right reads 'THE FUTURE OF AI' in a sleek, thin sans-serif font.",
+     "prompt": "A high-fashion magazine cover featuring an android in an avant-garde geometric cloth dress, with logo prints from @Image1. The backdrop is an eye-catching scenery. The title text '\''FAL MAGAZINE'\'' spans the top in bold white serif font. Overlay text at the bottom right reads '\''THE FUTURE OF AI'\'' in a sleek, thin sans-serif font.",
      "image_urls": [
        "https://storage.googleapis.com/falserverless/example_inputs/flux2/max.jpg"
      ]

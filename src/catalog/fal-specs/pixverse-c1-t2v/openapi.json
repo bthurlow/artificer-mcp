@@ -71,6 +71,10 @@
         ]
       },
       "PixverseC1TextToVideoInput": {
+        "title": "TextToVideoRequestC1",
+        "required": [
+          "prompt"
+        ],
         "x-fal-order-properties": [
           "prompt",
           "aspect_ratio",
@@ -80,46 +84,41 @@
           "generate_audio_switch",
           "enable_safety_checker"
         ],
-        "title": "TextToVideoRequestC1",
-        "type": "object",
-        "required": [
-          "prompt"
-        ],
         "properties": {
-          "prompt": {
-            "examples": [
-              "Epic low-cut camera capture of a girl clad in ultraviolet threads, luminous diamond skin glistening under a vast moon's radiance, hyper-detailed"
-            ],
-            "title": "Prompt",
-            "type": "string",
-            "description": "Text prompt for the video generation. Limited to 2048 UTF-8 encoded bytes. Because the limit counts bytes rather than characters, emoji and non-Latin or accented characters (which use multiple bytes each) can push a visually short prompt over the cap."
+          "duration": {
+            "description": "The duration of the generated video in seconds (1-15)",
+            "minimum": 1,
+            "maximum": 15,
+            "default": 5,
+            "title": "Duration",
+            "type": "integer"
           },
-          "generate_audio_switch": {
-            "default": false,
-            "type": "boolean",
-            "title": "Generate Audio Switch",
-            "description": "Enable audio generation (BGM, SFX, dialogue)"
-          },
-          "seed": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
+          "resolution": {
+            "description": "The resolution of the generated video",
+            "enum": [
+              "360p",
+              "540p",
+              "720p",
+              "1080p"
             ],
-            "title": "Seed",
-            "description": "\n            The same seed and the same prompt given to the same version of the model\n            will output the same video every time.\n        "
+            "default": "720p",
+            "title": "Resolution",
+            "type": "string"
           },
           "enable_safety_checker": {
+            "description": "Authorized callers may set false to request relaxed screening.",
             "default": true,
             "title": "Enable Safety Checker",
-            "type": "boolean",
-            "description": "Authorized callers may set false to request relaxed screening."
+            "type": "boolean"
+          },
+          "generate_audio_switch": {
+            "description": "Enable audio generation (BGM, SFX, dialogue)",
+            "default": false,
+            "title": "Generate Audio Switch",
+            "type": "boolean"
           },
           "aspect_ratio": {
-            "default": "16:9",
+            "description": "The aspect ratio of the generated video",
             "enum": [
               "16:9",
               "4:3",
@@ -130,62 +129,12 @@
               "3:2",
               "21:9"
             ],
-            "type": "string",
+            "default": "16:9",
             "title": "Aspect Ratio",
-            "description": "The aspect ratio of the generated video"
+            "type": "string"
           },
-          "duration": {
-            "description": "The duration of the generated video in seconds (1-15)",
-            "default": 5,
-            "title": "Duration",
-            "type": "integer",
-            "maximum": 15,
-            "minimum": 1
-          },
-          "resolution": {
-            "default": "720p",
-            "enum": [
-              "360p",
-              "540p",
-              "720p",
-              "1080p"
-            ],
-            "type": "string",
-            "title": "Resolution",
-            "description": "The resolution of the generated video"
-          }
-        }
-      },
-      "PixverseC1TextToVideoOutput": {
-        "x-fal-order-properties": [
-          "video"
-        ],
-        "title": "VideoOutputC1",
-        "type": "object",
-        "required": [
-          "video"
-        ],
-        "properties": {
-          "video": {
-            "$ref": "#/components/schemas/File",
-            "description": "The generated video file."
-          }
-        }
-      },
-      "File": {
-        "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size"
-        ],
-        "title": "File",
-        "type": "object",
-        "required": [
-          "url"
-        ],
-        "properties": {
-          "file_size": {
+          "seed": {
+            "description": "\n            The same seed and the same prompt given to the same version of the model\n            will output the same video every time.\n        ",
             "anyOf": [
               {
                 "type": "integer"
@@ -194,28 +143,58 @@
                 "type": "null"
               }
             ],
-            "title": "File Size",
+            "title": "Seed"
+          },
+          "prompt": {
+            "title": "Prompt",
+            "description": "Text prompt for the video generation. Limited to 2048 UTF-8 encoded bytes. Because the limit counts bytes rather than characters, emoji and non-Latin or accented characters (which use multiple bytes each) can push a visually short prompt over the cap.",
             "examples": [
-              4404019
+              "Epic low-cut camera capture of a girl clad in ultraviolet threads, luminous diamond skin glistening under a vast moon's radiance, hyper-detailed"
             ],
-            "description": "The size of the file in bytes."
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PixverseC1TextToVideoOutput": {
+        "title": "VideoOutputC1",
+        "required": [
+          "video"
+        ],
+        "x-fal-order-properties": [
+          "video"
+        ],
+        "properties": {
+          "video": {
+            "description": "The generated video file.",
+            "$ref": "#/components/schemas/File"
+          }
+        },
+        "type": "object"
+      },
+      "File": {
+        "title": "File",
+        "required": [
+          "url"
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size"
+        ],
+        "properties": {
+          "url": {
+            "description": "The URL where the file can be downloaded from.",
+            "title": "Url",
+            "type": "string"
           },
           "content_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
             "title": "Content Type",
+            "description": "The mime type of the file.",
             "examples": [
               "image/png"
             ],
-            "description": "The mime type of the file."
-          },
-          "file_name": {
             "anyOf": [
               {
                 "type": "string"
@@ -223,19 +202,40 @@
               {
                 "type": "null"
               }
-            ],
+            ]
+          },
+          "file_name": {
             "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "examples": [
               "z9RV14K95DvU.png"
             ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
+          "file_size": {
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
+            "examples": [
+              4404019
+            ],
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
-        }
+        },
+        "type": "object"
       }
     }
   },

@@ -84,7 +84,7 @@ The API returns the following output format:
 
 - **`audio`** (`File`, _required_):
   The generated music audio file in MP3 format
-  - Examples: {"content_type":"audio/mpeg","file_name":"music_generated.mp3","url":"https://storage.googleapis.com/falserverless/example_outputs/elevenlabs/music_generated.mp3"}
+  - Examples: {"content_type":"audio/mpeg","url":"https://storage.googleapis.com/falserverless/example_outputs/elevenlabs/music_generated.mp3","file_name":"music_generated.mp3"}
 
 
 
@@ -94,8 +94,8 @@ The API returns the following output format:
 {
   "audio": {
     "content_type": "audio/mpeg",
-    "file_name": "music_generated.mp3",
-    "url": "https://storage.googleapis.com/falserverless/example_outputs/elevenlabs/music_generated.mp3"
+    "url": "https://storage.googleapis.com/falserverless/example_outputs/elevenlabs/music_generated.mp3",
+    "file_name": "music_generated.mp3"
   }
 }
 ```

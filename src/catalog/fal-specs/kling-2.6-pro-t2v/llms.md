@@ -118,7 +118,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "Old friends reuniting at a train station after 20 years, one exclaims 'Is that really you?!' other tearfully replies 'I promised I'd come back, didn't I?', train whistle, steam hissing, emotional orchestral swell, crowd murmur"
+     "prompt": "Old friends reuniting at a train station after 20 years, one exclaims '\''Is that really you?!'\'' other tearfully replies '\''I promised I'\''d come back, didn'\''t I?'\'', train whistle, steam hissing, emotional orchestral swell, crowd murmur"
    }'
 ```
 

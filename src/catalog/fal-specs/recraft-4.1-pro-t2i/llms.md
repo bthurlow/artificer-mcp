@@ -79,7 +79,7 @@ The API returns the following output format:
 
 - **`images`** (`list<File>`, _required_)
   - Array of File
-  - Examples: [{"content_type":"image/webp","url":"https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/pro-output.webp","file_name":"image.webp","file_size":1949504}]
+  - Examples: [{"file_name":"image.webp","file_size":1949504,"content_type":"image/webp","url":"https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/pro-output.webp"}]
 
 
 
@@ -89,10 +89,10 @@ The API returns the following output format:
 {
   "images": [
     {
-      "content_type": "image/webp",
-      "url": "https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/pro-output.webp",
       "file_name": "image.webp",
-      "file_size": 1949504
+      "file_size": 1949504,
+      "content_type": "image/webp",
+      "url": "https://storage.googleapis.com/falserverless/example_outputs/recraft-v4/pro-output.webp"
     }
   ]
 }
@@ -109,7 +109,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "Crash zoom frozen at the moment of impact as a kingfisher breaks the surface of a pond, water crown splash forming a perfect circle, the bird's beak piercing the mirror-like surface, fish visible just below, frozen at 1/8000s, 400mm super telephoto with 2x extender, ring flash fill, pre-dawn blue light with single shaft of gold, BBC Frozen Planet production quality"
+     "prompt": "Crash zoom frozen at the moment of impact as a kingfisher breaks the surface of a pond, water crown splash forming a perfect circle, the bird'\''s beak piercing the mirror-like surface, fish visible just below, frozen at 1/8000s, 400mm super telephoto with 2x extender, ring flash fill, pre-dawn blue light with single shaft of gold, BBC Frozen Planet production quality"
    }'
 ```
 

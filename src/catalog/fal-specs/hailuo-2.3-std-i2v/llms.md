@@ -106,7 +106,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "The space station slowly rotates in orbit, its solar panels tracking the sun. Earth rotates majestically in the background with weather patterns and landmasses drifting by. The station's communication arrays adjust position. A small spacecraft approaches one of the docking ports. The scene captures the silent majesty of space and human engineering.",
+     "prompt": "The space station slowly rotates in orbit, its solar panels tracking the sun. Earth rotates majestically in the background with weather patterns and landmasses drifting by. The station'\''s communication arrays adjust position. A small spacecraft approaches one of the docking ports. The scene captures the silent majesty of space and human engineering.",
      "image_url": "https://storage.googleapis.com/falserverless/example_inputs/hailuo23/standard_i2v_in.jpg"
    }'
 ```

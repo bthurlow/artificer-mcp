@@ -71,23 +71,75 @@
         ]
       },
       "GptImage25FlareEditInput": {
-        "x-fal-order-properties": [
-          "prompt",
-          "image_urls",
-          "mask_url",
-          "image_size",
-          "background",
-          "quality",
-          "num_images",
-          "output_format",
-          "output_compression",
-          "sync_mode",
-          "enable_safety_checker"
-        ],
         "title": "GPTImage25EditImageRequest",
-        "type": "object",
         "properties": {
+          "enable_safety_checker": {
+            "title": "Enable Safety Checker",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "default": true,
+            "type": "boolean"
+          },
+          "sync_mode": {
+            "title": "Sync Mode",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "default": false,
+            "type": "boolean"
+          },
+          "quality": {
+            "title": "Quality",
+            "enum": [
+              "auto",
+              "low",
+              "medium",
+              "high",
+              "xhigh",
+              "max"
+            ],
+            "default": "high",
+            "description": "Quality for the generated image. Higher settings increase detail, latency, and token usage. Use 'auto' to let the model choose.",
+            "type": "string"
+          },
+          "mask_url": {
+            "title": "Mask URL",
+            "description": "Mask image URL. White marks regions to edit and black marks regions to keep.",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "num_images": {
+            "title": "Number of Images",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Number of images to generate",
+            "default": 1,
+            "examples": [
+              1
+            ],
+            "type": "integer"
+          },
+          "image_urls": {
+            "title": "Image URLs",
+            "description": "The URLs of the images to use as a reference for the generation. A maximum of 16 images are allowed.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 16,
+            "examples": [
+              [
+                "https://v3b.fal.media/files/b/0a8691af/9Se_1_VX1wzTjjTOpWbs9_bb39c2eb-1a41-4749-b1d0-cf134abc8bbf.png"
+              ]
+            ],
+            "type": "array"
+          },
           "image_size": {
+            "title": "Image Size",
+            "description": "The size of the generated image. Use 'auto' to infer from input images.",
+            "default": "auto",
             "anyOf": [
               {
                 "$ref": "#/components/schemas/ImageSize"
@@ -104,41 +156,21 @@
                 ],
                 "type": "string"
               }
-            ],
-            "title": "Image Size",
-            "description": "The size of the generated image. Use 'auto' to infer from input images.",
-            "default": "auto"
-          },
-          "background": {
-            "title": "Background",
-            "enum": [
-              "auto",
-              "transparent",
-              "opaque"
-            ],
-            "description": "Background for the generated image",
-            "default": "auto",
-            "type": "string"
-          },
-          "sync_mode": {
-            "title": "Sync Mode",
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
-            "default": false,
-            "type": "boolean"
+            ]
           },
           "output_compression": {
+            "title": "Output Compression",
+            "description": "Compression level from 0 to 100. Only supported when output_format is 'jpeg' or 'webp'.",
             "anyOf": [
               {
-                "maximum": 100,
                 "minimum": 0,
+                "maximum": 100,
                 "type": "integer"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Output Compression",
-            "description": "Compression level from 0 to 100. Only supported when output_format is 'jpeg' or 'webp'."
+            ]
           },
           "output_format": {
             "title": "Output Format",
@@ -147,154 +179,115 @@
               "png",
               "webp"
             ],
-            "description": "Output format for the images",
             "default": "png",
+            "description": "Output format for the images",
             "type": "string"
           },
-          "quality": {
-            "title": "Quality",
+          "background": {
+            "title": "Background",
             "enum": [
               "auto",
-              "low",
-              "medium",
-              "high",
-              "xhigh",
-              "max"
+              "transparent",
+              "opaque"
             ],
-            "description": "Quality for the generated image. Higher settings increase detail, latency, and token usage. Use 'auto' to let the model choose.",
-            "default": "high",
+            "default": "auto",
+            "description": "Background for the generated image",
             "type": "string"
-          },
-          "enable_safety_checker": {
-            "title": "Enable Safety Checker",
-            "description": "Authorized callers may set false to request relaxed screening.",
-            "default": true,
-            "type": "boolean"
           },
           "prompt": {
             "title": "Prompt",
+            "description": "The prompt for image generation",
+            "minLength": 1,
+            "maxLength": 32000,
             "examples": [
               "Same workers, same beam, same lunch boxes - but they're all on their phones now. One is taking a selfie. One is on a call looking annoyed. Same danger, new priorities. A hard hat has AirPods."
             ],
-            "maxLength": 32000,
-            "minLength": 1,
-            "description": "The prompt for image generation",
             "type": "string"
-          },
-          "image_urls": {
-            "title": "Image URLs",
-            "examples": [
-              [
-                "https://v3b.fal.media/files/b/0a8691af/9Se_1_VX1wzTjjTOpWbs9_bb39c2eb-1a41-4749-b1d0-cf134abc8bbf.png"
-              ]
-            ],
-            "items": {
-              "type": "string"
-            },
-            "description": "The URLs of the images to use as a reference for the generation. A maximum of 16 images are allowed.",
-            "maxItems": 16,
-            "type": "array"
-          },
-          "mask_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mask URL",
-            "description": "Mask image URL. White marks regions to edit and black marks regions to keep."
-          },
-          "num_images": {
-            "title": "Number of Images",
-            "examples": [
-              1
-            ],
-            "default": 1,
-            "maximum": 10,
-            "description": "Number of images to generate",
-            "minimum": 1,
-            "type": "integer"
           }
         },
         "description": "GPT Image 2.5 edit inputs with model-specific quality and compression.",
         "required": [
           "prompt",
           "image_urls"
-        ]
+        ],
+        "x-fal-order-properties": [
+          "prompt",
+          "image_urls",
+          "mask_url",
+          "image_size",
+          "background",
+          "quality",
+          "num_images",
+          "output_format",
+          "output_compression",
+          "sync_mode",
+          "enable_safety_checker"
+        ],
+        "type": "object"
       },
       "GptImage25FlareEditOutput": {
-        "x-fal-order-properties": [
-          "images"
-        ],
         "title": "EditImageResponse",
-        "type": "object",
         "properties": {
           "images": {
             "title": "Images",
-            "examples": [
-              [
-                {
-                  "content_type": "image/png",
-                  "url": "https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png",
-                  "file_name": "yUt7tifLSbg1WzWWgfj2o.png",
-                  "height": 1024,
-                  "width": 1024
-                }
-              ]
-            ],
+            "description": "The generated images.",
             "items": {
               "$ref": "#/components/schemas/ImageFile"
             },
-            "description": "The generated images.",
+            "examples": [
+              [
+                {
+                  "height": 1024,
+                  "content_type": "image/png",
+                  "url": "https://v3b.fal.media/files/b/0a8691b0/yUt7tifLSbg1WzWWgfj2o.png",
+                  "width": 1024,
+                  "file_name": "yUt7tifLSbg1WzWWgfj2o.png"
+                }
+              ]
+            ],
             "type": "array"
           }
         },
         "required": [
           "images"
-        ]
+        ],
+        "x-fal-order-properties": [
+          "images"
+        ],
+        "type": "object"
       },
       "ImageSize": {
-        "x-fal-order-properties": [
-          "width",
-          "height"
-        ],
         "title": "ImageSize",
         "properties": {
           "height": {
             "title": "Height",
-            "exclusiveMinimum": 0,
-            "maximum": 14142,
             "description": "The height of the generated image.",
+            "maximum": 14142,
             "default": 512,
+            "exclusiveMinimum": 0,
             "type": "integer"
           },
           "width": {
             "title": "Width",
-            "exclusiveMinimum": 0,
-            "maximum": 14142,
             "description": "The width of the generated image.",
+            "maximum": 14142,
             "default": 512,
+            "exclusiveMinimum": 0,
             "type": "integer"
           }
         },
-        "type": "object"
-      },
-      "ImageFile": {
         "x-fal-order-properties": [
-          "url",
-          "content_type",
-          "file_name",
-          "file_size",
           "width",
           "height"
         ],
+        "type": "object"
+      },
+      "ImageFile": {
         "title": "ImageFile",
-        "type": "object",
         "properties": {
           "content_type": {
+            "title": "Content Type",
+            "description": "The mime type of the file.",
             "anyOf": [
               {
                 "type": "string"
@@ -305,16 +298,40 @@
             ],
             "examples": [
               "image/png"
-            ],
-            "title": "Content Type",
-            "description": "The mime type of the file."
+            ]
+          },
+          "height": {
+            "title": "Height",
+            "description": "The height of the image",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "url": {
             "title": "Url",
             "description": "The URL where the file can be downloaded from.",
             "type": "string"
           },
+          "width": {
+            "title": "Width",
+            "description": "The width of the image",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "file_name": {
+            "title": "File Name",
+            "description": "The name of the file. It will be auto-generated if not provided.",
             "anyOf": [
               {
                 "type": "string"
@@ -325,11 +342,11 @@
             ],
             "examples": [
               "z9RV14K95DvU.png"
-            ],
-            "title": "File Name",
-            "description": "The name of the file. It will be auto-generated if not provided."
+            ]
           },
           "file_size": {
+            "title": "File Size",
+            "description": "The size of the file in bytes.",
             "anyOf": [
               {
                 "type": "integer"
@@ -340,38 +357,21 @@
             ],
             "examples": [
               4404019
-            ],
-            "title": "File Size",
-            "description": "The size of the file in bytes."
-          },
-          "height": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Height",
-            "description": "The height of the image"
-          },
-          "width": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Width",
-            "description": "The width of the image"
+            ]
           }
         },
         "required": [
           "url"
-        ]
+        ],
+        "x-fal-order-properties": [
+          "url",
+          "content_type",
+          "file_name",
+          "file_size",
+          "width",
+          "height"
+        ],
+        "type": "object"
       }
     }
   },

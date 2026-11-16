@@ -71,6 +71,11 @@
         ]
       },
       "MaiImage25ProInput": {
+        "required": [
+          "prompt"
+        ],
+        "type": "object",
+        "title": "MaiImage25ProTextToImageInput",
         "x-fal-order-properties": [
           "prompt",
           "num_images",
@@ -79,17 +84,27 @@
           "sync_mode"
         ],
         "properties": {
-          "prompt": {
-            "maxLength": 5000,
+          "output_format": {
             "type": "string",
-            "examples": [
-              "A photorealistic concept-art poster of a university campus at sunset, cinematic lighting, a banner reading \"LOUISVILLE\" in bold serif type."
+            "default": "png",
+            "title": "Output Format",
+            "enum": [
+              "jpeg",
+              "png",
+              "webp"
             ],
-            "title": "Prompt",
-            "minLength": 3,
-            "description": "The text prompt to generate an image from."
+            "description": "The format of the generated image."
+          },
+          "sync_mode": {
+            "type": "boolean",
+            "default": false,
+            "title": "Sync Mode",
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
           },
           "aspect_ratio": {
+            "type": "string",
+            "default": "auto",
+            "title": "Aspect Ratio",
             "enum": [
               "auto",
               "1:1",
@@ -100,71 +115,61 @@
               "3:2",
               "2:3"
             ],
-            "type": "string",
-            "title": "Aspect Ratio",
-            "default": "auto",
             "description": "The aspect ratio of the generated image. Use \"auto\" to let the model decide based on the prompt."
           },
-          "sync_mode": {
-            "title": "Sync Mode",
-            "type": "boolean",
-            "default": false,
-            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history."
-          },
-          "output_format": {
-            "enum": [
-              "jpeg",
-              "png",
-              "webp"
-            ],
-            "title": "Output Format",
-            "type": "string",
-            "default": "png",
-            "description": "The format of the generated image."
-          },
           "num_images": {
-            "title": "Number of Images",
             "maximum": 4,
-            "type": "integer",
             "minimum": 1,
+            "type": "integer",
             "default": 1,
+            "title": "Number of Images",
             "description": "The number of images to generate."
+          },
+          "prompt": {
+            "maxLength": 5000,
+            "examples": [
+              "A photorealistic concept-art poster of a university campus at sunset, cinematic lighting, a banner reading \"LOUISVILLE\" in bold serif type."
+            ],
+            "type": "string",
+            "minLength": 3,
+            "title": "Prompt",
+            "description": "The text prompt to generate an image from."
           }
-        },
-        "required": [
-          "prompt"
-        ],
-        "type": "object",
-        "title": "MaiImage25ProTextToImageInput"
+        }
       },
       "MaiImage25ProOutput": {
+        "required": [
+          "images",
+          "description"
+        ],
+        "type": "object",
+        "title": "MaiImage25ProTextToImageOutput",
         "x-fal-order-properties": [
           "images",
           "description"
         ],
         "properties": {
           "images": {
+            "description": "The generated images.",
+            "type": "array",
             "title": "Images",
             "items": {
               "$ref": "#/components/schemas/ImageFile"
-            },
-            "type": "array",
-            "description": "The generated images."
+            }
           },
           "description": {
-            "title": "Description",
             "type": "string",
+            "title": "Description",
             "description": "The description of the generated images."
           }
-        },
-        "required": [
-          "images",
-          "description"
-        ],
-        "type": "object",
-        "title": "MaiImage25ProTextToImageOutput"
+        }
       },
       "ImageFile": {
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "title": "ImageFile",
         "x-fal-order-properties": [
           "url",
           "content_type",
@@ -174,12 +179,8 @@
           "height"
         ],
         "properties": {
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
-          },
           "width": {
+            "description": "The width of the image",
             "title": "Width",
             "anyOf": [
               {
@@ -188,44 +189,14 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The width of the image"
-          },
-          "content_type": {
-            "title": "Content Type",
-            "examples": [
-              "image/png"
-            ],
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The mime type of the file."
-          },
-          "file_size": {
-            "title": "File Size",
-            "examples": [
-              4404019
-            ],
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "The size of the file in bytes."
+            ]
           },
           "file_name": {
-            "title": "File Name",
             "examples": [
               "z9RV14K95DvU.png"
             ],
+            "description": "The name of the file. It will be auto-generated if not provided.",
+            "title": "File Name",
             "anyOf": [
               {
                 "type": "string"
@@ -233,10 +204,10 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided."
+            ]
           },
           "height": {
+            "description": "The height of the image",
             "title": "Height",
             "anyOf": [
               {
@@ -245,15 +216,44 @@
               {
                 "type": "null"
               }
+            ]
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
+          "file_size": {
+            "examples": [
+              4404019
             ],
-            "description": "The height of the image"
+            "description": "The size of the file in bytes.",
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "content_type": {
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file.",
+            "title": "Content Type",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
-        },
-        "required": [
-          "url"
-        ],
-        "type": "object",
-        "title": "ImageFile"
+        }
       }
     }
   },

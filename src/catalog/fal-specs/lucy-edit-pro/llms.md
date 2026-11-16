@@ -114,7 +114,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "Transform the woman's outfit into a regal medieval gown with flowing velvet fabric, intricate gold embroidery, and a jeweled crown, giving her the appearance of a queen.",
+     "prompt": "Transform the woman'\''s outfit into a regal medieval gown with flowing velvet fabric, intricate gold embroidery, and a jeweled crown, giving her the appearance of a queen.",
      "video_url": "https://v3.fal.media/files/monkey/GI7ArkqpQVk3M6V1C_epr_original.mp4"
    }'
 ```

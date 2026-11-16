@@ -94,7 +94,7 @@ curl --request POST \
   --header "Authorization: Key $FAL_KEY" \
   --header "Content-Type: application/json" \
   --data '{
-     "prompt": "The camera follows the snowboarder as they carve down the mountain through deep powder, each turn sending up huge rooster tails of snow. They navigate between trees, floating through the powder with smooth, flowing movements. The rider launches off a natural jump, grabbing the board mid-air before landing softly in deep snow and continuing down. Powder sprays continuously as they link turns together. The atmosphere is exhilarating and free. Audio: Board cutting through snow, powder spraying, wind rushing, the rider's excited shouts, and the soft thuds of landing in deep snow."
+     "prompt": "The camera follows the snowboarder as they carve down the mountain through deep powder, each turn sending up huge rooster tails of snow. They navigate between trees, floating through the powder with smooth, flowing movements. The rider launches off a natural jump, grabbing the board mid-air before landing softly in deep snow and continuing down. Powder sprays continuously as they link turns together. The atmosphere is exhilarating and free. Audio: Board cutting through snow, powder spraying, wind rushing, the rider'\''s excited shouts, and the soft thuds of landing in deep snow."
    }'
 ```
 

@@ -83,7 +83,7 @@ The API returns the following output format:
 
 - **`video`** (`VideoFile`, _required_):
   The generated video.
-  - Examples: {"content_type":"video/mp4","duration":6.041667,"width":1280,"height":720,"num_frames":145,"url":"https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","file_name":"0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","fps":24}
+  - Examples: {"height":720,"file_name":"0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","content_type":"video/mp4","fps":24,"duration":6.041667,"url":"https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4","num_frames":145,"width":1280}
 
 
 
@@ -92,14 +92,14 @@ The API returns the following output format:
 ```json
 {
   "video": {
-    "content_type": "video/mp4",
-    "duration": 6.041667,
-    "width": 1280,
     "height": 720,
-    "num_frames": 145,
-    "url": "https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4",
     "file_name": "0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4",
-    "fps": 24
+    "content_type": "video/mp4",
+    "fps": 24,
+    "duration": 6.041667,
+    "url": "https://v3b.fal.media/files/b/0a8b90e0/0Ci1dviuSnEyUZzBUq-_5_nu7MrAAa.mp4",
+    "num_frames": 145,
+    "width": 1280
   }
 }
 ```

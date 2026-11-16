@@ -71,7 +71,9 @@
         ]
       },
       "ViduQ3ImageToVideoInput": {
-        "title": "Q3ImageToVideoRequest",
+        "required": [
+          "image_url"
+        ],
         "x-fal-order-properties": [
           "enable_safety_checker",
           "prompt",
@@ -82,28 +84,22 @@
           "resolution",
           "audio"
         ],
+        "title": "Q3ImageToVideoRequest",
+        "type": "object",
         "properties": {
-          "resolution": {
-            "type": "string",
-            "description": "Output video resolution. Note: 360p is not available when end_image_url is provided.",
-            "enum": [
-              "360p",
-              "540p",
-              "720p",
-              "1080p"
+          "end_image_url": {
+            "title": "End Image Url",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
             ],
-            "title": "Resolution",
-            "default": "720p"
-          },
-          "audio": {
-            "type": "boolean",
-            "description": "Whether to use direct audio-video generation. When true, outputs video with sound (including dialogue and sound effects).",
-            "title": "Audio",
-            "default": true
+            "description": "URL of the image to use as the ending frame. When provided, generates a transition video between start and end frames."
           },
           "enable_safety_checker": {
-            "description": "Enable safety checks; disabling requires authorization.",
-            "hidden": true,
             "title": "Enable Safety Checker",
             "anyOf": [
               {
@@ -113,40 +109,35 @@
                 "type": "null"
               }
             ],
-            "default": true
+            "default": true,
+            "hidden": true,
+            "description": "Enable safety checks; disabling requires authorization."
           },
           "duration": {
+            "title": "Duration",
             "default": 5,
+            "type": "integer",
             "description": "Duration of the video in seconds (1-16 for Q3 models)",
             "maximum": 16,
-            "minimum": 1,
-            "title": "Duration",
-            "type": "integer"
-          },
-          "end_image_url": {
-            "description": "URL of the image to use as the ending frame. When provided, generates a transition video between start and end frames.",
-            "title": "End Image Url",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "minimum": 1
           },
           "prompt": {
+            "maxLength": 2000,
+            "title": "Prompt",
             "examples": [
               "The astronaut waved and the camera moved up."
             ],
-            "maxLength": 2000,
             "type": "string",
-            "description": "Text prompt for video generation, max 2000 characters",
-            "title": "Prompt",
-            "default": ""
+            "default": "",
+            "description": "Text prompt for video generation, max 2000 characters"
+          },
+          "audio": {
+            "title": "Audio",
+            "default": true,
+            "type": "boolean",
+            "description": "Whether to use direct audio-video generation. When true, outputs video with sound (including dialogue and sound effects)."
           },
           "seed": {
-            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
             "title": "Seed",
             "anyOf": [
               {
@@ -155,27 +146,40 @@
               {
                 "type": "null"
               }
+            ],
+            "description": "Random seed for reproducibility. If None, a random seed is chosen."
+          },
+          "resolution": {
+            "title": "Resolution",
+            "default": "720p",
+            "type": "string",
+            "description": "Output video resolution. Note: 360p is not available when end_image_url is provided.",
+            "enum": [
+              "360p",
+              "540p",
+              "720p",
+              "1080p"
             ]
           },
           "image_url": {
+            "title": "Image Url",
             "examples": [
               "https://prod-ss-images.s3.cn-northwest-1.amazonaws.com.cn/vidu-maas/template/image2video.png"
             ],
-            "description": "URL or base64 image to use as the starting frame",
-            "title": "Image Url",
-            "type": "string"
+            "type": "string",
+            "description": "URL or base64 image to use as the starting frame"
           }
-        },
-        "required": [
-          "image_url"
-        ],
-        "type": "object"
+        }
       },
       "ViduQ3ImageToVideoOutput": {
-        "title": "Q3ImageToVideoOutput",
+        "required": [
+          "video"
+        ],
         "x-fal-order-properties": [
           "video"
         ],
+        "title": "Q3ImageToVideoOutput",
+        "type": "object",
         "properties": {
           "video": {
             "examples": [
@@ -183,29 +187,25 @@
                 "url": "https://v3b.fal.media/files/b/0a8c9189/n9z3uUDPqmU2msAtqr25-_output.mp4"
               }
             ],
-            "description": "The generated video from image using the Q3 model",
-            "$ref": "#/components/schemas/File"
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video from image using the Q3 model"
           }
-        },
-        "required": [
-          "video"
-        ],
-        "type": "object"
+        }
       },
       "File": {
-        "title": "File",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
+        "title": "File",
+        "type": "object",
         "properties": {
           "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
             "title": "Content Type",
             "anyOf": [
               {
@@ -214,33 +214,13 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
-          "file_size": {
-            "examples": [
-              4404019
             ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
           },
           "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "title": "File Name",
             "anyOf": [
               {
@@ -249,13 +229,33 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "file_size": {
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes."
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
           }
-        },
-        "required": [
-          "url"
-        ],
-        "type": "object"
+        }
       }
     }
   },

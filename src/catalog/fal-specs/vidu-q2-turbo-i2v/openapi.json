@@ -71,7 +71,10 @@
         ]
       },
       "ViduQ2ImageToVideoTurboInput": {
-        "title": "Q2ImageToVideoRequest",
+        "required": [
+          "prompt",
+          "image_url"
+        ],
         "x-fal-order-properties": [
           "enable_safety_checker",
           "prompt",
@@ -83,26 +86,22 @@
           "movement_amplitude",
           "bgm"
         ],
+        "title": "Q2ImageToVideoRequest",
+        "type": "object",
         "properties": {
-          "resolution": {
-            "type": "string",
-            "description": "Output video resolution",
-            "enum": [
-              "720p",
-              "1080p"
+          "end_image_url": {
+            "title": "End Image Url",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
             ],
-            "title": "Resolution",
-            "default": "720p"
-          },
-          "bgm": {
-            "type": "boolean",
-            "description": "Whether to add background music to the video (only for 4-second videos)",
-            "title": "Bgm",
-            "default": false
+            "description": "URL of the image to use as the ending frame. When provided, generates a transition video between start and end frames."
           },
           "enable_safety_checker": {
-            "description": "Enable safety checks; disabling requires authorization.",
-            "hidden": true,
             "title": "Enable Safety Checker",
             "anyOf": [
               {
@@ -112,9 +111,22 @@
                 "type": "null"
               }
             ],
-            "default": true
+            "default": true,
+            "hidden": true,
+            "description": "Enable safety checks; disabling requires authorization."
+          },
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "A woman walking through a vibrant city street at night, neon lights reflecting off wet pavement."
+            ],
+            "type": "string",
+            "description": "Text prompt for video generation, max 3000 characters",
+            "maxLength": 3000
           },
           "duration": {
+            "title": "Duration",
+            "default": 4,
             "type": "integer",
             "description": "Duration of the video in seconds",
             "enum": [
@@ -125,33 +137,21 @@
               6,
               7,
               8
-            ],
-            "title": "Duration",
-            "default": 4
-          },
-          "end_image_url": {
-            "description": "URL of the image to use as the ending frame. When provided, generates a transition video between start and end frames.",
-            "title": "End Image Url",
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
             ]
           },
-          "prompt": {
-            "examples": [
-              "A woman walking through a vibrant city street at night, neon lights reflecting off wet pavement."
-            ],
-            "maxLength": 3000,
-            "description": "Text prompt for video generation, max 3000 characters",
-            "title": "Prompt",
-            "type": "string"
+          "movement_amplitude": {
+            "title": "Movement Amplitude",
+            "default": "auto",
+            "type": "string",
+            "description": "The movement amplitude of objects in the frame",
+            "enum": [
+              "auto",
+              "small",
+              "medium",
+              "large"
+            ]
           },
           "seed": {
-            "description": "Random seed for reproducibility. If None, a random seed is chosen.",
             "title": "Seed",
             "anyOf": [
               {
@@ -160,40 +160,44 @@
               {
                 "type": "null"
               }
+            ],
+            "description": "Random seed for reproducibility. If None, a random seed is chosen."
+          },
+          "bgm": {
+            "title": "Bgm",
+            "default": false,
+            "type": "boolean",
+            "description": "Whether to add background music to the video (only for 4-second videos)"
+          },
+          "resolution": {
+            "title": "Resolution",
+            "default": "720p",
+            "type": "string",
+            "description": "Output video resolution",
+            "enum": [
+              "720p",
+              "1080p"
             ]
           },
-          "movement_amplitude": {
-            "type": "string",
-            "description": "The movement amplitude of objects in the frame",
-            "enum": [
-              "auto",
-              "small",
-              "medium",
-              "large"
-            ],
-            "title": "Movement Amplitude",
-            "default": "auto"
-          },
           "image_url": {
+            "title": "Image Url",
             "examples": [
               "https://storage.googleapis.com/falserverless/web-examples/vidu/stylish_woman.webp"
             ],
-            "description": "URL of the image to use as the starting frame",
-            "title": "Image Url",
-            "type": "string"
+            "type": "string",
+            "description": "URL of the image to use as the starting frame"
           }
-        },
-        "required": [
-          "prompt",
-          "image_url"
-        ],
-        "type": "object"
+        }
       },
       "ViduQ2ImageToVideoTurboOutput": {
-        "title": "Q2ImageToVideoOutput",
+        "required": [
+          "video"
+        ],
         "x-fal-order-properties": [
           "video"
         ],
+        "title": "Q2ImageToVideoOutput",
+        "type": "object",
         "properties": {
           "video": {
             "examples": [
@@ -201,29 +205,25 @@
                 "url": "https://fal.media/files/tiger/L_lU76tYg-cXG_twy9N62_output.mp4"
               }
             ],
-            "description": "The generated video from image using the Q2 model",
-            "$ref": "#/components/schemas/File"
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video from image using the Q2 model"
           }
-        },
-        "required": [
-          "video"
-        ],
-        "type": "object"
+        }
       },
       "File": {
-        "title": "File",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
+        "title": "File",
+        "type": "object",
         "properties": {
           "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
             "title": "Content Type",
             "anyOf": [
               {
@@ -232,33 +232,13 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
-          "file_size": {
-            "examples": [
-              4404019
             ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
           },
           "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "title": "File Name",
             "anyOf": [
               {
@@ -267,13 +247,33 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "file_size": {
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes."
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
           }
-        },
-        "required": [
-          "url"
-        ],
-        "type": "object"
+        }
       }
     }
   },

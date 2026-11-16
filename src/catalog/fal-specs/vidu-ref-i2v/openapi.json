@@ -71,7 +71,10 @@
         ]
       },
       "ViduReferenceToVideoInput": {
-        "title": "ReferenceToVideoRequest",
+        "required": [
+          "prompt",
+          "reference_image_urls"
+        ],
         "x-fal-order-properties": [
           "enable_safety_checker",
           "prompt",
@@ -80,57 +83,33 @@
           "aspect_ratio",
           "movement_amplitude"
         ],
+        "title": "ReferenceToVideoRequest",
+        "type": "object",
         "properties": {
+          "seed": {
+            "title": "Seed",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Random seed for generation"
+          },
           "aspect_ratio": {
+            "title": "Aspect Ratio",
+            "default": "16:9",
             "type": "string",
             "description": "The aspect ratio of the output video",
             "enum": [
               "16:9",
               "9:16",
               "1:1"
-            ],
-            "title": "Aspect Ratio",
-            "default": "16:9"
-          },
-          "reference_image_urls": {
-            "examples": [
-              [
-                "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference1.png",
-                "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference2.png",
-                "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference3.png"
-              ]
-            ],
-            "description": "URLs of the reference images to use for consistent subject appearance",
-            "items": {
-              "type": "string"
-            },
-            "title": "Reference Image Urls",
-            "type": "array"
-          },
-          "movement_amplitude": {
-            "type": "string",
-            "description": "The movement amplitude of objects in the frame",
-            "enum": [
-              "auto",
-              "small",
-              "medium",
-              "large"
-            ],
-            "title": "Movement Amplitude",
-            "default": "auto"
-          },
-          "prompt": {
-            "examples": [
-              "The little devil is looking at the apple on the beach and walking around it."
-            ],
-            "maxLength": 1500,
-            "description": "Text prompt for video generation, max 1500 characters",
-            "title": "Prompt",
-            "type": "string"
+            ]
           },
           "enable_safety_checker": {
-            "description": "Enable safety checks; disabling requires authorization.",
-            "hidden": true,
             "title": "Enable Safety Checker",
             "anyOf": [
               {
@@ -140,32 +119,57 @@
                 "type": "null"
               }
             ],
-            "default": true
+            "default": true,
+            "hidden": true,
+            "description": "Enable safety checks; disabling requires authorization."
           },
-          "seed": {
-            "description": "Random seed for generation",
-            "title": "Seed",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
+          "prompt": {
+            "title": "Prompt",
+            "examples": [
+              "The little devil is looking at the apple on the beach and walking around it."
+            ],
+            "type": "string",
+            "description": "Text prompt for video generation, max 1500 characters",
+            "maxLength": 1500
+          },
+          "movement_amplitude": {
+            "title": "Movement Amplitude",
+            "default": "auto",
+            "type": "string",
+            "description": "The movement amplitude of objects in the frame",
+            "enum": [
+              "auto",
+              "small",
+              "medium",
+              "large"
             ]
+          },
+          "reference_image_urls": {
+            "title": "Reference Image Urls",
+            "examples": [
+              [
+                "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference1.png",
+                "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference2.png",
+                "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/reference3.png"
+              ]
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "URLs of the reference images to use for consistent subject appearance"
           }
-        },
-        "required": [
-          "prompt",
-          "reference_image_urls"
-        ],
-        "type": "object"
+        }
       },
       "ViduReferenceToVideoOutput": {
-        "title": "ReferenceToVideoOutput",
+        "required": [
+          "video"
+        ],
         "x-fal-order-properties": [
           "video"
         ],
+        "title": "ReferenceToVideoOutput",
+        "type": "object",
         "properties": {
           "video": {
             "examples": [
@@ -173,29 +177,25 @@
                 "url": "https://storage.googleapis.com/falserverless/web-examples/vidu/new-examples/referencevideo.mp4"
               }
             ],
-            "description": "The generated video with consistent subjects from reference images",
-            "$ref": "#/components/schemas/File"
+            "$ref": "#/components/schemas/File",
+            "description": "The generated video with consistent subjects from reference images"
           }
-        },
-        "required": [
-          "video"
-        ],
-        "type": "object"
+        }
       },
       "File": {
-        "title": "File",
+        "required": [
+          "url"
+        ],
         "x-fal-order-properties": [
           "url",
           "content_type",
           "file_name",
           "file_size"
         ],
+        "title": "File",
+        "type": "object",
         "properties": {
           "content_type": {
-            "examples": [
-              "image/png"
-            ],
-            "description": "The mime type of the file.",
             "title": "Content Type",
             "anyOf": [
               {
@@ -204,33 +204,13 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "url": {
-            "description": "The URL where the file can be downloaded from.",
-            "title": "Url",
-            "type": "string"
-          },
-          "file_size": {
-            "examples": [
-              4404019
             ],
-            "description": "The size of the file in bytes.",
-            "title": "File Size",
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "examples": [
+              "image/png"
+            ],
+            "description": "The mime type of the file."
           },
           "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
-            "description": "The name of the file. It will be auto-generated if not provided.",
             "title": "File Name",
             "anyOf": [
               {
@@ -239,13 +219,33 @@
               {
                 "type": "null"
               }
-            ]
+            ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
+            "description": "The name of the file. It will be auto-generated if not provided."
+          },
+          "file_size": {
+            "title": "File Size",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "examples": [
+              4404019
+            ],
+            "description": "The size of the file in bytes."
+          },
+          "url": {
+            "title": "Url",
+            "type": "string",
+            "description": "The URL where the file can be downloaded from."
           }
-        },
-        "required": [
-          "url"
-        ],
-        "type": "object"
+        }
       }
     }
   },

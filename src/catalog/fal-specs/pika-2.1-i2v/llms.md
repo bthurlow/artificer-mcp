@@ -107,7 +107,7 @@ curl --request POST \
   --header "Content-Type: application/json" \
   --data '{
      "image_url": "https://storage.googleapis.com/falserverless/example_inputs/pika/pika_i2v_v21_input.png",
-     "prompt": "The flower blossoms into a vibrant pink lily. The lily's wide-open petals are lavishly adorned with sparkling glitter and an array of tiny, iridescent, multicolored gem-like stickers in shapes like stars, moons, and dolphins, catching the light playfully as a developing bud rises from the top of the main bloom."
+     "prompt": "The flower blossoms into a vibrant pink lily. The lily'\''s wide-open petals are lavishly adorned with sparkling glitter and an array of tiny, iridescent, multicolored gem-like stickers in shapes like stars, moons, and dolphins, catching the light playfully as a developing bud rises from the top of the main bloom."
    }'
 ```
 

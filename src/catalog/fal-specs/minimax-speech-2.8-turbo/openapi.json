@@ -71,6 +71,7 @@
         ]
       },
       "MinimaxSpeech28TurboInput": {
+        "description": "Request model for Speech 2.8 Turbo - faster speech synthesis with good quality.",
         "x-fal-order-properties": [
           "enable_safety_checker",
           "prompt",
@@ -82,12 +83,26 @@
           "normalization_setting",
           "voice_modify"
         ],
-        "title": "TextToSpeechTurbo28Request",
+        "type": "object",
         "required": [
           "prompt"
         ],
-        "type": "object",
         "properties": {
+          "voice_setting": {
+            "$ref": "#/components/schemas/VoiceSetting",
+            "default": {
+              "vol": 1,
+              "speed": 1,
+              "english_normalization": false,
+              "voice_id": "Wise_Woman",
+              "pitch": 0
+            },
+            "description": "Voice configuration settings"
+          },
+          "audio_setting": {
+            "$ref": "#/components/schemas/AudioSetting",
+            "description": "Audio configuration settings"
+          },
           "pronunciation_dict": {
             "anyOf": [
               {
@@ -103,15 +118,11 @@
             "examples": [
               "Hello world! Welcome to MiniMax's new text to speech model <#0.1#> Speech 2.8 Turbo (sighs) now available on Fal!"
             ],
-            "title": "Prompt",
-            "type": "string",
             "minLength": 1,
+            "type": "string",
+            "title": "Prompt",
             "maxLength": 10000,
             "description": "Text to convert to speech. Use `<#x#>` for pauses (x = 0.01-99.99 seconds). Supports interjection tags: `(laughs)`, `(sighs)`, `(coughs)`, `(clears throat)`, `(gasps)`, `(sniffs)`, `(groans)`, `(yawns)`."
-          },
-          "audio_setting": {
-            "$ref": "#/components/schemas/AudioSetting",
-            "description": "Audio configuration settings"
           },
           "voice_modify": {
             "anyOf": [
@@ -124,7 +135,18 @@
             ],
             "description": "Voice modification settings to adjust pitch, intensity, and timbre."
           },
+          "output_format": {
+            "enum": [
+              "url",
+              "hex"
+            ],
+            "type": "string",
+            "title": "Output Format",
+            "description": "Format of the output content (non-streaming only)",
+            "default": "hex"
+          },
           "language_boost": {
+            "title": "Language Boost",
             "anyOf": [
               {
                 "enum": [
@@ -173,220 +195,77 @@
                 "type": "null"
               }
             ],
-            "title": "Language Boost",
             "description": "Enhance recognition of specified languages and dialects"
-          },
-          "output_format": {
-            "default": "hex",
-            "title": "Output Format",
-            "type": "string",
-            "enum": [
-              "url",
-              "hex"
-            ],
-            "description": "Format of the output content (non-streaming only)"
-          },
-          "voice_setting": {
-            "default": {
-              "vol": 1,
-              "pitch": 0,
-              "voice_id": "Wise_Woman",
-              "speed": 1,
-              "english_normalization": false
-            },
-            "$ref": "#/components/schemas/VoiceSetting",
-            "description": "Voice configuration settings"
           },
           "normalization_setting": {
             "$ref": "#/components/schemas/LoudnessNormalizationSetting",
             "description": "Loudness normalization settings for the audio"
           },
           "enable_safety_checker": {
-            "default": true,
-            "title": "Enable Safety Checker",
             "type": "boolean",
-            "description": "Authorized callers may set false to request relaxed screening."
+            "title": "Enable Safety Checker",
+            "description": "Authorized callers may set false to request relaxed screening.",
+            "default": true
           }
         },
-        "description": "Request model for Speech 2.8 Turbo - faster speech synthesis with good quality."
+        "title": "TextToSpeechTurbo28Request"
       },
       "MinimaxSpeech28TurboOutput": {
+        "description": "Output model for Speech 2.8 Turbo.",
         "x-fal-order-properties": [
           "audio",
           "duration_ms"
         ],
-        "title": "TextToSpeechTurbo28Output",
+        "type": "object",
         "required": [
           "audio",
           "duration_ms"
         ],
-        "type": "object",
         "properties": {
+          "duration_ms": {
+            "type": "integer",
+            "title": "Duration Ms",
+            "description": "Duration of the audio in milliseconds"
+          },
           "audio": {
+            "$ref": "#/components/schemas/File",
             "examples": [
               {
                 "url": "https://v3b.fal.media/files/b/0a8d0bf6/AE2KhEIGf4SkSMrWIDs45_speech.mp3"
               }
             ],
-            "$ref": "#/components/schemas/File",
             "description": "The generated audio file"
-          },
-          "duration_ms": {
-            "title": "Duration Ms",
-            "type": "integer",
-            "description": "Duration of the audio in milliseconds"
           }
         },
-        "description": "Output model for Speech 2.8 Turbo."
-      },
-      "PronunciationDict": {
-        "x-fal-order-properties": [
-          "tone_list"
-        ],
-        "title": "PronunciationDict",
-        "type": "object",
-        "properties": {
-          "tone_list": {
-            "title": "Tone List",
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "List of pronunciation replacements in format ['text/(pronunciation)', ...]. For Chinese, tones are 1-5. Example: ['燕少飞/(yan4)(shao3)(fei1)']"
-          }
-        }
-      },
-      "AudioSetting": {
-        "x-fal-order-properties": [
-          "sample_rate",
-          "bitrate",
-          "format",
-          "channel"
-        ],
-        "title": "AudioSetting",
-        "type": "object",
-        "properties": {
-          "bitrate": {
-            "default": 128000,
-            "title": "Bitrate",
-            "type": "integer",
-            "enum": [
-              32000,
-              64000,
-              128000,
-              256000
-            ],
-            "description": "Bitrate of generated audio"
-          },
-          "format": {
-            "default": "mp3",
-            "title": "Format",
-            "type": "string",
-            "enum": [
-              "mp3",
-              "pcm",
-              "flac"
-            ],
-            "description": "Audio format"
-          },
-          "channel": {
-            "default": 1,
-            "title": "Channel",
-            "type": "integer",
-            "enum": [
-              1,
-              2
-            ],
-            "description": "Number of audio channels (1=mono, 2=stereo)"
-          },
-          "sample_rate": {
-            "default": 32000,
-            "title": "Sample Rate",
-            "type": "integer",
-            "enum": [
-              8000,
-              16000,
-              22050,
-              24000,
-              32000,
-              44100
-            ],
-            "description": "Sample rate of generated audio"
-          }
-        }
-      },
-      "VoiceModify": {
-        "x-fal-order-properties": [
-          "pitch",
-          "intensity",
-          "timbre"
-        ],
-        "title": "VoiceModify",
-        "type": "object",
-        "properties": {
-          "intensity": {
-            "minimum": -100,
-            "default": 0,
-            "title": "Intensity",
-            "maximum": 100,
-            "type": "integer",
-            "description": "Intensity/energy of the voice. Range: -100 to 100. Higher values create more energetic speech."
-          },
-          "timbre": {
-            "minimum": -100,
-            "default": 0,
-            "title": "Timbre",
-            "maximum": 100,
-            "type": "integer",
-            "description": "Timbre adjustment. Range: -100 to 100. Affects the tonal quality of the voice."
-          },
-          "pitch": {
-            "minimum": -100,
-            "default": 0,
-            "title": "Pitch",
-            "maximum": 100,
-            "type": "integer",
-            "description": "Pitch adjustment in semitones. Range: -100 to 100. Positive values raise pitch, negative values lower it."
-          }
-        },
-        "description": "Voice modification settings for Speech 2.8 models."
+        "title": "TextToSpeechTurbo28Output"
       },
       "VoiceSetting": {
-        "x-fal-order-properties": [
-          "voice_id",
-          "speed",
-          "vol",
-          "pitch",
-          "emotion",
-          "english_normalization"
-        ],
-        "title": "VoiceSetting",
         "type": "object",
+        "title": "VoiceSetting",
         "properties": {
-          "english_normalization": {
-            "default": false,
-            "title": "English Normalization",
-            "type": "boolean",
-            "description": "Enables English text normalization to improve number reading performance, with a slight increase in latency"
-          },
           "vol": {
-            "minimum": 0.01,
             "default": 1,
-            "title": "Vol",
-            "maximum": 10,
+            "minimum": 0.01,
             "type": "number",
-            "description": "Volume (0-10)"
+            "maximum": 10,
+            "description": "Volume (0-10)",
+            "title": "Vol"
           },
-          "pitch": {
-            "minimum": -12,
-            "default": 0,
-            "title": "Pitch",
-            "maximum": 12,
-            "type": "integer",
-            "description": "Voice pitch (-12 to 12)"
+          "speed": {
+            "default": 1,
+            "minimum": 0.5,
+            "type": "number",
+            "maximum": 2,
+            "description": "Speech speed (0.5-2.0)",
+            "title": "Speed"
+          },
+          "english_normalization": {
+            "type": "boolean",
+            "title": "English Normalization",
+            "description": "Enables English text normalization to improve number reading performance, with a slight increase in latency",
+            "default": false
           },
           "voice_id": {
-            "default": "Wise_Woman",
             "examples": [
               "Wise_Woman",
               "Friendly_Person",
@@ -406,20 +285,22 @@
               "Sweet_Girl_2",
               "Exuberant_Girl"
             ],
-            "title": "Voice Id",
-            "type": "string",
             "minLength": 1,
-            "description": "Predefined voice ID to use for synthesis"
+            "type": "string",
+            "title": "Voice Id",
+            "description": "Predefined voice ID to use for synthesis",
+            "default": "Wise_Woman"
           },
-          "speed": {
-            "minimum": 0.5,
-            "default": 1,
-            "title": "Speed",
-            "maximum": 2,
-            "type": "number",
-            "description": "Speech speed (0.5-2.0)"
+          "pitch": {
+            "default": 0,
+            "minimum": -12,
+            "type": "integer",
+            "maximum": 12,
+            "description": "Voice pitch (-12 to 12)",
+            "title": "Pitch"
           },
           "emotion": {
+            "title": "Emotion",
             "anyOf": [
               {
                 "enum": [
@@ -437,52 +318,171 @@
                 "type": "null"
               }
             ],
-            "title": "Emotion",
             "description": "Emotion of the generated speech"
           }
-        }
+        },
+        "x-fal-order-properties": [
+          "voice_id",
+          "speed",
+          "vol",
+          "pitch",
+          "emotion",
+          "english_normalization"
+        ]
+      },
+      "AudioSetting": {
+        "type": "object",
+        "title": "AudioSetting",
+        "properties": {
+          "format": {
+            "enum": [
+              "mp3",
+              "pcm",
+              "flac"
+            ],
+            "type": "string",
+            "title": "Format",
+            "description": "Audio format",
+            "default": "mp3"
+          },
+          "sample_rate": {
+            "enum": [
+              8000,
+              16000,
+              22050,
+              24000,
+              32000,
+              44100
+            ],
+            "type": "integer",
+            "title": "Sample Rate",
+            "description": "Sample rate of generated audio",
+            "default": 32000
+          },
+          "channel": {
+            "enum": [
+              1,
+              2
+            ],
+            "type": "integer",
+            "title": "Channel",
+            "description": "Number of audio channels (1=mono, 2=stereo)",
+            "default": 1
+          },
+          "bitrate": {
+            "enum": [
+              32000,
+              64000,
+              128000,
+              256000
+            ],
+            "type": "integer",
+            "title": "Bitrate",
+            "description": "Bitrate of generated audio",
+            "default": 128000
+          }
+        },
+        "x-fal-order-properties": [
+          "sample_rate",
+          "bitrate",
+          "format",
+          "channel"
+        ]
+      },
+      "PronunciationDict": {
+        "type": "object",
+        "title": "PronunciationDict",
+        "properties": {
+          "tone_list": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "description": "List of pronunciation replacements in format ['text/(pronunciation)', ...]. For Chinese, tones are 1-5. Example: ['燕少飞/(yan4)(shao3)(fei1)']",
+            "title": "Tone List"
+          }
+        },
+        "x-fal-order-properties": [
+          "tone_list"
+        ]
+      },
+      "VoiceModify": {
+        "x-fal-order-properties": [
+          "pitch",
+          "intensity",
+          "timbre"
+        ],
+        "type": "object",
+        "title": "VoiceModify",
+        "properties": {
+          "intensity": {
+            "default": 0,
+            "minimum": -100,
+            "type": "integer",
+            "maximum": 100,
+            "description": "Intensity/energy of the voice. Range: -100 to 100. Higher values create more energetic speech.",
+            "title": "Intensity"
+          },
+          "pitch": {
+            "default": 0,
+            "minimum": -100,
+            "type": "integer",
+            "maximum": 100,
+            "description": "Pitch adjustment in semitones. Range: -100 to 100. Positive values raise pitch, negative values lower it.",
+            "title": "Pitch"
+          },
+          "timbre": {
+            "default": 0,
+            "minimum": -100,
+            "type": "integer",
+            "maximum": 100,
+            "description": "Timbre adjustment. Range: -100 to 100. Affects the tonal quality of the voice.",
+            "title": "Timbre"
+          }
+        },
+        "description": "Voice modification settings for Speech 2.8 models."
       },
       "LoudnessNormalizationSetting": {
+        "type": "object",
+        "title": "LoudnessNormalizationSetting",
+        "properties": {
+          "target_range": {
+            "default": 8,
+            "minimum": 0,
+            "type": "number",
+            "maximum": 20,
+            "description": "Target loudness range in LU (default 8.0)",
+            "title": "Target Range"
+          },
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "description": "Enable loudness normalization for the audio",
+            "default": true
+          },
+          "target_peak": {
+            "default": -0.5,
+            "minimum": -3,
+            "type": "number",
+            "maximum": 0,
+            "description": "Target peak level in dBTP (default -0.5).",
+            "title": "Target Peak"
+          },
+          "target_loudness": {
+            "default": -18,
+            "minimum": -70,
+            "type": "number",
+            "maximum": -10,
+            "description": "Target loudness in LUFS (default -18.0)",
+            "title": "Target Loudness"
+          }
+        },
         "x-fal-order-properties": [
           "enabled",
           "target_loudness",
           "target_range",
           "target_peak"
-        ],
-        "title": "LoudnessNormalizationSetting",
-        "type": "object",
-        "properties": {
-          "enabled": {
-            "default": true,
-            "title": "Enabled",
-            "type": "boolean",
-            "description": "Enable loudness normalization for the audio"
-          },
-          "target_loudness": {
-            "minimum": -70,
-            "default": -18,
-            "title": "Target Loudness",
-            "maximum": -10,
-            "type": "number",
-            "description": "Target loudness in LUFS (default -18.0)"
-          },
-          "target_range": {
-            "minimum": 0,
-            "default": 8,
-            "title": "Target Range",
-            "maximum": 20,
-            "type": "number",
-            "description": "Target loudness range in LU (default 8.0)"
-          },
-          "target_peak": {
-            "minimum": -3,
-            "default": -0.5,
-            "title": "Target Peak",
-            "maximum": 0,
-            "type": "number",
-            "description": "Target peak level in dBTP (default -0.5)."
-          }
-        }
+        ]
       },
       "File": {
         "x-fal-order-properties": [
@@ -491,16 +491,12 @@
           "file_name",
           "file_size"
         ],
-        "title": "File",
+        "type": "object",
         "required": [
           "url"
         ],
-        "type": "object",
         "properties": {
           "file_size": {
-            "examples": [
-              4404019
-            ],
             "title": "File Size",
             "anyOf": [
               {
@@ -510,12 +506,12 @@
                 "type": "null"
               }
             ],
+            "examples": [
+              4404019
+            ],
             "description": "The size of the file in bytes."
           },
           "content_type": {
-            "examples": [
-              "image/png"
-            ],
             "title": "Content Type",
             "anyOf": [
               {
@@ -525,12 +521,17 @@
                 "type": "null"
               }
             ],
+            "examples": [
+              "image/png"
+            ],
             "description": "The mime type of the file."
           },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "The URL where the file can be downloaded from."
+          },
           "file_name": {
-            "examples": [
-              "z9RV14K95DvU.png"
-            ],
             "title": "File Name",
             "anyOf": [
               {
@@ -540,14 +541,13 @@
                 "type": "null"
               }
             ],
+            "examples": [
+              "z9RV14K95DvU.png"
+            ],
             "description": "The name of the file. It will be auto-generated if not provided."
-          },
-          "url": {
-            "title": "Url",
-            "type": "string",
-            "description": "The URL where the file can be downloaded from."
           }
-        }
+        },
+        "title": "File"
       }
     }
   },
